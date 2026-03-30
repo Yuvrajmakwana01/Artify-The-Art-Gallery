@@ -1,0 +1,64 @@
+# =========================
+# Build folders
+# =========================
+bin/
+obj/
+
+# Ignore bin and obj in all subprojects
+**/bin/
+**/obj/
+
+# =========================
+# Visual Studio files
+# =========================
+.vs/
+*.user
+*.suo
+
+# =========================
+# Rider / VSCode settings
+# =========================
+.idea/
+.vscode/
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# ASP.NET temporary files
+# =========================
+wwwroot/lib/
+
+# =========================
+# NuGet packages
+# =========================
+packages/
+
+# Ignore local NuGet cache (if exists)
+*.nupkg
+
+# =========================
+# Environment & Secrets
+# =========================
+appsettings.Development.json
+appsettings.Local.json
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Publish output
+# =========================
+publish/
+*.publishproj
+
+# =========================
+# Temporary files
+# =========================
+*.tmp
+*.temp
