@@ -24,6 +24,37 @@ namespace MVC.Controllers
             return View();
         }
 
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+
+        public IActionResult Upload()
+        {
+            return View();
+        }
+
+
+        public IActionResult Gallery()
+        {
+            return View();
+        }
+
+
+        public IActionResult Logout()
+        {
+            // Clear all session data
+            HttpContext.Session.Clear();
+
+            return RedirectToAction("Login", "Artist");
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

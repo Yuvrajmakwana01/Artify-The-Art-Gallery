@@ -1,0 +1,486 @@
+﻿@* @{
+    ViewData["Title"] = "Upload Artwork";
+    Layout = "~/Views/Shared/_ArtistLayout.cshtml";
+}
+
+<link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.common.min.css" rel="stylesheet" />
+<link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.default-v2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+<style>
+    body { background-color: #f4f7f6; font-family: 'Inter', sans-serif; }
+    .upload-container { margin-top: 40px; margin-bottom: 60px; }
+    
+    /* Premium Glass Card */
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+    }
+
+    .section-title { font-weight: 800; color: #2d3436; letter-spacing: -0.5px; }
+    .form-label { font-weight: 600; font-size: 0.85rem; color: #636e72; margin-bottom: 8px; text-transform: uppercase; }
+
+    /* Live Preview Card */
+    .preview-card {
+        position: sticky;
+        top: 20px;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    .preview-img-container {
+        height: 300px;
+        background: #dfe6e9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    #imgPlaceholder { width: 100%; height: 100%; object-fit: cover; display: none; }
+    .preview-info { padding: 20px; background: white; }
+
+    /* Custom Kendo Overrides */
+    .k-upload { border-radius: 10px; border: 2px dashed #d1d8e0 !important; }
+    .btn-publish {
+        background: linear-gradient(135deg, #6a0dad, #a020f0) !important;
+        border: none !important;
+        padding: 15px !important;
+        font-weight: 700 !important;
+        border-radius: 50px !important;
+    }
+</style>
+
+<div class="container upload-container">
+    <div class="row">
+        <div class="col-lg-8 animate__animated animate__fadeInLeft">
+            <div class="glass-panel p-5">
+                <h2 class="section-title mb-4">Upload Your Masterpiece</h2>
+                
+                <form id="artworkForm">
+                    <div class="row">
+                        <div class="col-md-12 mb-4">
+                            <label class="form-label">Artwork Title</label>
+                            <input id="c_title" name="c_title" class="w-100" required />
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label">Category</label>
+                            <input id="c_category_id" name="c_category_id" class="w-100" required />
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label">Price (USD)</label>
+                            <input id="c_price" name="c_price" class="w-100" required />
+                        </div>
+
+                        <div class="col-md-12 mb-4">
+                            <label class="form-label">Description</label>
+                            <textarea id="c_description" name="c_description" class="w-100" style="height: 120px;"></textarea>
+                        </div>
+
+                        <div class="col-md-12 mb-5">
+                            <label class="form-label">High-Resolution File</label>
+                            <input type="file" name="ArtworkFile" id="ArtworkFile" />
+                            <small class="text-muted">This file will be used for the watermarked preview and original storage.</small>
+                        </div>
+
+                        <div class="col-md-12">
+                            <button type="button" id="btnPublish" class="k-button k-button-md k-rounded-pill k-button-solid-primary btn-publish w-100 text-white">
+                                <span class="k-icon k-i-upload"></span> PUBLISH TO ARTIFY
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-4 animate__animated animate__fadeInRight">
+            <div class="preview-card shadow-sm">
+                <div class="preview-img-container">
+                    <i class="k-icon k-i-image k-i-xlarge" id="iconPlaceholder" style="color: #b2bec3;"></i>
+                    <img id="imgPlaceholder" src="#" />
+                </div>
+                <div class="preview-info">
+                    <span class="badge bg-soft-primary text-primary mb-2" id="viewCategory">Category</span>
+                    <h4 id="viewTitle" style="font-weight: 700;">Artwork Title</h4>
+                    <p class="text-muted small" id="viewDesc">No description provided yet...</p>
+                    <hr />
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="text-primary mb-0" id="viewPrice">$0.00</h5>
+                        <span class="badge bg-warning text-dark">Pending Approval</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // 1. Initialize Kendo UI Components
+            $("#c_title").kendoTextBox({
+                placeholder: "Enter a captivating title...",
+                change: function() { $("#viewTitle").text(this.value() || "Artwork Title"); }
+            });
+
+            $("#c_price").kendoNumericTextBox({
+                format: "c2",
+                min: 0,
+                value: 0,
+                change: function() { $("#viewPrice").text(kendo.toString(this.value(), "c2")); }
+            });
+
+            // FIXED: Fetching real IDs (5, 6, 8) from your database table
+            $("#c_category_id").kendoDropDownList({
+                dataTextField: "name",
+                dataValueField: "id",
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: "http://localhost:5183/api/ArtistApi/GetCategories",
+                            dataType: "json"
+                        }
+                    }
+                },
+                optionLabel: "Select Category...",
+                change: function() { $("#viewCategory").text(this.text()); }
+            });
+
+            $("#c_description").kendoTextArea({
+                placeholder: "Tell us about the inspiration behind this piece...",
+                rows: 4,
+                change: function() { $("#viewDesc").text(this.value() || "No description..."); }
+            });
+
+            // 2. Kendo Upload Logic
+            $("#ArtworkFile").kendoUpload({
+                multiple: false,
+                validation: { allowedExtensions: [".jpg", ".jpeg", ".png"] },
+                select: function(e) {
+                    var file = e.files[0].rawFile;
+                    if (file) {
+                        var reader = new FileReader();
+                        reader.onload = function(event) {
+                            $("#iconPlaceholder").hide();
+                            $("#imgPlaceholder").attr("src", event.target.result).fadeIn();
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                }
+            });
+
+            // 3. Form Submission
+            $("#btnPublish").click(function () {
+                var validator = $("#artworkForm").kendoValidator().data("kendoValidator");
+
+                if (validator.validate()) {
+                    // FIXED: Safety check for localStorage to prevent "undefined" error
+                    var userDataString = localStorage.getItem("userData");
+                    if (!userDataString || userDataString === "undefined") {
+                        kendo.alert("Error: Your session has expired. Please log in again.");
+                        return;
+                    }
+
+                    var artistData = JSON.parse(userDataString);
+                    
+                    // FIXED: Validate that we actually have a User ID
+                    if (!artistData.c_User_Id || artistData.c_User_Id === 0) {
+                        kendo.alert("Error: Valid Artist ID not found. Please re-login.");
+                        return;
+                    }
+
+                    kendo.ui.progress($(".glass-panel"), true);
+                    
+                    var formData = new FormData($("#artworkForm")[0]);
+                    
+                    // Manually append IDs to ensure they are sent correctly
+                    formData.append("c_artist_id", artistData.c_User_Id);
+                    
+                    var categoryId = $("#c_category_id").data("kendoDropDownList").value();
+                    formData.append("c_category_id", categoryId);
+
+                    $.ajax({
+                        // FIXED: URL matches your ArtistApiController route
+                        url: 'http://localhost:5183/api/ArtistApi/Upload',
+                        type: 'POST',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function (res) {
+                            kendo.ui.progress($(".glass-panel"), false);
+                            if (res.success) {
+                                kendo.alert("Success! " + res.message);
+                                setTimeout(function() { window.location.href = "/Artist/Gallery"; }, 2000);
+                            } else {
+                                kendo.alert("Error: " + res.message);
+                            }
+                        },
+                        error: function (xhr) {
+                            kendo.ui.progress($(".glass-panel"), false);
+                            // Log the exact DB error for debugging
+                            console.log("Server Error:", xhr.responseText);
+                            kendo.alert("Upload Failed: Check console for database constraint details.");
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+} *@
+
+@{
+    ViewData["Title"] = "Upload Artwork";
+    Layout = "~/Views/Shared/_ArtistLayout.cshtml";
+}
+
+<link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.common.min.css" rel="stylesheet" />
+<link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.default-v2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+<style>
+    body { background-color: #f8fafc; }
+    /* Premium Glass Card */
+    .glass-panel { 
+        background: rgba(255, 255, 255, 0.95); 
+        border-radius: 24px; 
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.04); 
+    }
+    
+    .form-label { font-size: 0.8rem; letter-spacing: 0.5px; color: #64748b; }
+
+    /* Sticky Preview */
+    .preview-card { 
+        position: sticky; 
+        top: 30px; 
+        background: white; 
+        border-radius: 20px; 
+        overflow: hidden; 
+        border: 1px solid #e2e8f0;
+        transition: transform 0.3s ease;
+    }
+    .preview-card:hover { transform: translateY(-5px); }
+    
+    .preview-img-container { 
+        height: 280px; 
+        background: #f1f5f9; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    #imgPlaceholder { width: 100%; height: 100%; object-fit: cover; display: none; }
+    
+    /* Kendo Custom Styling */
+    .k-textbox, .k-numerictextbox, .k-dropdown, .k-textarea { border-radius: 8px !important; }
+    .btn-publish {
+        background: linear-gradient(135deg, #6366f1, #a855f7);
+        border: none;
+        transition: opacity 0.3s;
+    }
+    .btn-publish:hover { opacity: 0.9; color: white; }
+
+    /* Validation Message Styling */
+    .k-invalid-msg { margin-top: 5px; font-size: 12px; display: block; }
+</style>
+
+<div class="container py-5 mt-3">
+    <div class="row g-4">
+        <div class="col-lg-8 animate__animated animate__fadeIn">
+            <div class="glass-panel p-4 p-md-5">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-primary text-white rounded-3 p-2 me-3">
+                        <i class="k-icon k-i-upload k-i-xlarge"></i>
+                    </div>
+                    <div>
+                        <h2 class="fw-bold mb-0">List New Artwork</h2>
+                        <p class="text-muted mb-0">Share your digital soul with the world.</p>
+                    </div>
+                </div>
+
+                <form id="artworkForm" novalidate>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-uppercase">Artwork Title</label>
+                        <input id="c_title" name="c_title" style="width: 100%;" required data-required-msg="Please enter a title" />
+                        <span class="k-invalid-msg" data-for="c_title"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-bold text-uppercase">Category</label>
+                            <input id="c_category_id" name="c_category_id" style="width: 100%;" required data-required-msg="Select a category" />
+                            <span class="k-invalid-msg" data-for="c_category_id"></span>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-bold text-uppercase">Price (USD)</label>
+                            <input id="c_price" name="c_price" style="width: 100%;" required data-required-msg="Set a price" />
+                            <span class="k-invalid-msg" data-for="c_price"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-uppercase">Inspiration/Description</label>
+                        <textarea id="c_description" name="c_description" style="width: 100%;" placeholder="Write something about your work..."></textarea>
+                    </div>
+
+                    <div class="mb-5">
+    <label class="form-label fw-bold text-uppercase">Upload Source File</label>
+    <input type="file" id="ArtworkFile" name="ArtworkFile" />
+    <div class="form-text mt-2 text-muted small">Supported formats: JPG, PNG, JPEG. Max size: 5MB.</div>
+</div>
+
+                    <button type="button" id="btnPublish" class="btn btn-publish w-100 py-3 fw-bold rounded-pill text-white shadow-sm">
+                        <i class="k-icon k-i-check me-2"></i> PUBLISH TO GALLERY
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-4 animate__animated animate__fadeIn animate__delay-1s">
+            <div class="preview-card shadow-sm">
+                <div class="preview-img-container">
+                    <div id="iconPlaceholder" class="text-center text-muted">
+                        <i class="k-icon k-i-image k-i-xxxxlarge d-block mb-2" style="opacity:0.3"></i>
+                        <span class="small fw-bold">Image Preview</span>
+                    </div>
+                    <img id="imgPlaceholder" src="#" alt="Artwork Preview" />
+                </div>
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge rounded-pill bg-light text-primary px-3 py-2 border" id="viewCategory">Category</span>
+                        <h4 id="viewPrice" class="fw-bold text-primary mb-0">$0.00</h4>
+                    </div>
+                    <h5 id="viewTitle" class="fw-bold text-dark mt-3">Artwork Title</h5>
+                    <p id="viewDesc" class="text-muted small mb-0 mt-2 line-clamp-3">The description you write will appear here for collectors...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // 1. Initialize Kendo Validator
+            var validator = $("#artworkForm").kendoValidator({
+                rules: {
+                    uploadRequired: function(input) {
+                        if (input.is("[name='ArtworkFile']")) {
+                            return input.closest(".k-upload").find(".k-file").length > 0;
+                        }
+                        return true;
+                    }
+                },
+                messages: {
+                    uploadRequired: "Please select an artwork file"
+                }
+            }).data("kendoValidator");
+
+            // 2. Initialize UI Components
+            $("#c_title").kendoTextBox({ 
+                change: function() { $("#viewTitle").text(this.value() || "Artwork Title"); } 
+            });
+
+            $("#c_price").kendoNumericTextBox({ 
+                format: "c2", 
+                min: 0,
+                change: function() { $("#viewPrice").text(kendo.toString(this.value(), "c2") || "$0.00"); } 
+            });
+
+            $("#c_description").kendoTextArea({ 
+                rows: 3,
+                change: function() { $("#viewDesc").text(this.value() || "The description you write will appear here..."); }
+            });
+            
+            $("#c_category_id").kendoDropDownList({
+                dataTextField: "name", 
+                dataValueField: "id",
+                optionLabel: "Select Genre...",
+                dataSource: { 
+                    transport: { 
+                        read: { url: "http://localhost:5183/api/ArtistApi/GetCategories", dataType: "json" } 
+                    } 
+                },
+                change: function() { $("#viewCategory").text(this.text()); }
+            });
+
+            $("#ArtworkFile").kendoUpload({
+                multiple: false,
+                validation: { allowedExtensions: [".jpg", ".jpeg", ".png"] },
+                select: function(e) {
+                    var file = e.files[0].rawFile;
+                    if (file) {
+                        var reader = new FileReader();
+                        reader.onload = function(ev) { 
+                            $("#iconPlaceholder").hide(); 
+                            $("#imgPlaceholder").attr("src", ev.target.result).show(); 
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                },
+                remove: function() {
+                    $("#imgPlaceholder").hide();
+                    $("#iconPlaceholder").show();
+                }
+            });
+
+            // 3. Optimized Submit Logic
+            $("#btnPublish").click(function() {
+                if (validator.validate()) {
+                    var userDataRaw = localStorage.getItem("userData");
+                    
+                    if (!userDataRaw || userDataRaw === "undefined") {
+                        kendo.alert("Session expired. Please log in again.");
+                        return;
+                    }
+
+                    var user = JSON.parse(userDataRaw);
+                    var formData = new FormData($("#artworkForm")[0]);
+                    
+                    // Append Artist ID from session
+                    if (user && user.c_User_Id) {
+                        formData.append("c_artist_id", user.c_User_Id);
+                    } else {
+                        kendo.alert("Artist profile error. Please log in.");
+                        return;
+                    }
+
+                    // Show loading state
+                    kendo.ui.progress($(".glass-panel"), true);
+
+                    $.ajax({
+                        url: 'http://localhost:5183/api/ArtistApi/Upload',
+                        type: 'POST',
+                        data: formData,
+                        processData: false, 
+                        contentType: false,
+                        success: function(res) {
+                            kendo.ui.progress($(".glass-panel"), false);
+                            if(res.success) { 
+                                kendo.alert("Masterpiece Published!"); 
+                                setTimeout(() => window.location.href = "/Artist/Gallery", 1500);
+                            } else {
+                                kendo.alert("Error: " + res.message);
+                            }
+                        },
+                        error: function(xhr) {
+                            kendo.ui.progress($(".glass-panel"), false);
+                            kendo.alert("Network error. Check console.");
+                            console.log(xhr.responseText);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}
