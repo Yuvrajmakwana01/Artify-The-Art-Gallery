@@ -4,12 +4,17 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using Npgsql;
+using Repository.Implementations;
+using Repository.Interfaces;
 using StackExchange.Redis;
+using Microsoft.AspNetCore.Authentication.Google;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+// builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAuthInterface, AuthRepository>();
 
 // Swagger (ONLY ONCE)
 builder.Services.AddSwaggerGen(c =>
@@ -42,6 +47,7 @@ builder.Services.AddScoped<NpgsqlConnection>(conn =>
     var connectionString = conn.GetRequiredService<IConfiguration>().GetConnectionString("pgconn");
     return new NpgsqlConnection(connectionString);
 });
+
 
 // CORS (FIXED)
 builder.Services.AddCors(options =>
@@ -76,7 +82,8 @@ builder.Services.AddAuthentication(options =>
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
         )
     };
-});
+})
+;
 
 // Redis
 builder.Services.AddScoped<IConnectionMultiplexer>(sp =>
@@ -112,6 +119,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+
 var app = builder.Build();
 
 // =========================
@@ -128,10 +136,11 @@ app.UseHttpsRedirection();
 
 app.UseCors("corsapp");
 
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseSession();
+app.UseStaticFiles();
 
 app.MapControllers();
 
