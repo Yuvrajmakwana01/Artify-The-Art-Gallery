@@ -7,11 +7,14 @@ using Npgsql;
 using Repository.Implementations;
 using Repository.Interfaces;
 using StackExchange.Redis;
+using Microsoft.AspNetCore.Authentication.Google;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+// builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAuthInterface, AuthRepository>();
 
 // Swagger (ONLY ONCE)
 builder.Services.AddSwaggerGen(c =>
@@ -49,6 +52,7 @@ builder.Services.AddScoped<NpgsqlConnection>(conn =>
     return new NpgsqlConnection(connectionString);
 });
 
+
 // CORS (FIXED)
 builder.Services.AddCors(options =>
 {
@@ -82,7 +86,8 @@ builder.Services.AddAuthentication(options =>
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
         )
     };
-});
+})
+;
 
 // Redis
 builder.Services.AddScoped<IConnectionMultiplexer>(sp =>
@@ -137,10 +142,11 @@ app.UseHttpsRedirection();
 
 app.UseCors("corsapp");
 
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseSession();
+app.UseStaticFiles();
 
 app.MapControllers();
 
