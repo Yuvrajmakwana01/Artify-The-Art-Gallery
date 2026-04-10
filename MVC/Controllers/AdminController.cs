@@ -29,5 +29,20 @@ namespace MVC.Controllers
         {
             return View("Error!");
         }
+
+        public IActionResult Categories()
+        {
+            return View();
+        }
+
+        public IActionResult Artists()
+        {
+            return View();
+        }
+
+        public IActionResult Users()
+        {
+            return View();
+        }
     }
 }

@@ -4,11 +4,17 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using Npgsql;
+using Repository.Implementations;
+using Repository.Interfaces;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+
+builder.Services.AddScoped<IAdmincategoiresInteface, AdminCategoriesRepository>();
+builder.Services.AddScoped<IAdminUsersInterface, AdminUsersRepository>();
+builder.Services.AddScoped<IAdminArtistInterface, AdminArtistRepository>();
 builder.Services.AddEndpointsApiExplorer();
 
 // Swagger (ONLY ONCE)
@@ -39,7 +45,43 @@ builder.Services.AddSwaggerGen(c =>
 // PostgreSQL
 builder.Services.AddScoped<NpgsqlConnection>(conn =>
 {
-    var connectionString = conn.GetRequiredService<IConfiguration>().GetConnectionString("pgconn");
+    var configuration = conn.GetRequiredService<IConfiguration>();
+    var raw = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")?.Trim();
+    if (string.IsNullOrWhiteSpace(raw))
+    {
+        raw = configuration.GetConnectionString("pgconn")?.Trim();
+    }
+    if (string.IsNullOrWhiteSpace(raw))
+    {
+        raw = configuration.GetConnectionString("DefaultConnection")?.Trim();
+    }
+
+    if (string.IsNullOrWhiteSpace(raw) ||
+        raw.Equals("your-postgres-connection", StringComparison.OrdinalIgnoreCase) ||
+        raw.Contains("YOUR_DB_USER", StringComparison.OrdinalIgnoreCase) ||
+        raw.Contains("REPLACE_WITH_YOUR_NEON_PASSWORD", StringComparison.OrdinalIgnoreCase) ||
+        raw.Contains("YOUR_REAL_NEON_PASSWORD", StringComparison.OrdinalIgnoreCase))
+    {
+        throw new InvalidOperationException("Set a valid PostgreSQL connection string. Use env var POSTGRES_CONNECTION_STRING or API/appsettings.json -> ConnectionStrings:pgconn");
+    }
+
+    string connectionString;
+    if (raw.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) ||
+        raw.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
+    {
+        var uri = new Uri(raw);
+        var userInfo = uri.UserInfo.Split(':', 2);
+        if (userInfo.Length < 2)
+            throw new InvalidOperationException("Invalid PostgreSQL URL format. Expected: postgresql://user:password@host:port/database");
+
+        var database = uri.AbsolutePath.Trim('/');
+        connectionString = $"Host={uri.Host};Port={uri.Port};Database={database};Username={userInfo[0]};Password={Uri.UnescapeDataString(userInfo[1])};SSL Mode=Require;Trust Server Certificate=true";
+    }
+    else
+    {
+        connectionString = raw;
+    }
+
     return new NpgsqlConnection(connectionString);
 });
 
