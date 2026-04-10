@@ -9,11 +9,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace MVC.Controllers
 {
-    // [Route("[controller]")]
     public class AuthController : Controller
     {
         private readonly ILogger<AuthController> _logger;
