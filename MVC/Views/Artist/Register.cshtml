@@ -1,0 +1,271 @@
+﻿@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/_ArtistLayout.cshtml";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.common.min.css" rel="stylesheet" />
+<link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.default-v2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css" integrity="sha512-t7Few9xlddEmgd3oKZQahkNI4dS6l80+eGEzFQiqtyVYdvcSG2D3Iub77R20BdotfRPA9caaRkg1tyaJiPmO0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+<style>
+    :root {
+        --accent: #7000ff;
+        --accent-hover: #5a00cc;
+        --glass: #ffffff;
+        --text-main: #1a1a1c;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+        --error: #ef4444;
+        --error-bg: #fff5f5;
+    }
+
+    body { background-color: #fcfcfd; font-family: 'Inter', sans-serif; }
+
+    .registration-container {
+        display: flex; justify-content: center; align-items: center;
+        padding: 40px 20px; min-height: 50vh;
+         background: linear-gradient(-45deg, #6ac3ff, #bb7cf6, #ffd3b6, #ffe066);
+        background-size: 400% 400%;
+        animation: gradientAnimation 10s ease infinite;
+        width: 62%; margin: auto;
+        border-radius: 36px;
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+    }
+
+    @@keyframes gradientAnimation {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .glass-card {
+        background: var(--glass);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 18px;
+        padding: 50px;
+        width: 100%;
+        max-width: 720px;
+        @* box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 1px 0px; *@
+        box-shadow: rgba(9, 152, 300, 0.2) 0px 0px 0px 3px;
+    }
+
+    .form-label {
+        font-weight: 600; font-size: 0.8rem; letter-spacing: 0.5px;
+        color: var(--text-main); margin-bottom: 8px; display: block;
+    }
+
+    .k-textbox {
+        background: #f8fafc !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-main) !important;
+        width: 100% !important;
+        border-radius: 8px !important;
+        padding: 20px 12px !important;
+        font-size: 0.95rem !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .k-textbox.k-invalid {
+        border-color: var(--error) !important;
+        background-color: var(--error-bg) !important;
+    }
+
+    .k-tooltip-validation {
+        background: transparent !important; color: var(--error) !important;
+        box-shadow: none !important; border: none !important;
+        font-size: 0.78rem !important; padding: 6px 0 0 2px !important;
+        font-weight: 500; display: flex !important; align-items: center;
+    }
+    
+    .k-callout { display: none !important; }
+
+    .radio-group { display: flex; gap: 8px; }
+    .radio-item { flex: 1; position: relative; }
+    .radio-item input[type="radio"] { position: absolute; opacity: 0; }
+    .radio-chip {
+        display: block; text-align: center; background: #f8fafc;
+        border: 1px solid var(--border-color); padding: 10px 5px; border-radius: 10px;
+        font-size: 0.85rem; color: var(--text-muted); cursor: pointer; transition: 0.2s;
+    }
+    .radio-item input[type="radio"]:checked + .radio-chip {
+        background: #f5f3ff; border-color: var(--accent); color: var(--accent);
+    }
+
+    .k-upload { 
+        border-radius: 10px !important; 
+        border-color: var(--border-color) !important;
+        background: #f8fafc !important;
+    }
+
+    .btn-premium {
+        background: var(--accent) !important; border: none !important;
+        color: white !important; height: 54px !important; border-radius: 12px !important;
+        font-weight: 700 !important; cursor: pointer; transition: 0.3s;
+        margin-top: 15px;
+    }
+    .btn-premium:hover { background: var(--accent-hover) !important; transform: translateY(-1px); }
+
+    .pass-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; }
+    .pass-hint.valid { color: #10b981; font-weight: 600; }
+</style>
+
+<div class="registration-container">
+    <div class="glass-card animate__animated animate__fadeInUp">
+        <div style="text-align: center; margin-bottom: 35px;">
+            <h2 style="font-family: 'Syne'; font-size: 1.7rem; font-weight: 800; color: #0f172a;">Create Account</h2>
+            <p style="color: var(--text-muted);">Join the Artify community today.</p>
+        </div>
+
+        <form id="artistForm">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Full Name</label>
+                    <input id="txtFullName" name="c_Full_Name" required validationMessage="Please enter your full name" placeholder="artist name" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Username</label>
+                    <input id="txtUserName" name="c_UserName" required validationMessage="Please enter a username" placeholder="artist_handle" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Email Address</label>
+                    <input id="txtEmail" name="c_Email" type="email" required data-email-msg="Please enter a valid email address" placeholder="email@example.com" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Mobile Number</label>
+                    <input id="txtMobile" name="c_Mobile" required validationMessage="Please enter your mobile number" placeholder="1234567890" />
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <label class="form-label">Password</label>
+                    <input id="txtPass" name="c_Password" type="password" required placeholder="••••••••" />
+                    <div id="pwHint" class="pass-hint">Min. 6 chars: 1 Uppercase, 1 Number, 1 Special.</div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <label class="form-label">Gender</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="male" name="c_Gender" value="Male" required checked>
+                            <label for="male" class="radio-chip"> <i class="bi bi-gender-male"></i> Male</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="female" name="c_Gender" value="Female">
+                            <label for="female" class="radio-chip"><i class="bi bi-gender-female"></i> Female</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="other" name="c_Gender" value="Other">
+                            <label for="other" class="radio-chip"> <i class="bi bi-gender-trans"></i> Other</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <label class="form-label">Profile Photo</label>
+                    <input type="file" name="ProfilePicture" id="profileUpload" />
+                </div>
+            </div>
+
+            <button type="button" id="btnRegister" class="k-button btn-premium w-100">
+                Enter the Studio
+            </button>
+
+            <div style="text-align: center; margin-top: 25px;">
+                <p style="font-size: 0.9rem; color: var(--text-muted);">
+                    Already a member? <a href="/Artist/Login" style="color: var(--accent); font-weight: 600; text-decoration: none;">Sign In</a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Initialize Kendo TextBoxes
+            $("#txtFullName").kendoTextBox();
+            $("#txtUserName").kendoTextBox();
+            $("#txtEmail").kendoTextBox();
+            $("#txtMobile").kendoTextBox();
+            $("#txtPass").kendoTextBox();
+
+            $("#profileUpload").kendoUpload({
+                multiple: false,
+                localization: { select: "Select Image" }
+            });
+
+            const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@@$!%*?&])[A-Za-z\d@@$!%*?&]{6,}$/;
+
+            var validator = $("#artistForm").kendoValidator({
+                validateOnBlur: true,
+                rules: {
+                    passwordFormat: function(input) {
+                        if (input.is("[name='c_Password']")) {
+                            return passRegex.test(input.val());
+                        }
+                        return true;
+                    },
+                    mobileFormat: function(input) {
+                        if (input.is("[name='c_Mobile']")) {
+                            // Simple regex for digits (adjust as needed for your region)
+                            return /^\d{10,15}$/.test(input.val());
+                        }
+                        return true;
+                    }
+                },
+                messages: {
+                    passwordFormat: "Your password needs a bit more color (requirements not met).",
+                    mobileFormat: "Please enter a valid mobile number."
+                }
+            }).data("kendoValidator");
+
+            // Password hint update
+            $("#txtPass").on("input", function() {
+                if(passRegex.test($(this).val())) {
+                    $("#pwHint").addClass("valid").text("✓ Password Secure");
+                } else {
+                    $("#pwHint").removeClass("valid").text("Min. 6 chars: 1 Uppercase, 1 Number, 1 Special.");
+                }
+            });
+
+            $("#btnRegister").click(function () {
+                if (validator.validate()) {
+                    kendo.ui.progress($(".glass-card"), true);
+                    const btn = $(this);
+                    btn.prop("disabled", true).text("SYNCING...");
+
+                    $.ajax({
+                        url: 'http://localhost:5183/api/ArtistApi/Register',
+                        type: 'POST',
+                        data: new FormData($("#artistForm")[0]),
+                        contentType: false,
+                        processData: false,
+                        success: function (res) {
+                            kendo.ui.progress($(".glass-card"), false);
+                            if (res.success) {
+                                Swal.fire({ icon: 'success', title: 'Welcome to the Studio.', text: 'You\'re officially an Artify creator.', confirmButtonColor: '#7000ff' })
+                                .then(() => window.location.href = "/Artist/Login");
+                            } else {
+                                btn.prop("disabled", false).text("GET STARTED");
+                                Swal.fire('Error', res.message, 'error');
+                            }
+                        },
+                        error: function () {
+                            kendo.ui.progress($(".glass-card"), false);
+                            btn.prop("disabled", false).text("GET STARTED");
+                            Swal.fire('Error', 'Connection failed.', 'warning');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}

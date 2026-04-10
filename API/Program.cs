@@ -4,6 +4,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using Npgsql;
+using Repository.Implementations;
+using Repository.Interfaces;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,10 +38,14 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+
+builder.Services.AddScoped<IArtistInterface, ArtistRepository>();
+builder.Services.AddScoped<IArtworkInterface, ArtworkRepository>();
+
 // PostgreSQL
 builder.Services.AddScoped<NpgsqlConnection>(conn =>
 {
-    var connectionString = conn.GetRequiredService<IConfiguration>().GetConnectionString("pgconn");
+    var connectionString = conn.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection");
     return new NpgsqlConnection(connectionString);
 });
 
@@ -111,6 +117,9 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+
+
 
 var app = builder.Build();
 
