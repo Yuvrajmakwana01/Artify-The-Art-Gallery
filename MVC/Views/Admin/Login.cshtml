@@ -1,0 +1,272 @@
+@{
+    ViewData["Title"] = "Admin Login";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Artify – Admin Login</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.common.min.css" rel="stylesheet" />
+    <link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.default-v2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <style>
+        :root {
+            --accent:       #6c3fff;
+            --accent-hover: #5a32d1;
+            --text-main:    #1a1a1a;
+            --text-muted:   #666666;
+            --glass-card:   rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.4);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body { height: 100vh; overflow: hidden; font-family: 'Inter', sans-serif; background: #f0f2f5; }
+
+        .spline-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+        .spline-bg iframe {
+            width: 100%; height: calc(100% + 100px);
+            border: none; position: absolute; top: 0; left: 0;
+        }
+
+        .viewport {
+            position: fixed; inset: 0; z-index: 2;
+            display: flex; align-items: center; justify-content: center;
+            background: radial-gradient(circle at center, transparent 0%, rgba(255,255,255,0.2) 100%);
+        }
+
+        .card {
+            width: 100%; max-width: 420px;
+            background: var(--glass-card);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px; padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(255,255,255,0.5);
+            text-align: center;
+        }
+
+        .card-title { font-family: 'Syne', sans-serif; font-size: 2.5rem; font-weight: 800; color: var(--text-main); margin-bottom: 4px; }
+        .card-sub   { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 30px; }
+
+        .admin-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(108, 63, 255, 0.1);
+            border: 1px solid rgba(108, 63, 255, 0.25);
+            border-radius: 20px; padding: 4px 14px;
+            font-size: 0.72rem; font-weight: 700;
+            color: var(--accent); text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 20px;
+        }
+
+        .field-group { text-align: left; margin-bottom: 18px; }
+        .field-label { font-size: 0.8rem; font-weight: 600; color: var(--text-main); margin-bottom: 6px; display: block; }
+
+        .k-textbox {
+            background: #ffffff !important;
+            border: 1px solid #dcdcdc !important;
+            border-radius: 10px !important;
+            padding: 12px 16px !important;
+            color: var(--text-main) !important;
+            width: 100% !important;
+            font-size: 0.95rem !important;
+            height: auto !important;
+            transition: border-color 0.2s;
+        }
+        .k-textbox:focus { border-color: var(--accent) !important; box-shadow: 0 0 0 3px rgba(108,63,255,0.1) !important; }
+
+        .pass-wrapper { position: relative; }
+        .pass-wrapper .k-textbox { padding-right: 2.6rem !important; }
+        .pass-toggle {
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer; color: #888;
+            display: flex; align-items: center; z-index: 5; padding: 0;
+        }
+        .pass-toggle:hover { color: var(--text-main); }
+
+        .btn-enter {
+            width: 100%; padding: 14px;
+            background: var(--accent) !important;
+            border: none !important; border-radius: 12px !important;
+            color: #fff !important;
+            font-family: 'Syne', sans-serif !important;
+            font-weight: 700 !important; font-size: 1rem !important;
+            cursor: pointer; margin-top: 10px; transition: all 0.3s;
+        }
+        .btn-enter:hover:not(:disabled) {
+            background: var(--accent-hover) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 15px rgba(108,63,255,0.3);
+        }
+        .btn-enter:disabled { opacity: 0.55; cursor: not-allowed; }
+
+        .k-tooltip-validation { background: #ff4757 !important; margin-top: 5px; border-radius: 6px; }
+
+        @@media (max-width: 480px) { .card { padding: 30px 20px; margin: 15px; } }
+    </style>
+</head>
+<body>
+
+    <div class="spline-bg">
+        <iframe src='https://my.spline.design/discover-olgn7D5l2JkSfRRRJNmWAP7v/' frameborder='0'></iframe>
+    </div>
+
+    <div class="viewport">
+        <div class="card animate__animated animate__fadeInUp">
+
+            <h2 class="card-title">Artify</h2>
+            <div class="admin-badge">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 1l3.09 6.26L22 8.27l-5 4.87 1.18 6.88L12 17l-6.18 3.02L7 13.14 2 8.27l6.91-1.01L12 1z"/>
+                </svg>
+                Admin Portal
+            </div>
+            <p class="card-sub">Sign in to your admin workspace</p>
+
+            <span id="kNotification"></span>
+
+            <form id="loginForm" novalidate="novalidate">
+                <div class="field-group">
+                    <label class="field-label" for="c_Email">Email</label>
+                    <input id="c_Email" name="c_Email" type="email"
+                           placeholder="admin@@artify.com"
+                           data-required-msg="Email is required"
+                           data-email-msg="Enter a valid email address"
+                           class="k-textbox" />
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label" for="c_Password">Password</label>
+                    <div class="pass-wrapper">
+                        <input id="c_Password" name="c_Password" type="password"
+                               placeholder="••••••••"
+                               data-required-msg="Password is required"
+                               class="k-textbox" />
+                        <button type="button" class="pass-toggle"
+                                onclick="togglePass('c_Password', 'eyeIcon')">
+                            <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg"
+                                 width="16" height="16" fill="none" viewBox="0 0 24 24"
+                                 stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-enter" id="loginBtn">SIGN IN</button>
+            </form>
+
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $(function () {
+
+            var notification = $("#kNotification").kendoNotification({
+                position: { pinned: true, top: 20, right: 20 },
+                autoHideAfter: 4000,
+                stacking: "down",
+                templates: [
+                    { type: "success", template: "<div style='padding:6px 4px;font-family:Inter,sans-serif'><strong>✔ Success</strong> &nbsp; #: message #</div>" },
+                    { type: "error",   template: "<div style='padding:6px 4px;font-family:Inter,sans-serif'><strong>✖ Error</strong> &nbsp; #: message #</div>" }
+                ]
+            }).data("kendoNotification");
+
+            function showSuccess(msg) { notification.show({ message: msg }, "success"); }
+            function showError(msg)   { notification.show({ message: msg }, "error");   }
+
+            $("#c_Email").kendoTextBox();
+            $("#c_Password").kendoTextBox();
+
+            var validator = $("#loginForm").kendoValidator({
+                messages: { required: "#= message #", email: "#= message #" }
+            }).data("kendoValidator");
+
+            window.togglePass = function (inputId, iconId) {
+                var inp    = document.getElementById(inputId);
+                var isText = inp.type === "text";
+                inp.type   = isText ? "password" : "text";
+                document.getElementById(iconId).innerHTML = isText
+                    ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+                    : '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>' +
+                      '<path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>' +
+                      '<line x1="1" y1="1" x2="23" y2="23"/>';
+            };
+
+            $("#loginForm").on("submit", function (e) {
+                e.preventDefault();
+
+                if (!validator.validate()) {
+                    showError("Please fix the errors before submitting.");
+                    return;
+                }
+
+                var btn = $("#loginBtn");
+                btn.prop("disabled", true).text("AUTHENTICATING...");
+
+                // ── Step 1: Verify credentials with the API ────────────────────
+                $.ajax({
+                    url:         "http://localhost:5183/api/AdminApi/login",
+                    type:        "POST",
+                    data:        new FormData($("#loginForm")[0]),
+                    contentType: false,
+                    processData: false,
+                    success: function (res) {
+                        if (!res.success) {
+                            btn.prop("disabled", false).text("SIGN IN");
+                            showError(res.message || "Invalid credentials.");
+                            return;
+                        }
+
+                        // Keep token in localStorage (for _AdminLayout JS to read name/initials)
+                        localStorage.setItem("adminToken", res.token);
+                        localStorage.setItem("adminData",  JSON.stringify(res.admin));
+
+                        // ── Step 2: Also save to server-side Session ───────────
+                        // This is what actually blocks unauthenticated direct URL access.
+                        // The C# controllers check Session["AdminToken"] before serving any page.
+                        $.ajax({
+                            url:         "/Admin/SetSession",
+                            type:        "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify({
+                                token:      res.token,
+                                adminName:  res.admin.c_AdminName,
+                                adminEmail: res.admin.c_Email,
+                                adminId:    res.admin.c_AdminId
+                            }),
+                            success: function () {
+                                showSuccess("Login successful!");
+                                setTimeout(function () {
+                                    window.location.href = "/AdminArtworkModerationMvc/Artworks";
+                                }, 1000);
+                            },
+                            error: function () {
+                                btn.prop("disabled", false).text("SIGN IN");
+                                showError("Session error. Please try again.");
+                            }
+                        });
+                    },
+                    error: function () {
+                        btn.prop("disabled", false).text("SIGN IN");
+                        showError("Server connection failed. Please try again.");
+                    }
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
