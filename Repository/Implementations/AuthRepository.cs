@@ -3,6 +3,9 @@ using System.Security.Cryptography;
 using System.Text;
 using Npgsql;
 using Repository.Interfaces;
+using Npgsql;
+using Repository.Models;
+using BCrypt.Net;
 using Repository.Models;
 
 namespace Repository.Implementations
@@ -15,6 +18,13 @@ namespace Repository.Implementations
         {
             _conn = conn;
         }
+        // Admin Login ────────────────────────────────────────────────
+        // Queries t_admin table, verifies BCrypt hash
+        public async Task<t_Admin?> AdminLogin(vm_AdminLogin admin)
+        {
+            t_Admin? adminData = null;
+            var qry = "SELECT * FROM t_admin WHERE c_email = @email";
+
 
         private string HashPassword(string password)
         {
@@ -30,6 +40,28 @@ namespace Repository.Implementations
             {
                 await _conn.OpenAsync();
 
+                using (NpgsqlCommand com = new NpgsqlCommand(qry, _conn))
+                {
+                    com.Parameters.AddWithValue("@email", admin.c_Email.Trim().ToLower());
+
+                    using (var reader = await com.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            string storedHash = reader["c_password"].ToString()!;
+
+                            // BCrypt verify — same library used by ArtistRepository
+                            if (BCrypt.Net.BCrypt.Verify(admin.c_Password, storedHash))
+                            {
+                                adminData = new t_Admin
+                                {
+                                    c_AdminId = Convert.ToInt32(reader["c_adminid"]),
+                                    c_AdminName = reader["c_adminname"].ToString()!,
+                                    c_Email = reader["c_email"].ToString()!
+                                };
+                            }
+                        }
+                    }
                 var emailCheckQry = @"SELECT COUNT(1) FROM t_user WHERE LOWER(c_email) = LOWER(@email)";
                 using (var emailCmd = new NpgsqlCommand(emailCheckQry, _conn))
                 {
@@ -68,6 +100,7 @@ namespace Repository.Implementations
             }
             catch (Exception ex)
             {
+                Console.WriteLine("Admin Login Error: " + ex.Message);
                 Console.WriteLine("Error in user register:" + ex.Message);
                 return -99;
             }
@@ -75,6 +108,8 @@ namespace Repository.Implementations
             {
                 await _conn.CloseAsync();
             }
+
+            return adminData;
         }
 
         public async Task<t_UserRegister?> UserLogin(t_UserLogin model)

@@ -8,6 +8,8 @@ namespace Repository.Interfaces
 {
     public interface IAuthInterface
     {
+        // ── Admin auth ──────────────────────────────────────────────────────
+        Task<t_Admin?> AdminLogin(vm_AdminLogin admin);
         Task<int> UserRegister(t_UserRegister model);
         Task<t_UserRegister?> UserLogin(t_UserLogin model);
 

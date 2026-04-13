@@ -7,6 +7,10 @@ using Npgsql;
 using Repository.Implementations;
 using Repository.Interfaces;
 using StackExchange.Redis;
+using Repository.Services;
+using Repository.Implementations;
+using Repository.Interfaces;
+using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication.Google;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -123,6 +127,14 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+// ── Repository ───────────────────────────────────────────────────────────
+builder.Services.AddScoped<IAdminArtworkInterface, AdminArtworkRepository>();
+builder.Services.AddScoped<IAuthInterface, AuthRepository>();
+
+// ── Services ─────────────────────────────────────────────────────────────
+builder.Services.AddScoped<AdminArtworkService>();
+builder.Services.AddSingleton<RabbitMQProducer>();
+builder.Services.AddScoped<RedisService>();
 
 
 
@@ -141,6 +153,10 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors("corsapp");
+
+app.UseSession();           // ✅ first
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseSession();
 app.UseAuthentication();
