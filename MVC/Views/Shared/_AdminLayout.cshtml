@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -18,6 +18,15 @@
             <div class="sidebar-logo">
                 <i class="bi bi-layers-fill"></i>
             </div>
+    <link rel="stylesheet" href="~/lib/kendo/kendo.default-v2.min.css" />
+</head>
+<body>
+
+    <!-- ── SIDEBAR ────────────────────────────────────────────────────────── -->
+    <nav id="sidebar">
+
+        <div class="sidebar-brand">
+            <div class="sidebar-logo"><i class="bi bi-layers-fill"></i></div>
             <div class="sidebar-brand-text">
                 <span class="sidebar-brand-name">Artify</span>
                 <span class="sidebar-brand-tag">Admin Dashboard</span>
@@ -30,6 +39,7 @@
             <li class="nav-item">
                 <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")"
                    asp-controller="Admin" asp-action="Index">
+                   asp-controller="Dashboard" asp-action="Index">
                     <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
                 </a>
@@ -37,8 +47,17 @@
             <li class="nav-item">
                 <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Artists" ? "active" : "")"
                    asp-controller="Artists" asp-action="Index">
+                <a class="nav-link @((ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Artists") ? "active" : "")"
+                   asp-controller="Admin" asp-action="Artists">
                     <i class="bi bi-person"></i>
                     <span>Artists</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @((ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Users") ? "active" : "")"
+                   asp-controller="Admin" asp-action="Users">
+                    <i class="bi bi-people"></i>
+                    <span>Users</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -46,6 +65,19 @@
                    asp-controller="Artworks" asp-action="Index">
                     <i class="bi bi-image"></i>
                     <span>Artworks</span>
+                    <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Artists" ? "active" : "")"
+                   asp-controller="Artists" asp-action="Index">
+                    <i class="bi bi-person"></i><span>Artists</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminArtworkModerationMvc" ? "active" : "")"
+                   asp-controller="AdminArtworkModerationMvc" asp-action="Index">
+                    <i class="bi bi-image"></i><span>Artworks</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -53,6 +85,17 @@
                    asp-controller="Admin" asp-action="PaymentDetails">
                     <i class="bi bi-cart"></i>
                     <span>Payment Details</span>
+                   asp-controller="Sales" asp-action="Index">
+                    <i class="bi bi-cart"></i>
+                    <span>Sales</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @((ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Categories") ? "active" : "")"
+                   asp-controller="Admin" asp-action="Categories">
+                    <i class="bi bi-tags"></i>
+                    <span>Categories</span>
+                    <i class="bi bi-cart"></i><span>Sales</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -60,6 +103,7 @@
                    asp-controller="Analytics" asp-action="Index">
                     <i class="bi bi-bar-chart"></i>
                     <span>Analytics</span>
+                    <i class="bi bi-bar-chart"></i><span>Analytics</span>
                 </a>
             </li>
         </ul>
@@ -77,6 +121,17 @@
                 <a class="nav-link" asp-controller="Account" asp-action="Setting">
                     <i class="bi bi-gear"></i>
                     <span>Setting</span>
+        <span class="nav-section-label">Account</span>
+        <ul class="nav flex-column sidebar-nav">
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Account" asp-action="Setting">
+                    <i class="bi bi-gear"></i><span>Settings</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                {{!-- Logout: clears localStorage then redirects --}}
+                <a class="nav-link" href="#" id="logoutBtn">
+                    <i class="bi bi-box-arrow-right"></i><span>Logout</span>
                 </a>
             </li>
         </ul>
@@ -87,6 +142,12 @@
             <div class="sidebar-user-info">
                 <span class="sidebar-user-name">Admin</span>
                 <span class="sidebar-user-role">Super admin</span>
+        <!-- Admin name + initials filled by JS from localStorage -->
+        <div class="sidebar-user">
+            <div class="sidebar-avatar" id="sidebarInitials">--</div>
+            <div class="sidebar-user-info">
+                <span class="sidebar-user-name" id="sidebarName">Admin</span>
+                <span class="sidebar-user-role">Super Admin</span>
             </div>
         </div>
 
@@ -96,6 +157,9 @@
     <div class="main-wrapper">
 
         <!-- TOPBAR -->
+    <!-- ── MAIN WRAPPER ───────────────────────────────────────────────────── -->
+    <div class="main-wrapper">
+
         <header class="topbar">
             <div class="topbar-search">
                 <i class="bi bi-search"></i>
@@ -114,6 +178,15 @@
         </header>
 
         <!-- PAGE CONTENT -->
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <a class="icon-btn" href="#" id="topbarLogoutBtn" title="Logout">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+                <div class="topbar-avatar" id="topbarInitials">--</div>
+            </div>
+        </header>
+
         <main class="content-area">
             @RenderBody()
         </main>
@@ -123,12 +196,56 @@
             <div class="container-fluid">
                 &copy; 2026 - Artify
             </div>
+        <footer class="site-footer">
+            <div class="container-fluid">&copy; 2026 - Artify Admin</div>
         </footer>
 
     </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>
+
+    <script>
+        // ── Auth guard — checking localStorage ───
+        var adminToken = localStorage.getItem("adminToken");
+        if (!adminToken) {
+            window.location.href = "/Admin/Login";
+        }
+
+        // ── Populate admin name and initials from localStorage ─────────────────
+        var adminData = JSON.parse(localStorage.getItem("adminData") || "{}");
+        var adminName = adminData.c_AdminName || "Admin";
+        var words = adminName.trim().split(" ");
+        var initials = words.map(function (w) { return w[0]; }).join("").toUpperCase().slice(0, 2);
+
+        document.getElementById("sidebarName").textContent = adminName;
+        document.getElementById("sidebarInitials").textContent = initials;
+        document.getElementById("topbarInitials").textContent = initials;
+
+        // ── Logout — clears localStorage then goes to /Admin/Logout ───────────
+        // /Admin/Logout also calls Session.Clear() on the server side
+        function doLogout() {
+            localStorage.removeItem("adminToken");
+            localStorage.removeItem("adminData");
+            window.location.href = "/Admin/Logout";
+        }
+
+        document.getElementById("logoutBtn").addEventListener("click", function (e) {
+            e.preventDefault();
+            if (confirm("Are you sure you want to logout?")) doLogout();
+        });
+
+        document.getElementById("topbarLogoutBtn").addEventListener("click", function (e) {
+            e.preventDefault();
+            if (confirm("Are you sure you want to logout?")) doLogout();
+        });
+    </script>
+    <script src="~/lib/kendo/kendo.all.min.js"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 
 </body>

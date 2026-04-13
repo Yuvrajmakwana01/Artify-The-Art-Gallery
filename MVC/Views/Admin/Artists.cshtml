@@ -1,0 +1,392 @@
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Artists Management";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" />
+
+<style>
+    .mg-page { padding: 28px 32px; font-family: 'Segoe UI', sans-serif; background: #f4f4f6; min-height: 100vh; }
+    .mg-header { margin-bottom: 24px; }
+    .mg-header h1 { margin: 0 0 4px; font-size: 28px; font-weight: 700; color: #1a1a1a; }
+    .mg-header p { margin: 0; color: #888; font-size: 14px; }
+
+    .mg-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 18px 20px; border: 1px solid #eee; display: flex; align-items: center; gap: 14px; }
+    .stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .stat-label { font-size: 12px; color: #888; margin-bottom: 3px; }
+    .stat-value { font-size: 22px; font-weight: 700; line-height: 1; }
+
+    .mg-card { background: #fff; border-radius: 14px; border: 1px solid #e8e8e8; overflow: hidden; }
+    .mg-card-topbar { padding: 18px 20px 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .mg-card-title { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700; color: #1a1a1a; }
+
+    .mg-toolbar { padding: 14px 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background: #fafafa; }
+    .mg-filters { display: flex; gap: 10px; flex-wrap: wrap; flex: 1; }
+
+    .mg-search { padding: 8px 14px 8px 34px; border-radius: 8px; border: 1px solid #ddd; font-size: 13px; outline: none; min-width: 220px; color: #333; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.868-3.833zm-5.242 1.156a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z'/%3E%3C/svg%3E") no-repeat 10px center; }
+    .mg-search:focus { border-color: #f26522; box-shadow: 0 0 0 2px rgba(242,101,34,.12); }
+
+    .mg-status-filter { padding: 8px 14px; border-radius: 8px; border: 1px solid #ddd; font-size: 13px; outline: none; color: #444; background: #fff; cursor: pointer; }
+    .mg-status-filter:focus { border-color: #f26522; }
+
+    .btn-add { background: #f26522; color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .btn-add:hover { background: #d4551c; }
+
+    .person-cell { display: flex; align-items: center; gap: 10px; }
+    .person-avatar { width: 38px; height: 38px; border-radius: 50%; background: #e8f0fe; color: #1f5fd5; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+    .person-name { font-weight: 600; font-size: 13px; color: #1a1a1a; line-height: 1.3; }
+    .person-meta { font-size: 11.5px; color: #999; margin-top: 2px; }
+
+    .badge-active { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+    .badge-inactive { background: #fce4ec; color: #c62828; border: 1px solid #ef9a9a; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+    .badge-review { background: #fff8e1; color: #e65100; border: 1px solid #ffcc80; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+
+    .action-btns { display: flex; align-items: center; gap: 6px; }
+    .btn-icon { width: 30px; height: 30px; border-radius: 6px; border: 1px solid #e0e0e0; background: #f5f5f5; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; color: #555; }
+    .btn-icon:hover { background: #ebebeb; }
+    .btn-icon.del { border-color: #ffcdd2; background: #fff5f5; color: #c62828; }
+    .btn-icon.del:hover { background: #ffebee; }
+    .btn-icon i { font-size: 12px; }
+
+    #artistGridTable_wrapper { padding: 0; }
+    #artistGridTable_wrapper .dataTables_filter, #artistGridTable_wrapper .dataTables_paginate, #artistGridTable_wrapper .dataTables_info, #artistGridTable_wrapper .dataTables_length { display: none !important; }
+    #artistGridTable_wrapper .dataTables_scrollBody { border: none !important; max-height: 460px !important; }
+    #artistGridTable { margin: 0 !important; width: 100% !important; border-collapse: separate !important; border-spacing: 0 !important; }
+    #artistGridTable thead th { background: #fafafa; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #999; padding: 12px 16px !important; border: none !important; }
+    #artistGridTable tbody td { padding: 12px 16px !important; vertical-align: middle; border: none !important; background: #fff; font-size: 13px; color: #4b4b4b; }
+    #artistGridTable tbody tr:hover td { background: #fef9f7; }
+    .table > :not(caption) > * > * { border-bottom-width: 0 !important; box-shadow: none !important; }
+
+    .field-error { color: #e53935; font-size: 12px; margin-top: 5px; display: none; }
+    .dlg-warn { margin-top: 12px; padding: 10px 14px; border-radius: 8px; background: #fff8e1; border: 1px solid #ffe082; font-size: 13px; color: #795548; line-height: 1.5; }
+    .modal .modal-header { border-bottom: 1px solid #f0f0f0; }
+    .modal .modal-footer { border-top: 1px solid #f0f0f0; }
+
+    .dlg-group { margin-bottom: 16px; }
+    .dlg-group label { font-size: 13px; font-weight: 600; color: #444; display: block; margin-bottom: 7px; }
+    .dlg-group label .req { color: #e53935; margin-left: 2px; }
+    .dlg-group input[type=text], .dlg-group textarea, .dlg-group select { width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1px solid #ddd; border-radius: 7px; font-size: 13px; outline: none; font-family: 'Segoe UI', sans-serif; color: #333; background: #fff; }
+    .dlg-group input[type=text]:focus, .dlg-group textarea:focus, .dlg-group select:focus { border-color: #f26522; box-shadow: 0 0 0 2px rgba(242,101,34,.12); }
+    .dlg-group textarea { resize: vertical; min-height: 80px; }
+    .dlg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .btn-dlg-cancel { background: #fff; border: 1px solid #ddd; border-radius: 7px; padding: 8px 20px; font-size: 13px; cursor: pointer; color: #555; }
+    .btn-dlg-cancel:hover { background: #f5f5f5; }
+    .btn-dlg-save { background: #f26522; color: #fff; border: none; border-radius: 7px; padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .btn-dlg-save:hover { background: #d4551c; }
+    .btn-dlg-del { background: #e53935; color: #fff; border: none; border-radius: 7px; padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .btn-dlg-del:hover { background: #c62828; }
+
+    @@media (max-width: 900px) { .mg-stats { grid-template-columns: repeat(2, 1fr); } }
+    @@media (max-width: 600px) { .mg-page { padding: 14px; } .mg-stats { grid-template-columns: 1fr; } .dlg-row { grid-template-columns: 1fr; } }
+</style>
+
+<div class="mg-page">
+    <div class="mg-header">
+        <h1>Artists Management</h1>
+        <p>Manage artist profiles, performance and account status</p>
+    </div>
+
+    <div class="mg-stats">
+        <div class="stat-card"><div class="stat-icon" style="background:#e8f0fe;">🎭</div><div><div class="stat-label">Total Artists</div><div class="stat-value" style="color:#1565c0;" id="statTotal">0</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#e8f5e9;">✅</div><div><div class="stat-label">Active</div><div class="stat-value" style="color:#2e7d32;" id="statActive">0</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#fce4ec;">⛔</div><div><div class="stat-label">Inactive</div><div class="stat-value" style="color:#c62828;" id="statInactive">0</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#e8f5e9;">$</div><div><div class="stat-label">Total Sales</div><div class="stat-value" style="color:#2e7d32;" id="statSales">$0</div></div></div>
+    </div>
+
+    <div class="mg-card">
+        <div class="mg-card-topbar">
+            <div class="mg-card-title"><span style="font-size:20px;">🧑‍🎨</span> Artist Directory</div>
+        </div>
+
+        <div class="mg-toolbar">
+            <div class="mg-filters">
+                <input type="text" id="searchInput" class="mg-search" placeholder="Search artists..." />
+                <select id="statusFilter" class="mg-status-filter">
+                    <option value="">All Status</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+            </div>
+        </div>
+
+        <table id="artistGridTable" class="table align-middle w-100">
+            <thead>
+                <tr>
+                    <th>Artist</th>
+                    <th>Artworks</th>
+                    <th>Total Sales</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="artistModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title" id="artistModalTitle">Add New Artist</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+            <div class="modal-body">
+                <div class="dlg-group"><label>Artist Name <span class="req">*</span></label><input id="fldName" type="text" placeholder="e.g. Aisha Khan" /><div class="field-error" id="errName">Name is required.</div></div>
+                <div class="dlg-group"><label>Email <span class="req">*</span></label><input id="fldEmail" type="text" placeholder="e.g. aisha@email.com" /><div class="field-error" id="errEmail">Email is required.</div></div>
+                <div class="dlg-row">
+                    <div class="dlg-group"><label>Status</label><select id="fldStatus"><option value="Active">Active</option><option value="Inactive">Inactive</option></select></div>
+                    <div class="dlg-group"><label>Avatar Initials</label><input id="fldAvatar" type="text" placeholder="AK" /></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn-dlg-cancel" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn-dlg-save" id="btnSaveArtist">Add Artist</button></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Confirm Delete</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+            <div class="modal-body">
+                <p style="margin:0 0 4px;font-size:14px;color:#444;line-height:1.6;">Are you sure you want to delete <strong id="delName" style="color:#1a1a1a;"></strong>? This action cannot be undone.</p>
+                <div class="dlg-warn" id="delWarnBox" style="display:none;">⚠️ This artist has <strong id="delArtworkCount"></strong> artworks linked.</div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn-dlg-cancel" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn-dlg-del" id="btnConfirmDelete">Delete Artist</button></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    var ADMIN_API_BASE = "http://localhost:5183/api/AdminApi";
+    var artists = [];
+
+    var table, artistModal, deleteModal;
+    var editId = null, deleteId = null;
+    var currentSearch = "", currentStatus = "";
+    var debounceId = null;
+
+    function escapeHtml(v){ return $("<div>").text(v == null ? "" : v).html(); }
+    function normalizeStatus(s){ return s === "Active" ? "Active" : "Inactive"; }
+    function statusBadge(s){ var st = normalizeStatus(s); var cls = st === "Active" ? "badge-active" : "badge-inactive"; return '<span class="' + cls + '">' + escapeHtml(st) + '</span>'; }
+    function nextId(){ return Math.max.apply(Math, artists.map(function(a){ return a.id; })) + 1; }
+    function todayStr(){ var d=new Date(), m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; return m[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear(); }
+
+    function personCell(a){
+        return '<div class="person-cell">'
+            + '<div class="person-avatar">' + escapeHtml(a.avatar) + '</div>'
+            + '<div><div class="person-name">' + escapeHtml(a.name) + '</div><div class="person-meta">' + escapeHtml(a.email) + '</div></div>'
+            + '</div>';
+    }
+
+    function actionCell(id){
+        return '<div class="action-btns">'
+            + '<button class="btn-icon" title="Edit" onclick="openEditDialog(' + id + ')"><i class="bi bi-pencil"></i></button>'
+            + '<button class="btn-icon del" title="Delete" onclick="openDeleteDialog(' + id + ')"><i class="bi bi-trash"></i></button>'
+            + '</div>';
+    }
+
+    function refreshStats(){
+        $("#statTotal").text(artists.length);
+        $("#statActive").text(artists.filter(function(a){ return a.status === "Active"; }).length);
+        $("#statInactive").text(artists.filter(function(a){ return a.status === "Inactive"; }).length);
+    }
+
+    async function loadArtistsFromApi(){
+        var query = $.param({ search: currentSearch || "", status: currentStatus || "" });
+        var rows = await $.getJSON(ADMIN_API_BASE + "/artists?" + query);
+        artists = (rows || []).map(function(r){
+            var name = r.artistName || "";
+            var parts = name.split(" ").filter(Boolean);
+            return {
+                id: r.artistId,
+                avatar: ((parts[0] || "A")[0] + (parts[1] || "R")[0]).toUpperCase(),
+                name: name,
+                email: r.artistEmail || "",
+                artworks: Number(r.artworksCount || 0),
+                sales: Number(r.totalSales || 0),
+                status: normalizeStatus(r.status),
+                joined: r.createdAt ? new Date(r.createdAt).toDateString().slice(4) : "-",
+                biography: r.biography || "",
+                coverImage: r.coverImage || null
+            };
+        });
+    }
+
+    function updateSalesStat(){
+        var total = artists.reduce(function(s, a){ return s + Number(a.sales || 0); }, 0);
+        $("#statSales").text("$" + total.toLocaleString("en-US"));
+    }
+
+    function getFiltered(){
+        return artists.filter(function(a){
+            var q = !currentSearch
+                || a.name.toLowerCase().includes(currentSearch)
+                || a.email.toLowerCase().includes(currentSearch);
+            var st = !currentStatus || a.status === currentStatus;
+            return q && st;
+        });
+    }
+
+    function refreshGrid(list){
+        var rows = list || getFiltered();
+        table.clear();
+        table.rows.add(rows);
+        table.draw(false);
+        updateSalesStat();
+    }
+
+    async function applyFilters(){
+        currentSearch = $("#searchInput").val().toLowerCase().trim();
+        currentStatus = $("#statusFilter").val();
+        await loadArtistsFromApi();
+        refreshStats();
+        refreshGrid();
+    }
+
+    function scheduleFilters(){ if (debounceId) clearTimeout(debounceId); debounceId = setTimeout(async function(){ await applyFilters(); }, 120); }
+
+    function showSuccessAlert(title, text){
+        if (window.Swal) {
+            Swal.fire({
+                icon: "success",
+                title: title,
+                text: text,
+                timer: 1800,
+                showConfirmButton: false
+            });
+            return;
+        }
+        alert(text);
+    }
+
+    function openAddDialog(){
+        editId = null;
+        $("#fldName").val(""); $("#fldEmail").val(""); $("#fldStatus").val("Active"); $("#fldAvatar").val("NA");
+        $("#errName,#errEmail").hide();
+        $("#artistModalTitle").text("Add New Artist"); $("#btnSaveArtist").text("Add Artist");
+        artistModal.show();
+    }
+
+    function openEditDialog(id){
+        var a = artists.find(function(x){ return x.id === id; }); if(!a) return;
+        editId = id;
+        $("#fldName").val(a.name); $("#fldEmail").val(a.email); $("#fldStatus").val(a.status); $("#fldAvatar").val(a.avatar);
+        $("#errName,#errEmail").hide();
+        $("#artistModalTitle").text("Edit Artist"); $("#btnSaveArtist").text("Save Changes");
+        artistModal.show();
+    }
+
+    async function handleSave(){
+        var name = $("#fldName").val().trim(), email = $("#fldEmail").val().trim(), ok = true;
+        var isEdit = editId !== null;
+        if(!name){ $("#errName").show(); ok = false; } else { $("#errName").hide(); }
+        if(!email){ $("#errEmail").show(); ok = false; } else { $("#errEmail").hide(); }
+        if(!ok) return;
+
+        var status = $("#fldStatus").val(), avatar = ($("#fldAvatar").val().trim() || "NA").toUpperCase().slice(0,2);
+        if(editId !== null){
+            var i = artists.findIndex(function(x){ return x.id === editId; });
+            if (i === -1) return;
+            await $.ajax({
+                url: ADMIN_API_BASE + "/artists/" + editId,
+                method: "PUT",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    artistName: name,
+                    artistEmail: email,
+                    biography: artists[i].biography || "",
+                    coverImage: artists[i].coverImage,
+                    status: status
+                })
+            });
+        } else {
+            await $.ajax({
+                url: ADMIN_API_BASE + "/artists",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    artistName: name,
+                    artistEmail: email,
+                    biography: "",
+                    coverImage: null,
+                    status: status
+                })
+            });
+        }
+
+        artistModal.hide();
+        await applyFilters();
+
+        if (isEdit) {
+            showSuccessAlert("Artist Updated", "Artist has been updated successfully.");
+        } else {
+            showSuccessAlert("Artist Added", "New artist has been added successfully.");
+        }
+    }
+
+    function openDeleteDialog(id){
+        var a = artists.find(function(x){ return x.id === id; }); if(!a) return;
+        deleteId = id;
+        $("#delName").text(a.name);
+        if(a.artworks > 0){ $("#delArtworkCount").text(a.artworks.toLocaleString()); $("#delWarnBox").show(); }
+        else { $("#delWarnBox").hide(); }
+        deleteModal.show();
+    }
+
+    async function confirmDelete(){
+        var deletedArtist = artists.find(function(a){ return a.id === deleteId; });
+        var deletedName = deletedArtist ? deletedArtist.name : "Artist";
+        await $.ajax({ url: ADMIN_API_BASE + "/artists/" + deleteId, method: "DELETE" });
+        deleteId = null;
+        deleteModal.hide();
+        await applyFilters();
+        showSuccessAlert("Artist Deleted", deletedName + " has been deleted successfully.");
+    }
+
+    $(document).ready(async function(){
+        artistModal = new bootstrap.Modal(document.getElementById("artistModal"));
+        deleteModal = new bootstrap.Modal(document.getElementById("deleteModal"));
+
+        table = $("#artistGridTable").DataTable({
+            paging: false,
+            info: false,
+            lengthChange: false,
+            ordering: false,
+            searching: false,
+            autoWidth: false,
+            scrollY: "460px",
+            scrollCollapse: true,
+            data: [],
+            columns: [
+                { data: null, render: function(d){ return personCell(d); } },
+                { data: "artworks", render: function(d){ return '<span style="font-weight:600;color:#333;">' + Number(d).toLocaleString() + ' items</span>'; } },
+                { data: "sales", render: function(d){ return '<span style="font-weight:600;color:#333;">$' + Number(d).toLocaleString('en-US') + '</span>'; } },
+                { data: "status", render: function(d){ return statusBadge(d); } },
+                { data: "joined", render: function(d){ return '<span style="font-size:13px;color:#aaa;">' + escapeHtml(d) + '</span>'; } },
+                { data: "id", render: function(d){ return actionCell(d); } }
+            ],
+            columnDefs: [
+                { targets: 0, width: "36%" },
+                { targets: 1, width: "12%" },
+                { targets: 2, width: "14%" },
+                { targets: 3, width: "12%" },
+                { targets: 4, width: "14%" },
+                { targets: 5, width: "12%" }
+            ],
+            dom: "rt"
+        });
+
+        await applyFilters();
+
+        $("#searchInput").on("input keyup paste", function(){ scheduleFilters(); });
+        $("#statusFilter").on("change", async function(){ await applyFilters(); });
+        $("#btnSaveArtist").on("click", async function(){ await handleSave(); });
+        $("#btnConfirmDelete").on("click", async function(){ await confirmDelete(); });
+    });
+</script>
+}
