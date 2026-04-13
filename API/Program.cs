@@ -4,12 +4,17 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using Npgsql;
+using Repository.Implementations;
+using Repository.Interfaces;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddScoped<IArtistInterface, ArtistRepository>();
+
 
 // Swagger (ONLY ONCE)
 builder.Services.AddSwaggerGen(c =>
@@ -36,12 +41,13 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// PostgreSQL
 builder.Services.AddScoped<NpgsqlConnection>(conn =>
 {
-    var connectionString = conn.GetRequiredService<IConfiguration>().GetConnectionString("pgconn");
+    var connectionString = conn.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection");
     return new NpgsqlConnection(connectionString);
 });
+
+
 
 // CORS (FIXED)
 builder.Services.AddCors(options =>
@@ -78,39 +84,39 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// Redis
-builder.Services.AddScoped<IConnectionMultiplexer>(sp =>
-{
-    var config = sp.GetRequiredService<IConfiguration>();
-    var redisConn = config.GetConnectionString("Redis");
+// // Redis
+// builder.Services.AddScoped<IConnectionMultiplexer>(sp =>
+// {
+//     var config = sp.GetRequiredService<IConfiguration>();
+//     var redisConn = config.GetConnectionString("Redis");
 
-    if (string.IsNullOrEmpty(redisConn))
-        throw new InvalidOperationException("Redis connection string missing");
+//     if (string.IsNullOrEmpty(redisConn))
+//         throw new InvalidOperationException("Redis connection string missing");
 
-    return ConnectionMultiplexer.Connect(redisConn);
-});
+//     return ConnectionMultiplexer.Connect(redisConn);
+// });
 
-// Redis DB
-builder.Services.AddScoped<IDatabase>(sp =>
-{
-    var mux = sp.GetRequiredService<IConnectionMultiplexer>();
-    return mux.GetDatabase();
-});
+// // Redis DB
+// builder.Services.AddScoped<IDatabase>(sp =>
+// {
+//     var mux = sp.GetRequiredService<IConnectionMultiplexer>();
+//     return mux.GetDatabase();
+// });
 
-// Cache
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = builder.Configuration.GetConnectionString("Redis");
-    options.InstanceName = "Session_";
-});
+// // Cache
+// builder.Services.AddStackExchangeRedisCache(options =>
+// {
+//     options.Configuration = builder.Configuration.GetConnectionString("Redis");
+//     options.InstanceName = "Session_";
+// });
 
 // Session
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
+// builder.Services.AddSession(options =>
+// {
+//     options.IdleTimeout = TimeSpan.FromMinutes(30);
+//     options.Cookie.HttpOnly = true;
+//     options.Cookie.IsEssential = true;
+// });
 
 var app = builder.Build();
 
@@ -131,7 +137,7 @@ app.UseCors("corsapp");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseSession();
+// app.UseSession();
 
 app.MapControllers();
 
