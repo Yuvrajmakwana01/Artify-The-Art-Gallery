@@ -170,6 +170,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+builder.Services.AddScoped<IUserProfileInterface,UserProfileRepository>();
 // ── Repository ───────────────────────────────────────────────────────────
 builder.Services.AddScoped<IAdminArtworkInterface, AdminArtworkRepository>();
 builder.Services.AddScoped<IAuthInterface, AuthRepository>();

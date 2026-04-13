@@ -1,0 +1,281 @@
+@{
+    ViewBag.Title = "Order ART-20260301";
+    Layout = "~/Views/Shared/_BuyerLayout.cshtml";
+}
+
+<style>
+    :root {
+        --bg: hsl(40, 33%, 96%);
+        --fg: hsl(30, 10%, 15%);
+        --card: hsl(40, 30%, 98%);
+        --primary: hsl(30, 30%, 30%);
+        --primary-fg: hsl(40, 33%, 96%);
+        --muted: hsl(35, 20%, 92%);
+        --muted-fg: hsl(30, 8%, 50%);
+        --accent: hsl(30, 40%, 82%);
+        --border: hsl(35, 20%, 87%);
+        --warm: hsl(32, 45%, 70%);
+        --warm-fg: hsl(30, 15%, 20%);
+        --success: hsl(145, 50%, 40%);
+        --warning: hsl(38, 90%, 55%);
+        --warning-fg: hsl(30, 15%, 15%);
+        --destructive: hsl(0, 65%, 55%);
+        --info: hsl(210, 60%, 50%);
+    }
+
+    .detail-page { max-width: 900px; margin: 0 auto; font-family: 'Inter', sans-serif; }
+    .detail-page h1, .detail-page h2, .detail-page h3 { font-family: 'Playfair Display', serif; }
+
+    .back-link {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 14px; color: var(--muted-fg); text-decoration: none;
+        transition: color 0.2s; margin-bottom: 24px;
+    }
+    .back-link:hover { color: var(--fg); }
+    .back-link:hover .k-icon { transform: translateX(-2px); }
+    .back-link .k-icon { transition: transform 0.2s; font-size: 16px; }
+
+    /* Hero Banner */
+    .order-banner {
+        background: linear-gradient(135deg, hsla(30,30%,30%,0.08), hsla(30,40%,82%,0.3), hsla(32,45%,70%,0.15));
+        border-radius: 16px; padding: 32px; position: relative; overflow: hidden; margin-bottom: 24px;
+    }
+    .order-banner::before {
+        content: ''; position: absolute; inset: 0;
+        background: radial-gradient(circle at 70% 30%, hsla(32,45%,70%,0.12), transparent 60%);
+    }
+    .order-banner-inner { position: relative; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+    .order-banner-left .order-id-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .order-banner-left h2 { font-size: 28px; font-weight: 700; color: var(--fg); margin: 0; }
+
+    .status-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 4px 12px; border-radius: 20px;
+        font-size: 14px; font-weight: 500; border: 1px solid;
+    }
+    .status-delivered { background: hsla(145,50%,40%,0.1); color: var(--success); border-color: hsla(145,50%,40%,0.2); }
+    .status-processing { background: hsla(38,90%,55%,0.1); color: var(--warning-fg); border-color: hsla(38,90%,55%,0.2); }
+    .status-failed { background: hsla(0,65%,55%,0.1); color: var(--destructive); border-color: hsla(0,65%,55%,0.2); }
+
+    .order-date { color: var(--muted-fg); display: flex; align-items: center; gap: 8px; font-size: 14px; }
+    .order-date .k-icon { font-size: 16px; }
+    .order-banner-right { text-align: right; }
+    .order-banner-right .label { font-size: 14px; color: var(--muted-fg); }
+    .order-banner-right .amount { font-size: 28px; font-weight: 700; color: var(--fg); }
+
+    /* Info Grid */
+    .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+    .info-card {
+        background: var(--card); border: 1px solid hsla(35,20%,87%,0.6);
+        border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .info-card-icon {
+        width: 40px; height: 40px; border-radius: 12px;
+        background: hsla(30,40%,82%,0.4);
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .info-card-icon .k-icon { font-size: 20px; color: var(--primary); }
+    .info-card-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); }
+    .info-card-value { font-size: 14px; font-weight: 500; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Detail Card */
+    .detail-card {
+        background: var(--card); border: 1px solid hsla(35,20%,87%,0.6);
+        border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        margin-bottom: 24px;
+    }
+    .detail-card-header {
+        background: hsla(30,40%,82%,0.2); border-bottom: 1px solid hsla(35,20%,87%,0.4);
+        padding: 16px 24px; display: flex; align-items: center; gap: 8px;
+    }
+    .detail-card-header h3 { font-size: 18px; font-weight: 600; color: var(--fg); margin: 0; }
+    .detail-card-header .k-icon { font-size: 20px; color: var(--primary); }
+
+    /* Artwork Item */
+    .artwork-item {
+        display: flex; align-items: center; gap: 16px; padding: 20px;
+        transition: background 0.2s;
+    }
+    .artwork-item:hover { background: hsla(30,40%,82%,0.1); }
+    .artwork-thumb {
+        width: 64px; height: 64px; border-radius: 12px; flex-shrink: 0;
+        background: linear-gradient(135deg, hsla(30,40%,82%,0.5), hsla(32,45%,70%,0.3));
+        display: flex; align-items: center; justify-content: center;
+    }
+    .artwork-thumb .k-icon { font-size: 28px; color: var(--muted-fg); }
+    .artwork-info { flex: 1; min-width: 0; }
+    .artwork-name { font-size: 15px; font-weight: 600; color: var(--fg); }
+    .artwork-artist { font-size: 14px; color: var(--muted-fg); }
+    .type-badge {
+        display: inline-flex; align-items: center; padding: 2px 8px;
+        border-radius: 20px; font-size: 12px; font-weight: 500; margin-top: 4px; border: 1px solid;
+    }
+    .type-digital { background: hsla(210,60%,50%,0.1); color: var(--info); border-color: hsla(210,60%,50%,0.2); }
+    .type-print { background: hsla(32,45%,70%,0.2); color: var(--warm-fg); border-color: hsla(32,45%,70%,0.3); }
+    .artwork-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .artwork-price { font-size: 18px; font-weight: 700; color: var(--fg); }
+    .download-btn {
+        padding: 6px 16px; border-radius: 20px;
+        border: 1px solid hsla(30,30%,30%,0.3); background: transparent;
+        color: var(--primary); font-size: 13px; font-weight: 500;
+        cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+        transition: all 0.2s;
+    }
+    .download-btn:hover { background: var(--primary); color: var(--primary-fg); }
+    .item-divider { height: 1px; background: var(--border); margin: 0 24px; }
+
+    /* Payment Summary */
+    .summary-body { padding: 24px; }
+    .summary-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 12px; }
+    .summary-label { color: var(--muted-fg); }
+    .summary-value { color: var(--fg); }
+    .summary-value.free { color: var(--success); font-weight: 500; }
+    .summary-divider { height: 1px; background: var(--border); margin: 16px 0; }
+    .summary-total { display: flex; justify-content: space-between; align-items: center; }
+    .summary-total-label { font-size: 16px; font-weight: 600; color: var(--fg); }
+    .summary-total-value { font-size: 24px; font-weight: 700; color: var(--fg); }
+
+    @@media (max-width: 640px) {
+        .info-grid { grid-template-columns: 1fr; }
+        .order-banner { padding: 24px; }
+        .order-banner-inner { flex-direction: column; align-items: flex-start; }
+        .order-banner-right { text-align: left; }
+        .artwork-item { flex-wrap: wrap; }
+    }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<div class="detail-page">
+    <!-- Back Link -->
+    <a href="/Buyer/Orders" class="back-link">
+        <span class="k-icon k-i-arrow-left"></span> Back to Orders
+    </a>
+
+    <!-- Order Banner -->
+    <div class="order-banner">
+        <div class="order-banner-inner">
+            <div class="order-banner-left">
+                <div class="order-id-row">
+                    <h2>ART-20260301</h2>
+                    <span class="status-badge status-delivered">
+                        <span class="k-icon k-i-check-circle" style="font-size:14px;"></span>
+                        Delivered
+                    </span>
+                </div>
+                <div class="order-date">
+                    <span class="k-icon k-i-calendar"></span> Placed on March 1, 2026
+                </div>
+            </div>
+            <div class="order-banner-right">
+                <div class="label">Order Total</div>
+                <div class="amount">$249.99</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Grid -->
+    <div class="info-grid">
+        <div class="info-card">
+            <div class="info-card-icon">
+                <span class="k-icon k-i-currency"></span>
+            </div>
+            <div>
+                <div class="info-card-label">Payment</div>
+                <div class="info-card-value">Visa •••• 4242</div>
+            </div>
+        </div>
+        <div class="info-card">
+            <div class="info-card-icon">
+                <span class="k-icon k-i-marker-pin"></span>
+            </div>
+            <div>
+                <div class="info-card-label">Shipping</div>
+                <div class="info-card-value">124 Art Street</div>
+            </div>
+        </div>
+        <div class="info-card">
+            <div class="info-card-icon">
+                <span class="k-icon k-i-user"></span>
+            </div>
+            <div>
+                <div class="info-card-label">Buyer</div>
+                <div class="info-card-value">Sarah Mitchell</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Artworks -->
+    <div class="detail-card">
+        <div class="detail-card-header">
+            <span class="k-icon k-i-palette"></span>
+            <h3>Artworks (2)</h3>
+        </div>
+
+        <!-- Artwork 1 -->
+        <div class="artwork-item">
+            <div class="artwork-thumb">
+                <span class="k-icon k-i-image"></span>
+            </div>
+            <div class="artwork-info">
+                <div class="artwork-name">Ethereal Bloom</div>
+                <div class="artwork-artist">by Maya Chen</div>
+                <span class="type-badge type-digital">Digital</span>
+            </div>
+            <div class="artwork-right">
+                <span class="artwork-price">$149.99</span>
+                <button class="download-btn">
+                    <span class="k-icon k-i-download"></span> Download
+                </button>
+            </div>
+        </div>
+
+        <div class="item-divider"></div>
+
+        <!-- Artwork 2 -->
+        <div class="artwork-item">
+            <div class="artwork-thumb">
+                <span class="k-icon k-i-image"></span>
+            </div>
+            <div class="artwork-info">
+                <div class="artwork-name">Neon Cascade</div>
+                <div class="artwork-artist">by Liam Torres</div>
+                <span class="type-badge type-digital">Digital</span>
+            </div>
+            <div class="artwork-right">
+                <span class="artwork-price">$100.00</span>
+                <button class="download-btn">
+                    <span class="k-icon k-i-download"></span> Download
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Summary -->
+    <div class="detail-card">
+        <div class="detail-card-header">
+            <span class="k-icon k-i-file-txt"></span>
+            <h3>Payment Summary</h3>
+        </div>
+        <div class="summary-body">
+            <div class="summary-row">
+                <span class="summary-label">Subtotal</span>
+                <span class="summary-value">$239.99</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Tax</span>
+                <span class="summary-value">$10.00</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Shipping</span>
+                <span class="summary-value free">Free</span>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-total">
+                <span class="summary-total-label">Total</span>
+                <span class="summary-total-value">$249.99</span>
+            </div>
+        </div>
+    </div>
+</div>
