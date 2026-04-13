@@ -1,0 +1,195 @@
+@{
+    Layout = "../Shared/_AdminLayout.cshtml";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="~/css/paymentdetail.css" asp-append-version="true" />
+</head>
+<body>
+    
+
+<div class="page-header">
+    <div>
+        <h1>Payment Management</h1>
+        <p class="breadcrumb">Admin › Finance › Payments</p>
+    </div>
+    <div class="header-right">
+        <span class="dot-live"><span class="pulse-dot"></span> Live</span>
+        <button class="btn btn-primary"><i class="fa fa-download"></i> Export Report</button>
+    </div>
+</div>
+
+<div class="metrics-grid">
+    <div class="metric-card purple" data-badge="+14.2%">
+        <div class="metric-icon purple-icon"><i class="fa fa-dollar-sign"></i></div>
+        <span class="metric-label">Total Revenue</span>
+        <span class="metric-value">$2,847,392</span>
+        <span class="metric-sub"><span class="up">↑</span> 14.2% vs last month</span>
+    </div>
+    <div class="metric-card green" data-badge="18,432 txns">
+        <div class="metric-icon green-icon"><i class="fa fa-chart-line"></i></div>
+        <span class="metric-label">Successful Txns</span>
+        <span class="metric-value">18,432</span>
+        <span class="metric-sub"><span class="up">↑</span> 8.7% this week</span>
+    </div>
+    <div class="metric-card amber" data-badge="23 requests">
+        <div class="metric-icon amber-icon"><i class="fa fa-clock"></i></div>
+        <span class="metric-label">Pending Payouts</span>
+        <span class="metric-value">$143,200</span>
+        <span class="metric-sub"><span class="up">↑</span> 23 requests awaiting</span>
+    </div>
+    <div class="metric-card red" data-badge="2.1% rate">
+        <div class="metric-icon red-icon"><i class="fa fa-exclamation-triangle"></i></div>
+        <span class="metric-label">Failed / Refunded</span>
+        <span class="metric-value">$28,910</span>
+        <span class="metric-sub"><span class="dn">↓</span> 2.1% failed rate</span>
+    </div>
+</div>
+
+<div class="page-body">
+    <div id="paymentTabStrip">
+        <ul>
+            <li class="k-state-active">Transaction Logs</li>
+            <li>Pending Payouts</li>
+            <li>Payout History</li>
+            <li>Analytics Panel</li>
+        </ul>
+        <div><div id="transactionLogs"></div></div>
+        <div><div id="pendingPayouts"></div></div>
+        <div><div id="payoutHistory"></div></div>
+        <div><div id="analyticsPanel"></div></div>
+    </div>
+</div>
+</body>
+</html>
+@section Scripts {
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.2.616/styles/kendo.common.min.css" />
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.2.616/styles/kendo.default.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2021.2.616/js/kendo.all.min.js"></script>
+
+<script>
+    function statusTemplate(status) {
+        var cls = 'status-' + status.toLowerCase();
+        return '<span class="status-badge ' + cls + '">' + status + '</span>';
+    }
+
+    function approvePayout(e) {
+        e.preventDefault();
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        $.post("/Admin/ApprovePayout", { id: dataItem.id }, function () {
+            alert("Payout Approved");
+            $("#pendingPayouts").data("kendoGrid").dataSource.read();
+        });
+    }
+
+    function rejectPayout(e) {
+        e.preventDefault();
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        $.post("/Admin/RejectPayout", { id: dataItem.id }, function () {
+            alert("Payout Rejected");
+            $("#pendingPayouts").data("kendoGrid").dataSource.read();
+        });
+    }
+
+    $(document).ready(function () {
+
+        $("#paymentTabStrip").kendoTabStrip({
+            animation: { open: { effects: "fadeIn", duration: 300 } }
+        });
+
+        $("#transactionLogs").kendoGrid({
+            dataSource: {
+                transport: { read: "/Admin/GetTransactionLogs" },
+                pageSize: 10
+            },
+            pageable: true,
+            columns: [
+                { field: "transactionId", title: "Transaction ID",
+                  template: '<span style="font-family:monospace;font-weight:600">#: transactionId #</span>' },
+                { field: "user", title: "User" },
+                { field: "amount", title: "Amount",
+                  template: '<span style="font-weight:600">#: amount #</span>' },
+                { field: "status", title: "Status",
+                  template: '#= statusTemplate(status) #' },
+                { field: "date", title: "Date",
+                  template: '<span style="color:var(--text-muted)">#: date #</span>' }
+            ]
+        });
+
+        $("#pendingPayouts").kendoGrid({
+            dataSource: {
+                transport: { read: "/Admin/GetPendingPayouts" },
+                pageSize: 10
+            },
+            pageable: true,
+            columns: [
+                { field: "artistName", title: "Artist", template: '<span style="font-weight:500">#: artistName #</span>' },
+                { field: "artwork", title: "Artwork", template: '<span style="color:var(--text-muted)">#: artwork #</span>' },
+                { field: "grossAmount", title: "Gross", template: '<span style="font-weight:600">#: grossAmount #</span>' },
+                { field: "commission", title: "Commission" },
+                { field: "netAmount", title: "Net", template: '<span style="font-weight:600">#: netAmount #</span>' },
+                {
+                    command: [
+                        { name: "approve", text: "✓ Approve", click: approvePayout },
+                        { name: "reject", text: "✕ Reject", click: rejectPayout }
+                    ],
+                    title: "Action", width: 220
+                }
+            ]
+        });
+
+        $("#payoutHistory").kendoGrid({
+            dataSource: {
+                transport: { read: "/Admin/GetPayoutHistory" },
+                pageSize: 10
+            },
+            pageable: true,
+            columns: [
+                { field: "artistName", title: "Artist", template: '<span style="font-weight:500">#: artistName #</span>' },
+                { field: "amount", title: "Amount", template: '<span style="font-weight:600">#: amount #</span>' },
+                { field: "status", title: "Status", template: '#= statusTemplate(status) #' },
+                { field: "processedDate", title: "Processed Date",
+                  template: '<span style="color:var(--text-muted)">#: processedDate #</span>' }
+            ]
+        });
+
+        $("#analyticsPanel").kendoChart({
+            title: { text: "Revenue Overview", font: "18px 'Space Grotesk'", color: "#1a1a2e" },
+            legend: { visible: false },
+            seriesDefaults: { type: "area" },
+            series: [{
+                data: [45000, 62000, 78000, 55000, 92000, 84000, 105000, 98000],
+                color: "#ff7a00", opacity: 0.3,
+                line: { width: 2.5, color: "#ff7a00" }
+            }],
+            categoryAxis: {
+                categories: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"],
+                labels: { font: "12px 'DM Sans'", color: "#9096a8" },
+                majorGridLines: { color: "#f0ece8" },
+                line: { visible: false }
+            },
+            valueAxis: {
+                labels: { font: "12px 'DM Sans'", color: "#9096a8", template: "$#= value/1000 #k" },
+                majorGridLines: { color: "#f0ece8", dashType: "dash" },
+                line: { visible: false }
+            },
+            tooltip: {
+                visible: true, template: "$#= kendo.toString(value, 'n0') #",
+                background: "#fff", border: { color: "#f0ece8" }
+            },
+            chartArea: { background: "transparent", height: 320 }
+        });
+    });
+</script>
+}

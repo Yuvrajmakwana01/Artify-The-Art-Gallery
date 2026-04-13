@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using Npgsql;
+using Repository;
 using Repository.Implementations;
 using Repository.Interfaces;
 using StackExchange.Redis;
@@ -21,6 +22,7 @@ builder.Services.AddScoped<IAdmincategoiresInteface, AdminCategoriesRepository>(
 builder.Services.AddScoped<IAdminUsersInterface, AdminUsersRepository>();
 builder.Services.AddScoped<IAdminArtistInterface, AdminArtistRepository>();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddScoped<IAdminInterface,AdminRepository>();
 // builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuthInterface, AuthRepository>();
 
@@ -122,7 +124,7 @@ builder.Services.AddAuthentication(options =>
     {
         ValidateIssuer = true,
         ValidateAudience = true,
-        ValidateLifetime = true, // ✅ FIXED
+        ValidateLifetime = true, 
         ValidateIssuerSigningKey = true,
 
         ValidAudience = builder.Configuration["Jwt:Audience"],
@@ -156,7 +158,7 @@ builder.Services.AddScoped<IDatabase>(sp =>
 // Cache
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.Configuration = builder.Configuration.GetConnectionString("Redis")+ ",defaultDatabase=0";
     options.InstanceName = "Session_";
 });
 

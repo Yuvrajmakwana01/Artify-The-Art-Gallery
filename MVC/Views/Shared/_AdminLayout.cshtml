@@ -38,12 +38,15 @@
         <ul class="nav flex-column sidebar-nav">
             <li class="nav-item">
                 <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")"
+                   asp-controller="Admin" asp-action="Index">
                    asp-controller="Dashboard" asp-action="Index">
                     <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Artists" ? "active" : "")"
+                   asp-controller="Artists" asp-action="Index">
                 <a class="nav-link @((ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Artists") ? "active" : "")"
                    asp-controller="Admin" asp-action="Artists">
                     <i class="bi bi-person"></i>
@@ -79,6 +82,9 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Sales" ? "active" : "")"
+                   asp-controller="Admin" asp-action="PaymentDetails">
+                    <i class="bi bi-cart"></i>
+                    <span>Payment Details</span>
                    asp-controller="Sales" asp-action="Index">
                     <i class="bi bi-cart"></i>
                     <span>Sales</span>
@@ -198,6 +204,10 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>
 
     <script>
         // ── Auth guard — checking localStorage ───

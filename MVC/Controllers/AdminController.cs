@@ -56,6 +56,7 @@ namespace MVC.Controllers
             return View();
         }
 
+        public IActionResult PaymentDetails()
         // ── GET /Admin/Logout ─────────────────────────────────────────────────
         // Clears server-side session. localStorage is cleared by _AdminLayout JS.
         public IActionResult Logout()
@@ -74,6 +75,8 @@ namespace MVC.Controllers
             return View();
         }
 
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
         public IActionResult Users()
         {
             return View();
