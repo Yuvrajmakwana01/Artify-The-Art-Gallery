@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] – Artify</title>
+
+    <!-- Google Fonts — same as original design -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Kendo UI CSS -->
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/themes/8.0.1/default/default-main.css" />
+
+    <style>
+        /* ── CSS Variables — beige theme (exact from original) ── */
+        :root {
+            --bg:            hsl(30, 25%, 96%);
+            --fg:            hsl(25, 30%, 10%);
+            --card-bg:       hsl(35, 30%, 92%);
+            --primary:       hsl(28, 60%, 45%);
+            --primary-fg:    hsl(35, 30%, 97%);
+            --accent:        hsl(22, 50%, 38%);
+            --muted:         hsl(25, 15%, 35%);
+            --border:        hsl(30, 15%, 82%);
+            --input-bg:      hsl(32, 18%, 88%);
+            --destructive:   hsl(0, 65%, 48%);
+            --gold-gradient: linear-gradient(135deg, hsl(28,60%,45%), hsl(18,70%,38%));
+            --radius:        0.75rem;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* ── Auth page wrapper ── */
+        .auth-page {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Background art image with slow pan animation */
+        .auth-bg-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            animation: bg-slow-pan 25s ease-in-out infinite;
+        }
+
+        /* Dark overlay on background */
+        .auth-bg-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                180deg,
+                hsl(25 20% 8% / 0.70) 0%,
+                hsl(25 20% 8% / 0.50) 50%,
+                hsl(25 20% 8% / 0.75) 100%
+            );
+        }
+
+        /* ── Glass card ── */
+        .auth-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 16px;
+            animation: scale-in 0.4s ease-out;
+        }
+
+        .glass-card {
+            background: hsl(35 30% 92% / 0.82);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid hsl(30 15% 82% / 0.30);
+            border-radius: 1.25rem;
+            padding: 2rem;
+            box-shadow: 0 8px 32px -8px hsl(25 20% 10% / 0.40),
+                        inset 0 1px 0 hsl(35 30% 97% / 0.15);
+        }
+
+        /* ── Logo float ── */
+        .logo-float {
+            width: 72px;
+            height: 72px;
+            object-fit: contain;
+            animation: float 3s ease-in-out infinite;
+            display: block;
+            margin: 0 auto 0.75rem;
+        }
+
+        .auth-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--fg);
+            text-align: center;
+        }
+
+        .auth-subtitle {
+            font-size: 0.8rem;
+            color: var(--muted);
+            text-align: center;
+            margin-top: 0.25rem;
+            font-weight: 500;
+        }
+
+        /* ── Form fields ── */
+        .form-group {
+            margin-top: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--fg);
+            margin-bottom: 0.35rem;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.35rem;
+        }
+
+        /* Override Kendo textbox to match beige design */
+        .k-input, .k-textbox, .k-picker {
+            background: var(--input-bg) !important;
+            border-color: var(--border) !important;
+            color: var(--fg) !important;
+            border-radius: var(--radius) !important;
+            font-family: 'Inter', sans-serif !important;
+            font-size: 0.875rem !important;
+            width: 100% !important;
+            height: 38px !important;
+        }
+
+        .k-input:focus-within, .k-textbox:focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px hsl(28 60% 45% / 0.15) !important;
+        }
+
+        .k-input-inner {
+            padding: 0 0.75rem !important;
+        }
+
+        /* Password eye button inside Kendo input */
+        .pass-wrapper {
+            position: relative;
+        }
+
+        .pass-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            z-index: 2;
+            padding: 0;
+        }
+
+        .pass-toggle:hover { color: var(--fg); }
+
+        /* ── Validation error ── */
+        .field-error {
+            font-size: 0.72rem;
+            color: var(--destructive);
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        /* Server-side error from ViewBag */
+        .alert-error {
+            background: hsl(0 65% 48% / 0.10);
+            border: 1px solid hsl(0 65% 48% / 0.30);
+            border-radius: var(--radius);
+            padding: 0.6rem 0.9rem;
+            font-size: 0.8rem;
+            color: var(--destructive);
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: hsl(120 40% 40% / 0.10);
+            border: 1px solid hsl(120 40% 40% / 0.30);
+            border-radius: var(--radius);
+            padding: 0.6rem 0.9rem;
+            font-size: 0.8rem;
+            color: hsl(120, 40%, 28%);
+            margin-bottom: 1rem;
+        }
+
+        /* ── 2-col grid for register ── */
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        /* ── Gold button (same as original) ── */
+        .btn-gold {
+            display: block;
+            width: 100%;
+            height: 42px;
+            background: var(--gold-gradient);
+            color: var(--primary-fg);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            margin-top: 1.25rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px hsl(28 60% 45% / 0.30);
+        }
+
+        .btn-gold:hover:not(:disabled) {
+            filter: brightness(1.10);
+            box-shadow: 0 6px 20px hsl(28 60% 45% / 0.40);
+        }
+
+        .btn-gold:active { transform: scale(0.98); }
+        .btn-gold:disabled { opacity: 0.55; cursor: not-allowed; }
+
+        /* ── Forgot password link ── */
+        .link-accent {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .link-accent:hover { color: var(--primary); }
+
+        /* ── Bottom sign in / sign up link ── */
+        .auth-footer {
+            text-align: center;
+            font-size: 0.82rem;
+            color: hsl(25 30% 10% / 0.65);
+            font-weight: 500;
+            margin-top: 1.25rem;
+        }
+
+        .auth-footer a {
+            color: var(--accent);
+            font-weight: 700;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .auth-footer a:hover { color: var(--primary); }
+
+        /* ── Profile image upload ── */
+        .upload-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 2px dashed var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+            background: var(--input-bg);
+            margin: 0 auto;
+        }
+
+        .upload-circle:hover { border-color: var(--primary); }
+
+        .upload-circle span {
+            font-size: 0.65rem;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .profile-preview-wrap {
+            position: relative;
+            width: 80px;
+            margin: 0 auto;
+        }
+
+        .profile-preview-wrap img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid hsl(28 60% 45% / 0.30);
+        }
+
+        .remove-img {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--destructive);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        /* ── Gender Kendo DropDownList override ── */
+        .k-dropdownlist {
+            height: 38px !important;
+            background: var(--input-bg) !important;
+            border-color: var(--border) !important;
+            border-radius: var(--radius) !important;
+        }
+
+        /* ── OTP boxes (forgot password) ── */
+        .otp-row {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
+
+        .otp-box {
+            width: 44px;
+            height: 48px;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            border: 1.5px solid var(--border);
+            border-radius: 0.5rem;
+            background: var(--input-bg);
+            color: var(--fg);
+            transition: border-color 0.2s;
+        }
+
+        .otp-box:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px hsl(28 60% 45% / 0.15);
+        }
+
+        /* ── Back button ── */
+        .btn-back {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--accent);
+            font-size: 0.82rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 1rem;
+            padding: 0;
+        }
+
+        .btn-back:hover { color: var(--primary); }
+
+        /* ── Animations ── */
+        @@keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50%       { transform: translateY(-6px); }
+        }
+
+        @@keyframes bg-slow-pan {
+            0%   { transform: scale(1.15) translate(0, 0); }
+            25%  { transform: scale(1.20) translate(-2%, -1%); }
+            50%  { transform: scale(1.15) translate(-1%, 1%); }
+            75%  { transform: scale(1.20) translate(1%, -1%); }
+            100% { transform: scale(1.15) translate(0, 0); }
+        }
+
+        @@keyframes scale-in {
+            from { opacity: 0; transform: scale(0.96); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        @@keyframes fade-up {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-up { animation: fade-up 0.4s ease-out forwards; }
+    </style>
+</head>
+<body>
+    @RenderBody()
+
+    <!-- Kendo JS -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2024.3.1015/js/kendo.all.min.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
