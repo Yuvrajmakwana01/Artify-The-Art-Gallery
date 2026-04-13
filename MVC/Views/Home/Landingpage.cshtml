@@ -1,0 +1,323 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Artify";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/themes/7.0.1/default/default-main.css" />
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2023.2.829/js/kendo.all.min.js"></script>
+    <style>
+        :root { --bg:#fbf6ef; --surface:#fffdf8; --text:#2e241b; --muted:#84745f; --gold:#cfa448; --brown:#6d4c22; --line:rgba(109,76,34,.12); --shadow:0 20px 50px rgba(73,49,24,.12); }
+        * { box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+        body { margin:0; color:var(--text); font-family:Georgia,"Times New Roman",serif; background:radial-gradient(circle at top left, rgba(245,217,145,.24), transparent 26%),radial-gradient(circle at top right, rgba(241,189,167,.18), transparent 22%),linear-gradient(180deg,#fffdfa 0%,#faf4ea 50%,#f4ece1 100%); overflow-x:hidden; overflow-y:scroll; }
+        a { color:inherit; text-decoration:none; }
+        .topbar { position:sticky; top:0; z-index:20; border-bottom:1px solid rgba(133,110,78,.12); background:rgba(255,250,244,.86); backdrop-filter:blur(14px); }
+        .topbar-inner,.section-inner { width:min(1280px, calc(100vw - 40px)); margin:0 auto; }
+        .topbar-inner { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 0; }
+        .brand { font-size:3rem; font-weight:700; line-height:1; }
+        .nav-links { display:flex; align-items:center; gap:30px; font-family:"Segoe UI",Tahoma,sans-serif; color:var(--muted); font-weight:600; }
+        .nav-actions { display:flex; align-items:center; gap:14px; }
+        .icon-shell { width:40px; height:40px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--line); background:rgba(255,255,255,.6); font-family:"Segoe UI",Tahoma,sans-serif; }
+        .hero { position:relative; padding:36px 0 90px; overflow:hidden; }
+        .hero::before { content:""; position:absolute; inset:0; background:radial-gradient(circle at 32% 25%, rgba(255,252,240,.86), transparent 26%),radial-gradient(circle at 70% 28%, rgba(255,255,255,.6), transparent 22%); pointer-events:none; }
+        .hero-inner { position:relative; width:min(1280px, calc(100vw - 40px)); min-height:660px; margin:0 auto; display:grid; place-items:center; }
+        .hero-copy { position:relative; z-index:3; max-width:860px; text-align:center; }
+        .eyebrow { display:inline-flex; align-items:center; gap:10px; padding:12px 20px; border-radius:999px; background:rgba(252,243,224,.95); color:#7b5b30; font-family:"Segoe UI",Tahoma,sans-serif; font-size:1rem; font-weight:700; box-shadow:0 10px 25px rgba(120,89,45,.1); }
+        .hero-title { margin:24px 0 18px; font-size:clamp(4rem,7vw,6.7rem); line-height:.92; letter-spacing:-.04em; }
+        .hero-title span { color:var(--gold); display:block; }
+        .hero-subtitle { margin:0 auto; max-width:760px; color:var(--muted); font-family:"Segoe UI",Tahoma,sans-serif; font-size:1.2rem; line-height:1.7; }
+        .hero-actions { display:flex; justify-content:center; gap:16px; margin-top:28px; }
+        .hero-actions .k-button { min-width:180px; border-radius:18px; padding:14px 24px; font-size:1rem; font-weight:700; }
+        .hero-primary.k-button { color:#24170d; border:0; background:linear-gradient(135deg,#e6bb56,#cc963e); }
+        .hero-secondary.k-button { color:var(--text); border:1px solid rgba(85,58,27,.35); background:rgba(255,255,255,.5); }
+        .floating-art { position:absolute; border-radius:28px; overflow:hidden; box-shadow:0 24px 46px rgba(53,37,20,.16); border:1px solid rgba(255,255,255,.7); opacity:.88; animation:drift 11s ease-in-out infinite; }
+        .floating-art img { width:100%; height:100%; object-fit:cover; display:block; }
+        .floating-art::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(255,255,255,.06), transparent 48%, rgba(14,10,8,.16)); }
+        .float-1 { left:-2%; top:4%; width:170px; height:350px; transform:rotate(-11deg); }
+        .float-2 { left:15%; top:38%; width:220px; height:310px; transform:rotate(-8deg); animation-delay:-1.6s; }
+        .float-3 { left:38%; top:48%; width:240px; height:280px; }
+        .float-4 { right:34%; top:12%; width:190px; height:250px; transform:rotate(8deg); animation-delay:-2.4s; }
+        .float-5 { right:14%; top:32%; width:200px; height:300px; transform:rotate(9deg); animation-delay:-4s; }
+        .float-6 { right:-2%; top:42%; width:160px; height:250px; transform:rotate(12deg); animation-delay:-5.5s; }
+        .section { padding:44px 0 0; }
+        .section-heading { text-align:center; margin-bottom:32px; }
+        .section-heading h2,.section-inline h2 { margin:0 0 14px; font-size:clamp(3rem,5vw,4.8rem); line-height:.95; letter-spacing:-.04em; }
+        .section-heading p { margin:0; color:var(--muted); font-family:"Segoe UI",Tahoma,sans-serif; font-size:1.15rem; }
+        .section-inline { display:flex; align-items:center; gap:14px; margin-bottom:28px; }
+        .section-inline .accent { color:var(--gold); font-size:2rem; }
+        .curated-stage { position:relative; height:420px; margin-bottom:28px; }
+        .curated-card { position:absolute; width:240px; height:320px; border-radius:28px; overflow:hidden; box-shadow:var(--shadow); border:1px solid rgba(255,255,255,.76); }
+        .curated-card img { width:100%; height:100%; object-fit:cover; display:block; }
+        .curated-card::after { content:""; position:absolute; inset:auto 0 0; height:44%; background:linear-gradient(180deg, transparent, rgba(10,8,6,.46)); }
+        .curated-label { position:absolute; left:16px; right:16px; bottom:16px; z-index:1; color:#fff9ef; font-family:"Segoe UI",Tahoma,sans-serif; }
+        .curated-label strong { display:block; font-family:Georgia,"Times New Roman",serif; font-size:1.35rem; }
+        .card-a { left:18%; bottom:32px; transform:scale(.95); z-index:1; }
+        .card-b { left:31%; top:16px; width:260px; height:340px; z-index:3; }
+        .card-c { right:28%; top:18px; width:260px; height:340px; z-index:4; }
+        .card-d { right:15%; bottom:36px; transform:scale(.95); z-index:2; }
+        .cards-host { min-height:220px; width:100%; }
+        .cards-host.k-listview .k-listview-content,
+        .cards-host > .k-listview-content {
+            display:grid !important;
+            grid-template-columns:repeat(4, minmax(250px, 1fr));
+            gap:26px;
+            align-items:start;
+            width:100% !important;
+        }
+        .cards-host.k-listview .k-listview-content > *,
+        .cards-host > .k-listview-content > * {
+            min-width:0;
+            width:100%;
+        }
+        .browse-host { min-height:320px; }
+        .card-tile { width:min(100%, 258px); margin:0 auto; border-radius:20px; overflow:hidden; background:#fffdfa; border:1px solid rgba(109,76,34,.08); box-shadow:0 12px 28px rgba(72,48,20,.12); }
+        .tile-media { position:relative; height:262px; overflow:hidden; display:block; background:#e8dcc8; }
+        .tile-media img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .7s ease; }
+        .card-tile:hover .tile-media img { transform:scale(1.06); }
+        .tile-overlay { position:absolute; inset:0; background:linear-gradient(180deg, rgba(255,255,255,.04) 0%, rgba(255,255,255,0) 42%, rgba(12,8,5,.18) 100%); }
+        .pill { position:absolute; top:12px; left:12px; display:inline-flex; align-items:center; gap:7px; padding:7px 14px; border-radius:999px; background:rgba(255,255,255,.92); color:#6a5843; font-family:"Segoe UI",Tahoma,sans-serif; font-size:.9rem; font-weight:700; z-index:1; box-shadow:0 4px 14px rgba(39,28,17,.08); }
+        .tile-actions { position:absolute; top:18px; right:12px; z-index:1; display:flex; flex-direction:column; gap:10px; }
+        .tile-actions .k-button { min-width:0; width:34px; height:34px; border-radius:50%; padding:0; border:1px solid rgba(255,255,255,.42); background:rgba(255,255,255,.26); backdrop-filter:blur(3px); }
+        .details-chip { position:absolute; left:50%; bottom:12px; transform:translateX(-50%); border-radius:999px; padding:9px 18px; border:0; background:rgba(223,199,188,.62); color:#6c5547; font-family:"Segoe UI",Tahoma,sans-serif; font-size:.9rem; font-weight:600; z-index:1; backdrop-filter:blur(6px); }
+        .tile-body { padding:14px 14px 16px; }
+        .tile-title { margin:0; font-size:1rem; line-height:1.25; font-weight:700; }
+        .tile-artist { margin:8px 0 14px; color:#8a7865; font-family:"Segoe UI",Tahoma,sans-serif; font-size:.98rem; line-height:1.3; }
+        .tile-meta { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:0; }
+        .tile-meta .meta-purchase { display:flex; align-items:center; gap:10px; margin-left:auto; }
+        .price { color:var(--gold); font-size:1rem; font-weight:700; }
+        .tag { padding:6px 10px; border-radius:999px; background:#efebe4; color:#6b5a48; font-family:"Segoe UI",Tahoma,sans-serif; font-size:.8rem; font-weight:500; }
+        .tile-buy-inline.k-button { min-width:auto; border:0; border-radius:999px; padding:8px 14px; background:linear-gradient(135deg,var(--brown),var(--gold)); color:#fff; font-family:"Segoe UI",Tahoma,sans-serif; font-size:.82rem; font-weight:700; line-height:1; box-shadow:none; }
+        .tile-footer { display:none; }
+        .tile-footer .k-button { border-radius:14px; font-family:"Segoe UI",Tahoma,sans-serif; font-weight:700; padding:11px 10px; min-width:0; }
+        .action-buy.k-button { border:0; background:linear-gradient(135deg,var(--brown),var(--gold)); color:#fff; }
+        .action-neutral.k-button { background:#f4ede3; border:1px solid rgba(99,72,40,.14); color:var(--text); }
+        .category-toolbar { margin-bottom:24px; }
+        .category-toolbar .k-button { border-radius:999px; margin:0 10px 12px 0; padding:12px 22px; background:#eee7dd; border:1px solid transparent; color:#514331; font-family:"Segoe UI",Tahoma,sans-serif; font-weight:700; }
+        .category-toolbar .k-button.is-active { background:var(--brown); color:#fff; box-shadow:0 10px 22px rgba(109,76,34,.2); }
+        .footer-band { margin-top:82px; padding:56px 20px 64px; text-align:center; color:#fff9ef; background:#6b4b21; }
+        .footer-band h3 { margin:0 0 10px; font-size:3rem; }
+        .footer-band p { margin:0; font-family:"Segoe UI",Tahoma,sans-serif; font-size:1rem; color:rgba(255,246,232,.76); }
+        .detail-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(260px,340px); gap:24px; padding:10px; font-family:"Segoe UI",Tahoma,sans-serif; }
+        .detail-layout img { width:100%; height:420px; object-fit:cover; border-radius:24px; }
+        .detail-panel h3 { margin:8px 0 8px; font-family:Georgia,"Times New Roman",serif; font-size:2.2rem; }
+        .detail-panel p { margin:0 0 14px; color:var(--muted); }
+        .detail-actions { display:grid; gap:10px; margin-top:16px; }
+        .loading-shell { display:grid; place-items:center; min-height:200px; font-family:"Segoe UI",Tahoma,sans-serif; color:var(--muted); }
+        @@keyframes drift { 0%,100% { transform:translateY(0) rotate(var(--r,0deg)); } 50% { transform:translateY(-16px) rotate(calc(var(--r,0deg) + 1deg)); } }
+        @@media (max-width:1100px) { .nav-links { display:none; } .hero-inner { min-height:740px; } .curated-stage { height:760px; } .card-a,.card-b,.card-c,.card-d { left:50%; right:auto; transform:translateX(-50%); } .card-a { top:0; } .card-b { top:150px; } .card-c { top:320px; } .card-d { top:490px; } .detail-layout { grid-template-columns:1fr; } }
+        @@media (max-width:1200px) { .cards-host.k-listview .k-listview-content, .cards-host > .k-listview-content { grid-template-columns:repeat(3, minmax(230px, 1fr)); } }
+        @@media (max-width:1080px) { .cards-host.k-listview .k-listview-content, .cards-host > .k-listview-content { grid-template-columns:repeat(2, minmax(240px, 1fr)); } }
+        @@media (max-width:780px) { .brand { font-size:2.2rem; } .hero-title { font-size:3.7rem; } .hero-actions { flex-direction:column; align-items:center; } .hero-actions .k-button { width:100%; max-width:340px; } .float-1,.float-6 { display:none; } .cards-host.k-listview .k-listview-content, .cards-host > .k-listview-content { grid-template-columns:1fr; } .card-tile { width:min(100%, 300px); } }
+    </style>
+</head> 
+<body>
+    <div class="landing-page">
+        <header class="topbar">
+            <div class="topbar-inner">
+                <a class="brand" href="#top">Artify</a>
+                <nav class="nav-links">
+                    <a href="#collection">Gallery</a>
+                    <a href="#trending">Trending</a>
+                    <a href="#categories">Categories</a>
+                    <a asp-action="Login" asp-controller="Artist">Artist</a>
+                </nav>
+                <div class="nav-actions">
+                    <span class="icon-shell">&#9825;</span>
+                    <span class="icon-shell">&#128722;</span>
+                    <a asp-action="UserLogin" asp-controller="Auth">Sign In</a>
+                </div>
+            </div>
+        </header>
+        <section class="hero" id="top">
+            <div class="hero-inner">
+                <div id="heroArtHost"></div>
+                <div class="hero-copy">
+                    <div class="eyebrow">&#10023; Digital Art Marketplace</div>
+                    <h1 class="hero-title">Discover &amp; Collect<span>Extraordinary Art</span></h1>
+                    <p class="hero-subtitle">Explore curated digital masterpieces from world-class artists. Own unique pieces that inspire, with live catalog data, category filtering, and marketplace actions backed by your MVC app.</p>
+                    <div class="hero-actions">
+                        <button id="exploreBtn" class="hero-primary">Explore Gallery</button>
+                        <button id="trendBtn" class="hero-secondary">Trending Now</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="section" id="collection"><div class="section-inner"><div class="section-heading"><h2>Curated Collection</h2><p>Explore our handpicked masterpieces rotating in an endless gallery.</p></div><div class="curated-stage" id="curatedStage"></div></div></section>
+        <section class="section" id="trending"><div class="section-inner"><div class="section-inline"><span class="accent">&#9685;</span><h2>Trending Now</h2></div><div id="trendingList" class="cards-host"></div></div></section>
+        <section class="section" id="categories"><div class="section-inner"><div class="section-inline"><span class="accent">&#9685;</span><h2>Browse by Category</h2></div><div id="categoryToolbar" class="category-toolbar"></div><div id="categoryList" class="cards-host browse-host"></div></div></section>
+        <footer class="footer-band"><h3>Artify</h3><p>&copy; 2026 Artify. Curating digital excellence.</p><br><p><a asp-action="Login" asp-controller="Admin">Administrator Login</a></p></footer>
+    </div>
+    <div id="artworkDetailWindow" style="display:none;"><div id="artworkDetailContent"></div></div>
+    <div id="landingNotification"></div>
+    <script id="artwork-card-template" type="text/x-kendo-template">
+        <article class="card-tile">
+            <div class="tile-media">
+                <img src="#: imageUrl #" alt="#: title #" />
+                <div class="tile-overlay"></div>
+                <div class="pill">♡ #: likes #</div>
+                <div class="tile-actions">
+                    <button class="js-like" data-id="#: id #"># if (isLiked) { #♥# } else { #♡# } #</button>
+                    <button class="js-cart" data-id="#: id #"># if (inCart) { #✓# } else { #+# } #</button>
+                </div>
+                <button class="details-chip js-details" data-id="#: id #">View Details</button>
+            </div>
+            <div class="tile-body">
+                <h3 class="tile-title">#: title #</h3>
+                <p class="tile-artist">#: artistName #</p>
+                <div class="tile-meta"><span class="tag">#: category #</span><div class="meta-purchase"><span class="price">$#: kendo.toString(price, 'n0') #</span><button class="tile-buy-inline js-buy" data-id="#: id #">Buy</button></div></div>
+                <div class="tile-footer">
+                    <button class="action-buy js-buy" data-id="#: id #">Buy</button>
+                    <button class="action-neutral js-details" data-id="#: id #">Details</button>
+                    <button class="action-neutral js-like" data-id="#: id #">Like</button>
+                    <button class="action-neutral js-cart" data-id="#: id #">Cart</button>
+                </div>
+            </div>
+        </article>
+    </script>
+    <script>
+        let landingData = { artworks: [], categories: [] };
+        let selectedCategory = "All";
+        let activeDetailId = null;
+        $(function () {
+            $("#signInBtn, #exploreBtn, #trendBtn").kendoButton();
+            $("#landingNotification").kendoNotification({ stacking: "down", autoHideAfter: 1800 });
+            $("#artworkDetailWindow").kendoWindow({ title: "Artwork Details", width: "920px", modal: true, visible: false, actions: ["Close"] });
+            $("#artworkDetailWindow").on("close", function () { activeDetailId = null; });
+            $("#exploreBtn").on("click", function () { document.getElementById("collection").scrollIntoView({ behavior: "smooth" }); });
+            $("#trendBtn").on("click", function () { document.getElementById("trending").scrollIntoView({ behavior: "smooth" }); });
+            loadLandingData();
+            bindCardEvents();
+        });
+        function loadLandingData() {
+            showLoader("#trendingList");
+            showLoader("#categoryList");
+            $.getJSON("@Url.Action("LandingPageData", "Home")", function (response) {
+                landingData = { artworks: response.artworks || [], categories: response.categories || [] };
+                renderHeroArt();
+                renderCuratedCollection();
+                renderCategoryToolbar();
+                renderTrendingList();
+                renderCategoryList();
+            });
+        }
+        function renderHeroArt() {
+            const heroItems = landingData.artworks.slice(0, 6);
+            const classes = ["float-1", "float-2", "float-3", "float-4", "float-5", "float-6"];
+            const rotations = [-11, -8, 0, 8, 9, 12];
+            $("#heroArtHost").html(heroItems.map(function (item, index) { return '<div class="floating-art ' + classes[index] + '" style="--r:' + rotations[index] + 'deg"><img src="' + item.imageUrl + '" alt="' + kendo.htmlEncode(item.title) + '"></div>'; }).join(""));
+        }
+        function renderCuratedCollection() {
+            const curated = landingData.artworks.slice(0, 4);
+            const classes = ["card-a", "card-b", "card-c", "card-d"];
+            $("#curatedStage").html(curated.map(function (item, index) { return '<article class="curated-card ' + classes[index] + '"><img src="' + item.imageUrl + '" alt="' + kendo.htmlEncode(item.title) + '" /><div class="curated-label"><strong>' + kendo.htmlEncode(item.title) + '</strong><span>' + kendo.htmlEncode(item.artistName) + '</span></div></article>'; }).join(""));
+        }
+        function createDataSource(items, pageSize) {
+            const config = { data: items };
+            if (pageSize) { config.pageSize = pageSize; }
+            return new kendo.data.DataSource(config);
+        }
+        function renderTrendingList() {
+            const trending = landingData.artworks
+                .slice()
+                .sort(function (a, b) { return b.likes - a.likes; })
+                .slice(0, 12);
+
+            if ($("#trendingList").data("kendoListView")) {
+                $("#trendingList").data("kendoListView").destroy();
+                $("#trendingList").empty();
+            }
+
+            $("#trendingList").kendoListView({
+                dataSource: createDataSource(trending, 12),
+                template: kendo.template($("#artwork-card-template").html()),
+                dataBound: function () {
+                    applyGridLayout(this.element);
+                    enhanceButtons(this.element);
+                }
+            });
+        }
+        function renderCategoryList() {
+            const items = selectedCategory === "All" ? landingData.artworks : landingData.artworks.filter(function (art) { return art.category === selectedCategory; });
+            if ($("#categoryList").data("kendoListView")) {
+                $("#categoryList").data("kendoListView").destroy();
+                $("#categoryList").empty();
+            }
+
+            $("#categoryList").kendoListView({
+                dataSource: createDataSource(items),
+                template: kendo.template($("#artwork-card-template").html()),
+                dataBound: function () {
+                    applyGridLayout(this.element);
+                    enhanceButtons(this.element);
+                }
+            });
+        }
+        function renderCategoryToolbar() {
+            const host = $("#categoryToolbar").empty();
+            landingData.categories.forEach(function (category) {
+                const button = $('<button type="button">' + kendo.htmlEncode(category) + '</button>');
+                button.kendoButton();
+                button.toggleClass("is-active", category === selectedCategory);
+                button.on("click", function () { selectedCategory = category; renderCategoryToolbar(); renderCategoryList(); });
+                host.append(button);
+            });
+        }
+        function enhanceButtons(scope) { $(scope).find(".js-like, .js-cart, .js-buy, .js-details").each(function () { if (!$(this).data("kendoButton")) { $(this).kendoButton(); } }); }
+        function applyGridLayout(element) {
+            $(element).addClass("cards-host");
+        }
+        function bindCardEvents() {
+            $(document).on("click", ".js-details", function (event) { event.preventDefault(); openDetailWindow(Number($(this).data("id"))); });
+            $(document).on("click", ".js-buy, .js-cart", function (event) { event.preventDefault(); postAction("@Url.Action("AddToCart", "Home")", Number($(this).data("id")), "cart", "Added to cart"); });
+            $(document).on("click", ".js-like", function (event) { event.preventDefault(); postAction("@Url.Action("ToggleLike", "Home")", Number($(this).data("id")), "like", "Like updated"); });
+        }
+        function postAction(url, artworkId, actionType, message) {
+            if (!artworkId) { return; }
+            $.ajax({ url: url, method: "POST", contentType: "application/json", data: JSON.stringify({ artworkId: artworkId }) })
+                .done(function (response) {
+                    syncArtworkState(artworkId, actionType, response || {});
+                    refreshVisibleArtworkUi();
+                    notify(message);
+                })
+                .fail(function () { notify("Action could not be completed"); });
+        }
+        function syncArtworkState(artworkId, actionType, response) {
+            const item = landingData.artworks.find(function (art) { return art.id === artworkId; });
+            if (!item) { return; }
+            if (actionType === "like") {
+                item.isLiked = !!response.isLiked;
+                if (typeof response.likes === "number") {
+                    item.likes = response.likes;
+                }
+            }
+            if (actionType === "cart") {
+                item.inCart = !!response.inCart;
+            }
+        }
+        function refreshVisibleArtworkUi() {
+            renderTrendingList();
+            renderCategoryList();
+            if (activeDetailId) {
+                openDetailWindow(activeDetailId);
+            }
+        }
+        function openDetailWindow(id) {
+            const item = landingData.artworks.find(function (art) { return art.id === id; });
+            if (!item) { return; }
+            activeDetailId = id;
+            const html = '<div class="detail-layout"><div><img src="' + item.imageUrl + '" alt="' + kendo.htmlEncode(item.title) + '"></div><div class="detail-panel"><span class="tag">' + kendo.htmlEncode(item.category) + '</span><h3>' + kendo.htmlEncode(item.title) + '</h3><p>By ' + kendo.htmlEncode(item.artistName) + '</p><span class="price">$' + kendo.toString(item.price, "n0") + '</span><p>' + item.likes + ' collectors liked this artwork. You can like it or add it to cart directly from this panel.</p><div class="detail-actions"><button class="action-buy js-buy" data-id="' + item.id + '">Buy Now</button><button class="action-neutral js-like" data-id="' + item.id + '">Like</button><button class="action-neutral js-cart" data-id="' + item.id + '">Add to Cart</button></div></div></div>';
+            $("#artworkDetailContent").html(html);
+            enhanceButtons("#artworkDetailContent");
+            $("#artworkDetailWindow").data("kendoWindow").center().open();
+        }
+        function showLoader(selector) { $(selector).html('<div class="loading-shell"></div>'); }
+        function notify(message) { $("#landingNotification").data("kendoNotification").show(message, "info"); }
+    </script>
+</body>
+</html>

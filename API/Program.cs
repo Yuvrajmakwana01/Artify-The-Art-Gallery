@@ -7,6 +7,11 @@ using Npgsql;
 using Repository.Implementations;
 using Repository.Interfaces;
 using StackExchange.Redis;
+using Repository.Services;
+using Repository.Implementations;
+using Repository.Interfaces;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authentication.Google;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +21,8 @@ builder.Services.AddScoped<IAdmincategoiresInteface, AdminCategoriesRepository>(
 builder.Services.AddScoped<IAdminUsersInterface, AdminUsersRepository>();
 builder.Services.AddScoped<IAdminArtistInterface, AdminArtistRepository>();
 builder.Services.AddEndpointsApiExplorer();
+// builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAuthInterface, AuthRepository>();
 
 // Swagger (ONLY ONCE)
 builder.Services.AddSwaggerGen(c =>
@@ -41,6 +48,10 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
+
+builder.Services.AddScoped<IArtistInterface, ArtistRepository>();
+builder.Services.AddScoped<IArtworkInterface, ArtworkRepository>();
 
 // PostgreSQL
 builder.Services.AddScoped<NpgsqlConnection>(conn =>
@@ -82,8 +93,10 @@ builder.Services.AddScoped<NpgsqlConnection>(conn =>
         connectionString = raw;
     }
 
+    var connectionString = conn.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection");
     return new NpgsqlConnection(connectionString);
 });
+
 
 // CORS (FIXED)
 builder.Services.AddCors(options =>
@@ -118,7 +131,8 @@ builder.Services.AddAuthentication(options =>
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
         )
     };
-});
+})
+;
 
 // Redis
 builder.Services.AddScoped<IConnectionMultiplexer>(sp =>
@@ -154,6 +168,17 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+// ── Repository ───────────────────────────────────────────────────────────
+builder.Services.AddScoped<IAdminArtworkInterface, AdminArtworkRepository>();
+builder.Services.AddScoped<IAuthInterface, AuthRepository>();
+
+// ── Services ─────────────────────────────────────────────────────────────
+builder.Services.AddScoped<AdminArtworkService>();
+builder.Services.AddSingleton<RabbitMQProducer>();
+builder.Services.AddScoped<RedisService>();
+
+
+
 var app = builder.Build();
 
 // =========================
@@ -170,10 +195,15 @@ app.UseHttpsRedirection();
 
 app.UseCors("corsapp");
 
+app.UseSession();           // ✅ first
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseSession();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseStaticFiles();
 
 app.MapControllers();
 

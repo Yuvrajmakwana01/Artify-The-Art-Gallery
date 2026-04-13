@@ -1,0 +1,661 @@
+@model Repository.Models.t_UserLogin
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Sign In";
+}
+
+<style>
+    /* ── Auth page wrapper ── */
+    .auth-page {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .auth-bg-img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        animation: bgPan 25s ease-in-out infinite;
+    }
+
+    .auth-bg-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            180deg,
+            hsl(25 20% 8% / 0.70) 0%,
+            hsl(25 20% 8% / 0.50) 50%,
+            hsl(25 20% 8% / 0.75) 100%
+        );
+    }
+
+    .auth-wrapper {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        max-width: 460px;
+        margin: 24px 16px;
+        animation: scaleIn 0.4s ease-out;
+    }
+
+    /* Glass card — same as Register */
+    .glass-card {
+        background: hsl(35 30% 92% / 0.88);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid hsl(30 15% 82% / 0.35);
+        border-radius: 1.25rem;
+        padding: 2rem 2rem 1.5rem;
+        box-shadow:
+            0 8px 32px -8px hsl(25 20% 10% / 0.40),
+            inset 0 1px 0 hsl(35 30% 97% / 0.18);
+    }
+
+    .auth-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: hsl(25, 30%, 10%);
+        text-align: center;
+        margin: 0;
+    }
+
+    .auth-subtitle {
+        font-size: 0.8rem;
+        color: hsl(25, 15%, 35%);
+        text-align: center;
+        margin: 0.25rem 0 1.4rem;
+        font-weight: 500;
+    }
+
+    .form-group { margin-top: 0.9rem; }
+
+    .form-label {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: hsl(25, 30%, 10%);
+        margin-bottom: 0.3rem;
+    }
+
+    /* ── Kendo input override — exact same as Register ── */
+    .k-textbox,
+    .k-input.k-textbox,
+    .k-input {
+        background-color: hsl(32, 18%, 88%) !important;
+        border-color: hsl(30, 15%, 78%) !important;
+        border-radius: 0.6rem !important;
+        color: hsl(25, 30%, 10%) !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.85rem !important;
+        height: 38px !important;
+        width: 100% !important;
+        transition: border-color 0.25s, box-shadow 0.25s !important;
+    }
+
+    .k-textbox:focus,
+    .k-input:focus-within {
+        border-color: hsl(28, 60%, 45%) !important;
+        box-shadow: 0 0 0 3px hsl(28 60% 45% / 0.15) !important;
+        outline: none !important;
+    }
+
+    .k-tooltip-validation {
+        background: hsl(0, 65%, 48%) !important;
+        border-color: hsl(0, 65%, 40%) !important;
+        border-radius: 0.4rem !important;
+        font-size: 0.72rem !important;
+        font-family: 'Inter', sans-serif !important;
+        margin-top: 3px !important;
+        padding: 3px 8px !important;
+    }
+
+    .k-tooltip-validation .k-callout { color: hsl(0, 65%, 48%) !important; }
+
+    /* Password wrapper */
+    .pass-wrapper { position: relative; }
+
+    .pass-wrapper .k-textbox,
+    .pass-wrapper .k-input { padding-right: 2.4rem !important; }
+
+    .pass-toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: hsl(25, 15%, 45%);
+        display: flex;
+        align-items: center;
+        z-index: 5;
+        padding: 0;
+        line-height: 1;
+    }
+
+    .pass-toggle:hover { color: hsl(25, 30%, 10%); }
+
+    /* ── Forgot Password row ── */
+    .forgot-row {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 0.3rem;
+    }
+
+    .forgot-link {
+        font-size: 0.75rem;
+        color: hsl(22, 50%, 38%);
+        font-weight: 600;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0;
+        font-family: 'Inter', sans-serif;
+        transition: color 0.2s;
+    }
+
+    .forgot-link:hover { color: hsl(28, 60%, 45%); }
+
+    /* ── reCAPTCHA wrapper ── */
+    .captcha-wrap {
+        margin-top: 1rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* ── OR divider ── */
+    .or-divider {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin: 1.1rem 0 0.9rem;
+    }
+
+    .or-divider::before,
+    .or-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: hsl(30, 15%, 78%);
+    }
+
+    .or-divider span {
+        font-size: 0.73rem;
+        color: hsl(25, 15%, 45%);
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    /* ── Google OAuth button ── */
+    .btn-google {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        height: 42px;
+        background: hsl(35 30% 96% / 0.95);
+        border: 1.5px solid hsl(30, 15%, 76%);
+        border-radius: 0.65rem;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: hsl(25, 30%, 12%);
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+        text-decoration: none;
+    }
+
+    .btn-google:hover {
+        background: hsl(35, 30%, 100%);
+        border-color: hsl(28, 60%, 55%);
+        box-shadow: 0 2px 10px hsl(28 60% 45% / 0.12);
+    }
+
+    .btn-google svg { flex-shrink: 0; }
+
+    /* ── Gold submit button — same as Register ── */
+    .btn-gold {
+        display: block;
+        width: 100%;
+        height: 42px;
+        background: linear-gradient(135deg, hsl(28,60%,45%), hsl(18,70%,38%));
+        color: hsl(35, 30%, 97%);
+        font-family: 'Inter', sans-serif;
+        font-size: 0.875rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 0.65rem;
+        cursor: pointer;
+        margin-top: 1.1rem;
+        transition: filter 0.25s, box-shadow 0.25s, transform 0.1s;
+        box-shadow: 0 4px 14px hsl(28 60% 45% / 0.32);
+        letter-spacing: 0.01em;
+    }
+
+    .btn-gold:hover:not(:disabled) {
+        filter: brightness(1.08);
+        box-shadow: 0 6px 20px hsl(28 60% 45% / 0.42);
+    }
+
+    .btn-gold:active:not(:disabled) { transform: scale(0.985); }
+    .btn-gold:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    /* ── Footer link ── */
+    .auth-footer {
+        text-align: center;
+        font-size: 0.82rem;
+        color: hsl(25 30% 10% / 0.60);
+        font-weight: 500;
+        margin-top: 1.1rem;
+    }
+
+    .auth-footer a {
+        color: hsl(22, 50%, 38%);
+        font-weight: 700;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        transition: color 0.2s;
+    }
+
+    .auth-footer a:hover { color: hsl(28, 60%, 45%); }
+
+    /* ── Kendo Notification ── */
+    .k-notification-wrap {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.82rem !important;
+        border-radius: 0.6rem !important;
+    }
+
+    /* ── Lockout warning bar ── */
+    .lockout-bar {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        background: hsl(30, 80%, 94%);
+        border: 1px solid hsl(28, 60%, 72%);
+        border-radius: 0.6rem;
+        padding: 8px 12px;
+        font-size: 0.75rem;
+        color: hsl(22, 50%, 28%);
+        font-family: 'Inter', sans-serif;
+        margin-bottom: 0.8rem;
+    }
+
+    .lockout-bar.visible { display: flex; }
+
+    /* ── pass-hint ── */
+    .pass-hint {
+        font-size: 0.67rem;
+        color: hsl(25, 15%, 40%);
+        margin-top: 0.35rem;
+    }
+
+    @@keyframes bgPan {
+        0%   { transform: scale(1.15) translate(0%, 0%); }
+        25%  { transform: scale(1.20) translate(-2%, -1%); }
+        50%  { transform: scale(1.15) translate(-1%, 1%); }
+        75%  { transform: scale(1.20) translate(1%, -1%); }
+        100% { transform: scale(1.15) translate(0%, 0%); }
+    }
+
+    @@keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.96); }
+        to   { opacity: 1; transform: scale(1); }
+    }
+</style>
+
+@* Google reCAPTCHA v2 *@
+@* <script src="https://www.google.com/recaptcha/api.js" async defer></script> *@
+
+<div class="auth-page">
+    <img class="auth-bg-img"
+         src="https://images.unsplash.com/photo-1578926375605-eaf7559b1458?w=1920&q=80"
+         alt="Art gallery background" />
+    <div class="auth-bg-overlay"></div>
+
+    <div class="auth-wrapper">
+        <div class="glass-card">
+
+            <h1 class="auth-title">Welcome Back</h1>
+            <p class="auth-subtitle">Sign in to your Artify account</p>
+
+            <!-- Kendo Notification container -->
+            <span id="kNotification"></span>
+
+            <!-- OWASP A07: Brute-force lockout UI bar -->
+            @* <div class="lockout-bar" id="lockoutBar">
+                <svg width="15" height="15" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                Too many failed attempts. Please wait
+                <strong id="lockoutCountdown">30s</strong>
+                or reset your password.
+            </div> *@
+
+            <!-- LOGIN FORM -->
+            <form id="loginForm" novalidate="novalidate">
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label class="form-label" for="c_Email">Email</label>
+                    <input id="c_Email" name="c_Email"
+                           type="email" placeholder="your@@email.com"
+                           data-required-msg="Email is required"
+                           data-email-msg="Enter a valid email address"
+                           class="k-textbox" />
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label class="form-label" for="c_Password">Password</label>
+                    <div class="pass-wrapper">
+                        <input id="c_Password" name="c_Password"
+                               type="password" placeholder="••••••••"
+                               data-required-msg="Password is required"
+                               class="k-textbox" />
+                        <button type="button" class="pass-toggle"
+                                onclick="togglePass('c_Password','eye-pass')">
+                            <svg id="eye-pass" xmlns="http://www.w3.org/2000/svg"
+                                 width="15" height="15" fill="none"
+                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Forgot Password -->
+                <div class="forgot-row">
+                    <button type="button" class="forgot-link" id="openForgotBtn" , Url.Action("UserForgotPassword", "Auth")>
+                        Forgot Password?
+                    </button>
+                </div>
+
+                <!-- reCAPTCHA v2 Checkbox
+                     STEP: Google Console se apna Site Key lo aur neeche dalo
+                     URL: https://www.google.com/recaptcha/admin/create
+                -->
+                @* <div class="captcha-wrap">
+                    <div class="g-recaptcha"
+                         data-sitekey="YOUR_RECAPTCHA_SITE_KEY_HERE"
+                         data-theme="light"
+                         data-callback="onCaptchaSuccess"
+                         data-expired-callback="onCaptchaExpired">
+                    </div>
+                </div> *@
+
+                <button type="submit" class="btn-gold" id="loginBtn">
+                    Sign In
+                </button>
+
+            </form>
+
+            <!-- OR divider -->
+           <div style="text-align:center;margin-top:1rem">
+                <p style="font-size:0.75rem;color:hsl(25,15%,40%);margin-bottom:0.6rem">
+                    ── or continue with ──
+                </p>
+               <a href="@Url.Action("UserGoogleLogin", "Auth")" class="btn btn-google"
+                style="display:inline-flex;align-items:center;gap:8px;
+                        padding:0 1.2rem;height:40px;border-radius:0.6rem;
+                        background:hsl(35,30%,94%);border:1.5px solid hsl(30,15%,78%);
+                        color:hsl(25,30%,15%);font-size:0.82rem;font-weight:600;
+                        text-decoration:none;font-family:'Inter',sans-serif;
+                        transition:box-shadow 0.2s, border-color 0.2s"
+                        onmouseover="this.style.borderColor='hsl(28,60%,45%)';this.style.boxShadow='0 2px 8px hsl(28 60% 45%/0.2)'"
+                        onmouseout="this.style.borderColor='hsl(30,15%,78%)';this.style.boxShadow='none'">
+
+                    <!-- Google SVG icon -->
+                    <svg width="18" height="18" viewBox="0 0 48 48">
+                        <path fill="#EA4335" d="M24 9.5c3.14 0 5.95 1.08 8.17 2.85L38.4 6.1C34.6 2.38 29.6 0 24 0 14.82 0 6.98 5.5 3.16 13.5l7.28 5.65C12.18 13.1 17.64 9.5 24 9.5z"/>
+                        <path fill="#4285F4" d="M46.1 24.5c0-1.6-.14-3.13-.4-4.6H24v8.72h12.42c-.54 2.9-2.18 5.36-4.64 7.02l7.18 5.57C43.1 37.13 46.1 31.27 46.1 24.5z"/>
+                        <path fill="#FBBC05" d="M10.44 28.85A14.57 14.57 0 019.5 24c0-1.7.3-3.33.84-4.85L3.06 13.5A23.93 23.93 0 000 24c0 3.87.93 7.52 2.56 10.73l7.88-5.88z"/>
+                        <path fill="#34A853" d="M24 48c5.6 0 10.3-1.85 13.73-5.02l-7.18-5.57A14.6 14.6 0 0124 38.5c-6.36 0-11.82-3.6-13.56-8.85l-7.88 5.88C6.98 43.5 14.82 48 24 48z"/>
+                    </svg>
+                    Continue with Google
+                </a>
+            </div>
+
+            <p class="auth-footer">
+                Don't have an account?
+                <a asp-action="UserRegister" asp-controller="Auth">Create Account</a>
+            </p>
+        </div>
+    </div>
+</div>
+ 
+
+@section Scripts {
+<script>
+$(function () {
+
+    // ════════════════════════════════════════════════
+    // 1. KENDO NOTIFICATION — same as Register
+    // ════════════════════════════════════════════════
+    var notification = $("#kNotification").kendoNotification({
+        position: { pinned: true, top: 20, right: 20 },
+        autoHideAfter: 4000,
+        stacking: "down",
+        templates: [
+            {
+                type: "success",
+                template: "<div style='padding:6px 4px;font-family:Inter,sans-serif'>" +
+                          "<strong>✔ Success</strong> &nbsp; #: message #</div>"
+            },
+            {
+                type: "error",
+                template: "<div style='padding:6px 4px;font-family:Inter,sans-serif'>" +
+                          "<strong>✖ Error</strong> &nbsp; #: message #</div>"
+            },
+            {
+                type: "warning",
+                template: "<div style='padding:6px 4px;font-family:Inter,sans-serif'>" +
+                          "<strong>⚠ Warning</strong> &nbsp; #: message #</div>"
+            }
+        ]
+    }).data("kendoNotification");
+
+    function showSuccess(msg) { notification.show({ message: msg }, "success"); }
+    function showError(msg)   { notification.show({ message: msg }, "error");   }
+    function showWarning(msg) { notification.show({ message: msg }, "warning"); }
+
+
+    // ════════════════════════════════════════════════
+    // 2. KENDO TEXTBOX INIT
+    // ════════════════════════════════════════════════
+    $("#c_Email").kendoTextBox();
+    $("#c_Password").kendoTextBox();
+
+
+    // ════════════════════════════════════════════════
+    // 3. KENDO VALIDATOR
+    // ════════════════════════════════════════════════
+    var validator = $("#loginForm").kendoValidator({
+        rules: {
+            emailFormat: function (input) {
+                if (input.is("[name='c_Email']")) {
+                    var val = input.val().trim();
+                    if (!val) return true;
+                    return /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(val);
+                }
+                return true;
+            }
+        },
+        messages: {
+            required:    "#= message #",
+            email:       "#= message #",
+            emailFormat: "Enter a valid email address"
+        }
+    }).data("kendoValidator");
+
+
+    // ════════════════════════════════════════════════
+    // 4. PASSWORD TOGGLE — reused from Register
+    // ════════════════════════════════════════════════
+    window.togglePass = function (inputId, iconId) {
+        var inp    = document.getElementById(inputId);
+        var isText = inp.type === "text";
+        inp.type   = isText ? "password" : "text";
+        document.getElementById(iconId).innerHTML = isText
+            ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>' +
+              '<circle cx="12" cy="12" r="3"/>'
+            : '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8' +
+              'a18.45 18.45 0 015.06-5.94"/>' +
+              '<path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8' +
+              'a18.5 18.5 0 01-2.16 3.19"/>' +
+              '<line x1="1" y1="1" x2="23" y2="23"/>';
+    };
+
+
+    // ════════════════════════════════════════════════
+    // 5. reCAPTCHA CALLBACKS
+    //    onCaptchaSuccess / onCaptchaExpired — global scope mein chahiye
+    // ════════════════════════════════════════════════
+    @* var captchaToken = "";
+
+    window.onCaptchaSuccess = function (token) {
+        captchaToken = token;
+    };
+
+    window.onCaptchaExpired = function () {
+        captchaToken = "";
+        showWarning("CAPTCHA expired. Please verify again.");
+    }; *@
+
+
+    // ════════════════════════════════════════════════
+    // 6. OWASP A07 — BRUTE-FORCE LOCKOUT (Client-side UX layer)
+    //    NOTE: Server-side pe bhi implement karna — ye sirf UI feedback hai
+    //    Server pe: AspNetCore.RateLimit ya custom middleware use karo
+    // ════════════════════════════════════════════════
+    @* var failedAttempts = parseInt(sessionStorage.getItem("loginFails") || "0");
+    var lockoutUntil   = parseInt(sessionStorage.getItem("lockoutUntil") || "0");
+    var lockoutTimer   = null;
+    var MAX_ATTEMPTS   = 5;
+    var LOCKOUT_SECS   = 30;   // 30 seconds — production mein 15 min rakhna
+
+    function isLockedOut() {
+        return Date.now() < lockoutUntil;
+    }
+
+    function startLockoutCountdown() {
+        $("#lockoutBar").addClass("visible");
+        $("#loginBtn").prop("disabled", true);
+
+        clearInterval(lockoutTimer);
+        lockoutTimer = setInterval(function () {
+            var remaining = Math.ceil((lockoutUntil - Date.now()) / 1000);
+            if (remaining <= 0) {
+                clearInterval(lockoutTimer);
+                $("#lockoutBar").removeClass("visible");
+                $("#loginBtn").prop("disabled", false);
+                sessionStorage.removeItem("loginFails");
+                sessionStorage.removeItem("lockoutUntil");
+                failedAttempts = 0;
+            } else {
+                $("#lockoutCountdown").text(remaining + "s");
+            }
+        }, 1000);
+    }
+
+    // Page reload pe bhi lockout active karo agar session me tha
+    if (isLockedOut()) startLockoutCountdown(); *@
+
+
+    // ════════════════════════════════════════════════
+    // 7. LOGIN FORM SUBMIT — AJAX
+    // ════════════════════════════════════════════════
+    $("#loginForm").on("submit", function (e) {
+        e.preventDefault();
+@* 
+        // Lockout check
+        if (isLockedOut()) {
+            showError("Account temporarily locked. Please wait.");
+            return;
+        } *@
+
+        // Kendo Validator
+        if (!validator.validate()) {
+            showError("Please fix the errors before submitting.");
+            return;
+        }
+
+        @* // CAPTCHA must be verified
+        if (!captchaToken) {
+            showWarning("Please complete the CAPTCHA verification.");
+            return;
+        } *@
+
+        var btn = $("#loginBtn");
+        btn.prop("disabled", true).text("Signing In...");
+
+        $.ajax({
+            url:         "http://localhost:5183/api/AuthApi/UserLogin/",
+            type:        "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                c_Email:    $("#c_Email").val().trim().toLowerCase(),
+                c_Password: $("#c_Password").data("kendoTextBox").value(),
+                @* g_recaptcha_response: captchaToken   // API se server-side verify karo *@
+            }),
+            success: function (res) {
+                btn.prop("disabled", false).text("Sign In");
+
+                // Fail counter reset
+                sessionStorage.removeItem("loginFails");
+                sessionStorage.removeItem("lockoutUntil");
+
+                @* // JWT token localStorage mein store karo
+                if (res.token) {
+                    localStorage.setItem("artify_token", res.token);
+                    localStorage.setItem("artify_user",  JSON.stringify(res.user));
+                } *@
+
+                showSuccess(res.message || "Login successful!");
+
+                setTimeout(function () {
+                    window.location.href = "/Home/Landingpage";
+                }, 1200);
+            },
+            error: function (err) {
+                btn.prop("disabled", false).text("Sign In");
+
+                @* // Reset reCAPTCHA — token ek baar hi valid hota hai
+                if (window.grecaptcha) grecaptcha.reset();
+                captchaToken = "";
+
+                // Increment fail counter
+                failedAttempts++;
+                sessionStorage.setItem("loginFails", failedAttempts);
+
+                if (failedAttempts >= MAX_ATTEMPTS) {
+                    lockoutUntil = Date.now() + LOCKOUT_SECS * 1000;
+                    sessionStorage.setItem("lockoutUntil", lockoutUntil);
+                    startLockoutCountdown();
+                } *@
+
+                var msg = "Invalid email or password";
+                if (err.responseJSON && err.responseJSON.message) msg = err.responseJSON.message;
+                else if (err.responseText) msg = err.responseText;
+                showError(msg);
+            }
+        });
+    });
+
+ 
+}); // end document.ready
+</script>
+}
