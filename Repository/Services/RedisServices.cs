@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using StackExchange.Redis;
 using System.Text.Json;
+using StackExchange.Redis;
 
 namespace Repository.Services
 {
@@ -14,10 +10,11 @@ namespace Repository.Services
 
         private const string Prefix = "admin_artworks_";
 
-        public RedisService(IDatabase db, IConnectionMultiplexer mux)
+        // ✅ FIXED CONSTRUCTOR
+        public RedisService(IConnectionMultiplexer mux)
         {
-            _db = db;
             _mux = mux;
+            _db = _mux.GetDatabase(); // ✅ correct way
         }
 
         // 🔹 GET DATA
@@ -52,10 +49,12 @@ namespace Repository.Services
         // 🔥 CLEAR ALL ADMIN ARTWORK CACHE
         public async Task ClearAdminArtworkCacheAsync()
         {
-            var servers = _mux.GetServers();
+            var endpoints = _mux.GetEndPoints();
 
-            foreach (var server in servers)
+            foreach (var endpoint in endpoints)
             {
+                var server = _mux.GetServer(endpoint);
+
                 await foreach (var key in server.KeysAsync(pattern: $"{Prefix}*"))
                 {
                     await _db.KeyDeleteAsync(key);

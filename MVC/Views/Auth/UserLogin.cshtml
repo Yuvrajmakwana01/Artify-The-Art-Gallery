@@ -627,7 +627,7 @@ $(function () {
                 showSuccess(res.message || "Login successful!");
 
                 setTimeout(function () {
-                    window.location.href = "/Home/Landingpage";
+                    window.location.href = "/Buyer/EditProfile";  // Redirect to buyer dashboard after login
                 }, 1200);
             },
             error: function (err) {

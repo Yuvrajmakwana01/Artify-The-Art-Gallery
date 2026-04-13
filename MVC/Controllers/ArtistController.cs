@@ -1,77 +1,36 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
-namespace MVC.Controllers
+namespace MVC.Controllers;
+
+public class ArtistController : Controller
 {
-    // [Route("[controller]")]
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public class ArtistController : Controller
+    private IActionResult? Guard()
     {
-        private readonly ILogger<ArtistController> _logger;
+        if (string.IsNullOrEmpty(HttpContext.Session.GetString("ArtistToken")))
+            return RedirectToAction("Login");
 
-        public ArtistController(ILogger<ArtistController> logger)
-        {
-            _logger = logger;
-        }
+        return null;
+    }
 
-        public IActionResult Register()
-        {
-            return View();
-        }
-         public IActionResult Sales()
-        {
-            return View();
-        }
-          public IActionResult Profile()
-        {
-            return View();
-        }
-        public IActionResult EditProfile()
-        {
-            ViewBag.ArtistId = 1;
-            return View();
-        }
+    public IActionResult Login() => View();
+    public IActionResult Register() => View();
 
-        public IActionResult DashBod()
-        {
-            return View();
-        }
+    public IActionResult Dashboard()
+    {
+        var g = Guard();
+        if (g != null) return g;
+        return View();
+    }
 
-        public IActionResult Login()
-        {
-            return View();
-        }
+    public IActionResult Upload() => View();
+    public IActionResult Gallery() => View();
+    public IActionResult Profile() => View();
+    public IActionResult EditProfile() => View();
+    public IActionResult Sales() => View();
 
-
-        public IActionResult Upload()
-        {
-            return View();
-        }
-
-
-        public IActionResult Gallery()
-        {
-            return View();
-        }
-
-
-        public IActionResult Logout()
-        {
-            // Clear all session data
-            HttpContext.Session.Clear();
-
-            return RedirectToAction("Login", "Artist");
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View("Error!");
-        }
+    public IActionResult Logout()
+    {
+        HttpContext.Session.Clear();
+        return RedirectToAction("Login");
     }
 }

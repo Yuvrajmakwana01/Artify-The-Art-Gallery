@@ -4,39 +4,64 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using Npgsql;
-using Repository;
-using Repository.Implementations;
-using Repository.Interfaces;
 using StackExchange.Redis;
-using Repository.Services;
-using Repository.Implementations;
+
 using Repository.Interfaces;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.AspNetCore.Authentication.Google;
+using Repository.Implementations;
+using Repository.Services;
+using Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// =========================
+// Controllers
+// =========================
 builder.Services.AddControllers();
 
+// =========================
+// Dependency Injection (Repositories)
+// =========================
 builder.Services.AddScoped<IAdmincategoiresInteface, AdminCategoriesRepository>();
 builder.Services.AddScoped<IAdminUsersInterface, AdminUsersRepository>();
 builder.Services.AddScoped<IAdminArtistInterface, AdminArtistRepository>();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddScoped<IAdminInterface,AdminRepository>();
-// builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAdminInterface, AdminRepository>();
 builder.Services.AddScoped<IAuthInterface, AuthRepository>();
-
 builder.Services.AddScoped<IArtistInterface, ArtistRepository>();
+builder.Services.AddScoped<IArtworkInterface, ArtworkRepository>();
+builder.Services.AddScoped<IUserProfileInterface, UserProfileRepository>();
+builder.Services.AddScoped<IAdminArtworkInterface, AdminArtworkRepository>();
+builder.Services.AddScoped<IAdminOrderInterface, AdminOrdersRepository>();
 
+// =========================
+// Services
+// =========================
+builder.Services.AddScoped<AdminArtworkService>();
+builder.Services.AddSingleton<RabbitMQProducer>();
 
-// Swagger (ONLY ONCE)
+// ✅ FIXED Redis Registration
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var redisConnection = builder.Configuration.GetConnectionString("Redis");
+
+    if (string.IsNullOrEmpty(redisConnection))
+        throw new Exception("Redis connection string missing");
+
+    return ConnectionMultiplexer.Connect(redisConnection);
+});
+
+builder.Services.AddScoped<RedisService>();
+
+// =========================
+// Swagger
+// =========================
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.AddSecurityDefinition("token", new OpenApiSecurityScheme
     {
         Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
         Scheme = "Bearer",
+        BearerFormat = "JWT",
         In = ParameterLocation.Header,
         Name = HeaderNames.Authorization
     });
@@ -49,73 +74,41 @@ builder.Services.AddSwaggerGen(c =>
                     Id = "token"
                 }
             },
-            Array.Empty<string>()
+            new string[] {}
         }
     });
 });
 
-builder.Services.AddScoped<NpgsqlConnection>(conn =>
-{
-
-builder.Services.AddScoped<IArtistInterface, ArtistRepository>();
-builder.Services.AddScoped<IArtworkInterface, ArtworkRepository>();
-
+// =========================
 // PostgreSQL
-builder.Services.AddScoped<NpgsqlConnection>(conn =>
+// =========================
+builder.Services.AddScoped<NpgsqlConnection>(sp =>
 {
-    var configuration = conn.GetRequiredService<IConfiguration>();
-    var raw = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")?.Trim();
-    if (string.IsNullOrWhiteSpace(raw))
-    {
-        raw = configuration.GetConnectionString("pgconn")?.Trim();
-    }
-    if (string.IsNullOrWhiteSpace(raw))
-    {
-        raw = configuration.GetConnectionString("DefaultConnection")?.Trim();
-    }
+    var config = sp.GetRequiredService<IConfiguration>();
+    var connectionString = config.GetConnectionString("pgconn");
 
-    if (string.IsNullOrWhiteSpace(raw) ||
-        raw.Equals("your-postgres-connection", StringComparison.OrdinalIgnoreCase) ||
-        raw.Contains("YOUR_DB_USER", StringComparison.OrdinalIgnoreCase) ||
-        raw.Contains("REPLACE_WITH_YOUR_NEON_PASSWORD", StringComparison.OrdinalIgnoreCase) ||
-        raw.Contains("YOUR_REAL_NEON_PASSWORD", StringComparison.OrdinalIgnoreCase))
-    {
-        throw new InvalidOperationException("Set a valid PostgreSQL connection string. Use env var POSTGRES_CONNECTION_STRING or API/appsettings.json -> ConnectionStrings:pgconn");
-    }
+    if (string.IsNullOrEmpty(connectionString))
+        throw new Exception("DefaultConnection is missing in appsettings.json");
 
-    string connectionString;
-    if (raw.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) ||
-        raw.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
-    {
-        var uri = new Uri(raw);
-        var userInfo = uri.UserInfo.Split(':', 2);
-        if (userInfo.Length < 2)
-            throw new InvalidOperationException("Invalid PostgreSQL URL format. Expected: postgresql://user:password@host:port/database");
-
-        var database = uri.AbsolutePath.Trim('/');
-        connectionString = $"Host={uri.Host};Port={uri.Port};Database={database};Username={userInfo[0]};Password={Uri.UnescapeDataString(userInfo[1])};SSL Mode=Require;Trust Server Certificate=true";
-    }
-    else
-    {
-        connectionString = raw;
-    }
-
-    var connectionString = conn.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection");
     return new NpgsqlConnection(connectionString);
 });
 
-
-
-// CORS (FIXED)
+// =========================
+// CORS
+// =========================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("corsapp", policy =>
     {
-        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
 
-// JWT Authentication (FIXED SECURITY)
+// =========================
+// JWT Authentication
+// =========================
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -126,80 +119,53 @@ builder.Services.AddAuthentication(options =>
     options.RequireHttpsMetadata = false;
     options.SaveToken = true;
 
-    options.TokenValidationParameters = new TokenValidationParameters()
+    options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
-        ValidateLifetime = true, 
+        ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
 
-        ValidAudience = builder.Configuration["Jwt:Audience"],
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
         )
     };
-})
-;
+});
 
-// // Redis
-// builder.Services.AddScoped<IConnectionMultiplexer>(sp =>
-// {
-//     var config = sp.GetRequiredService<IConfiguration>();
-//     var redisConn = config.GetConnectionString("Redis");
-
-//     if (string.IsNullOrEmpty(redisConn))
-//         throw new InvalidOperationException("Redis connection string missing");
-
-//     return ConnectionMultiplexer.Connect(redisConn);
-// });
-
-// // Redis DB
-// builder.Services.AddScoped<IDatabase>(sp =>
-// {
-//     var mux = sp.GetRequiredService<IConnectionMultiplexer>();
-//     return mux.GetDatabase();
-// });
-
-// // Cache
-// builder.Services.AddStackExchangeRedisCache(options =>
-// {
-//     options.Configuration = builder.Configuration.GetConnectionString("Redis");
-//     options.InstanceName = "Session_";
-// });
-// Cache
+// =========================
+// Redis Cache (Optional)
+// =========================
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = builder.Configuration.GetConnectionString("Redis")+ ",defaultDatabase=0";
+    var redis = builder.Configuration.GetConnectionString("Redis");
+
+    if (string.IsNullOrEmpty(redis))
+        throw new Exception("Redis connection string missing");
+
+    options.Configuration = redis;
     options.InstanceName = "Session_";
 });
 
+// =========================
 // Session
-// builder.Services.AddSession(options =>
-// {
-//     options.IdleTimeout = TimeSpan.FromMinutes(30);
-//     options.Cookie.HttpOnly = true;
-//     options.Cookie.IsEssential = true;
-// });
+// =========================
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
-builder.Services.AddScoped<IUserProfileInterface,UserProfileRepository>();
-// ── Repository ───────────────────────────────────────────────────────────
-builder.Services.AddScoped<IAdminArtworkInterface, AdminArtworkRepository>();
-builder.Services.AddScoped<IAuthInterface, AuthRepository>();
-
-// ── Services ─────────────────────────────────────────────────────────────
-builder.Services.AddScoped<AdminArtworkService>();
-builder.Services.AddSingleton<RabbitMQProducer>();
-builder.Services.AddScoped<RedisService>();
-
-
-
+// =========================
+// Build App
+// =========================
 var app = builder.Build();
 
 // =========================
-// Middleware (ORDER FIXED)
+// Middleware
 // =========================
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -208,19 +174,20 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors("corsapp");
-
-app.UseSession();           // ✅ first
-app.UseAuthentication();
-app.UseAuthorization();
-
-// app.UseSession();
-app.UseSession();
-app.UseAuthentication();
-app.UseAuthorization();
-
 app.UseStaticFiles();
 
+app.UseCors("corsapp");
+
+app.UseSession();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+// ✅ FIXED: Default route to avoid 404 on "/"
+app.MapGet("/", () => "Artify API is running 🚀");
+
+// Controllers
 app.MapControllers();
 
 app.Run();
+

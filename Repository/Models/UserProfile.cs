@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace Repository.Models
 {
@@ -12,10 +13,10 @@ namespace Repository.Models
         public string? c_Email { get; set; }
         public string? c_FullName { get; set; }
         public string? c_Mobile { get; set; }
-        public string? c_Address { get; set; }
         public string? c_Gender { get; set; }
         public string? c_Image { get; set; }
-        public string? c_PreferredStyles { get; set; }
         public DateTime? c_CreatedAt { get; set; }
+
+        public IFormFile? c_ImageFile { get; set; }
     }
 }

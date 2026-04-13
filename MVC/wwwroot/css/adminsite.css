@@ -1,8 +1,13 @@
 *, *::before, *::after { box-sizing: border-box; }
 
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
 :root {
     --sidebar-width: 220px;
-    --topbar-height: 52px;
+    --topbar-height: 60px;
     --accent:        #ff6b35;
     --accent-light:  #fff0eb;
     --accent-hover:  #fff5f2;
@@ -16,7 +21,7 @@
 
 body {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 14px;
     background: var(--page-bg);
     font-family: 'Segoe UI', sans-serif;
 }
@@ -31,7 +36,6 @@ body {
     display: flex;
     flex-direction: column;
     z-index: 300;
-    overflow: hidden;
 }
 
 /* Brand */
@@ -39,9 +43,8 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 18px 16px 14px;
+    padding: 18px 16px;
     border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
 }
 
 .sidebar-logo {
@@ -51,29 +54,31 @@ body {
     display: flex; align-items: center; justify-content: center;
     font-size: 18px;
     color: #fff;
-    flex-shrink: 0;
 }
 
 .sidebar-brand-text { display: flex; flex-direction: column; }
 .sidebar-brand-name { font-size: 15px; font-weight: 600; color: var(--text-dark); }
-.sidebar-brand-tag  { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+.sidebar-brand-tag  { font-size: 10px; color: var(--text-muted); }
 
-/* Section labels */
+/* Sidebar layout fix */
+.sidebar-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Section label */
 .nav-section-label {
-    display: block;
     font-size: 10px;
     font-weight: 600;
     color: #aab;
-    letter-spacing: 1px;
-    text-transform: uppercase;
     padding: 14px 18px 4px;
-    flex-shrink: 0;
+    text-transform: uppercase;
 }
 
-/* Nav links */
+/* Nav */
 .sidebar-nav {
     padding: 4px 10px;
-    margin-bottom: 0;
 }
 
 .sidebar-nav .nav-link {
@@ -83,17 +88,13 @@ body {
     padding: 9px 12px;
     border-radius: 8px;
     color: var(--text-body);
-    font-weight: 400;
     font-size: 13.5px;
-    margin-bottom: 2px;
-    transition: background 0.15s, color 0.15s;
+    transition: 0.2s;
 }
 
 .sidebar-nav .nav-link i {
     font-size: 15px;
     width: 18px;
-    text-align: center;
-    flex-shrink: 0;
 }
 
 .sidebar-nav .nav-link:hover {
@@ -107,115 +108,103 @@ body {
     font-weight: 500;
 }
 
-/* User footer */
-.sidebar-user {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 16px;
-    border-top: 1px solid var(--border);
+/* Push account section bottom */
+.mt-auto {
     margin-top: auto;
-    flex-shrink: 0;
 }
-
-.sidebar-avatar {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    background: var(--accent);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 600; color: #fff;
-    flex-shrink: 0;
-}
-
-.sidebar-user-info { display: flex; flex-direction: column; }
-.sidebar-user-name { font-size: 12.5px; font-weight: 500; color: var(--text-dark); }
-.sidebar-user-role { font-size: 10px; color: var(--text-muted); }
 
 /* ─── MAIN WRAPPER ────────────────────────────── */
 .main-wrapper {
-    margin-left: var(--sidebar-width);
+     margin-left: var(--sidebar-width);
+    margin-top: 0;   /* ADD THIS */
+    padding-top: 0;  /* ADD THIS */
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 }
 
-/* ─── TOPBAR ──────────────────────────────────── */
+/* ─── TOPBAR (FIXED CLEAN VERSION) ───────────── */
 .topbar {
     position: sticky;
     top: 0;
+    margin-top: 0;   /* ADD THIS */
     height: var(--topbar-height);
     background: var(--white);
     border-bottom: 1px solid var(--border);
+
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 24px;
+
+    padding: 0 20px;
     z-index: 200;
+
 }
 
-.topbar-search {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
-    padding: 7px 14px;
-    font-size: 13px;
-    color: var(--text-muted);
-    width: 220px;
+/* LEFT EMPTY SPACE */
+.topbar-left {
+    flex: 1;
 }
 
-.topbar-search input {
-    border: none;
-    background: transparent;
-    outline: none;
-    font-size: 13px;
-    color: var(--text-dark);
-    width: 100%;
-}
-
-.topbar-search input::placeholder { color: var(--text-muted); }
-.topbar-search i { font-size: 13px; }
-
+/* RIGHT SIDE */
 .topbar-actions {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
+/* ICON BUTTON */
 .icon-btn {
-    width: 34px; height: 34px;
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
-    background: #f8f9fa;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 15px;
-    color: var(--text-body);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid #eee;
+    background: #f9fafb;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 16px;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: 0.2s;
 }
 
-.icon-btn:hover { background: #e9ecef; }
+.icon-btn:hover {
+    background: #f1f5f9;
+}
 
-/* notification dot */
+/* Notification dot */
 .notif-dot {
     position: absolute;
-    top: 6px; right: 6px;
-    width: 7px; height: 7px;
+    top: 6px;
+    right: 6px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: var(--accent);
-    border: 1.5px solid #fff;
+    border: 2px solid #fff;
 }
 
+/* Avatar */
 .topbar-avatar {
-    width: 34px; height: 34px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background: var(--accent);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 600;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 12px;
+    font-weight: 600;
     color: #fff;
     cursor: pointer;
+}
+
+.topbar-avatar:hover {
+    opacity: 0.9;
 }
 
 /* ─── CONTENT ─────────────────────────────────── */
@@ -224,17 +213,18 @@ body {
     padding: 28px;
 }
 
-/* ─── STAT CARDS (tinted top row) ─────────────── */
-.card-sales    { background: #fff0eb; border: none; }
-.card-purchase { background: #edfaf4; border: none; }
-.card-expenses { background: #e8f4fd; border: none; }
-.card-invoice  { background: #fdf8e8; border: none; }
+/* ─── STAT CARDS ─────────────────────────────── */
+.card-sales    { background: #fff0eb; }
+.card-purchase { background: #edfaf4; }
+.card-expenses { background: #e8f4fd; }
+.card-invoice  { background: #fdf8e8; }
 
 .card-icon {
     width: 38px; height: 38px;
     border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 18px; color: #fff;
+    font-size: 18px;
+    color: #fff;
     margin-bottom: 10px;
 }
 
@@ -243,10 +233,10 @@ body {
 .icon-expenses { background: #38bdf8; }
 .icon-invoice  { background: #f59e0b; }
 
-.card-label { font-size: 12px; color: #666; margin-bottom: 4px; }
-.card-value { font-size: 22px; font-weight: 700; color: var(--text-dark); }
+.card-label { font-size: 12px; color: #666; }
+.card-value { font-size: 22px; font-weight: 700; }
 
-/* ─── WHITE STAT CARDS (mid row) ─────────────── */
+/* ─── STAT WHITE CARDS ───────────────────────── */
 .stat-card {
     background: var(--white);
     border: 1px solid var(--border);
@@ -254,12 +244,7 @@ body {
     padding: 18px;
 }
 
-/* ─── CHANGE INDICATORS ───────────────────────── */
-.change-up   { color: #22c55e; font-size: 12px; }
-.change-down { color: #ef4444; font-size: 12px; }
-.view-link   { color: var(--accent); font-size: 12px; text-decoration: underline; cursor: pointer; }
-
-/* ─── FOOTER ──────────────────────────────────── */
+/* ─── FOOTER ─────────────────────────────────── */
 .site-footer {
     background: var(--white);
     border-top: 1px solid var(--border);
