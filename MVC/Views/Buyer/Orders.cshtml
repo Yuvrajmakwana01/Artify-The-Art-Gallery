@@ -1,0 +1,362 @@
+@{
+    ViewBag.Title = "Order History";
+    Layout = "~/Views/Shared/_BuyerLayout.cshtml";
+}
+
+<style>
+    :root {
+        --bg: hsl(40, 33%, 96%);
+        --fg: hsl(30, 10%, 15%);
+        --card: hsl(40, 30%, 98%);
+        --primary: hsl(30, 30%, 30%);
+        --primary-fg: hsl(40, 33%, 96%);
+        --muted: hsl(35, 20%, 92%);
+        --muted-fg: hsl(30, 8%, 50%);
+        --accent: hsl(30, 40%, 82%);
+        --border: hsl(35, 20%, 87%);
+        --warm: hsl(32, 45%, 70%);
+        --success: hsl(145, 50%, 40%);
+        --warning: hsl(38, 90%, 55%);
+        --warning-fg: hsl(30, 15%, 15%);
+        --destructive: hsl(0, 65%, 55%);
+    }
+
+    .orders-page { max-width: 900px; margin: 0 auto; font-family: 'Inter', sans-serif; }
+    .orders-page h1, .orders-page h2, .orders-page h3 { font-family: 'Playfair Display', serif; }
+
+    .orders-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+    .orders-header h2 { font-size: 32px; font-weight: 700; color: var(--fg); margin: 0; }
+    .orders-header p { color: var(--muted-fg); margin: 4px 0 0; font-size: 14px; }
+    .orders-stats { display: flex; gap: 24px; }
+    .orders-stat { text-align: right; }
+    .orders-stat-value { font-size: 24px; font-weight: 700; }
+    .orders-stat-value.total { color: var(--fg); }
+    .orders-stat-value.spent { color: var(--success); }
+    .orders-stat-label { font-size: 12px; color: var(--muted-fg); }
+
+    .order-filters { display: flex; gap: 8px; margin-bottom: 32px; overflow-x: auto; padding-bottom: 4px; }
+    .filter-btn {
+        padding: 8px 16px; border-radius: 20px; border: none;
+        font-size: 14px; font-weight: 500; cursor: pointer;
+        white-space: nowrap; transition: all 0.2s;
+    }
+    .filter-btn.active { background: var(--primary); color: var(--primary-fg); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .filter-btn:not(.active) { background: hsla(30,40%,82%,0.4); color: var(--muted-fg); }
+    .filter-btn:not(.active):hover { background: var(--accent); color: var(--fg); }
+    .filter-count { margin-left: 6px; font-size: 12px; opacity: 0.7; }
+
+    .order-card {
+        background: var(--card);
+        border: 1px solid hsla(35,20%,87%,0.6);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        margin-bottom: 16px;
+        transition: all 0.3s;
+        cursor: pointer;
+        text-decoration: none;
+        display: block;
+        color: inherit;
+    }
+    .order-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-color: hsla(30,30%,30%,0.3);
+        transform: translateY(-2px);
+    }
+    .order-card-inner { display: flex; align-items: stretch; }
+    .order-card-preview {
+        width: 96px; display: none; align-items: center; justify-content: center;
+        background: linear-gradient(135deg, hsla(30,40%,82%,0.4), hsla(32,45%,70%,0.2));
+    }
+    .order-card-preview .preview-icon {
+        width: 56px; height: 56px; border-radius: 12px;
+        background: hsla(40,30%,98%,0.6);
+        display: flex; align-items: center; justify-content: center;
+        backdrop-filter: blur(4px);
+    }
+    .order-card-preview .k-icon { font-size: 24px; color: var(--muted-fg); }
+    .order-card-content { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 20px; gap: 16px; }
+    .order-card-info { flex: 1; min-width: 0; }
+    .order-id-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+    .order-id { font-size: 16px; font-weight: 600; color: var(--fg); }
+
+    .status-badge {
+        display: inline-flex; align-items: center; gap: 4px;
+        padding: 2px 10px; border-radius: 20px;
+        font-size: 12px; font-weight: 500; border: 1px solid;
+    }
+    .status-delivered { background: hsla(145,50%,40%,0.1); color: var(--success); border-color: hsla(145,50%,40%,0.2); }
+    .status-processing { background: hsla(38,90%,55%,0.1); color: var(--warning-fg); border-color: hsla(38,90%,55%,0.2); }
+    .status-failed { background: hsla(0,65%,55%,0.1); color: var(--destructive); border-color: hsla(0,65%,55%,0.2); }
+
+    .order-preview-text { font-size: 14px; color: var(--muted-fg); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .order-meta { display: flex; align-items: center; gap: 16px; font-size: 12px; color: var(--muted-fg); flex-wrap: wrap; }
+    .order-meta-item { display: flex; align-items: center; gap: 4px; }
+    .order-meta-item .k-icon { font-size: 12px; }
+
+    .order-card-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .order-total { font-size: 18px; font-weight: 700; color: var(--fg); }
+    .order-chevron { font-size: 20px; color: var(--muted-fg); transition: transform 0.3s, color 0.3s; }
+    .order-card:hover .order-chevron { transform: translateX(4px); color: var(--primary); }
+
+    .empty-state { text-align: center; padding: 64px 0; }
+    .empty-icon { font-size: 64px; color: hsla(30,8%,50%,0.4); }
+    .empty-text { font-size: 18px; font-weight: 500; color: var(--muted-fg); margin-top: 16px; }
+
+    @@media (min-width: 640px) {
+        .order-card-preview { display: flex; }
+    }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<div class="orders-page">
+    <!-- Header -->
+    <div class="orders-header">
+        <div>
+            <h2>Order History</h2>
+            <p>Track and manage your artwork purchases</p>
+        </div>
+        <div class="orders-stats">
+            <div class="orders-stat">
+                <div class="orders-stat-value total">5</div>
+                <div class="orders-stat-label">Total Orders</div>
+            </div>
+            <div class="orders-stat">
+                <div class="orders-stat-value spent">$454</div>
+                <div class="orders-stat-label">Total Spent</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="order-filters">
+        <button class="filter-btn active" onclick="filterOrders('All', this)">All</button>
+        <button class="filter-btn" onclick="filterOrders('Delivered', this)">Delivered <span class="filter-count">(3)</span></button>
+        <button class="filter-btn" onclick="filterOrders('Processing', this)">Processing <span class="filter-count">(1)</span></button>
+        <button class="filter-btn" onclick="filterOrders('Failed', this)">Failed <span class="filter-count">(1)</span></button>
+    </div>
+
+    <!-- Orders List -->
+    <div id="ordersList">
+
+        <!-- Order 1: ART-20260301 - Delivered -->
+        <a href="/Buyer/OrderDetail/ART-20260301" class="order-card" data-status="Delivered">
+            <div class="order-card-inner">
+                <div class="order-card-preview">
+                    <div class="preview-icon">
+                        <span class="k-icon k-i-image"></span>
+                    </div>
+                </div>
+                <div class="order-card-content">
+                    <div class="order-card-info">
+                        <div class="order-id-row">
+                            <span class="order-id">ART-20260301</span>
+                            <span class="status-badge status-delivered">
+                                <span class="k-icon k-i-check-circle" style="font-size:12px;"></span>
+                                Delivered
+                            </span>
+                        </div>
+                        <div class="order-preview-text">Ethereal Bloom, Neon Cascade</div>
+                        <div class="order-meta">
+                            <span class="order-meta-item">
+                                <span class="k-icon k-i-calendar"></span> March 1, 2026
+                            </span>
+                            <span class="order-meta-item">
+                                <span class="k-icon k-i-cart"></span> 2 items
+                            </span>
+                            <span class="order-meta-item">
+                                by Maya Chen, Liam Torres
+                            </span>
+                        </div>
+                    </div>
+                    <div class="order-card-right">
+                        <span class="order-total">$249.99</span>
+                        <span class="k-icon k-i-arrow-chevron-right order-chevron"></span>
+                    </div>
+                </div>
+            </div>
+        </a>
+
+        <!-- Order 2: ART-20260215 - Delivered -->
+        <a href="/Buyer/OrderDetail/ART-20260215" class="order-card" data-status="Delivered">
+            <div class="order-card-inner">
+                <div class="order-card-preview">
+                    <div class="preview-icon">
+                        <span class="k-icon k-i-image"></span>
+                    </div>
+                </div>
+                <div class="order-card-content">
+                    <div class="order-card-info">
+                        <div class="order-id-row">
+                            <span class="order-id">ART-20260215</span>
+                            <span class="status-badge status-delivered">
+                                <span class="k-icon k-i-check-circle" style="font-size:12px;"></span>
+                                Delivered
+                            </span>
+                        </div>
+                        <div class="order-preview-text">Abstract Horizons</div>
+                        <div class="order-meta">
+                            <span class="order-meta-item">
+                                <span class="k-icon k-i-calendar"></span> February 15, 2026
+                            </span>
+                            <span class="order-meta-item">
+                                <span class="k-icon k-i-cart"></span> 1 item
+                            </span>
+                            <span class="order-meta-item">
+                                by Anika Patel
+                            </span>
+                        </div>
+                    </div>
+                    <div class="order-card-right">
+                        <span class="order-total">$129.00</span>
+                        <span class="k-icon k-i-arrow-chevron-right order-chevron"></span>
+                    </div>
+                </div>
+            </div>
+        </a>
+
+        <!-- Order 3: ART-20260202 - Processing -->
+        <a href="/Buyer/OrderDetail/ART-20260202" class="order-card" data-status="Processing">  
+            <div class="order-card-inner">
+                <div class="order-card-preview">
+                    <div class="preview-icon">
+                        <span class="k-icon k-i-image"></span>
+                    </div>
+                </div>
+                <div class="order-card-content">
+                    <div class="order-card-info">
+                        <div class="order-id-row">
+                            <span class="order-id">ART-20260202</span>
+                            <span class="status-badge status-processing">
+                                <span class="k-icon k-i-clock" style="font-size:12px;"></span>
+                                Processing
+                            </span>
+                        </div>
+                        <div class="order-preview-text">Sunset Mosaic, Urban Dreams, Pixel Forest</div>
+                        <div class="order-meta">
+                            <span class="order-meta-item">
+                                <span class="k-icon k-i-calendar"></span> February 2, 2026
+                            </span>
+                            <span class="order-meta-item">
+                                <span class="k-icon k-i-cart"></span> 3 items
+                            </span>
+                            <span class="order-meta-item">
+                                by Ryo Nakamura, Elena Vasquez +1
+                            </span>
+                        </div>
+                    </div>
+                    <div class="order-card-right">
+                        <span class="order-total">$389.50</span>
+                        <span class="k-icon k-i-arrow-chevron-right order-chevron"></span>
+                    </div>
+                </div>
+            </div>
+        </a>
+
+        <!-- Order 4: ART-20260118 - Delivered -->
+        <a href="/Buyer/OrderDetail/ART-20260118" class="order-card" data-status="Delivered">
+            <div class="order-card-inner">
+                <div class="order-card-preview">
+                    <div class="preview-icon">
+                        <span class="k-icon k-i-image"></span>
+                    </div>
+                </div>
+                <div class="order-card-content">
+                    <div class="order-card-info">
+                        <div class="order-id-row">
+                            <span class="order-id">ART-20260118</span>
+                            <span class="status-badge status-delivered">
+                                <span class="k-icon k-i-check-circle" style="font-size:12px;"></span>
+                                Delivered
+                            </span>
+                        </div>
+                        <div class="order-preview-text">Cosmic Waves</div>
+                        <div class="order-meta">
+                            <span class="order-meta-item">
+                                <span class="k-icon k-i-calendar"></span> January 18, 2026
+                            </span>
+                            <span class="order-meta-item">
+                                <span class="k-icon k-i-cart"></span> 1 item
+                            </span>
+                            <span class="order-meta-item">
+                                by Maya Chen
+                            </span>
+                        </div>
+                    </div>
+                    <div class="order-card-right">
+                        <span class="order-total">$75.00</span>
+                        <span class="k-icon k-i-arrow-chevron-right order-chevron"></span>
+                    </div>
+                </div>
+            </div>
+        </a>
+
+        <!-- Order 5: ART-20260105 - Failed -->
+        <a href="/Buyer/OrderDetail/ART-20260105" class="order-card" data-status="Failed">
+            <div class="order-card-inner">
+                <div class="order-card-preview">
+                    <div class="preview-icon">
+                        <span class="k-icon k-i-image"></span>
+                    </div>
+                </div>
+                <div class="order-card-content">
+                    <div class="order-card-info">
+                        <div class="order-id-row">
+                            <span class="order-id">ART-20260105</span>
+                            <span class="status-badge status-failed">
+                                <span class="k-icon k-i-close-circle" style="font-size:12px;"></span>
+                                Failed
+                            </span>
+                        </div>
+                        <div class="order-preview-text">Midnight Garden</div>
+                        <div class="order-meta">
+                            <span class="order-meta-item">
+                                <span class="k-icon k-i-calendar"></span> January 5, 2026
+                            </span>
+                            <span class="order-meta-item">
+                                <span class="k-icon k-i-cart"></span> 1 item
+                            </span>
+                            <span class="order-meta-item">
+                                by Sofia Reyes
+                            </span>
+                        </div>
+                    </div>
+                    <div class="order-card-right">
+                        <span class="order-total">$95.00</span>
+                        <span class="k-icon k-i-arrow-chevron-right order-chevron"></span>
+                    </div>
+                </div>
+            </div>
+        </a>
+
+    </div>
+
+    <div id="emptyState" class="empty-state" style="display:none;">
+        <span class="k-icon k-i-cart empty-icon"></span>
+        <p class="empty-text">No orders found</p>
+    </div>
+</div>
+
+<script>
+    function filterOrders(status, btn) {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        var cards = document.querySelectorAll('.order-card');
+        var visible = 0;
+        cards.forEach(function (card) {
+            if (status === 'All' || card.getAttribute('data-status') === status) {
+                card.style.display = '';
+                visible++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        document.getElementById('emptyState').style.display = visible === 0 ? '' : 'none';
+        if (visible === 0) {
+            document.querySelector('.empty-text').textContent = 'No ' + status.toLowerCase() + ' orders found';
+        }
+    }
+</script>

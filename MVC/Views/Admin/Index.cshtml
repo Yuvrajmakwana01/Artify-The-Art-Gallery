@@ -2,5 +2,770 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
-    
+  Layout = "../Shared/_AdminLayout.cshtml" ;
 }
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Art Marketplace Dashboard</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f4f5f7;
+      --card: #ffffff;
+      --border: #e8eaed;
+      --text-primary: #111827;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --accent-orange: #f97316;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-gold: #f59e0b;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+      --radius: 14px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    /* ── Top bar ── */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+    .top-bar h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+    .top-bar p  { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+    .top-bar-actions { display: flex; gap: 10px; align-items: center; }
+
+    .btn-date {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border: 1.5px solid var(--border);
+      border-radius: 8px; background: var(--card); font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text-primary);
+    }
+    .btn-date svg { color: var(--text-secondary); }
+
+    .btn-export {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border: none;
+      border-radius: 8px; background: var(--accent-orange);
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+      cursor: pointer; color: #fff;
+    }
+
+    /* ── Stats Grid ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      position: relative;
+    }
+
+    .stat-top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .stat-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .icon-blue   { background: #eff6ff; }
+    .icon-purple { background: #f5f3ff; }
+    .icon-orange { background: #fff7ed; }
+    .icon-red    { background: #fef2f2; }
+    .icon-green  { background: #f0fdf4; }
+
+    .stat-badge {
+      font-size: 11.5px; font-weight: 600; border-radius: 5px;
+      padding: 2px 7px;
+    }
+    .badge-up   { background: #dcfce7; color: #16a34a; }
+    .badge-down { background: #fee2e2; color: #dc2626; }
+
+    .stat-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 2px; }
+    .stat-value { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+
+    /* ── Main row ── */
+    .main-row {
+      margin-bottom: 16px;
+    }
+    .middle-row{
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      @* padding: 20px; *@
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      padding: 24px;
+    }
+
+    .card-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .card-title { font-size: 15px; font-weight: 700; }
+    .card-sub   { font-size: 12px; color: var(--text-secondary); margin-bottom: 14px; }
+
+    /* Chart */
+  #sales-chart {
+    width: 100%;
+    height: 320px; /* increased height */
+    margin-top: 10px;
+}
+
+    .chart-period-btn {
+      display: flex; align-items: center; gap: 4px;
+      padding: 5px 10px; border: 1.5px solid var(--border);
+      border-radius: 7px; background: var(--card); font-family: 'DM Sans', sans-serif;
+      font-size: 12px; font-weight: 500; cursor: pointer;
+    }
+
+    /* Recent Activity */
+    .activity-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 14px;
+    }
+    .view-all { font-size: 12px; font-weight: 600; color: var(--accent-orange); cursor: pointer; text-decoration: none; }
+
+    .activity-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .activity-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .act-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; flex-shrink: 0; margin-top: 1px;
+    }
+    .act-blue   { background: #eff6ff; }
+    .act-purple { background: #f5f3ff; }
+    .act-gold   { background: #fffbeb; }
+    .act-green  { background: #f0fdf4; }
+
+    .act-title  { font-size: 13px; font-weight: 600; }
+    .act-desc   { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+    .act-time   { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
+
+    /* ── Bottom row ── */
+    .bottom-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    #userPieChart {
+      height: 260px;
+    }
+    
+    #categoryChart {
+      height: 260px;
+    }
+
+    /* User Growth Chart */
+    #growth-chart { height: 180px; }
+
+    .growth-goal {
+     isplay: flex; align-items: center; gap: 4px;
+      padding: 5px 10px; border: 1.5px solid var(--border);
+      border-radius: 7px; background: var(--card); font-family: 'DM Sans', sans-serif;
+      font-size: 12px; font-weight: 500; cursor: pointer;
+    }
+    .goal-dot { width: 8px; height: 8px; background: var(--accent-orange); border-radius: 50%; }
+
+    /* Top Artists */
+    .artists-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 14px;
+    }
+    .dots-btn { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text-secondary); }
+
+    .artist-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .artist-item:last-child { border-bottom: none; }
+
+    .artist-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      object-fit: cover; flex-shrink: 0;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: #fff; font-weight: 700;
+    }
+
+    .artist-info { flex: 1; }
+    .artist-name  { font-size: 13px; font-weight: 600; }
+    .artist-genre { font-size: 12px; color: var(--text-secondary); }
+
+    .artist-stats { text-align: right; }
+    .artist-revenue { font-size: 14px; font-weight: 700; }
+    .artist-sales   { font-size: 11.5px; font-weight: 600; color: var(--accent-green); margin-top: 1px; }
+
+    /* Kendo overrides */
+    .k-chart { border: none !important; box-shadow: none !important; }
+  </style>
+</head>
+<body>
+
+<!-- ── Top Bar ── -->
+<div class="top-bar">
+  <div>
+    <h1>Dashboard Overview</h1>
+    <p>Manage your art marketplace performance at a glance.</p>
+  </div>
+  <div class="top-bar-actions">
+    <button class="btn-date">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Last 30 Days
+    </button>
+    <button class="btn-export">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export Report
+    </button>
+  </div>
+</div>
+
+<!-- ── Stats Grid ── -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-top">
+      <div class="stat-icon icon-blue">👥</div>
+      <span class="stat-badge badge-up">+12%</span>
+    </div>
+    <div class="stat-label">Total Users</div>
+    <div class="stat-value">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-top">
+      <div class="stat-icon icon-purple">🎨</div>
+      <span class="stat-badge badge-up">+5%</span>
+    </div>
+    <div class="stat-label">Total Artists</div>
+    <div class="stat-value">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-top">
+      <div class="stat-icon icon-orange">🖼️</div>
+      <span class="stat-badge badge-up">+8%</span>
+    </div>
+    <div class="stat-label">Total Artworks</div>
+    <div class="stat-value">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-top">
+      <div class="stat-icon icon-red">🛍️</div>
+      <span class="stat-badge badge-down">-2%</span>
+    </div>
+    <div class="stat-label">Total Sales</div>
+    <div class="stat-value">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-top">
+      <div class="stat-icon icon-green">💰</div>
+      <span class="stat-badge badge-up">+20%</span>
+    </div>
+    <div class="stat-label">Total Revenue</div>
+    <div class="stat-value">$0</div>
+  </div>
+</div>
+
+<!-- ── Main Row ── -->
+<div class="main-row">
+  <!-- Sales Trends -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Sales Trends</div>
+        <div class="card-sub">Revenue performance vs previous week</div>
+      </div>
+      
+      <select class="chart-period-btn" id="filter">
+    <option value="weekly">Weekly</option>
+    <option value="monthly">Monthly</option>
+    <option value="yearly">Yearly</option>
+     </select>
+    </div>
+    <div id="sales-chart"></div>
+  </div>
+</div>
+
+<!-- ── Bottom Row ── -->
+<div class="middle-row">
+  <!-- User Growth -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">User Growth</div>
+        <div class="card-sub">Weekly new member registrations</div>
+      </div>
+        <select class="growth-goal" id="growthType">
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+    </div>
+     <div id="userGrowthChart"></div>
+  </div>
+</div>
+<!-- ── New Row: Charts ── -->
+<div class="bottom-row">
+
+  <!-- User Split Pie Chart -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">User Distribution</div>
+        <div class="card-sub">Buyers vs Artists</div>
+      </div>
+    </div>
+    <div id="userPieChart"></div>
+  </div>
+
+  <!-- Top Selling Categories -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Top Categories</div>
+        <div class="card-sub">Most sold artworks</div>
+      </div>
+    </div>
+    <div id="categoryChart"></div>
+  </div>
+
+</div>
+
+<div class="bottom-row">
+   <!-- Top Performing Artists -->
+  <div class="card">
+    <div class="artists-header">
+      <div class="card-title">Top Performing Artists</div>
+      <button class="dots-btn">···</button>
+    </div>
+        <div id="topArtistsContainer"></div>
+    </div>
+  <!-- Recent Activity -->
+  <div class="card">
+    <div class="activity-header">
+      <div class="card-title">Recent Activity</div>
+      <a href="#" class="view-all">View All</a>
+    </div>
+      <div id="activityContainer"></div>
+   
+  </div>
+  
+</div>
+
+
+@section Scripts{
+   <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.2.616/styles/kendo.common.min.css" />
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.2.616/styles/kendo.default.min.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2021.2.616/js/kendo.all.min.js"></script>
+<script>
+
+  const API_BASE = "http://localhost:5183/api/AdminApi";
+
+$(document).ready(function () {
+
+    var type = $("#filter").val();
+
+   loadChart(type);
+   loadUserGrowthChart("weekly");
+   loadUserPieChart();
+   loadCategoryChart();
+   loadDashboardStats();
+   loadTopArtists();
+   loadRecentActivity();
+});
+
+function loadDashboardStats() 
+{ $.ajax({
+   url: API_BASE + "/dashboard", type: "GET",
+   success: function (data) { 
+      $(".stat-card").eq(0).find(".stat-value").text(data.c_TotalUsers);
+      $(".stat-card").eq(1).find(".stat-value").text(data.c_TotalArtists);
+      $(".stat-card").eq(2).find(".stat-value").text(data.c_TotalArts);
+      $(".stat-card").eq(3).find(".stat-value").text(data.c_TotalSales);
+      $(".stat-card").eq(4).find(".stat-value").text("$" + data.c_TotalRevenue);
+    },
+   error: function (err)
+      { 
+      console.error("Dashboard error", err);
+      } 
+  });
+ }
+
+function loadChart(type) {
+
+    $.ajax({
+        url: API_BASE + "/revenue?type=" + type.toUpperCase(),
+        type: "GET",
+        success: function (res) {
+            console.log(res);
+            let result = {
+                categories: [],
+                gross: [],
+                platform: [],
+                artist: []
+            };
+
+            res.forEach(item => {
+                result.categories.push(item.label);
+                result.gross.push(item.grossRevenue);
+                result.platform.push(item.platformRevenue);
+                result.artist.push(item.artistRevenue);
+            });
+
+            renderChart(result);
+        },
+        error: function (err) {
+            console.log(err);
+        }
+    });
+}
+
+function renderChart(result) {
+
+    $("#sales-chart").data("kendoChart")?.destroy();
+    $("#sales-chart").empty();
+
+    $("#sales-chart").kendoChart({
+        title: {
+            text: "Sales Trend"
+        },
+        seriesDefaults: {
+            type: "line",
+            markers: {
+                visible: true,
+                size: 5
+            }
+        },
+        series: [
+            {
+                name: "Gross Revenue",
+                data: result.gross,
+                width: 3
+            },
+            {
+                name: "Platform Revenue",
+                data: result.platform,
+                dashType: "dash"
+            },
+            {
+                name: "Artist Revenue",
+                data: result.artist,
+                dashType: "dot"
+            }
+        ],
+        categoryAxis: {
+            categories: result.categories
+        },
+        valueAxis: {
+            title: { text: "Revenue (₹)" }
+        },
+        tooltip: {
+            visible: true,
+            shared: true,   // 🔥 shows all values together
+            format: "₹{0}"
+        },
+        legend: {
+            position: "bottom"
+        },
+        transitions: true
+    });
+} 
+  
+function loadUserGrowthChart(type) {
+
+         $.ajax({
+        url: API_BASE + "/users-count?type=" + type.toUpperCase(),
+        type: "GET",
+        success: function (res) {
+          console.log(res)
+            let result = {
+                categories: [],
+                userCount: [],
+                artistCount: []
+            };
+
+            res.forEach(item => {
+                result.categories.push(item.label);
+                result.userCount.push(item.userCount);
+                result.artistCount.push(item.artistCount);
+            });
+
+            renderUserGrowthChart(result);
+        },
+        error: function (err) {
+            console.log(err);
+        }
+    });
+    }
+
+function renderUserGrowthChart(result) {
+
+    // 🔥 destroy old chart (important)
+    $("#userGrowthChart").data("kendoChart")?.destroy();
+    $("#userGrowthChart").empty();
+
+     $("#userGrowthChart").kendoChart({
+            title: {
+                text: "User Growth (Buyers vs Artists)"
+            },
+            legend: {
+                position: "top"
+            },
+            seriesDefaults: {
+                type: "column"   
+            },
+            series: [
+                {
+                    name: "Buyers",
+                    data: result.userCount
+                },
+                {
+                    name: "Artists",
+                    data: result.artistCount
+                }
+            ],
+            categoryAxis: {
+                categories: result.categories,
+                title: {
+                    text: "Time"
+                }
+            },
+            valueAxis: {
+                title: {
+                    text: "Users Count"
+                }
+            },
+            tooltip: {
+                visible: true,
+                format: "{0}"
+            }
+        });
+   
+} 
+  
+function loadUserPieChart() {
+
+    $.ajax({
+        url: API_BASE + "/total-count",
+        type: "GET",
+        success: function (res) {
+            console.log(res);
+            $("#userPieChart").kendoChart({
+                title: {
+                    text: "User Split"
+                },
+                series: [{
+                    type: "pie",
+                    data: [
+                        { category: "Buyers", value: res.userTotalCount },
+                        { category: "Artists", value: res.artistTotalCount }
+                    ]
+                }],
+                tooltip: {
+                    visible: true,
+                    template: "#= category #: #= value #"
+                },
+                legend: {
+                    position: "bottom"
+                }
+            });
+
+        },
+        error: function (err) {
+            console.log("Pie chart error", err);
+        }
+    });
+}
+
+function loadCategoryChart() {
+
+    $.ajax({
+        url: API_BASE + "/top-category",
+        type: "GET",
+        success: function (res) {
+            console.log(res);
+            let categories = [];
+            let data = [];
+
+            res.forEach(item => {
+                categories.push(item.category);
+                data.push(item.totalSales);
+            });
+
+            $("#categoryChart").kendoChart({
+                title: {
+                    text: "Top Selling Categories"
+                },
+                series: [{
+                    type: "bar",
+                    data: data
+                }],
+                categoryAxis: {
+                    categories: categories
+                },
+                tooltip: {
+                    visible: true
+                }
+            });
+
+        },
+        error: function (err) {
+            console.log("Category chart error", err);
+        }
+    });
+}
+
+function loadTopArtists() {
+    $.ajax({
+        url: API_BASE + "/top-artists", 
+        type: "GET",
+        success: function (data) {
+            let html = "";
+            console.log("data",data);
+            data.forEach((artist, index) => {
+
+                // First letter for avatar
+                let avatar = artist.name ? artist.name.charAt(0).toUpperCase() : "A";
+
+                html += `
+                    <div class="artist-item">
+                        <div class="artist-avatar">${avatar}</div>
+
+                        <div class="artist-info">
+                            <div class="artist-name">${artist.name}</div>
+                            <div class="artist-genre">Top Performer</div>
+                        </div>
+
+                        <div class="artist-stats">
+                            <div class="artist-revenue">₹ ${artist.totalRevenue.toLocaleString()}</div>
+                            <div class="artist-sales">${artist.totalSales} Sales</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            $("#topArtistsContainer").html(html);
+        },
+        error: function (err) {
+            console.error("Error loading top artists", err);
+        }
+    });
+  }
+
+function loadRecentActivity() {
+    $.ajax({
+        url: API_BASE+"/recent-activity", 
+        type: "GET",
+        success: function (data) {
+
+            let html = "";
+
+            data.forEach(activity => {
+
+                let iconClass = getIconClass(activity.activity_Type);
+                let iconEmoji = getIconEmoji(activity.activity_Type);
+                let timeAgo = formatTimeAgo(activity.created_At);
+
+                html += `
+                    <div class="activity-item">
+                        <div class="act-icon ${iconClass}">${iconEmoji}</div>
+                        <div>
+                            <div class="act-title">${activity.activity_Type}</div>
+                            <div class="act-desc">${activity.description}</div>
+                            <div class="act-time">${timeAgo}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            $("#activityContainer").html(html);
+        },
+        error: function (err) {
+            console.error("Error loading activity", err);
+        }
+    });
+}
+
+function getIconClass(type) {
+    switch (type?.toLowerCase()) {
+        case "sale": return "act-blue";
+        case "user": return "act-green";
+        case "artist": return "act-purple";
+        case "order": return "act-orange";
+        default: return "act-gray";
+    }
+}
+
+function getIconEmoji(type) {
+    switch (type?.toLowerCase()) {
+        case "sale": return "🛒";
+        case "user": return "👤";
+        case "artist": return "🎨";
+        case "order": return "📦";
+        default: return "⚡";
+    }
+}
+
+function formatTimeAgo(dateString) {
+    let date = new Date(dateString);
+    let now = new Date();
+
+    let diff = Math.floor((now - date) / 1000);
+
+    if (diff < 60) return diff + " SECONDS AGO";
+    if (diff < 3600) return Math.floor(diff / 60) + " MINUTES AGO";
+    if (diff < 86400) return Math.floor(diff / 3600) + " HOURS AGO";
+
+    return Math.floor(diff / 86400) + " DAYS AGO";
+}
+$("#filter").change(function () {
+    let type = $(this).val();
+    loadChart(type);
+});
+$("#growthType").change(function () {
+    loadUserGrowthChart($(this).val());
+});
+
+</script>
+}
+
+</body>
+</html>

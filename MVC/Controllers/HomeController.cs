@@ -12,16 +12,25 @@ public class HomeController : Controller
     {
         _logger = logger;
     }
-
+    public IActionResult Landingpage()
+    {
+        return View();
+    }
+    public IActionResult LandingpageNew()
+    {
+        return View();
+    }
+    
     public IActionResult Index()
     {
         return View();
     }
-
+    
     public IActionResult Privacy()
     {
         return View();
     }
+   
 
     public IActionResult EditProfile()
 {
