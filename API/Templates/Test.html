@@ -1,0 +1,687 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Artify AI</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background-color: #0a0a0c; 
+            font-family: 'Plus Jakarta Sans', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+        }
+        .container { 
+            width: 100%; 
+            padding: 50px 0; 
+            background-color: #0a0a0c;
+            background-image: radial-gradient(circle at 10% 20%, rgba(93, 58, 255, 0.05) 0%, transparent 50%),
+                              radial-gradient(circle at 90% 80%, rgba(255, 58, 158, 0.05) 0%, transparent 50%);
+        }
+        .email-card { 
+            max-width: 580px; 
+            margin: 0 auto; 
+            background: #16161a; 
+            border-radius: 32px; 
+            overflow: hidden; 
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 40px 100px rgba(0,0,0,0.4); 
+        }
+        .hero-section { 
+            background: linear-gradient(135deg, #16161a 0%, #1e1e24 100%); 
+            padding: 60px 40px; 
+            text-align: center; 
+            position: relative;
+        }
+        .logo-text { 
+            font-size: 32px; 
+            font-weight: 800; 
+            letter-spacing: -1.5px; 
+            margin-bottom: 15px; 
+            color: #ffffff;
+            text-decoration: none;
+        }
+        .logo-text span { 
+            background: linear-gradient(to right, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .ai-badge { 
+            display: inline-block; 
+            background: linear-gradient(rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1)); 
+            color: #d1d5db; 
+            padding: 8px 20px; 
+            border-radius: 100px; 
+            font-size: 11px; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            margin-bottom: 25px;
+        }
+        .content-body { padding: 0 50px 50px 50px; text-align: center; }
+        .headline { 
+            font-size: 32px; 
+            color: #ffffff; 
+            margin: 0 0 20px 0; 
+            font-weight: 800; 
+            line-height: 1.2;
+        }
+        .subtext { 
+            font-size: 16px; 
+            color: #94a3b8; 
+            line-height: 1.7; 
+            margin-bottom: 35px; 
+        }
+        
+        .glass-box { 
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 20px; 
+            padding: 25px; 
+            margin-bottom: 40px;
+            text-align: left;
+        }
+        .info-label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 8px; display: block; }
+        .info-value { font-size: 16px; color: #f1f5f9; font-weight: 500; }
+
+        .cta-button { 
+            display: inline-block; 
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: #ffffff !important; 
+            padding: 20px 50px; 
+            text-decoration: none; 
+            border-radius: 18px; 
+            font-weight: 700; 
+            font-size: 17px; 
+            box-shadow: 0 15px 30px rgba(139, 92, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+        .footer { 
+            padding: 40px; 
+            text-align: center; 
+            background: rgba(0,0,0,0.2);
+        }
+        .footer-links a { color: #64748b; text-decoration: none; font-size: 13px; margin: 0 12px; transition: color 0.2s; }
+        .footer-links a:hover { color: #8b5cf6; }
+        .footer-copy { font-size: 12px; color: #475569; margin-top: 25px; line-height: 1.6; }
+        
+        .accent-line {
+            height: 4px;
+            width: 60px;
+            background: linear-gradient(to right, #8b5cf6, #ec4899);
+            margin: 0 auto 30px auto;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="email-card">
+            <div class="hero-section">
+                <div class="ai-badge">Intelligence & Creativity</div>
+                <div class="logo-text">Artify<span>.AI</span></div>
+            </div>
+
+            <div class="content-body">
+                <div class="accent-line"></div>
+                <h2 class="headline">The canvas is ready, {{Name}}.</h2>
+                <p class="subtext">
+                    Your portal to AI-driven creativity is now active. 
+                </p>
+
+                <div class="glass-box">
+                    <table width="100%" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td>
+                                <span class="info-label">Artist Identity</span>
+                                <span class="info-value">{{Email}}</span>
+                            </td>
+                            <td align="right">
+                                <span class="info-label">Status</span>
+                                <span class="info-value" style="color: #10b981;">● Active</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <a href="{{LoginLink}}" class="cta-button">Launch Studio</a>
+            </div>
+
+            <div class="footer">
+                <div class="footer-links">
+                    <a href="#">Documentation</a>
+                    <a href="#">API Guide</a>
+                    <a href="#">Showcase</a>
+                </div>
+                <p class="footer-copy">
+                    &copy; 2026 Artify AI Project. Powered by Scikit-Learn.<br>
+                    You received this because your artistic journey began at Artify.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+
+ -->
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Artify AI</title>
+    <style>
+        /* Import a refined, modern font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@300;500;700&display=swap');
+
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background-color: #f8fafc; 
+            font-family: 'Inter', sans-serif; 
+        }
+        .wrapper { 
+            width: 100%; 
+            padding: 60px 0; 
+            background-color: #f8fafc;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.08) 0px, transparent 50%);
+        }
+        .email-card { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background: #ffffff; 
+            border-radius: 40px; 
+            overflow: hidden; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #ffffff;
+        }
+        .header { 
+            padding: 60px 40px 40px 40px; 
+            text-align: center;
+        }
+        .brand {
+            font-family: 'Outfit', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .brand span {
+            color: #8b5cf6;
+            background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            background: #f1f5f9;
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+        }
+        .status-dot {
+            height: 6px;
+            width: 6px;
+            background-color: #10b981;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .hero-image-box {
+            margin: 0 40px;
+            height: 4px;
+            background: linear-gradient(to right, #e2e8f0, #8b5cf6, #e2e8f0);
+            border-radius: 2px;
+        }
+        .body-content { 
+            padding: 40px 50px; 
+            text-align: center; 
+        }
+        .title { 
+            font-family: 'Outfit', sans-serif;
+            font-size: 36px; 
+            color: #0f172a; 
+            margin: 0 0 20px 0; 
+            font-weight: 700; 
+            line-height: 1.1;
+        }
+        .description { 
+            font-size: 16px; 
+            color: #475569; 
+            line-height: 1.8; 
+            margin-bottom: 40px; 
+        }
+        
+        .data-card { 
+            background: #fdfdfd; 
+            border: 1px solid #f1f5f9; 
+            border-radius: 24px; 
+            padding: 24px; 
+            margin-bottom: 40px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .label { font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; display: block; }
+        .value { font-size: 17px; color: #1e293b; font-weight: 500; }
+
+        .btn-primary { 
+            display: inline-block; 
+            background: #0f172a;
+            color: #ffffff !important; 
+            padding: 22px 50px; 
+            text-decoration: none; 
+            border-radius: 20px; 
+            font-weight: 600; 
+            font-size: 16px; 
+            box-shadow: 0 20px 30px -10px rgba(15, 23, 42, 0.3);
+            transition: transform 0.2s ease;
+        }
+        .footer { 
+            padding: 50px 40px; 
+            text-align: center; 
+            background-color: #fafafa;
+        }
+        .social-links a { 
+            color: #94a3b8; 
+            text-decoration: none; 
+            font-size: 14px; 
+            margin: 0 15px; 
+            font-weight: 500;
+        }
+        .copyright { 
+            font-size: 13px; 
+            color: #cbd5e1; 
+            margin-top: 30px; 
+            line-height: 1.6; 
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="email-card">
+            <div class="header">
+                <div class="status-pill">
+                    <span class="status-dot"></span>
+                    AI Model Online
+                </div>
+                <br>
+                <a href="#" class="brand">Artify<span>AI</span></a>
+            </div>
+
+            <div class="hero-image-box"></div>
+
+            <div class="body-content">
+                <h1 class="title">Welcome to the future of Art, {{Name}}.</h1>
+                <p class="description">
+                    Your workspace is ready. Experience the perfect blend of <strong>Linear SVM intelligence</strong> and creative intuition. Start classifying, tagging, and organizing your gallery today.
+                </p>
+
+                <div class="data-card">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td width="60%" style="text-align: left;">
+                                <span class="label">Artist Identity</span>
+                                <span class="value">{{Email}}</span>
+                            </td>
+                            <td width="40%" style="text-align: right;">
+                                <span class="label">Plan Type</span>
+                                <span class="value" style="color: #8b5cf6;">Creative Pro</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <a href="{{LoginLink}}" class="btn-primary">Open Creative Studio</a>
+            </div>
+
+            <div class="footer">
+                <div class="social-links">
+                    <a href="#">Showcase</a>
+                    <a href="#">Community</a>
+                    <a href="#">Support</a>
+                </div>
+                <p class="copyright">
+                    &copy; 2026 Artify AI Project. <br>
+                    Crafted with precision by the Artify Engineering Team.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
+
+
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artify AI Welcome</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;600&display=swap');
+
+        body { margin: 0; padding: 0; background-color: #ffffff; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .wrapper { width: 100%; table-layout: fixed; background-color: #ffffff; padding-bottom: 60px; }
+        
+        /* Main Container */
+        .main { width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; }
+
+        /* Typography */
+        .serif { font-family: 'DM Serif Display', serif; }
+        .hero-text { font-size: 52px; line-height: 1; color: #1a1a1a; margin: 0; letter-spacing: -2px; }
+        .sub-header { font-size: 14px; text-transform: uppercase; letter-spacing: 3px; color: #8b5cf6; font-weight: 600; display: block; margin-bottom: 20px; }
+        
+        /* Layout Blocks */
+        .header-padding { padding: 80px 40px 40px 40px; }
+        .content-padding { padding: 0 40px 60px 40px; }
+        
+        /* Decorative Element */
+        .line { width: 100%; height: 1px; background-color: #eeeeee; margin: 40px 0; }
+        
+        /* The Card */
+        .info-grid { 
+            background-color: #f9f9f9; 
+            border-radius: 4px; 
+            padding: 30px; 
+            border-left: 4px solid #1a1a1a;
+        }
+        
+        .label { font-size: 11px; color: #999999; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .value { font-size: 15px; color: #1a1a1a; font-weight: 500; }
+
+        /* Button */
+        .btn { 
+            display: inline-block; 
+            background-color: #1a1a1a; 
+            color: #ffffff !important; 
+            padding: 20px 40px; 
+            text-decoration: none; 
+            font-size: 14px; 
+            font-weight: 600; 
+            border-radius: 0px; /* Sharp edges for high-end look */
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .footer { padding: 60px 40px; background-color: #1a1a1a; color: #888888; font-size: 12px; }
+        .footer a { color: #ffffff; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <center class="wrapper">
+        <table class="main" cellspacing="0" cellpadding="0">
+            <tr>
+                <td class="header-padding">
+                    <span class="sub-header">Artify AI / 2026</span>
+                    <h1 class="hero-text serif">Make <br>Something <br>Real.</h1>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="content-padding">
+                    <p style="font-size: 18px; line-height: 1.6; color: #444444; margin-bottom: 40px;">
+                        Hello {{Name}}, <br><br>
+                        We’ve integrated our most advanced <strong>SVM Classification architecture</strong> into your new workspace. The data is processed. The labels are encoded. The only thing missing is your vision.
+                    </p>
+
+                    <div class="info-grid">
+                        <table width="100%">
+                            <tr>
+                                <td width="50%">
+                                    <span class="label">Identifier</span>
+                                    <span class="value">{{Email}}</span>
+                                </td>
+                                <td width="50%">
+                                    <span class="label">Access Level</span>
+                                    <span class="value">Unlimited Studio</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="line"></div>
+
+                    <a href="{{LoginLink}}" class="btn">ENTER THE GALLERY &rarr;</a>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="footer">
+                    <table width="100%">
+                        <tr>
+                            <td style="padding-bottom: 20px;">
+                                <strong style="color: #ffffff; font-size: 16px;">Artify AI</strong><br>
+                                Where Data meets Aesthetic.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="line-height: 1.8;">
+                                <a href="#">Terms</a> &nbsp;&nbsp; <a href="#">API</a> &nbsp;&nbsp; <a href="#">Journal</a><br>
+                                &copy; 2026 Artify Intelligence Project. <br>
+                                Built with Scikit-Learn and passion.
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </center>
+</body>
+</html>
+
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Artify AI</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap');
+
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background-color: #050507; 
+            font-family: 'Plus Jakarta Sans', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            -webkit-font-smoothing: antialiased;
+        }
+        .wrapper {
+            width: 100%;
+            table-layout: fixed;
+            background-color: #050507;
+            padding-bottom: 60px;
+        }
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background-color: transparent;
+        }
+        /* Glassmorphism Effect */
+        .email-card { 
+            margin-top: 50px;
+            background: #111114; 
+            border-radius: 40px; 
+            overflow: hidden; 
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 50px 100px -20px rgba(0,0,0,0.7); 
+        }
+        .hero-section { 
+            padding: 60px 40px 20px 40px; 
+            text-align: center; 
+        }
+        .ai-badge { 
+            display: inline-block; 
+            background: rgba(139, 92, 246, 0.1); 
+            color: #a78bfa; 
+            padding: 6px 16px; 
+            border-radius: 100px; 
+            font-size: 11px; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            margin-bottom: 20px;
+        }
+        .logo-text { 
+            font-size: 38px; 
+            font-weight: 800; 
+            letter-spacing: -1.5px; 
+            color: #ffffff;
+            margin: 0;
+        }
+        .logo-text span { 
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: #8b5cf6;
+        }
+        .content-body { 
+            padding: 20px 50px 50px 50px; 
+            text-align: center; 
+        }
+        .headline { 
+            font-size: 34px; 
+            color: #ffffff; 
+            margin: 0 0 16px 0; 
+            font-weight: 800; 
+            line-height: 1.1;
+            letter-spacing: -0.5px;
+        }
+        .subtext { 
+            font-size: 16px; 
+            color: #94a3b8; 
+            line-height: 1.6; 
+            margin-bottom: 35px; 
+        }
+        .data-table {
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 24px; 
+            padding: 20px; 
+            margin-bottom: 40px;
+            width: 100%;
+        }
+        .info-label { 
+            font-size: 10px; 
+            color: #64748b; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            font-weight: 700; 
+            display: block;
+            margin-bottom: 4px;
+        }
+        .info-value { 
+            font-size: 15px; 
+            color: #f1f5f9; 
+            font-weight: 500; 
+        }
+        .cta-button { 
+            display: inline-block; 
+            background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
+            color: #ffffff !important; 
+            padding: 18px 45px; 
+            text-decoration: none; 
+            border-radius: 20px; 
+            font-weight: 700; 
+            font-size: 16px; 
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+        }
+        .footer { 
+            padding: 40px; 
+            text-align: center; 
+        }
+        .footer-links a { 
+            color: #475569; 
+            text-decoration: none; 
+            font-size: 13px; 
+            margin: 0 10px; 
+        }
+        .footer-copy { 
+            font-size: 12px; 
+            color: #334155; 
+            margin-top: 25px; 
+            line-height: 1.6; 
+        }
+        @media screen and (max-width: 600px) {
+            .content-body { padding: 20px 25px 40px 25px; }
+            .headline { font-size: 28px; }
+            .email-card { border-radius: 24px; margin: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <div class="email-card">
+                <div class="hero-section">
+                    <div class="ai-badge">Neural Engine V2.4</div>
+                    <h1 class="logo-text">Artify<span>.AI</span></h1>
+                </div>
+
+                <div class="content-body">
+                    <h2 class="headline">Hello, {{Name}}.<br>Your vision awaits.</h2>
+                    <p class="subtext">
+                        Welcome to the future of digital artistry. 
+                    </p>
+
+                    <table class="data-table" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td align="left">
+                                <span class="info-label">Account</span>
+                                <span class="info-value">{{Email}}</span>
+                            </td>
+                            <td align="right">
+                                <span class="info-label">Access</span>
+                                <span class="info-value" style="color: #34d399;">● Authorized</span>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <a href="{{LoginLink}}" class="cta-button">Enter the Studio</a>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.2); padding: 30px 0;">
+                    <div class="footer">
+                        <div class="footer-links">
+                            <a href="#">Guides</a>
+                            <a href="#">Showcase</a>
+                            <a href="#">Support</a>
+                        </div>
+                        <p class="footer-copy">
+                            &copy; 2026 Artify AI Project. <br>
+                            Built with passion and Scikit-Learn.<br>
+                            <span style="opacity: 0.5;">San Francisco, CA</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> -->
+
+
