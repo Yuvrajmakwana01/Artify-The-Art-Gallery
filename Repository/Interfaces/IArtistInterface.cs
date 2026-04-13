@@ -23,5 +23,7 @@ namespace Repository.Interfaces
         Task<int> EditArtistProfile(t_ArtistProfile model);
         Task<int> Register(t_Artist user);
         Task<t_Artist> Login(vm_Login user);
+
+        public Task<t_Artist_Dashboard> GetDashboardData(int artistId);
     }
 }

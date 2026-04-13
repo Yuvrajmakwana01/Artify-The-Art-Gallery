@@ -37,7 +37,7 @@ namespace MVC.Controllers
             return View();
         }
 
-        public IActionResult Register()
+        public IActionResult DashBod()
         {
             return View();
         }
