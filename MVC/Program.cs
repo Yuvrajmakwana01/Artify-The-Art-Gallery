@@ -9,6 +9,25 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+// ── PostgreSQL ─────────────────────────────────────────────────────────
+builder.Services.AddScoped<NpgsqlConnection>(_ =>
+    new NpgsqlConnection(builder.Configuration.GetConnectionString("pgconn")));
+
+// ── Repository DI ──────────────────────────────────────────────────────
+builder.Services.AddScoped<IArtistInterface, ArtistRepository>();
+
+// ── Session ────────────────────────────────────────────────────────────
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout        = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly    = true;
+    options.Cookie.IsEssential = true;
+});
+
+
+
+builder.Services.AddScoped<IArtistInterface, ArtistRepository>();
 
 
 // Register the Artist Repository for Dependency Injection
@@ -94,6 +113,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
 
 // (Optional)
 app.UseSession();

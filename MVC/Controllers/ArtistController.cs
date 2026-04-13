@@ -19,8 +19,21 @@ namespace MVC.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public IActionResult Register()
         {
+            return View();
+        }
+         public IActionResult Sales()
+        {
+            return View();
+        }
+          public IActionResult Profile()
+        {
+            return View();
+        }
+        public IActionResult EditProfile()
+        {
+            ViewBag.ArtistId = 1;
             return View();
         }
 
