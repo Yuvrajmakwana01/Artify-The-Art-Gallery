@@ -24,6 +24,32 @@ namespace Repository.Implementations
         {
             t_Admin? adminData = null;
             var qry = "SELECT * FROM t_admin WHERE c_email = @email";
+            using (NpgsqlCommand com = new NpgsqlCommand(qry, _conn))
+            {
+                com.Parameters.AddWithValue("@email", admin.c_Email.Trim().ToLower());
+                await _conn.OpenAsync();
+
+                using (var reader = await com.ExecuteReaderAsync())
+                {
+                    if (await reader.ReadAsync())
+                    {
+                        string storedHash = reader["c_password"].ToString()!;
+
+                        // BCrypt verify — same library used by ArtistRepository
+                        if (BCrypt.Net.BCrypt.Verify(admin.c_Password, storedHash))
+                        {
+                            adminData = new t_Admin
+                            {
+                                c_AdminId = Convert.ToInt32(reader["c_adminid"]),
+                                c_AdminName = reader["c_adminname"].ToString()!,
+                                c_Email = reader["c_email"].ToString()!
+                            };
+                        }
+                    }
+                }
+            }
+            return adminData;
+        }
 
 
         private string HashPassword(string password)
@@ -40,28 +66,7 @@ namespace Repository.Implementations
             {
                 await _conn.OpenAsync();
 
-                using (NpgsqlCommand com = new NpgsqlCommand(qry, _conn))
-                {
-                    com.Parameters.AddWithValue("@email", admin.c_Email.Trim().ToLower());
 
-                    using (var reader = await com.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync())
-                        {
-                            string storedHash = reader["c_password"].ToString()!;
-
-                            // BCrypt verify — same library used by ArtistRepository
-                            if (BCrypt.Net.BCrypt.Verify(admin.c_Password, storedHash))
-                            {
-                                adminData = new t_Admin
-                                {
-                                    c_AdminId = Convert.ToInt32(reader["c_adminid"]),
-                                    c_AdminName = reader["c_adminname"].ToString()!,
-                                    c_Email = reader["c_email"].ToString()!
-                                };
-                            }
-                        }
-                    }
                 var emailCheckQry = @"SELECT COUNT(1) FROM t_user WHERE LOWER(c_email) = LOWER(@email)";
                 using (var emailCmd = new NpgsqlCommand(emailCheckQry, _conn))
                 {
@@ -109,7 +114,7 @@ namespace Repository.Implementations
                 await _conn.CloseAsync();
             }
 
-            return adminData;
+
         }
 
         public async Task<t_UserRegister?> UserLogin(t_UserLogin model)

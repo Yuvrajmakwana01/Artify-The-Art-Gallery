@@ -95,7 +95,7 @@ namespace MVC.Controllers
                         if (!string.IsNullOrEmpty(token))
                         {
                             HttpContext.Session.SetString("JWToken", token);
-                            return RedirectToAction("Landingpage", "Home");
+                            return RedirectToAction("EditProfile", "Buyer");
                         }
                     }
                 }

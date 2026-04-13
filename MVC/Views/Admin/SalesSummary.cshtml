@@ -1,0 +1,968 @@
+@model Repository.Models.AdminAnalyticsViewModel
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@using System.Text.Json
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Reports & Analytics";
+
+    var vm = Model ?? new Repository.Models.AdminAnalyticsViewModel();
+    var revenueJson = JsonSerializer.Serialize(vm.RevenueGrowth ?? new List<Repository.Models.AdminRevenuePointViewModel>());
+    var activityJson = JsonSerializer.Serialize(vm.UserActivity ?? new List<Repository.Models.AdminUserActivityPointViewModel>());
+    var topArtworksJson = JsonSerializer.Serialize(vm.TopPerformingArtworks ?? new List<Repository.Models.AdminTopArtworkViewModel>());
+    var apiBaseUrl = (Configuration["ApiSettings:BaseUrl"] ?? string.Empty).TrimEnd('/');
+
+    var totalNewUsers = (vm.UserActivity ?? new List<Repository.Models.AdminUserActivityPointViewModel>()).Sum(x => x.NewUsers);
+    var rawConversionRate = totalNewUsers <= 0 ? 0m : ((decimal)vm.ActiveBuyers / totalNewUsers) * 100m;
+    var conversionRate = Math.Clamp(Math.Round(rawConversionRate, 2), 0m, 99.99m);
+
+    string PeriodClass(string value) => string.Equals(vm.SelectedPeriod, value, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty;
+
+    string ChangeClass(decimal value) => value < 0 ? "negative" : "positive";
+    string ChangeText(decimal value) => $"{(value < 0 ? "-" : "+")}{Math.Abs(value):0.#}%";
+}
+
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    body,
+    #sidebar,
+    .topbar,
+    .content-area,
+    .analytics-shell,
+    .analytics-shell * {
+        font-family: 'Inter', 'Segoe UI', sans-serif !important;
+    }
+
+    .analytics-shell {
+        padding: 18px 20px 24px;
+        color: #1f2937;
+    }
+
+    .analytics-crumbs {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 3px;
+        color: #8a95a9;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .analytics-crumbs .slash {
+        color: #b6c0d2;
+    }
+
+    .analytics-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 16px;
+    }
+
+    .analytics-title {
+        margin: 0;
+        color: #111827;
+        font-size: 19px;
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: 0;
+    }
+
+    .analytics-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .page-btn {
+        height: 38px;
+        border: 1px solid #dfe6f0;
+        border-radius: 12px;
+        background: #fff;
+        padding: 0 14px;
+        color: #425066;
+        font-size: 13px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .page-btn.icon-only {
+        width: 38px;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .page-btn.primary {
+        border-color: #ef6a1a;
+        background: linear-gradient(135deg, #ff8a3d 0%, #f55a00 100%);
+        color: #fff;
+        box-shadow: 0 10px 24px rgba(245, 90, 0, 0.26);
+    }
+
+    .panel {
+        border: 1px solid #e5eaf2;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 8px 28px rgba(102, 116, 143, 0.07);
+    }
+
+    .analytics-cards {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .analytics-card {
+        padding: 18px;
+    }
+
+    .analytics-card-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+    }
+
+    .analytics-card-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        font-size: 17px;
+    }
+
+    .analytics-card-icon.orange {
+        background: #fff2e9;
+        color: #f97316;
+    }
+
+    .analytics-card-icon.blue {
+        background: #eaf1ff;
+        color: #4f8ff7;
+    }
+
+    .analytics-card-icon.purple {
+        background: #f2e9ff;
+        color: #a855f7;
+    }
+
+    .analytics-card-icon.green {
+        background: #dcf9f0;
+        color: #15b89a;
+    }
+
+    .analytics-card-change {
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .analytics-card-change.positive {
+        color: #21b06a;
+    }
+
+    .analytics-card-change.negative {
+        color: #f0567e;
+    }
+
+    .analytics-card-label {
+        margin: 0 0 6px;
+        color: #7f8ca3;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .analytics-card-value {
+        margin: 0;
+        color: #111827;
+        font-size: 18px;
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: 0;
+    }
+
+    .analytics-chart-panel {
+        margin-bottom: 16px;
+        overflow: hidden;
+    }
+
+    .analytics-panel-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #edf1f6;
+        padding: 16px 18px;
+    }
+
+    .analytics-panel-title {
+        margin: 0;
+        color: #131d2d;
+        font-size: 15px;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .analytics-segmented {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px;
+        border-radius: 9px;
+        background: #f3f6fb;
+    }
+
+    .analytics-segmented a {
+        min-width: 46px;
+        height: 28px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #6a7892;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 0 8px;
+    }
+
+    .analytics-segmented a.active {
+        background: #fff1e8;
+        color: #f06a18;
+    }
+
+    .revenue-chart {
+        position: relative;
+        height: 330px;
+        padding: 20px 16px 42px;
+    }
+
+    .revenue-bars {
+        position: absolute;
+        inset: 18px 16px 38px;
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 6px;
+        align-items: end;
+    }
+
+    .revenue-col {
+        height: 100%;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        position: relative;
+    }
+
+    .revenue-bar {
+        width: 100%;
+        border-radius: 7px 7px 0 0;
+        background: #f5dccc;
+        max-width: 66px;
+    }
+
+    .revenue-label {
+        position: absolute;
+        bottom: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #9ca9bc;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .revenue-line {
+        position: absolute;
+        inset: 18px 16px 38px;
+        pointer-events: none;
+    }
+
+    .revenue-line svg {
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+    }
+
+    .analytics-bottom-grid {
+        display: grid;
+        grid-template-columns: 1fr 2.1fr;
+        gap: 16px;
+    }
+
+    .activity-panel,
+    .top-artworks-panel {
+        overflow: hidden;
+    }
+
+    .activity-panel .analytics-panel-head,
+    .top-artworks-panel .analytics-panel-head {
+        padding: 16px 18px;
+    }
+
+    .activity-body {
+        padding: 18px;
+    }
+
+    .activity-columns {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        align-items: end;
+        min-height: 190px;
+    }
+
+    .activity-column {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 6px;
+        min-height: 150px;
+        position: relative;
+    }
+
+    .activity-bar {
+        width: 14px;
+        border-radius: 3px 3px 0 0;
+    }
+
+    .activity-bar.new {
+        background: #f97316;
+    }
+
+    .activity-bar.active {
+        background: #3b82f6;
+    }
+
+    .activity-month {
+        position: absolute;
+        bottom: -28px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #9eabba;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .activity-legend {
+        margin-top: 32px;
+        display: flex;
+        justify-content: center;
+        gap: 18px;
+        color: #8f9caf;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .legend-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 6px;
+    }
+
+    .legend-dot.new {
+        background: #f97316;
+    }
+
+    .legend-dot.active {
+        background: #3b82f6;
+    }
+
+    .top-artworks-head-right {
+        color: #f97316;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .top-artworks-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .top-artworks-table th {
+        padding: 14px 16px;
+        background: #f8fafc;
+        text-align: left;
+        color: #7a899f;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .top-artworks-table td {
+        padding: 14px 16px;
+        border-top: 1px solid #edf1f6;
+        color: #243046;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .top-artwork-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .top-artwork-thumb {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        position: relative;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .top-artwork-thumb.peach { background: linear-gradient(160deg, #f9dcc2 0%, #ecbf95 100%); }
+    .top-artwork-thumb.sand { background: linear-gradient(160deg, #f5dfca 0%, #e4b27e 100%); }
+    .top-artwork-thumb.landscape { background: linear-gradient(160deg, #82aec8 0%, #a4d1bb 52%, #e7c274 100%); }
+    .top-artwork-thumb.night { background: linear-gradient(160deg, #2b2f3b 0%, #65513f 100%); }
+    .top-artwork-thumb.gold { background: linear-gradient(160deg, #ffe38b 0%, #ffc94a 100%); }
+
+    .top-artwork-thumb::before,
+    .top-artwork-thumb::after {
+        content: "";
+        position: absolute;
+    }
+
+    .top-artwork-thumb::before {
+        left: -2px;
+        bottom: 6px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.38);
+    }
+
+    .top-artwork-thumb::after {
+        right: 6px;
+        bottom: 4px;
+        width: 7px;
+        height: 18px;
+        border-radius: 4px;
+        background: rgba(55, 43, 35, 0.24);
+    }
+
+    .top-artwork-revenue {
+        color: #f97316;
+        font-weight: 800;
+    }
+
+    .analytics-footer {
+        margin-top: 16px;
+        padding: 18px 0 0;
+        border-top: 1px solid #e7edf5;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .analytics-last-updated {
+        color: #8fa0b7;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .analytics-last-updated strong {
+        color: #7b8ea7;
+    }
+
+    .analytics-export-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .page-btn.ghost {
+        min-width: 128px;
+        justify-content: center;
+        background: #f2f6fb;
+        border-color: #e1e8f2;
+        color: #3e5068;
+    }
+
+    @@media (max-width: 1300px) {
+        .analytics-cards {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .analytics-bottom-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 980px) {
+        .analytics-header,
+        .analytics-footer {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .analytics-actions,
+        .analytics-export-actions {
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .analytics-title,
+        .analytics-panel-title,
+        .analytics-card-value {
+            font-size: 17px;
+        }
+    }
+
+    @@media (max-width: 720px) {
+        .analytics-shell {
+            padding: 14px;
+        }
+
+        .analytics-cards {
+            grid-template-columns: 1fr;
+        }
+
+        .revenue-chart {
+            height: 300px;
+        }
+
+        .top-artworks-table-wrap {
+            overflow-x: auto;
+        }
+
+        .top-artworks-table {
+            min-width: 560px;
+        }
+    }
+</style>
+
+<section class="analytics-shell">
+    <div class="analytics-crumbs">
+        <span>Admin</span>
+        <span class="slash">/</span>
+        <span>Reports &amp; Analytics</span>
+    </div>
+
+    <div class="analytics-header">
+        <h1 class="analytics-title">Reports &amp; Analytics</h1>
+    </div>
+
+    <section class="analytics-cards">
+        <article class="panel analytics-card">
+            <div class="analytics-card-top">
+                <div class="analytics-card-icon orange"><i class="bi bi-cash-stack"></i></div>
+                <div id="revenueChange" class="analytics-card-change @ChangeClass(vm.RevenueChangePercentage)">@ChangeText(vm.RevenueChangePercentage)</div>
+            </div>
+            <p class="analytics-card-label">Total Revenue</p>
+            <p id="totalRevenueText" class="analytics-card-value">@vm.TotalRevenueText</p>
+        </article>
+
+        <article class="panel analytics-card">
+            <div class="analytics-card-top">
+                <div class="analytics-card-icon blue"><i class="bi bi-bag-fill"></i></div>
+                <div id="avgOrderChange" class="analytics-card-change @ChangeClass(vm.AverageOrderValueChangePercentage)">@ChangeText(vm.AverageOrderValueChangePercentage)</div>
+            </div>
+            <p class="analytics-card-label">Avg. Order Value</p>
+            <p id="avgOrderValueText" class="analytics-card-value">@vm.AverageOrderValueText</p>
+        </article>
+
+        <article class="panel analytics-card">
+            <div class="analytics-card-top">
+                <div class="analytics-card-icon purple"><i class="bi bi-lightning-charge-fill"></i></div>
+                <div id="conversionChange" class="analytics-card-change @ChangeClass(vm.ActiveBuyersChangePercentage)">@ChangeText(vm.ActiveBuyersChangePercentage)</div>
+            </div>
+            <p class="analytics-card-label">Conversion Rate</p>
+            <p id="conversionRateText" class="analytics-card-value">@conversionRate.ToString("0.##")%</p>
+        </article>
+
+        <article class="panel analytics-card">
+            <div class="analytics-card-top">
+                <div class="analytics-card-icon green"><i class="bi bi-credit-card-2-front-fill"></i></div>
+                <div id="payoutChange" class="analytics-card-change @ChangeClass(vm.PayoutChangePercentage)">@ChangeText(vm.PayoutChangePercentage)</div>
+            </div>
+            <p class="analytics-card-label">Payouts vs Earnings</p>
+            <p id="payoutVsEarningsText" class="analytics-card-value">@vm.PayoutVsCommissionText</p>
+        </article>
+    </section>
+
+    <section class="panel analytics-chart-panel">
+        <div class="analytics-panel-head">
+            <h2 class="analytics-panel-title">Revenue Growth</h2>
+            <div class="analytics-segmented">
+                <a asp-controller="Admin" asp-action="Analytics" asp-route-period="day" class="@PeriodClass("day")">Day</a>
+                <a asp-controller="Admin" asp-action="Analytics" asp-route-period="week" class="@PeriodClass("week")">Week</a>
+                <a asp-controller="Admin" asp-action="Analytics" asp-route-period="month" class="@PeriodClass("month")">Month</a>
+            </div>
+        </div>
+
+        <div class="revenue-chart">
+            <div id="revenueBars" class="revenue-bars"></div>
+            <div class="revenue-line">
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path id="revenuePath" fill="none" stroke="#f55a00" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" d="" />
+                    <g id="revenueDots"></g>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <section class="analytics-bottom-grid">
+        <article class="panel activity-panel">
+            <div class="analytics-panel-head">
+                <h2 class="analytics-panel-title">User Activity</h2>
+            </div>
+            <div class="activity-body">
+                <div id="activityColumns" class="activity-columns"></div>
+                <div class="activity-legend">
+                    <span><span class="legend-dot new"></span>New Users</span>
+                    <span><span class="legend-dot active"></span>Active Users</span>
+                </div>
+            </div>
+        </article>
+
+        <article class="panel top-artworks-panel">
+            <div class="analytics-panel-head">
+                <h2 class="analytics-panel-title">Top Performing Artworks</h2>
+                <a href="#" class="top-artworks-head-right">View All</a>
+            </div>
+            <div class="top-artworks-table-wrap">
+                <table class="top-artworks-table">
+                    <thead>
+                        <tr>
+                            <th>Artwork</th>
+                            <th>Artist</th>
+                            <th>Sales</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topArtworksBody">
+                        @if ((vm.TopPerformingArtworks?.Count ?? 0) == 0)
+                        {
+                            <tr>
+                                <td colspan="4">No completed artwork sales found in the database yet.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var artwork in vm.TopPerformingArtworks ?? new List<Repository.Models.AdminTopArtworkViewModel>())
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="top-artwork-wrap">
+                                            <div class="top-artwork-thumb @artwork.ArtworkTone"></div>
+                                            <span>@artwork.ArtworkTitle</span>
+                                        </div>
+                                    </td>
+                                    <td>@artwork.ArtistName</td>
+                                    <td>@artwork.SalesCount</td>
+                                    <td class="top-artwork-revenue">@artwork.RevenueText</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    </section>
+
+    <div class="analytics-footer">
+        <span class="analytics-last-updated"><strong>Last updated:</strong> @DateTime.Now.ToString("dddd 'at' hh:mm tt")</span>
+        <div class="analytics-export-actions">
+            <button type="button" id="exportPdfBtn" class="page-btn ghost"><i class="bi bi-file-earmark-pdf"></i> Export PDF</button>
+            <button type="button" id="exportCsvBtn" class="page-btn ghost"><i class="bi bi-filetype-csv"></i> Export CSV</button>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        let revenueGrowth = @Html.Raw(revenueJson);
+        let userActivity = @Html.Raw(activityJson);
+        let topPerformingArtworks = @Html.Raw(topArtworksJson);
+        const apiBaseUrl = @Html.Raw(JsonSerializer.Serialize(apiBaseUrl));
+        let selectedPeriod = @Html.Raw(JsonSerializer.Serialize(vm.SelectedPeriod));
+        let dateRangeText = @Html.Raw(JsonSerializer.Serialize(vm.DateRangeText));
+        const weekdayLabels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+        let summarySnapshot = {
+            totalRevenue: @vm.TotalRevenue,
+            averageOrderValue: @vm.AverageOrderValue,
+            activeBuyers: @vm.ActiveBuyers,
+            payoutsVsEarnings: @Html.Raw(JsonSerializer.Serialize(vm.PayoutVsCommissionText))
+        };
+
+        function normalizePeriod(value) {
+            const period = String(value ?? "").toLowerCase().trim();
+            if (period === "day" || period === "week" || period === "month") return period;
+            return "month";
+        }
+
+        function changeText(value) {
+            const amount = Number(value ?? 0);
+            return `${amount < 0 ? "-" : "+"}${Math.abs(amount).toFixed(1).replace(/\.0$/, "")}%`;
+        }
+
+        function changeClass(value) {
+            const amount = Number(value ?? 0);
+            return amount < 0 ? "negative" : "positive";
+        }
+
+        function updateSummaryCards(data) {
+            const totalRevenue = Number(data?.totalRevenue ?? data?.TotalRevenue ?? 0);
+            const averageOrderValue = Number(data?.averageOrderValue ?? data?.AverageOrderValue ?? 0);
+            const activeBuyers = Number(data?.activeBuyers ?? data?.ActiveBuyers ?? 0);
+            const payoutVsEarnings = data?.payoutVsCommissionText ?? data?.PayoutVsCommissionText ?? "$0 / $0";
+
+            const revenueChange = Number(data?.revenueChangePercentage ?? data?.RevenueChangePercentage ?? 0);
+            const avgOrderChange = Number(data?.averageOrderValueChangePercentage ?? data?.AverageOrderValueChangePercentage ?? 0);
+            const activeBuyersChange = Number(data?.activeBuyersChangePercentage ?? data?.ActiveBuyersChangePercentage ?? 0);
+            const payoutChange = Number(data?.payoutChangePercentage ?? data?.PayoutChangePercentage ?? 0);
+
+            const activityRows = Array.isArray(userActivity) ? userActivity : [];
+            const totalNewUsers = activityRows.reduce((sum, item) => sum + Number(item.newUsers ?? item.NewUsers ?? 0), 0);
+            const conversionRate = totalNewUsers <= 0 ? 0 : Math.min(99.99, Math.max(0, (activeBuyers / totalNewUsers) * 100));
+
+            summarySnapshot = {
+                totalRevenue,
+                averageOrderValue,
+                activeBuyers,
+                payoutsVsEarnings: payoutVsEarnings
+            };
+
+            const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+
+            document.getElementById("totalRevenueText").textContent = usd.format(totalRevenue);
+            document.getElementById("avgOrderValueText").textContent = usd.format(averageOrderValue);
+            document.getElementById("conversionRateText").textContent = `${conversionRate.toFixed(2).replace(/\.00$/, "")}%`;
+            document.getElementById("payoutVsEarningsText").textContent = payoutVsEarnings;
+
+            const revenueChangeEl = document.getElementById("revenueChange");
+            const avgOrderChangeEl = document.getElementById("avgOrderChange");
+            const conversionChangeEl = document.getElementById("conversionChange");
+            const payoutChangeEl = document.getElementById("payoutChange");
+
+            [revenueChangeEl, avgOrderChangeEl, conversionChangeEl, payoutChangeEl].forEach(el => {
+                el.classList.remove("positive", "negative");
+            });
+
+            revenueChangeEl.textContent = changeText(revenueChange);
+            revenueChangeEl.classList.add(changeClass(revenueChange));
+            avgOrderChangeEl.textContent = changeText(avgOrderChange);
+            avgOrderChangeEl.classList.add(changeClass(avgOrderChange));
+            conversionChangeEl.textContent = changeText(activeBuyersChange);
+            conversionChangeEl.classList.add(changeClass(activeBuyersChange));
+            payoutChangeEl.textContent = changeText(payoutChange);
+            payoutChangeEl.classList.add(changeClass(payoutChange));
+        }
+
+        function renderTopArtworksTable() {
+            const body = document.getElementById("topArtworksBody");
+            if (!body) return;
+
+            if (!Array.isArray(topPerformingArtworks) || topPerformingArtworks.length === 0) {
+                body.innerHTML = '<tr><td colspan="4">No completed artwork sales found in the database yet.</td></tr>';
+                return;
+            }
+
+            body.innerHTML = topPerformingArtworks.map(item => {
+                const artworkTitle = item.artworkTitle ?? item.ArtworkTitle ?? "";
+                const artistName = item.artistName ?? item.ArtistName ?? "";
+                const salesCount = item.salesCount ?? item.SalesCount ?? 0;
+                const revenueText = item.revenueText ?? item.RevenueText ?? "$0.00";
+                const artworkTone = item.artworkTone ?? item.ArtworkTone ?? "peach";
+
+                return `
+                    <tr>
+                        <td>
+                            <div class="top-artwork-wrap">
+                                <div class="top-artwork-thumb ${artworkTone}"></div>
+                                <span>${artworkTitle}</span>
+                            </div>
+                        </td>
+                        <td>${artistName}</td>
+                        <td>${salesCount}</td>
+                        <td class="top-artwork-revenue">${revenueText}</td>
+                    </tr>`;
+            }).join("");
+        }
+
+        function loadAnalyticsFromApi() {
+            if (!apiBaseUrl) return;
+
+            const queryPeriod = normalizePeriod(new URLSearchParams(window.location.search).get("period"));
+
+            $.ajax({
+                url: `${apiBaseUrl}/api/AdminAnalytics/analytics-dashboard`,
+                type: "GET",
+                data: { period: queryPeriod },
+                dataType: "json",
+                success: function (payload) {
+                    revenueGrowth = payload?.revenueGrowth ?? payload?.RevenueGrowth ?? [];
+                    userActivity = payload?.userActivity ?? payload?.UserActivity ?? [];
+                    topPerformingArtworks = payload?.topPerformingArtworks ?? payload?.TopPerformingArtworks ?? [];
+                    selectedPeriod = normalizePeriod(payload?.selectedPeriod ?? payload?.SelectedPeriod ?? queryPeriod);
+                    dateRangeText = payload?.dateRangeText ?? payload?.DateRangeText ?? dateRangeText;
+
+                    updateSummaryCards(payload);
+                    renderTopArtworksTable();
+                    buildRevenueChart();
+                    buildActivityChart();
+                },
+                error: function (xhr, status, error) {
+                    console.error("Failed to load analytics dashboard from API.", { xhr, status, error });
+                }
+            });
+        }
+
+        function buildRevenueChart() {
+            const host = document.getElementById("revenueBars");
+            const path = document.getElementById("revenuePath");
+            const dots = document.getElementById("revenueDots");
+            if (!host || !path || !dots || !Array.isArray(revenueGrowth)) return;
+
+            const values = revenueGrowth.map(x => Number(x.revenue ?? x.Revenue) || 0);
+            const maxValue = Math.max(...values, 1);
+            const count = revenueGrowth.length || 1;
+
+            host.style.gridTemplateColumns = `repeat(${count}, minmax(0, 1fr))`;
+            host.innerHTML = revenueGrowth.map((item, index) => {
+                const value = Number(item.revenue ?? item.Revenue) || 0;
+                const label = getRevenueLabel(item, index);
+                const height = Math.max((value / maxValue) * 90, value > 0 ? 18 : 8);
+                return `<div class="revenue-col"><div class="revenue-bar" style="height:${height}%"></div><div class="revenue-label">${label}</div></div>`;
+            }).join("");
+
+            const points = revenueGrowth.map((item, index) => {
+                const value = Number(item.revenue ?? item.Revenue) || 0;
+                const x = count === 1 ? 50 : (index / (count - 1)) * 100;
+                const y = 86 - ((value / maxValue) * 66);
+                return { x, y };
+            });
+
+            path.setAttribute("d", buildSmoothPath(points));
+            dots.innerHTML = points
+                .map(p => `<circle cx="${p.x}" cy="${p.y}" r="1.2" fill="#f55a00"></circle>`)
+                .join("");
+        }
+
+        function getRevenueLabel(item, index) {
+            const normalizedPeriod = String(selectedPeriod || "").trim().toLowerCase();
+            if (normalizedPeriod === "day") {
+                return weekdayLabels[index % weekdayLabels.length];
+            }
+
+            return item.label ?? item.Label ?? "";
+        }
+
+        function buildSmoothPath(points) {
+            if (!Array.isArray(points) || points.length === 0) return "";
+            if (points.length === 1) return `M ${points[0].x},${points[0].y}`;
+
+            let d = `M ${points[0].x},${points[0].y}`;
+            for (let i = 0; i < points.length - 1; i++) {
+                const p0 = points[i - 1] || points[i];
+                const p1 = points[i];
+                const p2 = points[i + 1];
+                const p3 = points[i + 2] || p2;
+
+                const cp1x = p1.x + (p2.x - p0.x) / 6;
+                const cp1y = p1.y + (p2.y - p0.y) / 6;
+                const cp2x = p2.x - (p3.x - p1.x) / 6;
+                const cp2y = p2.y - (p3.y - p1.y) / 6;
+
+                d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
+            }
+            return d;
+        }
+
+        function buildActivityChart() {
+            const host = document.getElementById("activityColumns");
+            if (!host || !Array.isArray(userActivity)) return;
+
+            const maxValue = Math.max(...userActivity.flatMap(x => [Number(x.newUsers ?? x.NewUsers) || 0, Number(x.activeUsers ?? x.ActiveUsers) || 0]), 1);
+            host.innerHTML = userActivity.map(item => {
+                const newUsers = Number(item.newUsers ?? item.NewUsers) || 0;
+                const activeUsers = Number(item.activeUsers ?? item.ActiveUsers) || 0;
+                const label = item.label ?? item.Label ?? "";
+                const newHeight = Math.max((newUsers / maxValue) * 116, newUsers > 0 ? 12 : 6);
+                const activeHeight = Math.max((activeUsers / maxValue) * 116, activeUsers > 0 ? 12 : 6);
+                return `<div class="activity-column"><div class="activity-bar new" style="height:${newHeight}px"></div><div class="activity-bar active" style="height:${activeHeight}px"></div><div class="activity-month">${label}</div></div>`;
+            }).join("");
+        }
+
+        function csvEscape(value) {
+            const text = String(value ?? "").replace(/"/g, '""');
+            return `"${text}"`;
+        }
+
+        function exportAnalyticsCsv() {
+            const rows = [];
+
+            rows.push(["Section", "Metric", "Value"]);
+            rows.push(["Summary", "Period", selectedPeriod]);
+            rows.push(["Summary", "Date Range", dateRangeText]);
+            rows.push(["Summary", "Total Revenue", summarySnapshot.totalRevenue]);
+            rows.push(["Summary", "Avg Order Value", summarySnapshot.averageOrderValue]);
+            rows.push(["Summary", "Active Buyers", summarySnapshot.activeBuyers]);
+            rows.push(["Summary", "Payouts vs Earnings", summarySnapshot.payoutsVsEarnings]);
+            rows.push([]);
+
+            rows.push(["Revenue Growth", "Label", "Revenue"]);
+            revenueGrowth.forEach(item => {
+                rows.push(["Revenue Growth", item.label ?? item.Label ?? "", item.revenue ?? item.Revenue ?? 0]);
+            });
+            rows.push([]);
+
+            rows.push(["User Activity", "Label", "New Users", "Active Users"]);
+            userActivity.forEach(item => {
+                rows.push([
+                    "User Activity",
+                    item.label ?? item.Label ?? "",
+                    item.newUsers ?? item.NewUsers ?? 0,
+                    item.activeUsers ?? item.ActiveUsers ?? 0
+                ]);
+            });
+            rows.push([]);
+
+            rows.push(["Top Performing Artworks", "Artwork", "Artist", "Sales", "Revenue"]);
+            topPerformingArtworks.forEach(item => {
+                rows.push([
+                    "Top Performing Artworks",
+                    item.artworkTitle ?? item.ArtworkTitle ?? "",
+                    item.artistName ?? item.ArtistName ?? "",
+                    item.salesCount ?? item.SalesCount ?? 0,
+                    item.revenue ?? item.Revenue ?? 0
+                ]);
+            });
+
+            const csv = rows.map(row => row.map(csvEscape).join(",")).join("\r\n");
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "analytics-report.csv";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function exportAnalyticsPdf() {
+            window.print();
+        }
+
+        buildRevenueChart();
+        buildActivityChart();
+        renderTopArtworksTable();
+        loadAnalyticsFromApi();
+
+        document.getElementById("exportCsvBtn")?.addEventListener("click", exportAnalyticsCsv);
+        document.getElementById("exportPdfBtn")?.addEventListener("click", exportAnalyticsPdf);
+    </script>
+}
+

@@ -37,36 +37,6 @@ namespace API.Controllers
         {
             if (model == null || string.IsNullOrEmpty(model.c_Email))
                 return BadRequest("Invalid Google data");
-
-            // // 1. Check user in DB
-            // var user = await _auth.GetUserByEmail(model.c_Email);
-
-            // if (user == null)
-            // {
-            //     // 2. Naya user object method ke andar define karein
-            //     var newUser = new t_UserRegister
-            //     {
-            //         c_FullName = model.c_FullName,
-            //         c_Email = model.c_Email,
-            //         c_UserName = model.c_Email.Split('@')[0], 
-            //         // Google ID ko hash karke store karein
-            //         c_PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.c_GoogleId), // Google ID as temporary pass
-            //         c_Gender = "other"
-            //     };
-
-            //     int result = await _auth.UserRegister(newUser);
-            //     if (result <= 0) return StatusCode(500, "Error registering new user");
-
-            //     // Register hone ke baad user fetch karein taaki ID mil jaye
-            //     user = await _auth.GetUserByEmail(model.c_Email);
-            // }
-
-            // // 3. JWT Token Generate karo
-            // var token = GenerateJwtToken(user);
-
-            // return Ok(new { token = token, message = "Login via Google Successful" });
-
-            // 1. Pehle check karein ki kya user pehle se database mein hai?
             var existingUser = await _auth.GetUserByEmail(model.c_Email);
 
             if (existingUser != null)
@@ -103,7 +73,7 @@ namespace API.Controllers
 
         // ================= REGISTER =================
         [HttpPost("UserRegister")]
-        public async Task<IActionResult> UserRegister([FromForm] t_UserRegister model, IFormFile? image)
+        public async Task<IActionResult> UserRegister([FromForm] t_UserRegister model, IFormFile? profileImageFile)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -116,26 +86,24 @@ namespace API.Controllers
             model.c_PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.c_Password);
 
 
-            if (image != null && image.Length > 0)
+            if (profileImageFile != null && profileImageFile.Length > 0)
             {
-                string rootPath = @"C:\Users\disha\casepoint\ARTIFY_PROJECT\Artify-The-Art-Gallery\MVC\wwwroot\";
-
-                if (!Directory.Exists(rootPath))
-                {
-                    Directory.CreateDirectory(rootPath);
-                }
-
-                string uploadsFolder = Path.Combine(rootPath, "images");
+                string apiDirectory = Directory.GetCurrentDirectory();
+                string mvcWwwRoot = Path.GetFullPath(Path.Combine(apiDirectory, "..", "MVC", "wwwroot"));
+                string uploadsFolder = Path.Combine(mvcWwwRoot, "UserImages");
 
                 if (!Directory.Exists(uploadsFolder))
+                {
                     Directory.CreateDirectory(uploadsFolder);
+                }
 
-                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                // Use profileImageFile here
+                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(profileImageFile.FileName);
                 string filePath = Path.Combine(uploadsFolder, fileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
-                    await image.CopyToAsync(stream);
+                    await profileImageFile.CopyToAsync(stream);
                 }
 
                 model.c_ProfileImage = fileName;

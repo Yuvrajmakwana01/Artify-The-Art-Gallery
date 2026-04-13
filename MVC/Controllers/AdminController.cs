@@ -56,7 +56,26 @@ namespace MVC.Controllers
             return View();
         }
 
-        public IActionResult PaymentDetails()
+        public IActionResult Payouts()
+        {
+            return View();
+        }
+
+         public IActionResult SalesSummary()
+        {
+            return View();
+        }
+
+         public IActionResult Profile()
+        {
+            return View();
+        }
+
+         public IActionResult EditProfile()
+        {
+            ViewBag.AdminId = HttpContext.Session.GetString("AdminId");
+            return View();
+        }
         // ── GET /Admin/Logout ─────────────────────────────────────────────────
         // Clears server-side session. localStorage is cleared by _AdminLayout JS.
         public IActionResult Logout()
@@ -75,12 +94,26 @@ namespace MVC.Controllers
             return View();
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
         public IActionResult Users()
         {
             return View();
         }
+
+        public IActionResult ArtworksLoading()
+        {
+            return RedirectToAction(nameof(Artworks));
+        }
+
+        public IActionResult Artworks()
+        {
+            return View();
+        }
+
+        public IActionResult Orders()
+        {
+            return View();
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error() => View("Error!");
     }
