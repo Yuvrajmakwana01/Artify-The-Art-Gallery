@@ -1,0 +1,826 @@
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Categories";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" />
+
+<style>
+    .cat-page { padding: 28px 32px; font-family: 'Segoe UI', sans-serif; background: #f4f4f6; min-height: 100vh; }
+
+    .cat-header { margin-bottom: 24px; }
+    .cat-header h1 { margin: 0 0 4px; font-size: 28px; font-weight: 700; color: #1a1a1a; }
+    .cat-header p { margin: 0; color: #888; font-size: 14px; }
+
+    .cat-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 18px 20px; border: 1px solid #eee; display: flex; align-items: center; gap: 14px; }
+    .stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .stat-label { font-size: 12px; color: #888; margin-bottom: 3px; }
+    .stat-value { font-size: 22px; font-weight: 700; line-height: 1; }
+
+    .cat-card { background: #fff; border-radius: 14px; border: 1px solid #e8e8e8; overflow: hidden; }
+
+    .cat-card-topbar {
+        padding: 18px 20px 16px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .cat-card-title { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700; color: #1a1a1a; }
+    .cat-card-title .folder-icon { font-size: 20px; }
+
+    .cat-toolbar {
+        padding: 14px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        background: #fafafa;
+    }
+
+    .cat-filters { display: flex; gap: 10px; flex-wrap: wrap; flex: 1; }
+
+    .cat-search {
+        padding: 8px 14px 8px 34px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        font-size: 13px;
+        outline: none;
+        min-width: 220px;
+        color: #333;
+        background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.868-3.833zm-5.242 1.156a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z'/%3E%3C/svg%3E") no-repeat 10px center;
+    }
+
+    .cat-search:focus { border-color: #f26522; box-shadow: 0 0 0 2px rgba(242, 101, 34, .12); }
+
+    .cat-status-filter {
+        padding: 8px 14px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        font-size: 13px;
+        outline: none;
+        color: #444;
+        background: #fff;
+        cursor: pointer;
+    }
+
+    .cat-status-filter:focus { border-color: #f26522; }
+
+    .btn-add-cat {
+        background: #f26522;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 9px 18px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .btn-add-cat:hover { background: #d4551c; }
+
+    .cat-grid-wrap { padding: 0; }
+
+    .cat-cell { display: flex; align-items: center; gap: 10px; }
+
+    .cat-emoji-box {
+        width: 38px;
+        height: 38px;
+        border-radius: 9px;
+        background: #fff3ee;
+        border: 1px solid #fde0cc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    .cat-name { font-weight: 600; font-size: 13px; color: #1a1a1a; line-height: 1.3; }
+    .cat-desc { font-size: 11.5px; color: #999; margin-top: 2px; }
+
+    .badge-active { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+    .badge-inactive { background: #fce4ec; color: #c62828; border: 1px solid #ef9a9a; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+    .badge-review { background: #fff8e1; color: #e65100; border: 1px solid #ffcc80; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+
+    .action-btns { display: flex; align-items: center; gap: 6px; }
+
+    .btn-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+        border: 1px solid #e0e0e0;
+        background: #f5f5f5;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        color: #555;
+    }
+
+    .btn-icon:hover { background: #ebebeb; }
+    .btn-icon.del { border-color: #ffcdd2; background: #fff5f5; color: #c62828; }
+    .btn-icon.del:hover { background: #ffebee; }
+    .btn-icon i { font-size: 12px; line-height: 1; }
+
+    #categoryGridTable_wrapper { padding: 0; }
+    #categoryGridTable_wrapper .row { margin: 0; }
+    #categoryGridTable_wrapper .dataTables_filter { display: none; }
+    #categoryGridTable_wrapper .cat-grid-footer { display: none !important; }
+
+    #categoryGridTable_wrapper .cat-footer-left,
+    #categoryGridTable_wrapper .cat-footer-mid,
+    #categoryGridTable_wrapper .cat-footer-right {
+        display: flex;
+        align-items: center;
+    }
+
+    #categoryGridTable_wrapper .cat-footer-left { gap: 8px; }
+    #categoryGridTable_wrapper .cat-footer-mid { margin-left: 8px; }
+    #categoryGridTable_wrapper .cat-footer-right { margin-left: auto; }
+
+    #categoryGridTable_wrapper .dataTables_info,
+    #categoryGridTable_wrapper .dataTables_paginate,
+    #categoryGridTable_wrapper .dataTables_length {
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: 13px;
+        color: #666;
+    }
+
+    #categoryGridTable_wrapper .dataTables_paginate {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 0;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+    }
+
+    #categoryGridTable_wrapper .dataTables_paginate span {
+        display: inline-flex;
+        gap: 4px;
+    }
+
+    #categoryGridTable_wrapper .dataTables_paginate .paginate_button {
+        min-width: 32px;
+        height: 32px;
+        margin: 0 !important;
+        padding: 0 10px !important;
+        border: 1px solid #e3e3e3 !important;
+        border-radius: 6px !important;
+        background: #fff !important;
+        color: #6b7280 !important;
+        font-size: 12px !important;
+        font-weight: 600;
+        line-height: 30px !important;
+        box-shadow: none !important;
+        transition: all .15s ease;
+    }
+
+    #categoryGridTable_wrapper .dataTables_paginate .paginate_button:hover {
+        background: #f8f9fb !important;
+        border-color: #d8dde4 !important;
+        color: #4b5563 !important;
+    }
+
+    #categoryGridTable_wrapper .dataTables_paginate .paginate_button.current,
+    #categoryGridTable_wrapper .dataTables_paginate .paginate_button.current:hover {
+        background: #2f6df6 !important;
+        border-color: #2f6df6 !important;
+        color: #fff !important;
+        font-weight: 700;
+        box-shadow: 0 4px 10px rgba(47, 109, 246, .24) !important;
+    }
+
+    #categoryGridTable_wrapper .dataTables_paginate .paginate_button.disabled,
+    #categoryGridTable_wrapper .dataTables_paginate .paginate_button.disabled:hover {
+        background: #fbfcfd !important;
+        border-color: #eceff3 !important;
+        color: #c0c6cf !important;
+        cursor: default !important;
+        box-shadow: none !important;
+    }
+
+    #categoryGridTable_wrapper .dataTables_info {
+        color: #646b75;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    #categoryGridTable_wrapper .dataTables_scroll {
+        border-top: none;
+    }
+
+    #categoryGridTable_wrapper .dataTables_scrollHead {
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    #categoryGridTable_wrapper .dataTables_scrollBody {
+        border: none !important;
+        max-height: 460px !important;
+    }
+
+    #categoryGridTable_wrapper .dataTables_paginate .paginate_button:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(47, 109, 246, .2) !important;
+    }
+
+    #categoryGridTable_wrapper .dataTables_length label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: #666;
+        white-space: nowrap;
+    }
+
+    #categoryGridTable_wrapper .dataTables_length select {
+        min-width: 56px;
+        height: 30px;
+        border: 1px solid #e3e3e3;
+        border-radius: 8px;
+        background: #fff;
+        color: #444;
+        font-size: 12px;
+        padding: 0 20px 0 10px;
+        box-shadow: none;
+    }
+
+    #categoryGridTable_wrapper .dataTables_length select:focus {
+        border-color: #f26522;
+        box-shadow: 0 0 0 2px rgba(242, 101, 34, .12);
+    }
+
+    #categoryGridTable {
+        margin: 0 !important;
+        width: 100% !important;
+        border-collapse: separate !important;
+        border-spacing: 0 !important;
+    }
+
+    #categoryGridTable thead th {
+        background: #fafafa;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        color: #999;
+        padding: 12px 16px !important;
+        border: none !important;
+    }
+
+    #categoryGridTable tbody td {
+        padding: 12px 16px !important;
+        vertical-align: middle;
+        border: none !important;
+        background: #fff;
+        font-size: 13px;
+        color: #4b4b4b;
+    }
+
+    #categoryGridTable tbody tr:hover td { background: #fef9f7; }
+
+    .table > :not(caption) > * > * {
+        border-bottom-width: 0 !important;
+        box-shadow: none !important;
+    }
+
+    .field-error { color: #e53935; font-size: 12px; margin-top: 5px; display: none; }
+    .dlg-warn { margin-top: 12px; padding: 10px 14px; border-radius: 8px; background: #fff8e1; border: 1px solid #ffe082; font-size: 13px; color: #795548; line-height: 1.5; }
+
+    .modal .modal-header { border-bottom: 1px solid #f0f0f0; }
+    .modal .modal-footer { border-top: 1px solid #f0f0f0; }
+
+    .dlg-group { margin-bottom: 16px; }
+    .dlg-group label { font-size: 13px; font-weight: 600; color: #444; display: block; margin-bottom: 7px; }
+    .dlg-group label .req { color: #e53935; margin-left: 2px; }
+    .dlg-group input[type=text],
+    .dlg-group textarea,
+    .dlg-group select {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 9px 12px;
+        border: 1px solid #ddd;
+        border-radius: 7px;
+        font-size: 13px;
+        outline: none;
+        font-family: 'Segoe UI', sans-serif;
+        color: #333;
+        background: #fff;
+    }
+
+    .dlg-group input[type=text]:focus,
+    .dlg-group textarea:focus,
+    .dlg-group select:focus { border-color: #f26522; box-shadow: 0 0 0 2px rgba(242, 101, 34, .12); }
+
+    .dlg-group textarea { resize: vertical; min-height: 80px; }
+
+    .dlg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .btn-dlg-cancel { background: #fff; border: 1px solid #ddd; border-radius: 7px; padding: 8px 20px; font-size: 13px; cursor: pointer; color: #555; }
+    .btn-dlg-cancel:hover { background: #f5f5f5; }
+    .btn-dlg-save { background: #f26522; color: #fff; border: none; border-radius: 7px; padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .btn-dlg-save:hover { background: #d4551c; }
+    .btn-dlg-del { background: #e53935; color: #fff; border: none; border-radius: 7px; padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .btn-dlg-del:hover { background: #c62828; }
+
+    @@media (max-width: 900px) { .cat-stats { grid-template-columns: repeat(2, 1fr); } }
+    @@media (max-width: 600px) { .cat-page { padding: 14px; } .cat-stats { grid-template-columns: 1fr; } .dlg-row { grid-template-columns: 1fr; } }
+</style>
+
+<div class="cat-page">
+    <div class="cat-header">
+        <h1>Taxonomy Management</h1>
+        <p>Organize and structure the platform artwork catalog</p>
+    </div>
+
+    <div class="cat-stats">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#e8f0fe;">🏷️</div>
+            <div>
+                <div class="stat-label">Total Categories</div>
+                <div class="stat-value" style="color:#1565c0;" id="statTotal">0</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#e8f5e9;">✅</div>
+            <div>
+                <div class="stat-label">Active</div>
+                <div class="stat-value" style="color:#2e7d32;" id="statActive">0</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#fff8e1;">⏳</div>
+            <div>
+                <div class="stat-label">Under Review</div>
+                <div class="stat-value" style="color:#e65100;" id="statReview">0</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#fce4ec;">⛔</div>
+            <div>
+                <div class="stat-label">Inactive</div>
+                <div class="stat-value" style="color:#c62828;" id="statInactive">0</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#fff3ee;">🖼️</div>
+            <div>
+                <div class="stat-label">Total Artworks</div>
+                <div class="stat-value" style="color:#f26522;" id="statArtworks">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cat-card">
+        <div class="cat-card-topbar">
+            <div class="cat-card-title">
+                <span class="folder-icon">📁</span>
+                Platform Categories
+            </div>
+            <button class="btn-add-cat" onclick="openAddDialog()">&#43; Add New Category</button>
+        </div>
+
+        <div class="cat-toolbar">
+            <div class="cat-filters">
+                <input type="text" id="searchInput" class="cat-search" placeholder="Search categories..." />
+                <select id="statusFilter" class="cat-status-filter">
+                    <option value="">All Status</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                    <option value="Under_Review">Under Review</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="cat-grid-wrap">
+            <table id="categoryGridTable" class="table align-middle w-100">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Artworks</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="categoryModalTitle">Add New Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="dlg-group">
+                    <label>Category Name <span class="req">*</span></label>
+                    <input id="fldName" type="text" placeholder="e.g. Digital Painting" />
+                    <div class="field-error" id="errName">Category name is required.</div>
+                </div>
+                <div class="dlg-group">
+                    <label>Description <span class="req">*</span></label>
+                    <textarea id="fldDesc" placeholder="Brief description of this category..."></textarea>
+                    <div class="field-error" id="errDesc">Description is required.</div>
+                </div>
+                <div class="dlg-row">
+                    <div class="dlg-group">
+                        <label>Status</label>
+                        <select id="fldStatus">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Under_Review">Under Review</option>
+                        </select>
+                    </div>
+                    <div class="dlg-group">
+                        <label>Icon</label>
+                        <select id="fldIcon">
+                            <option value="🎨">🎨  Palette</option>
+                            <option value="🎯">🎯  Target</option>
+                            <option value="🖌️">🖌️  Brush</option>
+                            <option value="🗿">🗿  Sculpture</option>
+                            <option value="🤖">🤖  AI Art</option>
+                            <option value="📷">📷  Camera</option>
+                            <option value="✏️">✏️  Pencil</option>
+                            <option value="🏙️">🏙️  Urban</option>
+                            <option value="💧">💧  Watercolor</option>
+                            <option value="🕹️">🕹️  Pixel</option>
+                            <option value="🖨️">🖨️  Print</option>
+                            <option value="🎭">🎭  Mixed</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-dlg-cancel" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn-dlg-save" id="btnSaveCategory">Add Category</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p style="margin:0 0 4px;font-size:14px;color:#444;line-height:1.6;">
+                    Are you sure you want to delete
+                    <strong id="delCatName" style="color:#1a1a1a;"></strong>?
+                    This action cannot be undone.
+                </p>
+                <div class="dlg-warn" id="delWarnBox" style="display:none;">
+                    ⚠️ This category has <strong id="delArtworkCount"></strong> artworks linked to it.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-dlg-cancel" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn-dlg-del" id="btnConfirmDelete">Delete Category</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    var ADMIN_API_BASE = "http://localhost:5183/api/AdminApi";
+    var categories = [];
+
+    var editId = null;
+    var deleteId = null;
+    var table;
+    var categoryModal;
+    var deleteModal;
+    var currentSearch = "";
+    var currentStatus = "";
+    var filterDebounceId = null;
+
+    function escapeHtml(value) {
+        return $("<div>").text(value == null ? "" : value).html();
+    }
+
+    function statusBadge(status) {
+        var cls = status === "Active" ? "badge-active" : status === "Inactive" ? "badge-inactive" : "badge-review";
+        var label = status === "Under_Review" ? "Under Review" : status;
+        return '<span class="' + cls + '">' + escapeHtml(label) + '</span>';
+    }
+
+    function categoryCell(cat) {
+        return '<div class="cat-cell">'
+            + '<div class="cat-emoji-box">' + cat.icon + '</div>'
+            + '<div>'
+            + '<div class="cat-name">' + escapeHtml(cat.name) + '</div>'
+            + '<div class="cat-desc">' + escapeHtml(cat.description) + '</div>'
+            + '</div></div>';
+    }
+
+    function actionCell(id) {
+        return '<div class="action-btns">'
+            + '<button class="btn-icon" title="Edit" onclick="openEditDialog(' + id + ')"><i class="bi bi-pencil"></i></button>'
+            + '<button class="btn-icon del" title="Delete" onclick="openDeleteDialog(' + id + ')"><i class="bi bi-trash"></i></button>'
+            + '</div>';
+    }
+
+    function refreshStats() {
+        $("#statTotal").text(categories.length);
+        $("#statActive").text(categories.filter(function (c) { return c.status === "Active"; }).length);
+        $("#statReview").text(categories.filter(function (c) { return c.status === "Under_Review"; }).length);
+        $("#statInactive").text(categories.filter(function (c) { return c.status === "Inactive"; }).length);
+        $("#statArtworks").text(categories.reduce(function (s, c) { return s + c.artworks; }, 0).toLocaleString());
+    }
+
+    async function loadCategoriesFromApi() {
+        var query = $.param({ search: currentSearch || "", status: currentStatus || "" });
+        var rows = await $.getJSON(ADMIN_API_BASE + "/categories?" + query);
+        categories = (rows || []).map(function (r) {
+            var name = r.categoryName || "";
+            return {
+                id: r.categoryId,
+                icon: r.categoryIcon || "🎨",
+                name: name,
+                description: r.categoryDescription || "",
+                artworks: Number(r.artworkCount || 0),
+                status: r.status || (r.isActive ? "Active" : "Inactive"),
+                createdAt: r.createdAt ? new Date(r.createdAt).toDateString().slice(4) : "-"
+            };
+        });
+    }
+
+    function refreshGrid() {
+        table.clear();
+        table.rows.add(getFilteredRows());
+        table.draw(false);
+    }
+
+    function todayStr() {
+        var d = new Date();
+        var m = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        return m[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
+    }
+
+    function nextId() {
+        return Math.max.apply(Math, categories.map(function (c) { return c.id; })) + 1;
+    }
+
+    function createdAtToTime(value) {
+        var t = Date.parse(value);
+        return Number.isNaN(t) ? 0 : t;
+    }
+
+    function statusSortRank(value) {
+        if (value === "Active") return 1;
+        if (value === "Under_Review") return 2;
+        if (value === "Inactive") return 3;
+        return 99;
+    }
+
+    async function applyFilters() {
+        currentSearch = $("#searchInput").val().toLowerCase().trim();
+        currentStatus = $("#statusFilter").val();
+        await loadCategoriesFromApi();
+        refreshStats();
+        refreshGrid();
+    }
+
+    function getFilteredRows() {
+        return categories.filter(function (row) {
+            var rowName = (row.name || "").toLowerCase();
+            var rowDesc = (row.description || "").toLowerCase();
+            var matchesSearch = !currentSearch
+                || rowName.includes(currentSearch)
+                || rowDesc.includes(currentSearch);
+            var matchesStatus = !currentStatus || row.status === currentStatus;
+            return matchesSearch && matchesStatus;
+        });
+    }
+
+    function scheduleFilters() {
+        if (filterDebounceId) clearTimeout(filterDebounceId);
+        filterDebounceId = setTimeout(async function () {
+            await applyFilters();
+        }, 120);
+    }
+
+    function showSuccessAlert(title, text) {
+        if (window.Swal) {
+            Swal.fire({
+                icon: "success",
+                title: title,
+                text: text,
+                timer: 1800,
+                showConfirmButton: false
+            });
+            return;
+        }
+        alert(text);
+    }
+
+    function showErrorAlert(title, text) {
+        if (window.Swal) {
+            Swal.fire({
+                icon: "error",
+                title: title,
+                text: text
+            });
+            return;
+        }
+        alert(text);
+    }
+
+    function openAddDialog() {
+        editId = null;
+        $("#fldName").val("");
+        $("#fldDesc").val("");
+        $("#fldStatus").val("Active");
+        $("#fldIcon").val("🎨");
+        $("#errName, #errDesc").hide();
+        $("#categoryModalTitle").text("Add New Category");
+        $("#btnSaveCategory").text("Add Category");
+        categoryModal.show();
+    }
+
+    function openEditDialog(id) {
+        var cat = categories.find(function (c) { return c.id === id; });
+        if (!cat) return;
+
+        editId = id;
+        $("#fldName").val(cat.name);
+        $("#fldDesc").val(cat.description);
+        $("#fldStatus").val(cat.status);
+        $("#fldIcon").val(cat.icon);
+        $("#errName, #errDesc").hide();
+        $("#categoryModalTitle").text("Edit Category");
+        $("#btnSaveCategory").text("Save Changes");
+        categoryModal.show();
+    }
+
+    async function handleSave() {
+        var name = $("#fldName").val().trim();
+        var desc = $("#fldDesc").val().trim();
+        var ok = true;
+        var isEdit = editId !== null;
+
+        if (!name) { $("#errName").show(); ok = false; } else { $("#errName").hide(); }
+        if (!desc) { $("#errDesc").show(); ok = false; } else { $("#errDesc").hide(); }
+        if (!ok) return;
+
+        var status = $("#fldStatus").val();
+        var icon = $("#fldIcon").val();
+
+        try {
+            var payload = {
+                categoryIcon: icon,
+                categoryName: name,
+                categoryDescription: desc,
+                status: status,
+                isActive: status === "Active"
+            };
+            if (editId !== null) {
+                await $.ajax({ url: ADMIN_API_BASE + "/categories/" + editId, method: "PUT", contentType: "application/json", data: JSON.stringify(payload) });
+            } else {
+                await $.ajax({ url: ADMIN_API_BASE + "/categories", method: "POST", contentType: "application/json", data: JSON.stringify(payload) });
+            }
+
+            categoryModal.hide();
+            await applyFilters();
+
+            if (isEdit) {
+                showSuccessAlert("Category Updated", "Category has been updated successfully.");
+            } else {
+                showSuccessAlert("Category Added", "New category has been added successfully.");
+            }
+        } catch (err) {
+            var msg = (err && err.responseText) ? err.responseText : "Unable to save category. Check API server and try again.";
+            showErrorAlert("Save Failed", msg);
+        }
+    }
+
+    function openDeleteDialog(id) {
+        var cat = categories.find(function (c) { return c.id === id; });
+        if (!cat) return;
+
+        deleteId = id;
+        $("#delCatName").text(cat.name);
+
+        if (cat.artworks > 0) {
+            $("#delArtworkCount").text(cat.artworks.toLocaleString());
+            $("#delWarnBox").show();
+        } else {
+            $("#delWarnBox").hide();
+        }
+
+        deleteModal.show();
+    }
+
+    async function confirmDelete() {
+        try {
+            var deletedCat = categories.find(function (c) { return c.id === deleteId; });
+            var deletedName = deletedCat ? deletedCat.name : "Category";
+            await $.ajax({ url: ADMIN_API_BASE + "/categories/" + deleteId, method: "DELETE" });
+            deleteId = null;
+            deleteModal.hide();
+            await applyFilters();
+            showSuccessAlert("Category Deleted", deletedName + " has been deleted successfully.");
+        } catch (err) {
+            var msg = (err && err.responseText) ? err.responseText : "Unable to delete category.";
+            showErrorAlert("Delete Failed", msg);
+        }
+    }
+
+    $(document).ready(async function () {
+        categoryModal = new bootstrap.Modal(document.getElementById("categoryModal"));
+        deleteModal = new bootstrap.Modal(document.getElementById("deleteModal"));
+
+        table = $("#categoryGridTable").DataTable({
+            paging: false,
+            info: false,
+            lengthChange: false,
+            ordering: false,
+            searching: false,
+            autoWidth: false,
+            scrollY: "460px",
+            scrollCollapse: true,
+            data: [],
+            columns: [
+                {
+                    data: null,
+                    render: function (d, type) {
+                        if (type === "sort" || type === "type") return d.name;
+                        return categoryCell(d);
+                    }
+                },
+                {
+                    data: "artworks",
+                    render: function (d, type) {
+                        if (type === "sort" || type === "type") return d;
+                        return '<span style="font-weight:600;color:#333;">' + Number(d).toLocaleString() + ' assets</span>';
+                    }
+                },
+                {
+                    data: "status",
+                    render: function (d, type) {
+                        if (type === "sort" || type === "type") return statusSortRank(d);
+                        return statusBadge(d);
+                    }
+                },
+                {
+                    data: "createdAt",
+                    render: function (d, type) {
+                        if (type === "sort" || type === "type") return createdAtToTime(d);
+                        return '<span style="font-size:13px;color:#aaa;">' + escapeHtml(d) + '</span>';
+                    }
+                },
+                {
+                    data: "id",
+                    orderable: false,
+                    render: function (d, type) {
+                        if (type === "sort" || type === "type") return "";
+                        return actionCell(d);
+                    }
+                }
+            ],
+            columnDefs: [
+                { targets: 0, width: "40%" },
+                { targets: 1, width: "16%" },
+                { targets: 2, width: "16%" },
+                { targets: 3, width: "16%" },
+                { targets: 4, width: "12%" }
+            ],
+            dom: "rt"
+        });
+
+        try {
+            await applyFilters();
+        } catch (err) {
+            var msg = (err && err.responseText) ? err.responseText : "Failed to load categories. Verify API is running on https://localhost:7077.";
+            showErrorAlert("Load Failed", msg);
+        }
+
+        $("#searchInput").on("input keyup paste", function () { scheduleFilters(); });
+        $("#statusFilter").on("change", async function () { await applyFilters(); });
+        $("#btnSaveCategory").on("click", async function () { await handleSave(); });
+        $("#btnConfirmDelete").on("click", async function () { await confirmDelete(); });
+    });
+</script>
+}
