@@ -4,12 +4,14 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using Npgsql;
+using Repository;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddScoped<IAdminInterface,AdminRepository>();
 
 // Swagger (ONLY ONCE)
 builder.Services.AddSwaggerGen(c =>
@@ -67,7 +69,7 @@ builder.Services.AddAuthentication(options =>
     {
         ValidateIssuer = true,
         ValidateAudience = true,
-        ValidateLifetime = true, // ✅ FIXED
+        ValidateLifetime = true, 
         ValidateIssuerSigningKey = true,
 
         ValidAudience = builder.Configuration["Jwt:Audience"],
@@ -100,7 +102,7 @@ builder.Services.AddScoped<IDatabase>(sp =>
 // Cache
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.Configuration = builder.Configuration.GetConnectionString("Redis")+ ",defaultDatabase=0";
     options.InstanceName = "Session_";
 });
 
