@@ -1,0 +1,125 @@
+@{
+    Layout = "../Shared/_ArtistLayout.cshtml";
+}
+
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #1f6f6b, #3aa6a0);
+        color: white;
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 20px;
+    }
+
+    .card-custom {
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 20px;
+        background: white;
+    }
+
+    .stat-title {
+        color: gray;
+        font-size: 14px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: bold;
+    }
+</style>
+
+<!-- 🔥 HEADER -->
+<div class="dashboard-header">
+    <h2 id="artistName">Welcome</h2>
+    <p id="artistBio"></p>
+    <h1 id="totalEarnings">$0</h1>
+</div>
+
+<!-- 🔥 CARDS -->
+<div class="row g-3">
+
+    <div class="col-md-3">
+        <div class="card-custom">
+            <div class="stat-title">ARTWORKS</div>
+            <div class="stat-value" id="artworks">0</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card-custom">
+            <div class="stat-title">LIKES</div>
+            <div class="stat-value" id="likes">0</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card-custom">
+            <div class="stat-title">SALES</div>
+            <div class="stat-value" id="sales">0</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card-custom">
+            <div class="stat-title">RATING</div>
+            <div class="stat-value" id="rating">0</div>
+        </div>
+    </div>
+
+</div>
+
+<br />
+
+<!-- 🔥 CHART SECTION (Placeholder for now) -->
+<div class="card-custom">
+    <h5>Revenue (Last 12 Months)</h5>
+    <div id="revenueChart">Chart coming soon...</div>
+</div>
+
+<br />
+
+<div class="card-custom">
+    <h5>Sales by Category</h5>
+    <div id="categoryChart">Chart coming soon...</div>
+</div>
+
+---
+
+@section Scripts {
+<script>
+    $(document).ready(function () {
+
+        const baseUrl = "http://localhost:5183/api/ArtistApi";
+        const artistId = 12;
+
+        $("#dashboard").hide();
+
+        $.ajax({
+            url: `${baseUrl}/dashboard/${artistId}`,
+            type: "GET",
+            success: function (data) {
+
+                // HEADER
+                $("#artistName").text("Welcome, " + data.artistName);
+                $("#artistBio").text(data.biography);
+                $("#rating").text(data.rating);
+
+                // CARDS
+                $("#artworks").text(data.totalArtworks);
+                $("#likes").text(data.totalLikes);
+                $("#sales").text(data.totalSales);
+
+                // STATIC (for now)
+                $("#totalEarnings").text("$18,240");
+
+                $("#dashboard").fadeIn();
+            },
+            error: function () {
+                alert("Failed to load dashboard");
+            }
+        });
+
+    });
+</script>
+}
