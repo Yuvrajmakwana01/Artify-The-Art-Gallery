@@ -1,0 +1,718 @@
+@* @{
+    ViewBag.Title = "Profile";
+    Layout = "~/Views/Shared/_BuyerLayout.cshtml";
+}
+
+<style>
+    :root {
+        --bg: hsl(40, 33%, 96%);
+        --fg: hsl(30, 10%, 15%);
+        --card: hsl(40, 30%, 98%);
+        --primary: hsl(30, 30%, 30%);
+        --primary-fg: hsl(40, 33%, 96%);
+        --muted: hsl(35, 20%, 92%);
+        --muted-fg: hsl(30, 8%, 50%);
+        --accent: hsl(30, 40%, 82%);
+        --accent-fg: hsl(30, 15%, 20%);
+        --border: hsl(35, 20%, 87%);
+        --warm: hsl(32, 45%, 70%);
+        --warm-fg: hsl(30, 15%, 20%);
+        --success: hsl(145, 50%, 40%);
+        --destructive: hsl(0, 65%, 55%);
+    }
+
+    .profile-page { max-width: 900px; margin: 0 auto; font-family: 'Inter', sans-serif; }
+    .profile-page h1, .profile-page h2, .profile-page h3, .profile-page h4 { font-family: 'Playfair Display', serif; }
+
+    /* Hero Section */
+    .profile-hero {
+        background: linear-gradient(135deg, hsla(30,30%,30%,0.08), hsla(30,40%,82%,0.3), hsla(32,45%,70%,0.15));
+        border-radius: 16px;
+        padding: 48px;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 32px;
+    }
+    .profile-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 30% 50%, hsla(32,45%,70%,0.15), transparent 60%);
+    }
+    .profile-hero-inner {
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        gap: 40px;
+    }
+    .profile-avatar {
+        position: relative;
+        flex-shrink: 0;
+    }
+    .profile-avatar-circle {
+        width: 112px;
+        height: 112px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), hsla(30,30%,30%,0.7));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        border: 4px solid var(--card);
+    }
+    .profile-avatar-circle .k-icon { font-size: 40px; color: var(--primary-fg); }
+    .profile-avatar-cam {
+        position: absolute;
+        bottom: -4px;
+        right: -4px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--card);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .profile-avatar-cam:hover { transform: scale(1.1); }
+    .profile-avatar-cam .k-icon { font-size: 16px; color: var(--fg); }
+
+    .profile-info { flex: 1; }
+    .profile-name { font-size: 32px; font-weight: 700; color: var(--fg); margin: 0; }
+    .profile-email { color: var(--muted-fg); margin-top: 4px; font-size: 14px; }
+
+    .profile-badges { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+    .profile-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .badge-collector { background: hsla(30,30%,30%,0.1); color: var(--primary); border: 1px solid hsla(30,30%,30%,0.2); }
+    .badge-verified { background: hsla(145,50%,40%,0.1); color: var(--success); border: 1px solid hsla(145,50%,40%,0.2); }
+
+    .profile-stats { display: flex; gap: 32px; margin-top: 24px; }
+    .profile-stat { text-align: center; }
+    .profile-stat-value { font-size: 24px; font-weight: 700; color: var(--fg); }
+    .profile-stat-label { font-size: 12px; color: var(--muted-fg); }
+    .stat-divider { width: 1px; height: 40px; background: var(--border); align-self: center; }
+
+    .profile-edit-btn {
+        padding: 8px 20px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--fg);
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+    .profile-edit-btn:hover { background: var(--muted); }
+
+    /* Cards Grid */
+    .profile-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+    .profile-card {
+        background: var(--card);
+        border: 1px solid hsla(35,20%,87%,0.6);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .card-header {
+        background: hsla(30,40%,82%,0.2);
+        border-bottom: 1px solid hsla(35,20%,87%,0.4);
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .card-header h3 { font-size: 18px; font-weight: 600; color: var(--fg); margin: 0; }
+    .card-header .k-icon { font-size: 20px; color: var(--primary); }
+    .card-body { padding: 24px; }
+
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .info-item-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); margin-bottom: 4px; }
+    .info-item-value { font-size: 14px; font-weight: 500; color: var(--fg); }
+
+    .card-divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+    .style-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .style-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        background: hsla(32,45%,70%,0.2);
+        color: var(--warm-fg);
+        border: 1px solid hsla(32,45%,70%,0.3);
+    }
+
+    /* Quick Links */
+    .quick-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: background 0.2s;
+        margin-bottom: 8px;
+    }
+    .quick-link:hover { background: hsla(30,40%,82%,0.4); }
+    .quick-link-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .quick-link-icon.orders { background: hsla(30,30%,30%,0.1); }
+    .quick-link-icon.orders .k-icon { color: var(--primary); }
+    .quick-link-icon.wishlist { background: hsla(0,65%,55%,0.1); }
+    .quick-link-icon.wishlist .k-icon { color: var(--destructive); }
+    .quick-link-text strong { display: block; font-size: 14px; color: var(--fg); font-weight: 500; }
+    .quick-link-text span { font-size: 12px; color: var(--muted-fg); }
+
+    /* Member Card */
+    .member-card {
+        background: linear-gradient(135deg, hsla(30,30%,30%,0.12), hsla(32,45%,70%,0.12));
+        padding: 24px;
+        text-align: center;
+        border-radius: 12px;
+        border: 1px solid hsla(35,20%,87%,0.6);
+    }
+    .member-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted-fg); }
+    .member-value { font-size: 24px; font-weight: 700; color: var(--fg); margin-top: 4px; font-family: 'Playfair Display', serif; }
+    .member-sub { font-size: 12px; color: var(--muted-fg); margin-top: 8px; }
+
+    @@media (max-width: 768px) {
+        .profile-hero { padding: 24px; }
+        .profile-hero-inner { flex-direction: column; align-items: center; text-align: center; gap: 20px; }
+        .profile-stats { justify-content: center; }
+        .profile-grid { grid-template-columns: 1fr; }
+        .info-grid { grid-template-columns: 1fr; }
+        .profile-badges { justify-content: center; }
+    }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<div class="profile-page">
+    <!-- Hero Section -->
+    <div class="profile-hero">
+        <div class="profile-hero-inner">
+            <div class="profile-avatar">
+                <div class="profile-avatar-circle">
+                    <span class="k-icon k-i-user"></span>
+                </div>
+                <div class="profile-avatar-cam">
+                    <span class="k-icon k-i-image"></span>
+                </div>
+            </div>
+            <div class="profile-info">
+                <h1 class="profile-name">Sarah Mitchell</h1>
+                <p class="profile-email">sarah.mitchell@@email.com</p>
+                <div class="profile-badges">
+                    <span class="profile-badge badge-collector">
+                        <span class="k-icon k-i-palette"></span> Art Collector
+                    </span>
+                    <span class="profile-badge badge-verified">
+                        <span class="k-icon k-i-check-circle"></span> Verified Buyer
+                    </span>
+                </div>
+                <div class="profile-stats">
+                    <div class="profile-stat">
+                        <div class="profile-stat-value">12</div>
+                        <div class="profile-stat-label">Artworks</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="profile-stat">
+                        <div class="profile-stat-value">5</div>
+                        <div class="profile-stat-label">Orders</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="profile-stat">
+                        <div class="profile-stat-value">8</div>
+                        <div class="profile-stat-label">Artists</div>
+                    </div>
+                </div>
+            </div>
+            <a href="@Url.Action("EditProfile", "Buyer")" class="profile-edit-btn">
+                <span class="k-icon k-i-edit"></span> Edit Profile
+            </a>
+        </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="profile-grid">
+        <!-- Left: Personal Info -->
+        <div>
+            <div class="profile-card">
+                <div class="card-header">
+                    <span class="k-icon k-i-user"></span>
+                    <h3>Personal Information</h3>
+                </div>
+                <div class="card-body">
+                    <div class="info-grid">
+                        <div>
+                            <div class="info-item-label">Full Name</div>
+                            <div class="info-item-value">Sarah Mitchell</div>
+                        </div>
+                        <div>
+                            <div class="info-item-label">Email Address</div>
+                            <div class="info-item-value">sarah.mitchell@@email.com</div>
+                        </div>
+                        <div>
+                            <div class="info-item-label">Phone Number</div>
+                            <div class="info-item-value">+1 (555) 234-5678</div>
+                        </div>
+                        <div>
+                            <div class="info-item-label">Shipping Address</div>
+                            <div class="info-item-value">124 Art Street, Brooklyn, NY 11201</div>
+                        </div>
+                    </div>
+                    <div class="card-divider"></div>
+                    <div class="info-item-label">Preferred Art Styles</div>
+                    <div class="style-tags">
+                        <span class="style-tag"><span class="k-icon k-i-palette"></span> Abstract</span>
+                        <span class="style-tag"><span class="k-icon k-i-palette"></span> Modern</span>
+                        <span class="style-tag"><span class="k-icon k-i-palette"></span> Digital Illustration</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div>
+            <div class="profile-card" style="margin-bottom: 24px;">
+                <div class="card-header">
+                    <h3>Quick Links</h3>
+                </div>
+                <div class="card-body" style="padding: 16px;">
+                    <a href="@Url.Action("Orders", "Buyer")" class="quick-link">
+                        <div class="quick-link-icon orders">
+                            <span class="k-icon k-i-cart"></span>
+                        </div>
+                        <div class="quick-link-text">
+                            <strong>My Orders</strong>
+                            <span>View purchase history</span>
+                        </div>
+                    </a>
+                    <a href="#" class="quick-link">
+                        <div class="quick-link-icon wishlist">
+                            <span class="k-icon k-i-heart"></span>
+                        </div>
+                        <div class="quick-link-text">
+                            <strong>Wishlist</strong>
+                            <span>Saved artworks</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="member-card">
+                <div class="member-label">Member Since</div>
+                <div class="member-value">Jan 2026</div>
+                <div class="member-sub">Early adopter of Artify Gallery</div>
+            </div>
+        </div>
+    </div>
+</div> *@
+
+
+
+@{
+    ViewBag.Title = "Profile";
+    Layout = "~/Views/Shared/_BuyerLayout.cshtml";
+}
+
+<style>
+    :root {
+        --bg: hsl(40, 33%, 96%);
+        --fg: hsl(30, 10%, 15%);
+        --card: hsl(40, 30%, 98%);
+        --primary: hsl(30, 30%, 30%);
+        --primary-fg: hsl(40, 33%, 96%);
+        --muted: hsl(35, 20%, 92%);
+        --muted-fg: hsl(30, 8%, 50%);
+        --accent: hsl(30, 40%, 82%);
+        --accent-fg: hsl(30, 15%, 20%);
+        --border: hsl(35, 20%, 87%);
+        --warm: hsl(32, 45%, 70%);
+        --warm-fg: hsl(30, 15%, 20%);
+        --success: hsl(145, 50%, 40%);
+        --destructive: hsl(0, 65%, 55%);
+    }
+
+    .profile-page { max-width: 900px; margin: 0 auto; font-family: 'Inter', sans-serif; }
+    .profile-page h1, .profile-page h2, .profile-page h3, .profile-page h4 { font-family: 'Playfair Display', serif; }
+
+    .profile-hero {
+        background: linear-gradient(135deg, hsla(30,30%,30%,0.08), hsla(30,40%,82%,0.3), hsla(32,45%,70%,0.15));
+        border-radius: 16px;
+        padding: 48px;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 32px;
+    }
+    .profile-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 30% 50%, hsla(32,45%,70%,0.15), transparent 60%);
+    }
+    .profile-hero-inner {
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        gap: 40px;
+    }
+    .profile-avatar {
+        position: relative;
+        flex-shrink: 0;
+    }
+    .profile-avatar-circle {
+        width: 112px;
+        height: 112px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), hsla(30,30%,30%,0.7));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        border: 4px solid var(--card);
+        overflow: hidden;
+    }
+    .profile-avatar-circle .k-icon { font-size: 40px; color: var(--primary-fg); }
+    .profile-avatar-cam {
+        position: absolute;
+        bottom: -4px;
+        right: -4px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--card);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .profile-avatar-cam:hover { transform: scale(1.1); }
+    .profile-avatar-cam .k-icon { font-size: 16px; color: var(--fg); }
+
+    .profile-info { flex: 1; }
+    .profile-name { font-size: 32px; font-weight: 700; color: var(--fg); margin: 0; }
+    .profile-email { color: var(--muted-fg); margin-top: 4px; font-size: 14px; }
+
+    .profile-badges { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+    .profile-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .badge-collector { background: hsla(30,30%,30%,0.1); color: var(--primary); border: 1px solid hsla(30,30%,30%,0.2); }
+    .badge-verified { background: hsla(145,50%,40%,0.1); color: var(--success); border: 1px solid hsla(145,50%,40%,0.2); }
+
+    .profile-stats { display: flex; gap: 32px; margin-top: 24px; }
+    .profile-stat { text-align: center; }
+    .profile-stat-value { font-size: 24px; font-weight: 700; color: var(--fg); }
+    .profile-stat-label { font-size: 12px; color: var(--muted-fg); }
+    .stat-divider { width: 1px; height: 40px; background: var(--border); align-self: center; }
+
+    .profile-edit-btn {
+        padding: 8px 20px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--fg);
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+    .profile-edit-btn:hover { background: var(--muted); }
+
+    .profile-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+    .profile-card {
+        background: var(--card);
+        border: 1px solid hsla(35,20%,87%,0.6);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .card-header {
+        background: hsla(30,40%,82%,0.2);
+        border-bottom: 1px solid hsla(35,20%,87%,0.4);
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .card-header h3 { font-size: 18px; font-weight: 600; color: var(--fg); margin: 0; }
+    .card-header .k-icon { font-size: 20px; color: var(--primary); }
+    .card-body { padding: 24px; }
+
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .info-item-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); margin-bottom: 4px; }
+    .info-item-value { font-size: 14px; font-weight: 500; color: var(--fg); }
+
+    .card-divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+    .style-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .style-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        background: hsla(32,45%,70%,0.2);
+        color: var(--warm-fg);
+        border: 1px solid hsla(32,45%,70%,0.3);
+    }
+
+    .quick-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: background 0.2s;
+        margin-bottom: 8px;
+    }
+    .quick-link:hover { background: hsla(30,40%,82%,0.4); }
+    .quick-link-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .quick-link-icon.orders { background: hsla(30,30%,30%,0.1); }
+    .quick-link-icon.orders .k-icon { color: var(--primary); }
+    .quick-link-icon.wishlist { background: hsla(0,65%,55%,0.1); }
+    .quick-link-icon.wishlist .k-icon { color: var(--destructive); }
+    .quick-link-text strong { display: block; font-size: 14px; color: var(--fg); font-weight: 500; }
+    .quick-link-text span { font-size: 12px; color: var(--muted-fg); }
+
+    .member-card {
+        background: linear-gradient(135deg, hsla(30,30%,30%,0.12), hsla(32,45%,70%,0.12));
+        padding: 24px;
+        text-align: center;
+        border-radius: 12px;
+        border: 1px solid hsla(35,20%,87%,0.6);
+    }
+    .member-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted-fg); }
+    .member-value { font-size: 24px; font-weight: 700; color: var(--fg); margin-top: 4px; font-family: 'Playfair Display', serif; }
+    .member-sub { font-size: 12px; color: var(--muted-fg); margin-top: 8px; }
+
+    @@media (max-width: 768px) {
+        .profile-hero { padding: 24px; }
+        .profile-hero-inner { flex-direction: column; align-items: center; text-align: center; gap: 20px; }
+        .profile-stats { justify-content: center; }
+        .profile-grid { grid-template-columns: 1fr; }
+        .info-grid { grid-template-columns: 1fr; }
+        .profile-badges { justify-content: center; }
+    }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<div class="profile-page">
+    <!-- Hero Section -->
+    <div class="profile-hero">
+        <div class="profile-hero-inner">
+            <div class="profile-avatar">
+                <div class="profile-avatar-circle">
+                    <span class="k-icon k-i-user" id="avatarIcon"></span>
+                    <img id="avatarImg" src="" alt="Profile"
+                        style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;" />
+                </div>
+                <div class="profile-avatar-cam">
+                    <span class="k-icon k-i-image"></span>
+                </div>
+            </div>
+            <div class="profile-info">
+                <h1 class="profile-name" id="profileName">—</h1>
+                <p class="profile-email" id="profileEmail">—</p>
+                <div class="profile-badges">
+                    <span class="profile-badge badge-collector">
+                        <span class="k-icon k-i-palette"></span> Art Collector
+                    </span>
+                    <span class="profile-badge badge-verified">
+                        <span class="k-icon k-i-check-circle"></span> Verified Buyer
+                    </span>
+                </div>
+                <div class="profile-stats">
+                    <div class="profile-stat">
+                        <div class="profile-stat-value">12</div>
+                        <div class="profile-stat-label">Artworks</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="profile-stat">
+                        <div class="profile-stat-value">5</div>
+                        <div class="profile-stat-label">Orders</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="profile-stat">
+                        <div class="profile-stat-value">8</div>
+                        <div class="profile-stat-label">Artists</div>
+                    </div>
+                </div>
+            </div>
+            <a href="@Url.Action("EditProfile", "Buyer")" class="profile-edit-btn">
+                <span class="k-icon k-i-edit"></span> Edit Profile
+            </a>
+        </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="profile-grid">
+        <!-- Left: Personal Info -->
+        <div>
+            <div class="profile-card">
+                <div class="card-header">
+                    <span class="k-icon k-i-user"></span>
+                    <h3>Personal Information</h3>
+                </div>
+                <div class="card-body">
+                    <div class="info-grid">
+                        <div>
+                            <div class="info-item-label">Full Name</div>
+                            <div class="info-item-value" id="infoFullName">—</div>
+                        </div>
+                        <div>
+                            <div class="info-item-label">Email Address</div>
+                            <div class="info-item-value" id="infoEmail">—</div>
+                        </div>
+                        <div>
+                            <div class="info-item-label">Phone Number</div>
+                            <div class="info-item-value" id="infoMobile">—</div>
+                        </div>
+                        <div>
+                            <div class="info-item-label">Gender</div>
+                            <div class="info-item-value" id="infoGender">—</div>
+                        </div>
+                    </div>
+                    <div class="card-divider"></div>
+                    <div class="info-item-label">Preferred Art Styles</div>
+                    <div class="style-tags">
+                        <span class="style-tag"><span class="k-icon k-i-palette"></span> Abstract</span>
+                        <span class="style-tag"><span class="k-icon k-i-palette"></span> Modern</span>
+                        <span class="style-tag"><span class="k-icon k-i-palette"></span> Digital Illustration</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div>
+            <div class="profile-card" style="margin-bottom: 24px;">
+                <div class="card-header">
+                    <h3>Quick Links</h3>
+                </div>
+                <div class="card-body" style="padding: 16px;">
+                    <a href="@Url.Action("Orders", "Buyer")" class="quick-link">
+                        <div class="quick-link-icon orders">
+                            <span class="k-icon k-i-cart"></span>
+                        </div>
+                        <div class="quick-link-text">
+                            <strong>My Orders</strong>
+                            <span>View purchase history</span>
+                        </div>
+                    </a>
+                    <a href="#" class="quick-link">
+                        <div class="quick-link-icon wishlist">
+                            <span class="k-icon k-i-heart"></span>
+                        </div>
+                        <div class="quick-link-text">
+                            <strong>Wishlist</strong>
+                            <span>Saved artworks</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="member-card">
+                <div class="member-label">Member Since</div>
+                <div class="member-value" id="memberSince">—</div>
+                <div class="member-sub">Early adopter of Artify Gallery</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+
+            // ⚠️ HARDCODED FOR TESTING - change this to any valid c_user_id from your DB
+            var testUserId = 8;
+
+            $.ajax({
+                url: 'http://localhost:5183/api/UserProfile/GetProfile/' + testUserId,
+                type: 'GET',
+                success: function (response) {
+                    if (response.success) {
+                        var u = response.data;
+
+                        // Hero
+                        $('#profileName').text(u.c_FullName || u.c_UserName || '—');
+                        $('#profileEmail').text(u.c_Email || '—');
+
+                        // Avatar
+                        if (u.c_Image) {
+                            $('#avatarIcon').hide();
+                            $('#avatarImg').attr('src', u.c_Image).show();
+                        }
+
+                        // Info card
+                        $('#infoFullName').text(u.c_FullName || '—');
+                        $('#infoEmail').text(u.c_Email       || '—');
+                        $('#infoMobile').text(u.c_Mobile     || '—');
+                        $('#infoGender').text(u.c_Gender     || '—');
+
+                        // Member since
+                        if (u.c_CreatedAt) {
+                            var date = new Date(u.c_CreatedAt);
+                            $('#memberSince').text(date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' }));
+                        }
+                    }
+                },
+                error: function () {
+                    console.log('Failed to load profile data');
+                }
+            });
+
+        });
+    </script>
+}
