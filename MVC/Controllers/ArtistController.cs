@@ -12,9 +12,7 @@ public class ArtistController : Controller
         return null;
     }
 
-    public IActionResult Login() => View();
-    public IActionResult Register() => View();
-
+    
     public IActionResult Dashboard()
     {
         var g = Guard();
@@ -22,15 +20,49 @@ public class ArtistController : Controller
         return View();
     }
 
-    public IActionResult Upload() => View();
-    public IActionResult Gallery() => View();
-    public IActionResult Profile() => View();
+    public IActionResult Register()
+        {
+            return View();
+        }
+
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+
+        public IActionResult Upload()
+        {
+            return View();
+        }
+
+
+        public IActionResult Gallery()
+        {
+            return View();
+        }
+
+
+        public IActionResult Settings()
+        {
+            return View();
+        }
+
+        public IActionResult Profile()
+        {
+            return View();
+        }
+
+
+        public IActionResult Logout()
+        {
+            // Clear all session data
+            HttpContext.Session.Clear();
+
+            return RedirectToAction("Login", "Artist");
+        }
     public IActionResult EditProfile() => View();
     public IActionResult Sales() => View();
 
-    public IActionResult Logout()
-    {
-        HttpContext.Session.Clear();
-        return RedirectToAction("Login");
-    }
+   
 }

@@ -16,16 +16,287 @@ public class ArtistApiController : ControllerBase
 {
     private readonly IArtistInterface _artistRepo;
     private readonly IArtworkInterface _artworkRepo;
-    private readonly IConfiguration _config;
+    private readonly IConfiguration myConfig;
 
-    public ArtistApiController(
-        IArtistInterface artistRepo,
-        IArtworkInterface artworkRepo,
-        IConfiguration config)
+    public ArtistApiController(IArtistInterface artistRepo, IArtworkInterface artworkRepo, IConfiguration config)
     {
         _artistRepo = artistRepo;
+        myConfig = config;
         _artworkRepo = artworkRepo;
-        _config = config;
+    }
+
+
+    [HttpPost("Register")]
+    public async Task<IActionResult> Register([FromForm] t_Artist user)
+    {
+        if (user.ProfilePicture != null)
+        {
+            var fileName = Guid.NewGuid() + Path.GetExtension(user.ProfilePicture.FileName);
+            var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "MVC", "wwwroot", "Artist_Images");
+
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            var filePath = Path.Combine(folderPath, fileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await user.ProfilePicture.CopyToAsync(stream);
+            }
+            user.c_Profile_Image = fileName;
+        }
+
+        if (user.CoverPicture != null)
+        {
+            var fileName = Guid.NewGuid() + Path.GetExtension(user.CoverPicture.FileName);
+            var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "MVC", "wwwroot", "Cover_Images");
+
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            var filePath = Path.Combine(folderPath, fileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await user.CoverPicture.CopyToAsync(stream);
+            }
+            user.c_Cover_Image = fileName;
+        }
+
+        var status = await _artistRepo.Register(user);
+        return status == 1 ? Ok(new { success = true, message = "Artist Registered" }) :
+                             Ok(new { success = false, message = "Artist already exists" });
+    }
+
+    [HttpPost("Login")]
+    public async Task<IActionResult> Login([FromForm] vm_Login user)
+    {
+        t_Artist UserData = await _artistRepo.Login(user);
+
+        if (UserData != null && UserData.c_User_Id != 0)
+        {
+            HttpContext.Session.SetString("UserName", UserData.c_UserName);
+
+            var claims = new[]
+            {
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim("UserId", UserData.c_User_Id.ToString()),
+                    new Claim("UserName", UserData.c_UserName)
+                };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(myConfig["Jwt:Key"]));
+            var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: myConfig["Jwt:Issuer"],
+                audience: myConfig["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddDays(1),
+                signingCredentials: signIn
+            );
+
+            return Ok(new
+            {
+                success = true,
+                message = "User logged in successfully.",
+                UserData = UserData,
+                token = new JwtSecurityTokenHandler().WriteToken(token)
+            });
+        }
+
+        return Ok(new { success = false, message = "Invalid credentials." });
+    }
+
+
+    [HttpPost("Upload")]
+    public async Task<IActionResult> Upload([FromForm] t_Artwork art)
+    {
+        if (art.ArtworkFile == null || art.ArtworkFile.Length == 0)
+        {
+            return BadRequest("Please select an image to upload.");
+        }
+
+        var account = new Account(
+            myConfig["CloudinarySettings:CloudName"],
+            myConfig["CloudinarySettings:ApiKey"],
+            myConfig["CloudinarySettings:ApiSecret"]
+        );
+
+        var cloudinary = new Cloudinary(account);
+
+        try
+        {
+            using (var stream = art.ArtworkFile.OpenReadStream())
+            {
+                var uploadParams = new ImageUploadParams()
+                {
+                    File = new FileDescription(art.ArtworkFile.FileName, stream),
+                    Folder = "Artify_Gallery",
+                    UploadPreset = myConfig["CloudinarySettings:UploadPreset"] ?? "Cloudinary_Setup"
+                };
+
+                var uploadResult = await cloudinary.UploadAsync(uploadParams);
+
+                if (uploadResult.Error != null)
+                    return BadRequest(uploadResult.Error.Message);
+
+                art.c_original_path = uploadResult.SecureUrl.ToString();
+
+                art.c_preview_path = cloudinary.Api.UrlImgUp.Transform(new Transformation()
+                    .Width(800).Crop("scale").Quality("auto")
+                    .Overlay(new TextLayer().Text("Artify").FontFamily("Arial").FontSize(60).FontWeight("bold"))
+                    .Opacity(30).Chain())
+                    .BuildUrl(uploadResult.PublicId);
+            }
+
+            var status = await _artworkRepo.UploadArtwork(art);
+            return status > 0 ? Ok(new { success = true, message = "Masterpiece uploaded!" })
+                              : BadRequest("Failed to save artwork to database.");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
+    [HttpGet("GetAll")]
+    public async Task<IActionResult> GetAll()
+    {
+        try
+        {
+            var artworks = await _artworkRepo.GetAllArtworks();
+            return Ok(new { success = true, data = artworks });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Error: {ex.Message}");
+        }
+    }
+
+    [HttpGet("GetCategories")]
+    public async Task<IActionResult> GetCategories()
+    {
+        try
+        {
+            var data = await _artworkRepo.GetCategories();
+            return Ok(data);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+
+    [HttpGet("GetById/{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        try
+        {
+            // Fetch the artwork from the repository
+            var artwork = await _artworkRepo.GetById(id);
+
+            // Check if the artwork exists
+            if (artwork == null)
+            {
+                return NotFound(new { message = $"Artwork with ID {id} not found." });
+            }
+
+            // Return the successfully found object
+            return Ok(artwork);
+        }
+        catch (Exception ex)
+        {
+            // Log the exception (using your logger) and return 500
+            return StatusCode(500, new { message = "An error occurred while retrieving the data.", details = ex.Message });
+        }
+    }
+
+
+
+    [HttpGet("GetApproved")]
+    public async Task<IActionResult> GetApproved() => Ok(await _artworkRepo.GetApprovedArtworks());
+
+
+    [HttpGet("GetByArtist/{id}")]
+    public async Task<IActionResult> GetByArtist(int id) => Ok(await _artworkRepo.GetArtworksByArtist(id));
+
+
+    [HttpDelete("Delete/{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var rowsAffected = await _artworkRepo.DeleteArtwork(id);
+
+        if (rowsAffected > 0)
+        {
+            return Ok(new
+            {
+                success = true,
+                message = "Artwork deleted successfully."
+            });
+        }
+        else
+        {
+            return NotFound(new
+            {
+                success = false,
+                message = "Artwork not found or could not be deleted."
+            });
+        }
+    }
+
+
+
+    [HttpPut("Update")]
+    public async Task<IActionResult> Update([FromForm] t_Artwork art)
+    {
+        try
+        {
+            // 1. Only process Cloudinary if a new file is actually uploaded
+            if (art.ArtworkFile != null && art.ArtworkFile.Length > 0)
+            {
+                var cloudinary = new Cloudinary(new Account(
+                    myConfig["CloudinarySettings:CloudName"],
+                    myConfig["CloudinarySettings:ApiKey"],
+                    myConfig["CloudinarySettings:ApiSecret"]));
+
+                using var stream = art.ArtworkFile.OpenReadStream();
+                var result = await cloudinary.UploadAsync(new ImageUploadParams
+                {
+                    File = new FileDescription(art.ArtworkFile.FileName, stream),
+                    Folder = "Artify_Gallery",
+                    UploadPreset = myConfig["CloudinarySettings:UploadPreset"] ?? "Cloudinary_Setup"
+
+                });
+
+                // Update model with new paths
+                art.c_original_path = result.SecureUrl.ToString();
+                art.c_preview_path = cloudinary.Api.UrlImgUp.Transform(new Transformation()
+                    .Width(800).Crop("scale").Quality("auto")
+                    .Overlay(new TextLayer().Text("Artify").FontFamily("Arial").FontSize(40).FontWeight("bold"))
+                    .Opacity(30).Chain())
+                    .BuildUrl(result.PublicId);
+            }
+            else
+            {
+                // Explicitly set these to null so the Repository knows NOT to update them
+                art.c_original_path = null;
+                art.c_preview_path = null;
+            }
+
+            // 2. Call the repository
+            var resultRows = await _artworkRepo.UpdateArtwork(art);
+
+            return resultRows > 0
+                ? Ok(new { success = true, message = "Artwork updated successfully" })
+                : NotFound(new { success = false, message = "Artwork not found" });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { success = false, message = ex.Message });
+        }
     }
 
     // ================= DASHBOARD =================
@@ -36,52 +307,8 @@ public class ArtistApiController : ControllerBase
         return data == null ? NotFound() : Ok(data);
     }
 
-    // ================= REGISTER =================
-    [HttpPost("register")]
-    public async Task<IActionResult> Register([FromForm] t_Artist user)
-    {
-        var status = await _artistRepo.Register(user);
-        return status == 1
-            ? Ok(new { success = true })
-            : Ok(new { success = false });
-    }
 
-    // ================= LOGIN =================
-    [HttpPost("login")]
-    public async Task<IActionResult> Login([FromForm] vm_Login user)
-    {
-        Console.WriteLine("Data" + user.c_Email + user.c_Password);
-      
-        var data = await _artistRepo.Login(user);
 
-        if (data == null)
-            return Ok(new { success = false });
-
-        var claims = new[]
-        {
-            new Claim("UserId", data.c_User_Id.ToString()),
-            new Claim("UserName", data.c_UserName)
-        };
-
-        var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(_config["Jwt:Key"])
-        );
-
-        var token = new JwtSecurityToken(
-            issuer: _config["Jwt:Issuer"],
-            audience: _config["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.UtcNow.AddDays(1),
-            signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
-        );
-
-        return Ok(new
-        {
-            success = true,
-            token = new JwtSecurityTokenHandler().WriteToken(token),
-            data
-        });
-    }
 
     // ================= PROFILE =================
     [HttpGet("profile/{id}")]
@@ -98,33 +325,11 @@ public class ArtistApiController : ControllerBase
         return Ok(result);
     }
 
-    // ================= UPLOAD =================
-    [HttpPost("upload")]
-    public async Task<IActionResult> Upload([FromForm] t_Artwork art)
-    {
-        var status = await _artworkRepo.UploadArtwork(art);
-        return status > 0 ? Ok() : BadRequest();
-    }
 
-    // ================= ARTWORK =================
-    [HttpGet("artworks")]
-    public async Task<IActionResult> GetAll()
-    {
-        var data = await _artworkRepo.GetAllArtworks();
-        return Ok(data);
-    }
-
-    [HttpGet("categories")]
-    public async Task<IActionResult> GetCategories()
-    {
-        var data = await _artworkRepo.GetCategories();
-        return Ok(data);
-    }
-
-    [HttpPost("logout")]
-    public IActionResult Logout()
+    [HttpPost("Logout")]
+    public async Task<IActionResult> Logout()
     {
         HttpContext.Session.Clear();
-        return Ok();
+        return Ok(new { success = true, message = "Logged out successfully." });
     }
 }
