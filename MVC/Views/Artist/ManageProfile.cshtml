@@ -1,0 +1,190 @@
+﻿@* @model Repository.Models.t_ArtistProfile
+@{
+    ViewData["Title"] = "Artist Studio";
+    Layout = "_ArtistLayout"; // Or your specific layout
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    :root { --studio-gold: #b39359; --studio-dark: #0f172a; --glass: rgba(255,255,255,0.95); }
+    .profile-banner { height: 280px; background-size: cover; background-position: center; border-radius: 0 0 30px 30px; position: relative; }
+    .profile-overlay { position: absolute; inset: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); border-radius: 0 0 30px 30px; }
+    .profile-header-content { position: relative; margin-top: -100px; padding: 0 5%; }
+    .artist-avatar { width: 180px; height: 180px; border: 6px solid white; border-radius: 50%; box-shadow: 0 10px 30px rgba(0,0,0,0.1); background: #fff; object-fit: cover; }
+    .card-custom { background: var(--glass); border-radius: 20px; border: 1px solid #eee; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+    .stat-card { text-align: center; padding: 20px; border-right: 1px solid #eee; }
+    .stat-card:last-child { border-right: none; }
+</style>
+
+<div class="container-fluid mb-5">
+    <div class="profile-banner" style="background-image: url('/Cover_Images/@Model.CoverImage');">
+        <div class="profile-overlay"></div>
+    </div>
+
+    <div class="profile-header-content">
+        <div class="d-flex align-items-end justify-content-between flex-wrap gap-3">
+            <div class="d-flex align-items-end gap-4 flex-wrap">
+                <img src="/Artist_Images/@Model.CoverImage" class="artist-avatar" alt="Artist Profile">
+                <div class="mb-3 text-white">
+                    <h1 class="display-5 fw-bold mb-1">@Model.ArtistName 
+                        @if(Model.IsVerified) { <i class="bi bi-patch-check-fill text-info fs-3"></i> }
+                    </h1>
+                    <p class="opacity-75"><i class="bi bi-envelope me-2"></i>@Model.ArtistEmail</p>
+                </div>
+            </div>
+            <div class="mb-3">
+                <button class="btn btn-light btn-lg shadow-sm" onclick="showEditModal()">
+                    <i class="bi bi-gear-wide-connected me-2"></i>Edit Studio Profile
+                </button>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-lg-8">
+                <div class="card-custom mb-4">
+                    <h4 class="fw-bold mb-3">Artist Biography</h4>
+                    <p class="text-muted fs-5">@(string.IsNullOrEmpty(Model.Biography) ? "No biography provided." : Model.Biography)</p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card-custom">
+                            <h5 class="fw-bold"><i class="bi bi-graph-up-arrow me-2"></i>Monthly Revenue</h5>
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card-custom">
+                            <h5 class="fw-bold"><i class="bi bi-pie-chart me-2"></i>Sales by Category</h5>
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card-custom mb-4">
+                    <h5 class="fw-bold border-bottom pb-2">Collective Stats</h5>
+                    <div class="d-flex justify-content-around mt-3">
+                        <div class="stat-card">
+                            <h3 class="fw-bold">@Model.RatingAvg</h3>
+                            <small class="text-muted">Rating</small>
+                        </div>
+                        <div class="stat-card">
+                            <h3 class="fw-bold">@(Model.IsActive == true ? "Live" : "Idle")</h3>
+                            <small class="text-muted">Status</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-custom">
+                    <h5 class="fw-bold mb-3">Social Links</h5>
+                    <div class="list-group list-group-flush">
+                        @if (Model.Urls != null) {
+                            foreach (var url in Model.Urls) {
+                                <a href="@url" target="_blank" class="list-group-item list-group-item-action border-0 px-0">
+                                    <i class="bi bi-globe2 me-2 text-primary"></i> @url
+                                </a>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="editWindow" style="display:none;">
+    <form id="editForm" class="p-3">
+        <input type="hidden" name="ArtistId" value="@Model.ArtistId" />
+        <div class="mb-3">
+            <label class="form-label fw-bold">Display Name</label>
+            <input id="inName" name="ArtistName" value="@Model.ArtistName" style="width: 100%;" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold">Biography</label>
+            <textarea id="inBio" name="Biography" rows="5" style="width: 100%;">@Model.Biography</textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold">External Portfolio URL</label>
+            <input id="inUrl" name="Urls" value="@(Model.Urls?.FirstOrDefault())" style="width: 100%;" />
+        </div>
+        <div class="mt-4">
+            <button type="button" class="btn btn-dark w-100 py-2" onclick="submitProfile()">Update Profile</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Initialize Kendo Inputs
+        $("#inName").kendoTextBox();
+        $("#inBio").kendoTextArea({ rows: 5 });
+        $("#inUrl").kendoTextBox();
+
+        // Initialize Kendo Window
+        $("#editWindow").kendoWindow({
+            width: "500px",
+            title: "Manage Studio Profile",
+            visible: false,
+            modal: true,
+            animation: { open: { effects: "fade:in" } }
+        });
+
+        loadAnalytics();
+    });
+
+    function showEditModal() {
+        $("#editWindow").data("kendoWindow").center().open();
+    }
+
+    function loadAnalytics() {
+        // Fetch Revenue Data
+        $.get('/api/ArtistApi/revenue', function(data) {
+            new Chart(document.getElementById('revenueChart'), {
+                type: 'line',
+                data: {
+                    labels: data.map(x => x.month),
+                    datasets: [{ label: 'Revenue ($)', data: data.map(x => x.revenue), borderColor: '#b39359', tension: 0.4 }]
+                }
+            });
+        });
+
+        // Fetch Category Data
+        $.get('/api/ArtistApi/category-sales', function(data) {
+            new Chart(document.getElementById('categoryChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(x => x.category),
+                    datasets: [{ data: data.map(x => x.sales), backgroundColor: ['#0f172a', '#b39359', '#e2e8f0', '#64748b'] }]
+                }
+            });
+        });
+    }
+
+    function submitProfile() {
+        var profileData = {
+            ArtistId: parseInt($("[name='ArtistId']").val()),
+            ArtistName: $("#inName").val(),
+            Biography: $("#inBio").val(),
+            Urls: [$("#inUrl").val()], // Array mapping
+            IsActive: true
+        };
+
+        $.ajax({
+            url: 'http://localhost:5183//api/ArtistApi/manageprofile', // Matches Controller
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(profileData),
+            success: function(res) {
+                if (res === 1) {
+                    Swal.fire({ icon: 'success', title: 'Studio Updated', timer: 1500 }).then(() => location.reload());
+                } else {
+                    Swal.fire('Error', 'Could not update profile', 'error');
+                }
+            }
+        });
+    }
+</script> *@
