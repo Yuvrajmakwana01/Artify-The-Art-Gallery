@@ -8,7 +8,7 @@ namespace Repository.Interfaces
 {
     public interface IArtworkInterface
     {
-      
+
         Task<int> UploadArtwork(t_Artwork art);
         Task<IEnumerable<vm_Artwork>> GetAllArtworks();
 

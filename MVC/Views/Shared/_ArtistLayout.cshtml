@@ -1,149 +1,170 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] Artist</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/MVC.styles.css" asp-append-version="true" />
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " — Artify" : "Artify Studio")</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Kendo UI -->
+    <link href="https://kendo.cdn.telerik.com/2024.1.130/styles/kendo.default-v2.min.css" rel="stylesheet" />
+
+    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+    <!-- Studio Paper CSS (single source of truth) -->
+    <link href="~/css/site.css" rel="stylesheet" />
 </head>
 
 <body>
 
-    <!-- TOP NAVBAR (UNCHANGED) -->
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-3">
-            <div class="container-fluid">
+<!-- Mobile sidebar overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-                <a class="navbar-brand fw-bold" asp-controller="Artist" asp-action="Index">
-                    Artify
-                </a>
+<div class="app-container">
 
-                <div class="flex-grow-1 mx-4">
-                    <input type="text" class="form-control rounded-pill px-4"
-                           placeholder="Search artworks, orders, messages..." />
-                </div>
+    <!-- ══════════════════════════════════════
+         SIDEBAR
+    ══════════════════════════════════════ -->
+    <aside class="sidebar" id="sidebar">
 
-                <ul class="navbar-nav align-items-center gap-3">
-
-                    <li class="nav-item">
-                        <a class="nav-link position-relative" href="#">
-                            🔔
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">3</span>
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link position-relative" href="#">
-                            💬
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">2</span>
-                        </a>
-                    </li>
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown">
-                            <div class="bg-warning text-white rounded-circle d-flex justify-content-center align-items-center"
-                                 style="width:35px;height:35px;">M</div>
-                            <span class="ms-2">Maya</span>
-                        </a>
-
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#">Profile</a></li>
-                            <li><a class="dropdown-item" href="#">Settings</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Logout</a></li>
-                        </ul>
-                    </li>
-
-                </ul>
-
+        <!-- Logo -->
+        <a class="logo" href="/Dashboard">
+            <div class="logo-icon">
+                <i class="bi bi-palette2" style="color:#fff;font-size:16px"></i>
             </div>
-        </nav>
-    </header>
+            <span class="logo-text">Artify</span>
+        </a>
 
-    <!-- MAIN LAYOUT -->
-    <div class="d-flex">
+        <div class="sidebar-divider"></div>
 
-        <!-- SIDEBAR -->
-        <div class="bg-light border-end" style="width:250px; min-height:100vh;">
+        <span class="nav-label">Studio</span>
 
-            <div class="p-3">
+        <!-- Kendo Vertical Menu -->
+        <ul id="sidebarMenu"></ul>
 
-                <h6 class="text-muted">WORKSPACE</h6>
-                <ul class="nav flex-column mb-3">
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-controller="Artist" asp-action="Dashboard">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" href="#">Upload Artwork</a>
-                    </li>
-                </ul>
-
-                <h6 class="text-muted">GALLERY</h6>
-                <ul class="nav flex-column mb-3">
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" href="#">My Artworks</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" href="#">Collections</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" href="#">Exhibitions</a>
-                    </li>
-                </ul>
-
-                <h6 class="text-muted">SALES</h6>
-                <ul class="nav flex-column mb-3">
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" href="#">Orders</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" href="#">Earnings</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" href="#">Payouts</a>
-                    </li>
-                </ul>
-
-                <h6 class="text-muted">COMMUNITY</h6>
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" href="#">Messages</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" href="#">Notifications</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" href="#">Reviews</a>
-                    </li>
-                </ul>
-
+        <!-- Profile card -->
+        <div class="sidebar-footer">
+            <div class="profile-card">
+                <img src="/images/user.png" alt="Artist" onerror="this.src='https://ui-avatars.com/api/?name=Artist&background=2e2d29&color=e8a857&size=34'" />
+                <div>
+                    <h6>Artist Name</h6>
+                    <small>Pro Member</small>
+                </div>
             </div>
         </div>
 
-        <!-- CONTENT AREA -->
-        <div class="flex-grow-1 p-4">
-            <main role="main" class="pb-3">
-                @RenderBody()
-            </main>
+    </aside>
+
+    <!-- ══════════════════════════════════════
+         MAIN CONTENT
+    ══════════════════════════════════════ -->
+    <div class="main-content">
+
+        <!-- TOP NAVBAR -->
+        <nav class="top-navbar">
+
+            <!-- Mobile menu toggle -->
+            <button class="mobile-menu-btn me-3" id="mobileMenuBtn" aria-label="Open menu">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <!-- Search -->
+            <div class="search-bar-container">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Search artwork, artists…" autocomplete="off" />
+            </div>
+
+
+
+            <!-- Actions -->
+            <div class="nav-actions">
+                <button class="nav-icon-btn has-notif notification-trigger" title="Notifications">
+                    <i class="bi bi-bell"></i>
+                </button>
+                <div class="v-divider"></div>
+                <img src="/images/user.png"
+                     class="nav-avatar"
+                     alt="Profile"
+                     onerror="this.src='https://ui-avatars.com/api/?name=Artist&background=e8e5dd&color=c8873a&size=34'" />
+            </div>
+
+            
+
+        </nav>
+
+        <!-- PAGE CONTENT -->
+        <div class="content-body">
+            @RenderBody()
         </div>
 
     </div>
+</div>
 
-    <!-- FOOTER -->
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - MVC - <a asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+<!-- ══════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════ -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2024.1.130/js/kendo.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+<script>
+    /* ── SIDEBAR NAVIGATION ── */
+    $("#sidebarMenu").kendoMenu({
+        orientation: "vertical",
+        openOnClick: true,
+        dataSource: [
+            { text: "Dashboard",  spriteCssClass: "bi bi-house",         url: "/Artist/Dashboard"       },
+            { text: "Explore Art", spriteCssClass: "bi bi-grid",          url: "/Artist/Index"         },
+            { text: "My Artwork",  spriteCssClass: "bi bi-image",         url: "/Artist/Gallery"  },
+            { text: "Upload",      spriteCssClass: "bi bi-cloud-arrow-up", url: "/Artist/Upload"         },
+            { text: "Analytics",   spriteCssClass: "bi bi-bar-chart",     url: "/Artist/Sales_Earnings"       },
+            { text: "Profile",      spriteCssClass: "bi bi-person", url: "/Artist/MyProfile"        },
+            { text: "Manage Profile",     spriteCssClass: "bi bi-person-gear",        url: "/Artist/Profile"         },
+            { text: "Settings",    spriteCssClass: "bi bi-gear",          url: "/Artist/Settings"        },
+            { text: "Logout",      spriteCssClass: "bi bi-box-arrow-right", url: "/Artist/Logout"        }
+
+
+
+        ]
+    });
+
+    /* ── ACTIVE LINK HIGHLIGHT ── */
+    (function() {
+        var path = window.location.pathname.toLowerCase();
+        $("#sidebarMenu .k-link").each(function() {
+            var href = ($(this).attr("href") || "").toLowerCase();
+            if (href && path.startsWith(href) && href !== "/") {
+                $(this).closest(".k-item").addClass("k-state-selected");
+            }
+        });
+    })();
+
+    /* ── MOBILE SIDEBAR TOGGLE ── */
+    $("#mobileMenuBtn").on("click", function() {
+        $("#sidebar").toggleClass("open");
+        $("#sidebarOverlay").toggleClass("visible");
+    });
+
+    $("#sidebarOverlay").on("click", function() {
+        $("#sidebar").removeClass("open");
+        $("#sidebarOverlay").removeClass("visible");
+    });
+
+    /* ── SCROLL-AWARE CONTENT BODY ── */
+    $(".content-body").on("scroll", function() {
+        var scrolled = $(this).scrollTop() > 10;
+        $(".top-navbar").toggleClass("scrolled", scrolled);
+    });
+</script>
+
+@await RenderSectionAsync("Scripts", required: false)
 
 </body>
-
 </html>

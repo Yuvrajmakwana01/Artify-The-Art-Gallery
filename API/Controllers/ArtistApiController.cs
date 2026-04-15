@@ -11,7 +11,8 @@ using CloudinaryDotNet.Actions;
 namespace API.Controllers;
 
 [ApiController]
-[Route("api/artist")]
+[Route("api/[controller]")]
+
 public class ArtistApiController : ControllerBase
 {
     private readonly IArtistInterface _artistRepo;
@@ -300,13 +301,51 @@ public class ArtistApiController : ControllerBase
     }
 
     // ================= DASHBOARD =================
-    [HttpGet("dashboard/{artistId}")]
-    public async Task<IActionResult> GetDashboard(int artistId)
+    // [Authorize]
+    [HttpGet("dashboard")]
+    public async Task<IActionResult> GetDashboard()
     {
-        var data = await _artistRepo.GetDashboardData(artistId);
-        return data == null ? NotFound() : Ok(data);
+        try
+        {
+            // 🔥 Extract UserId from JWT Token
+            var userIdClaim = User.FindFirst("UserId");
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized(new { message = "Invalid token" });
+            }
+
+            int artistId = int.Parse(userIdClaim.Value);
+
+            var data = await _artistRepo.GetDashboardData(artistId);
+
+            return data == null ? NotFound() : Ok(data);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
     }
 
+
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] t_ChangePassword model)
+    {
+        // The [ApiController] attribute triggers automatic validation here.
+        // If validation fails, it returns 400 automatically.
+
+        var result = await _artistRepo.ChangePassword(
+            model.c_Artist_Id,
+            model.c_CurrentPassword,
+            model.c_NewPassword
+
+        );
+
+        if (result == 1) return Ok(new { success = true });
+        if (result == 0) return Ok(new { success = false, message = "Incorrect current password" });
+
+        return BadRequest(new { success = false, message = "Update failed or user not found" });
+    }
 
 
 
@@ -319,12 +358,61 @@ public class ArtistApiController : ControllerBase
     }
 
     [HttpPost("profile")]
-    public async Task<IActionResult> EditProfile([FromBody] t_ArtistProfile model)
+    public async Task<IActionResult> EditProfile([FromForm] t_ArtistProfile model)
     {
+        // 1. Handle File Upload if present
+        if (model.CoverImageFile != null)
+        {
+            var fileName = Guid.NewGuid() + Path.GetExtension(model.CoverImageFile.FileName);
+            // Ensure path matches your project structure
+            var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "MVC", "wwwroot", "Cover_Images");
+
+            if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+
+            var filePath = Path.Combine(folderPath, fileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await model.CoverImageFile.CopyToAsync(stream);
+            }
+            model.CoverImage = fileName; // This is what gets saved to DB
+        }
+
+        // 2. Call Repo
         var result = await _artistRepo.EditArtistProfile(model);
         return Ok(result);
     }
 
+
+    // [Authorize]
+    [HttpGet("revenue")]
+    public async Task<IActionResult> GetRevenue()
+    {
+        var userId = int.Parse(User.FindFirst("UserId").Value);
+        var data = await _artistRepo.GetMonthlyRevenue(userId);
+        return Ok(data);
+    }
+
+    // [Authorize]
+    [HttpGet("category-sales")]
+    public async Task<IActionResult> GetCategorySales()
+    {
+        var userId = int.Parse(User.FindFirst("UserId").Value);
+        var data = await _artistRepo.GetSalesByCategory(userId);
+        return Ok(data);
+    }
+
+
+
+    // [Authorize]
+    [HttpGet("earnings-summary")]
+    public async Task<IActionResult> GetEarningsSummary()
+    {
+        var userId = int.Parse(User.FindFirst("UserId").Value);
+
+        var data = await _artistRepo.GetEarningsSummary(userId);
+
+        return Ok(data);
+    }
 
     [HttpPost("Logout")]
     public async Task<IActionResult> Logout()

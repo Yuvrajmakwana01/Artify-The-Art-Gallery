@@ -1,22 +1,1397 @@
-html {
-  font-size: 14px;
+/* ============================================================
+   ARTIFY — STUDIO PAPER DESIGN SYSTEM
+   All layout, component, and utility styles live here.
+   No inline styles or per-view style blocks needed for
+   layout / shell elements.
+   ============================================================ */
+
+/* ── GOOGLE FONTS ── */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap');
+
+/* ── DESIGN TOKENS ── */
+:root {
+    /* Palette */
+    --sp-paper:      #faf9f6;          /* page background  */
+    --sp-surface:    #ffffff;          /* card / sidebar   */
+    --sp-surface2:   #f5f3ee;          /* secondary surface*/
+    --sp-border:     #e8e5dd;          /* hairline border  */
+    --sp-border2:    #d4cfc3;          /* stronger border  */
+
+    /* Text */
+    --sp-ink:        #1c1b18;          /* headings         */
+    --sp-body:       #3d3c38;          /* body copy        */
+    --sp-muted:      #8a8880;          /* labels / hints   */
+    --sp-hint:       #b5b2aa;          /* placeholders     */
+
+    /* Accent */
+    --sp-amber:      #c8873a;          /* primary accent   */
+    --sp-amber-lt:   #f5efe6;          /* accent light bg  */
+    --sp-amber-md:   #e9c99a;          /* mid accent       */
+    --sp-green:      #2d7a5a;          /* success          */
+    --sp-green-lt:   #edf7f2;
+    --sp-red:        #c0392b;          /* danger           */
+    --sp-red-lt:     #fdf1f0;
+
+    /* Sidebar */
+    --sb-w:          240px;
+    --sb-bg:         #1c1b18;
+    --sb-ink:        rgba(255,255,255,0.62);
+    --sb-ink-hover:  #ffffff;
+    --sb-active-bg:  rgba(200,135,58,0.15);
+    --sb-active-ink: #e8a857;
+
+    /* Nav */
+    --nav-h:         64px;
+
+    /* Elevation */
+    --sh-xs:  0 1px 3px rgba(0,0,0,0.06);
+    --sh-sm:  0 2px 8px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+    --sh-md:  0 8px 24px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+    --sh-lg:  0 20px 48px rgba(0,0,0,0.09), 0 4px 12px rgba(0,0,0,0.05);
+
+    /* Radius */
+    --r-sm:  8px;
+    --r-md:  12px;
+    --r-lg:  18px;
+    --r-xl:  24px;
+
+    /* Typography */
+    --font-display: 'Instrument Serif', serif;
+    --font-ui:      'DM Sans', sans-serif;
+    --font-brand:   'Syne', sans-serif;
+
+    /* Transitions */
+    --t-fast: 0.15s ease;
+    --t-med:  0.25s cubic-bezier(0.4,0,0.2,1);
+    --t-slow: 0.4s cubic-bezier(0.4,0,0.2,1);
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
+/* ── RESET & BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+html, body {
+    height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--sp-body);
+    background-color: var(--sp-paper);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
+
+/* ── APP SHELL ── */
+.app-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.sidebar {
+    width: var(--sb-w);
+    flex-shrink: 0;
+    background: var(--sb-bg);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 200;
+    transition: transform var(--t-med);
+    overflow: hidden;
+}
+
+/* subtle texture overlay */
+.sidebar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 20% 0%, rgba(200,135,58,0.12) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 100%, rgba(200,135,58,0.06) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+/* ── LOGO ── */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 28px 22px 20px;
+    position: relative;
+    z-index: 1;
+    text-decoration: none;
+}
+
+.logo-icon {
+    width: 34px;
+    height: 34px;
+    background: var(--sp-amber);
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(200,135,58,0.4);
+}
+
+.logo-text {
+    font-family: var(--font-brand);
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.3px;
+}
+
+/* ── SIDEBAR DIVIDER ── */
+.sidebar-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+    margin: 4px 18px 12px;
+    position: relative;
+    z-index: 1;
+}
+
+/* ── NAV LABEL ── */
+.nav-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.28);
+    padding: 8px 22px 6px;
+    position: relative;
+    z-index: 1;
+}
+
+/* ── KENDO MENU OVERRIDE ── */
+#sidebarMenu {
+    background: transparent !important;
+    border: none !important;
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 10px;
+    position: relative;
+    z-index: 1;
+    scrollbar-width: none;
+}
+
+#sidebarMenu::-webkit-scrollbar { display: none; }
+
+/* item wrapper */
+#sidebarMenu .k-item {
+    margin-bottom: 2px !important;
+}
+
+#sidebarMenu .k-link {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 10px 14px !important;
+    border-radius: var(--r-md) !important;
+    color: var(--sb-ink) !important;
+    font-family: var(--font-ui) !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    transition: background var(--t-fast), color var(--t-fast), transform var(--t-fast) !important;
+    text-decoration: none !important;
+    background: transparent !important;
+    border: none !important;
+    white-space: nowrap;
+}
+
+#sidebarMenu .k-link:hover {
+    background: rgba(255,255,255,0.07) !important;
+    color: var(--sb-ink-hover) !important;
+    transform: translateX(3px) !important;
+}
+
+#sidebarMenu .k-state-selected > .k-link,
+#sidebarMenu .k-state-selected > .k-link:hover {
+    background: var(--sb-active-bg) !important;
+    color: var(--sb-active-ink) !important;
+    transform: none !important;
+}
+
+/* icon sprite fix */
+#sidebarMenu .k-sprite {
+    font-family: "bootstrap-icons" !important;
+    font-style: normal !important;
+    font-size: 16px !important;
+    display: inline-block !important;
+    width: 18px !important;
+    text-align: center !important;
+    color: inherit !important;
+    flex-shrink: 0;
+}
+
+/* ── SIDEBAR FOOTER ── */
+.sidebar-footer {
+    padding: 14px 10px 18px;
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.profile-card {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 10px 12px;
+    border-radius: var(--r-md);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.06);
+    cursor: pointer;
+    transition: background var(--t-fast);
+}
+
+.profile-card:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+.profile-card img {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(200,135,58,0.5);
+    flex-shrink: 0;
+}
+
+.profile-card h6 {
+    margin: 0;
+    font-size: 0.825rem;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.3;
+}
+
+.profile-card small {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.4);
+    font-weight: 400;
+}
+
+/* ============================================================
+   MAIN CONTENT AREA
+   ============================================================ */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    margin-left: var(--sb-w);
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ============================================================
+   TOP NAVBAR
+   ============================================================ */
+.top-navbar {
+    height: var(--nav-h);
+    background: var(--sp-surface);
+    border-bottom: 1px solid var(--sp-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--sh-xs);
+}
+
+/* ── PAGE TITLE IN NAV ── */
+.nav-page-title {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--sp-muted);
+    display: none; /* shown via JS on scroll if desired */
+}
+
+/* ── SEARCH ── */
+.search-bar-container {
+    position: relative;
+    width: 280px;
+}
+
+.search-bar-container i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--sp-hint);
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.search-bar-container input {
+    width: 100%;
+    height: 38px;
+    padding: 0 14px 0 36px;
+    background: var(--sp-surface2);
+    border: 1px solid var(--sp-border);
+    border-radius: 100px;
+    font-family: var(--font-ui);
+    font-size: 0.85rem;
+    color: var(--sp-ink);
+    outline: none;
+    transition: border-color var(--t-fast), background var(--t-fast), box-shadow var(--t-fast);
+}
+
+.search-bar-container input::placeholder {
+    color: var(--sp-hint);
+}
+
+.search-bar-container input:focus {
+    background: var(--sp-surface);
+    border-color: var(--sp-amber-md);
+    box-shadow: 0 0 0 3px rgba(200,135,58,0.1);
+}
+
+/* ── NAV ACTIONS ── */
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.nav-icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid var(--sp-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sp-muted);
+    font-size: 15px;
+    cursor: pointer;
+    transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+    position: relative;
+}
+
+.nav-icon-btn:hover {
+    background: var(--sp-surface2);
+    color: var(--sp-ink);
+    border-color: var(--sp-border2);
+}
+
+/* notification dot */
+.nav-icon-btn.has-notif::after {
+    content: '';
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    width: 7px;
+    height: 7px;
+    background: var(--sp-amber);
+    border-radius: 50%;
+    border: 2px solid var(--sp-surface);
+}
+
+.v-divider {
+    width: 1px;
+    height: 22px;
+    background: var(--sp-border);
+    margin: 0 6px;
+}
+
+.nav-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--sp-border2);
+    cursor: pointer;
+    transition: border-color var(--t-fast);
+}
+
+.nav-avatar:hover {
+    border-color: var(--sp-amber);
+}
+
+/* ── notification trigger — keep class working ── */
+.notification-trigger {
+    cursor: pointer;
+}
+
+/* ============================================================
+   CONTENT BODY
+   ============================================================ */
+.content-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 28px;
+    background: var(--sp-paper);
+    scrollbar-width: thin;
+    scrollbar-color: var(--sp-border2) transparent;
+}
+
+.content-body::-webkit-scrollbar { width: 5px; }
+.content-body::-webkit-scrollbar-track { background: transparent; }
+.content-body::-webkit-scrollbar-thumb { background: var(--sp-border2); border-radius: 3px; }
+
+/* ============================================================
+   STUDIO PAPER COMPONENTS
+   Used across Gallery, Upload, Profile, Settings views.
+   ============================================================ */
+
+/* ── PAGE HEADER ── */
+.sp-page-header {
+    margin-bottom: 28px;
+}
+
+.sp-page-header .sp-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--sp-amber);
+    margin-bottom: 8px;
+}
+
+.sp-page-header h1,
+.sp-page-header .sp-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 400;
+    color: var(--sp-ink);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.sp-page-header .sp-subtitle {
+    font-size: 0.875rem;
+    color: var(--sp-muted);
+    margin-top: 6px;
+}
+
+/* ── STAT BADGE ── */
+.stat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 14px 5px 10px;
+    background: var(--sp-surface);
+    border: 1px solid var(--sp-border);
+    border-radius: 100px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--sp-body);
+    box-shadow: var(--sh-xs);
+}
+
+.stat-badge i {
+    color: var(--sp-amber);
+    font-size: 13px;
+}
+
+/* ── STUDIO CARD ── */
+.sp-card {
+    background: var(--sp-surface);
+    border: 1px solid var(--sp-border);
+    border-radius: var(--r-xl);
+    box-shadow: var(--sh-sm);
+    transition: box-shadow var(--t-med);
+}
+
+.sp-card:hover {
+    box-shadow: var(--sh-md);
+}
+
+.sp-card-body {
+    padding: 28px 32px;
+}
+
+/* section label inside card */
+.sp-section-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--sp-muted);
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--sp-border);
+}
+
+.sp-section-label::before {
+    content: '';
+    width: 3px;
+    height: 14px;
+    background: var(--sp-amber);
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+/* ── FORM ELEMENTS ── */
+.sp-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--sp-muted);
+    margin-bottom: 6px;
+}
+
+/* generic Kendo override to match Studio Paper */
+.k-input,
+.k-textarea,
+.k-textbox,
+.k-widget.k-numerictextbox .k-input,
+.k-widget.k-dropdown .k-input {
+    background: var(--sp-surface2) !important;
+    border: 1px solid var(--sp-border) !important;
+    border-radius: var(--r-sm) !important;
+    padding: 9px 12px !important;
+    font-family: var(--font-ui) !important;
+    font-size: 0.875rem !important;
+    color: var(--sp-ink) !important;
+    transition: border-color var(--t-fast), box-shadow var(--t-fast) !important;
+}
+
+.k-input:focus,
+.k-textarea:focus,
+.k-textbox:focus {
+    border-color: var(--sp-amber-md) !important;
+    box-shadow: 0 0 0 3px rgba(200,135,58,0.12) !important;
+    outline: none !important;
+    background: var(--sp-surface) !important;
+}
+
+.k-widget.k-dropdown {
+    background: var(--sp-surface2) !important;
+    border: 1px solid var(--sp-border) !important;
+    border-radius: var(--r-sm) !important;
+}
+
+.k-widget.k-dropdown .k-dropdown-wrap {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 2px 0 !important;
+}
+
+.k-widget.k-dropdown:focus-within {
+    border-color: var(--sp-amber-md) !important;
+    box-shadow: 0 0 0 3px rgba(200,135,58,0.12) !important;
+}
+
+.k-list .k-item:hover,
+.k-list .k-item.k-state-hover {
+    background: var(--sp-amber-lt) !important;
+    color: var(--sp-amber) !important;
+}
+
+.k-list .k-item.k-state-selected {
+    background: var(--sp-amber) !important;
+    color: #fff !important;
+}
+
+.k-multiselect .k-button {
+    background: var(--sp-amber-lt) !important;
+    color: var(--sp-amber) !important;
+    border: 1px solid var(--sp-amber-md) !important;
+    border-radius: 6px !important;
+    font-size: 0.75rem !important;
+    font-family: var(--font-ui) !important;
+}
+
+/* ── BUTTONS ── */
+.sp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border-radius: var(--r-md);
+    font-family: var(--font-ui);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all var(--t-fast);
+    text-decoration: none;
+    line-height: 1;
+}
+
+.sp-btn-primary {
+    background: var(--sp-ink);
+    color: #fff;
+}
+
+.sp-btn-primary:hover {
+    background: #2e2d29;
+    transform: translateY(-1px);
+    box-shadow: var(--sh-sm);
+    color: #fff;
+}
+
+.sp-btn-amber {
+    background: var(--sp-amber);
+    color: #fff;
+}
+
+.sp-btn-amber:hover {
+    background: #b57831;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(200,135,58,0.3);
+    color: #fff;
+}
+
+.sp-btn-outline {
+    background: transparent;
+    color: var(--sp-body);
+    border: 1px solid var(--sp-border2);
+}
+
+.sp-btn-outline:hover {
+    background: var(--sp-surface2);
+    border-color: var(--sp-border2);
+}
+
+.sp-btn-danger {
+    background: transparent;
+    color: var(--sp-red);
+    border: 1px solid #f5c6c2;
+}
+
+.sp-btn-danger:hover {
+    background: var(--sp-red-lt);
+    border-color: var(--sp-red);
+}
+
+/* ── UPLOAD ZONE ── */
+.sp-upload-zone {
+    border: 1.5px dashed var(--sp-border2);
+    border-radius: var(--r-lg);
+    background: var(--sp-surface2);
+    padding: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--t-fast);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.sp-upload-zone:hover {
+    border-color: var(--sp-amber-md);
+    background: var(--sp-amber-lt);
+}
+
+.sp-upload-zone-icon {
+    font-size: 28px;
+    color: var(--sp-hint);
+    transition: color var(--t-fast);
+}
+
+.sp-upload-zone:hover .sp-upload-zone-icon {
+    color: var(--sp-amber);
+}
+
+.sp-upload-zone-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--sp-body);
+}
+
+.sp-upload-zone-sub {
+    font-size: 0.75rem;
+    color: var(--sp-hint);
+}
+
+/* ── DANGER ZONE ── */
+.sp-danger-zone {
+    background: var(--sp-red-lt);
+    border: 1px solid #f5c6c2;
+    border-radius: var(--r-lg);
+    padding: 24px;
+}
+
+/* ── PLAN BANNER ── */
+.sp-plan-banner {
+    background: var(--sp-green-lt);
+    border: 1px solid #a8dfc6;
+    border-left: 4px solid var(--sp-green);
+    border-radius: var(--r-md);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+/* ── KENDO SWITCH ── */
+.k-widget.k-switch.k-switch-on .k-switch-container {
+    background: var(--sp-amber) !important;
+    border-color: var(--sp-amber) !important;
+}
+
+/* ── KENDO PAGER ── */
+.k-pager-wrap {
+    border: none !important;
+    background: transparent !important;
+    padding: 32px 0 8px !important;
+    justify-content: center !important;
+}
+
+.k-pager-wrap .k-link {
+    border-radius: var(--r-sm) !important;
+    font-family: var(--font-ui) !important;
+}
+
+.k-pager-wrap .k-state-selected {
+    background: var(--sp-amber) !important;
+    color: #fff !important;
+    border-color: var(--sp-amber) !important;
+}
+
+/* ── KENDO WINDOW ── */
+.k-window {
+    border-radius: var(--r-xl) !important;
+    border: 1px solid var(--sp-border) !important;
+    box-shadow: var(--sh-lg) !important;
+    font-family: var(--font-ui) !important;
+    overflow: hidden !important;
+}
+
+.k-window-titlebar {
+    background: var(--sp-surface) !important;
+    border-bottom: 1px solid var(--sp-border) !important;
+    padding: 16px 24px !important;
+    font-family: var(--font-display) !important;
+    font-size: 1rem !important;
+    color: var(--sp-ink) !important;
+}
+
+.k-window-content {
+    background: var(--sp-surface) !important;
+    padding: 24px !important;
+}
+
+/* ── KENDO TOOLTIP VALIDATION ── */
+.k-tooltip-validation {
+    background: transparent !important;
+    color: var(--sp-red) !important;
+    box-shadow: none !important;
+    border: none !important;
+    font-size: 0.72rem !important;
+    padding: 4px 0 0 !important;
+    font-weight: 600 !important;
+}
+
+.k-callout { display: none !important; }
+
+/* ── KENDO UPLOAD ── */
+.k-upload {
+    border: 1.5px dashed var(--sp-border2) !important;
+    border-radius: var(--r-lg) !important;
+    background: var(--sp-surface2) !important;
+}
+
+.k-upload:hover {
+    border-color: var(--sp-amber-md) !important;
+    background: var(--sp-amber-lt) !important;
+}
+
+.k-upload .k-upload-button {
+    background: var(--sp-surface) !important;
+    border: 1px solid var(--sp-border) !important;
+    border-radius: var(--r-sm) !important;
+    color: var(--sp-body) !important;
+    font-family: var(--font-ui) !important;
+    font-size: 0.85rem !important;
+}
+
+/* ============================================================
+   GALLERY VIEW
+   ============================================================ */
+#artworkListView {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    border: none !important;
+    background: transparent !important;
+    margin-top: 24px;
+    padding: 0;
+}
+
+.art-card {
+    background: var(--sp-surface);
+    border: 1px solid var(--sp-border);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    transition: transform var(--t-med), box-shadow var(--t-med), border-color var(--t-med);
+    position: relative;
+    box-shadow: var(--sh-xs);
+}
+
+.art-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--sh-md);
+    border-color: var(--sp-border2);
+}
+
+.image-container {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--sp-surface2);
+}
+
+.art-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.7s cubic-bezier(0.25,1,0.5,1);
+    display: block;
+}
+
+.art-card:hover .art-img {
+    transform: scale(1.06);
+}
+
+.art-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(28,27,24,0.65) 0%, rgba(28,27,24,0.1) 60%, transparent 100%);
+    opacity: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 16px;
+    transition: opacity var(--t-med);
+}
+
+.art-card:hover .art-overlay {
+    opacity: 1;
+}
+
+.action-group {
+    display: flex;
+    gap: 8px;
+    transform: translateY(12px);
+    transition: transform var(--t-med);
+}
+
+.art-card:hover .action-group {
+    transform: translateY(0);
+}
+
+.btn-glass {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sp-ink);
+    font-size: 14px;
+    text-decoration: none !important;
+    cursor: pointer;
+    transition: background var(--t-fast), color var(--t-fast), transform var(--t-fast);
+    backdrop-filter: blur(4px);
+}
+
+.btn-glass:hover {
+    background: var(--sp-ink);
+    color: #fff;
+    transform: scale(1.07);
+}
+
+.art-details {
+    padding: 16px 18px 18px;
+}
+
+.art-category {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--sp-amber);
+    margin-bottom: 5px;
+}
+
+.art-name {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: var(--sp-ink);
+    margin: 0 0 4px;
+    line-height: 1.3;
+}
+
+.art-price {
+    font-size: 0.82rem;
+    color: var(--sp-muted);
+    font-weight: 400;
+    display: block;
+}
+
+/* ── GALLERY FILTER DROPDOWN ── */
+#catFilter {
+    min-width: 180px;
+}
+
+/* ── UPLOAD BUTTON (gallery header) ── */
+.btn-upload {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--sp-ink);
+    color: #fff;
+    border: none;
+    border-radius: var(--r-md);
+    padding: 10px 22px;
+    font-family: var(--font-ui);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
+}
+
+.btn-upload:hover {
+    background: #2e2d29;
+    transform: translateY(-1px);
+    box-shadow: var(--sh-sm);
+    color: #fff;
+}
+
+/* ============================================================
+   UPLOAD VIEW
+   ============================================================ */
+.glass-panel {
+    background: var(--sp-surface);
+    border: 1px solid var(--sp-border);
+    border-radius: var(--r-xl);
+    box-shadow: var(--sh-md);
+    padding: 36px 40px;
+}
+
+.preview-card {
+    position: sticky;
+    top: 16px;
+    background: var(--sp-surface);
+    border: 1px solid var(--sp-border);
+    border-radius: var(--r-xl);
+    overflow: hidden;
+    box-shadow: var(--sh-sm);
+    transition: transform var(--t-med), box-shadow var(--t-med);
+}
+
+.preview-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--sh-md);
+}
+
+.preview-img-container {
+    height: 260px;
+    background: var(--sp-surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--sp-border);
+    overflow: hidden;
+}
+
+#imgPlaceholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+}
+
+/* publish button */
+.btn-publish {
+    background: var(--sp-ink);
+    border: none;
+    color: #fff;
+    border-radius: var(--r-md);
+    padding: 14px 28px;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: 0.875rem;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: background var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
+    width: 100%;
+}
+
+.btn-publish:hover {
+    background: #2e2d29;
+    transform: translateY(-1px);
+    box-shadow: var(--sh-sm);
+    color: #fff;
+    opacity: 1;
+}
+
+/* ── Syne for upload heading ── */
+.tit {
+    font-family: var(--font-brand);
+}
+
+/* ============================================================
+   PROFILE VIEW
+   ============================================================ */
+.studio-card {
+    background: var(--sp-surface);
+    border: 1px solid var(--sp-border);
+    border-radius: var(--r-xl);
+    padding: 36px;
+    box-shadow: var(--sh-sm);
+    margin-top: 1.5rem;
+    transition: box-shadow var(--t-med);
+}
+
+.studio-card:hover {
+    box-shadow: var(--sh-md);
+}
+
+.header-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+
+.avatar-wrapper {
+    width: 58px;
+    height: 58px;
+    background: var(--sp-amber-lt);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--sp-amber);
+    font-size: 1.3rem;
+    border: 1px solid var(--sp-amber-md);
+}
+
+.section-divider {
+    display: flex;
+    align-items: center;
+    margin: 2rem 0 1.5rem;
+    color: var(--sp-muted);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 1.8px;
+    font-weight: 700;
+}
+
+.section-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--sp-border);
+    margin-left: 14px;
+}
+
+/* Kendo form elements in profile */
+.k-form-label {
+    font-weight: 600;
+    color: var(--sp-body);
+    font-size: 0.875rem;
+    margin-bottom: 6px;
+}
+
+/* ============================================================
+   SETTINGS VIEW
+   ============================================================ */
+.settings-container {
+    max-width: 780px;
+    margin: 0 auto;
+}
+
+.card {
+    background: var(--sp-surface);
+    border: 1px solid var(--sp-border) !important;
+    border-radius: var(--r-xl) !important;
+    box-shadow: var(--sh-sm) !important;
+    transition: box-shadow var(--t-med);
+}
+
+.card:hover {
+    box-shadow: var(--sh-md) !important;
+}
+
+.danger-zone {
+    background: var(--sp-red-lt) !important;
+    border-color: #f5c6c2 !important;
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+.form-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--sp-muted);
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* Gallery section top spacing */
+.gallery-section {
+    padding-top: 4px;
+}
+
+/* Gallery title */
+.gallery-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 400;
+    color: var(--sp-ink);
+    letter-spacing: -0.5px;
+    margin: 0;
+}
+
+/* Bootstrap override for k-button */
+.k-button {
+    font-family: var(--font-ui) !important;
+    border-radius: var(--r-sm) !important;
+}
+
+.k-button-solid-primary {
+    background: var(--sp-amber) !important;
+    border-color: var(--sp-amber) !important;
+    color: #fff !important;
+}
+
+.k-button-solid-primary:hover {
+    background: #b57831 !important;
+    border-color: #b57831 !important;
+}
+
+.k-button-outline-danger {
+    color: var(--sp-red) !important;
+    border-color: #f5c6c2 !important;
+}
+
+.k-button-outline-danger:hover {
+    background: var(--sp-red-lt) !important;
+}
+
+.k-button-solid-danger {
+    background: var(--sp-red) !important;
+    border-color: var(--sp-red) !important;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1024px) {
+    :root { --sb-w: 220px; }
+    .content-body { padding: 24px 20px; }
+    .glass-panel { padding: 28px 24px; }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        box-shadow: none;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+        box-shadow: 4px 0 32px rgba(0,0,0,0.25);
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .top-navbar {
+        padding: 0 16px;
+    }
+
+    .search-bar-container {
+        width: 200px;
+    }
+
+    .content-body {
+        padding: 20px 16px;
+    }
+
+    #artworkListView {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+    }
+
+    .glass-panel {
+        padding: 24px 20px;
+    }
+
+    .studio-card {
+        padding: 24px;
+    }
+
+    .sp-card-body {
+        padding: 20px;
+    }
+
+    /* mobile hamburger (shown when sidebar is closed) */
+    .mobile-menu-btn {
+        display: flex;
+    }
+}
+
+@media (min-width: 769px) {
+    .mobile-menu-btn {
+        display: none;
+    }
+}
+
+/* ── MOBILE HAMBURGER ── */
+.mobile-menu-btn {
+    width: 36px;
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--sp-border);
+    border-radius: var(--r-sm);
+    background: transparent;
+    color: var(--sp-body);
+    font-size: 16px;
+    cursor: pointer;
+    transition: background var(--t-fast);
+}
+
+.mobile-menu-btn:hover {
+    background: var(--sp-surface2);
+}
+
+/* ── SIDEBAR OVERLAY (mobile) ── */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 199;
+    backdrop-filter: blur(2px);
+}
+
+.sidebar-overlay.visible {
+    display: block;
+}
+
+/* ============================================================
+   PROFILE VIEW — STATUS TOGGLE & SOCIAL LINKS
+   ============================================================ */
+
+/* Status pill toggle */
+.status-container {
+    background: var(--sp-surface2);
+    padding: 5px;
+    border-radius: 12px;
+    display: inline-flex;
+    gap: 4px;
+    border: 1px solid var(--sp-border);
+}
+
+.status-opt {
+    padding: 7px 20px;
+    border-radius: 8px;
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--sp-muted);
+    transition: all var(--t-fast);
+}
+
+.status-opt.selected-active {
+    background: var(--sp-surface);
+    color: var(--sp-green);
+    box-shadow: var(--sh-xs);
+}
+
+.status-opt.selected-inactive {
+    background: var(--sp-surface);
+    color: var(--sp-red);
+    box-shadow: var(--sh-xs);
+}
+
+/* Social URL rows */
+.url-item {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 10px;
+}
+
+.url-prefix {
+    background: var(--sp-surface2);
+    padding: 10px 14px;
+    border-radius: var(--r-sm) 0 0 var(--r-sm);
+    font-size: 0.78rem;
+    color: var(--sp-muted);
+    font-weight: 600;
+    border: 1px solid var(--sp-border);
+    border-right: none;
+    white-space: nowrap;
+    line-height: 1.5;
+}
+
+.url-input {
+    border-radius: 0 var(--r-sm) var(--r-sm) 0 !important;
+    flex: 1;
+    border-left: none !important;
+    min-width: 0;
+}
+
+.url-item .sp-btn {
+    border-radius: 0 var(--r-sm) var(--r-sm) 0;
+    margin-left: 8px;
+    border-radius: var(--r-sm) !important;
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   PAGE ENTRY ANIMATIONS
+   ============================================================ */
+@keyframes spFadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: none; }
+}
+
+.sp-fade-up {
+    animation: spFadeUp 0.45s ease both;
+}
+
+.sp-fade-up-1 { animation-delay: 0.05s; }
+.sp-fade-up-2 { animation-delay: 0.10s; }
+.sp-fade-up-3 { animation-delay: 0.15s; }
+.sp-fade-up-4 { animation-delay: 0.20s; }
