@@ -243,6 +243,22 @@ namespace Repository.Implementations
             return Convert.ToDateTime(result) > DateTime.UtcNow;
         }
 
+        public async Task<string?> GetArtistEmailAsync(int artistId)
+        {
+            await EnsureOpenAsync();
+
+            const string sql = @"
+                SELECT c_artist_email
+                FROM   t_artist_profile
+                WHERE  c_artist_id = @artistId";
+
+            await using var cmd = new NpgsqlCommand(sql, _conn);
+            cmd.Parameters.AddWithValue("@artistId", artistId);
+
+            var result = await cmd.ExecuteScalarAsync();
+            return result == DBNull.Value || result is null ? null : result.ToString();
+        }
+
         // ─────────────────────────────────────────────────────────────────
         //  PRIVATE — map reader row → ArtworkModel
         // ─────────────────────────────────────────────────────────────────

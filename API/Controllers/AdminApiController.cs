@@ -9,11 +9,13 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin")]
 public class AdminApiController : ControllerBase
 {
 
@@ -21,13 +23,14 @@ public class AdminApiController : ControllerBase
 
     private readonly IAuthInterface _repo;
     private readonly IConfiguration _config;
+    private readonly ILogger<AdminApiController> _logger;
 
-    public AdminApiController(IAuthInterface repo, IConfiguration config, IAdminInterface adminRepo)
+    public AdminApiController(IAuthInterface repo, IConfiguration config, IAdminInterface adminRepo, ILogger<AdminApiController> logger)
     {
         _repo = repo;
         _config = config;
         _adminRepo = adminRepo;
-
+        _logger = logger; 
     }
     // 1. Dashboard Summary
     [HttpGet("dashboard")]
@@ -131,27 +134,42 @@ public class AdminApiController : ControllerBase
         }
     }
 
-
-
-
-
-
-
-
-
     // POST api/AdminApi/login
     // Called by the admin Login.cshtml AJAX request.
     // Returns a JWT on success — the MVC layer stores it in Session.
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromForm] vm_AdminLogin admin)
     {
         if (!ModelState.IsValid)
-            return BadRequest(new { success = false, message = "Invalid input." });
+        {
+            var errors = ModelState
+                .Where(x => x.Value.Errors.Count > 0)
+                .ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                );
+
+            return BadRequest(new
+            {
+                success = false,
+                message = "Validation failed",
+                errors = errors
+            });
+        }
 
         var data = await _repo.AdminLogin(admin);
 
         if (data == null)
-            return Ok(new { success = false, message = "Invalid email or password." });
+        {
+            _logger.LogWarning($"Failed admin login attempt: {admin.c_Email}");
+            return Unauthorized(new
+            {
+                success = false,
+                message = "Invalid credentials"
+            });
+        }
+        _logger.LogInformation($"Admin logged in successfully: {admin.c_Email}");
 
         // ── Build JWT ────────────────────────────────────────────────────
         var jwtKey = _config["Jwt:Key"];
@@ -163,10 +181,11 @@ public class AdminApiController : ControllerBase
 
         var claims = new[]
         {
-                new Claim("AdminId",   data.c_AdminId.ToString()),
-                new Claim("AdminName", data.c_AdminName),
-                new Claim("Email",     data.c_Email)
-            };
+            new Claim("AdminId", data.c_AdminId.ToString()),
+            new Claim("AdminName", data.c_AdminName),
+            new Claim("Email", data.c_Email),
+            new Claim(ClaimTypes.Role, "Admin")
+        };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
         var token = new JwtSecurityToken(
@@ -188,6 +207,6 @@ public class AdminApiController : ControllerBase
                 data.c_Email
             }
         });
-    }
+    } 
 }
 
