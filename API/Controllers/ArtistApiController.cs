@@ -12,7 +12,6 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-
 public class ArtistApiController : ControllerBase
 {
     private readonly IArtistInterface _artistRepo;

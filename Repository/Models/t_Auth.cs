@@ -33,10 +33,12 @@ namespace Repository.Models
     public class vm_AdminLogin
     {
         [Required(ErrorMessage = "Email is required")]
-        [EmailAddress]
+        [EmailAddress(ErrorMessage = "Enter a valid email address")]
+        [StringLength(100, ErrorMessage = "Email cannot exceed 100 characters")]
         public string c_Email { get; set; }
 
         [Required(ErrorMessage = "Password is required")]
+        [StringLength(50, MinimumLength = 6, ErrorMessage = "Password must be between 6 and 50 characters")]
         public string c_Password { get; set; }
     }
 }

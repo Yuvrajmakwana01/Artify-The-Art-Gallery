@@ -594,9 +594,9 @@
         <div class="analytics-panel-head">
             <h2 class="analytics-panel-title">Revenue Growth</h2>
             <div class="analytics-segmented">
-                <a asp-controller="Admin" asp-action="Analytics" asp-route-period="day" class="@PeriodClass("day")">Day</a>
-                <a asp-controller="Admin" asp-action="Analytics" asp-route-period="week" class="@PeriodClass("week")">Week</a>
-                <a asp-controller="Admin" asp-action="Analytics" asp-route-period="month" class="@PeriodClass("month")">Month</a>
+                <a asp-controller="Admin" asp-action="SalesSummary" asp-route-period="day" class="@PeriodClass("day")">Day</a>
+                <a asp-controller="Admin" asp-action="SalesSummary" asp-route-period="week" class="@PeriodClass("week")">Week</a>
+                <a asp-controller="Admin" asp-action="SalesSummary" asp-route-period="month" class="@PeriodClass("month")">Month</a>
             </div>
         </div>
 
@@ -684,7 +684,7 @@
         let revenueGrowth = @Html.Raw(revenueJson);
         let userActivity = @Html.Raw(activityJson);
         let topPerformingArtworks = @Html.Raw(topArtworksJson);
-        const apiBaseUrl = @Html.Raw(JsonSerializer.Serialize(apiBaseUrl));
+        const configuredApiBaseUrl = @Html.Raw(JsonSerializer.Serialize(apiBaseUrl));
         let selectedPeriod = @Html.Raw(JsonSerializer.Serialize(vm.SelectedPeriod));
         let dateRangeText = @Html.Raw(JsonSerializer.Serialize(vm.DateRangeText));
         const weekdayLabels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -695,6 +695,36 @@
             activeBuyers: @vm.ActiveBuyers,
             payoutsVsEarnings: @Html.Raw(JsonSerializer.Serialize(vm.PayoutVsCommissionText))
         };
+        
+        function checkAuth() {
+            const token = localStorage.getItem("adminToken");
+            const expiry = localStorage.getItem("adminExpiry");
+
+            if (!token || !expiry) {
+                window.location.href = "/Admin/Login";
+                return false;
+            }
+
+            if (Date.now() > expiry * 1000) {
+                localStorage.removeItem("adminToken");
+                localStorage.removeItem("adminExpiry");
+
+                window.location.href = "/Admin/Login";
+                return false;
+            }
+
+            return true;
+        }
+
+        function authHeader() {
+            if (!checkAuth()) return {};
+
+            const token = localStorage.getItem("adminToken");
+
+            return {
+                "Authorization": "Bearer " + token
+            };
+        }
 
         function normalizePeriod(value) {
             const period = String(value ?? "").toLowerCase().trim();
@@ -791,32 +821,67 @@
             }).join("");
         }
 
+        function getApiBaseCandidates() {
+            const fromStorage = [
+                window.localStorage?.getItem("ApiBaseUrl"),
+                window.localStorage?.getItem("apiBaseUrl")
+            ].filter(Boolean);
+
+            const localhostCandidates = [];
+            if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+                localhostCandidates.push(
+                    `${window.location.protocol}//localhost:5183`,
+                    "http://localhost:5183",
+                    `${window.location.protocol}//localhost:7077`,
+                    "https://localhost:7077"
+                );
+            }
+
+            const candidates = [configuredApiBaseUrl, ...fromStorage, ...localhostCandidates]
+                .map(url => String(url || "").trim().replace(/\/+$/, ""))
+                .filter(Boolean);
+
+            return [...new Set(candidates)];
+        }
+
         function loadAnalyticsFromApi() {
-            if (!apiBaseUrl) return;
-
             const queryPeriod = normalizePeriod(new URLSearchParams(window.location.search).get("period"));
+            const baseCandidates = getApiBaseCandidates();
+            if (baseCandidates.length === 0) return;
 
-            $.ajax({
-                url: `${apiBaseUrl}/api/AdminAnalytics/analytics-dashboard`,
-                type: "GET",
-                data: { period: queryPeriod },
-                dataType: "json",
-                success: function (payload) {
-                    revenueGrowth = payload?.revenueGrowth ?? payload?.RevenueGrowth ?? [];
-                    userActivity = payload?.userActivity ?? payload?.UserActivity ?? [];
-                    topPerformingArtworks = payload?.topPerformingArtworks ?? payload?.TopPerformingArtworks ?? [];
-                    selectedPeriod = normalizePeriod(payload?.selectedPeriod ?? payload?.SelectedPeriod ?? queryPeriod);
-                    dateRangeText = payload?.dateRangeText ?? payload?.DateRangeText ?? dateRangeText;
-
-                    updateSummaryCards(payload);
-                    renderTopArtworksTable();
-                    buildRevenueChart();
-                    buildActivityChart();
-                },
-                error: function (xhr, status, error) {
-                    console.error("Failed to load analytics dashboard from API.", { xhr, status, error });
+            const tryLoad = (index) => {
+                if (index >= baseCandidates.length) {
+                    console.error("Failed to load analytics dashboard from all API base URL candidates.", baseCandidates);
+                    return;
                 }
-            });
+
+                const baseUrl = baseCandidates[index];
+                $.ajax({
+                    url: `${baseUrl}/api/AdminAnalytics/analytics-dashboard`,
+                    type: "GET",
+                    headers: authHeader(),
+                    data: { period: queryPeriod },
+                    dataType: "json",
+                    success: function (payload) {
+                        revenueGrowth = payload?.revenueGrowth ?? payload?.RevenueGrowth ?? [];
+                        userActivity = payload?.userActivity ?? payload?.UserActivity ?? [];
+                        topPerformingArtworks = payload?.topPerformingArtworks ?? payload?.TopPerformingArtworks ?? [];
+                        selectedPeriod = normalizePeriod(payload?.selectedPeriod ?? payload?.SelectedPeriod ?? queryPeriod);
+                        dateRangeText = payload?.dateRangeText ?? payload?.DateRangeText ?? dateRangeText;
+
+                        updateSummaryCards(payload);
+                        renderTopArtworksTable();
+                        buildRevenueChart();
+                        buildActivityChart();
+                    },
+                    error: function (xhr, status, error) {
+                        console.warn(`Analytics API call failed for ${baseUrl}. Trying next candidate.`, { status, error });
+                        tryLoad(index + 1);
+                    }
+                });
+            };
+
+            tryLoad(0);
         }
 
         function buildRevenueChart() {
@@ -965,4 +1030,3 @@
         document.getElementById("exportPdfBtn")?.addEventListener("click", exportAnalyticsPdf);
     </script>
 }
-

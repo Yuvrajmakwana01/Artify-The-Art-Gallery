@@ -592,6 +592,36 @@
     <script>
         const configuredBaseUrl = @Html.Raw(JsonSerializer.Serialize(apiBaseUrl));
         const API_BASE = `${(configuredBaseUrl || "http://localhost:5183").replace(/\/$/, "")}/api/AdminOrder`;
+        
+        function checkAuth() {
+            const token = localStorage.getItem("adminToken");
+            const expiry = localStorage.getItem("adminExpiry");
+
+            if (!token || !expiry) {
+                window.location.href = "/Admin/Login";
+                return false;
+            }
+
+            if (Date.now() > expiry * 1000) {
+                localStorage.removeItem("adminToken");
+                localStorage.removeItem("adminExpiry");
+
+                window.location.href = "/Admin/Login";
+                return false;
+            }
+
+            return true;
+        }
+
+        function authHeader() {
+            if (!checkAuth()) return {};
+
+            const token = localStorage.getItem("adminToken");
+
+            return {
+                "Authorization": "Bearer " + token
+            };
+        }
 
         function normalizeOrders(rawOrders) {
             return Array.isArray(rawOrders)
@@ -639,6 +669,7 @@
             $.ajax({
                 url: `${API_BASE}/orders-dashboard`,
                 type: "GET",
+                headers: authHeader(),
                 dataType: "json",
                 success: function (payload) {
                     allOrders = normalizeOrders(payload?.orders ?? payload?.Orders);

@@ -398,6 +398,36 @@
 <script>
 
   const API_BASE = "http://localhost:5183/api/AdminApi";
+  
+  function checkAuth() {
+    const token = localStorage.getItem("adminToken");
+    const expiry = localStorage.getItem("adminExpiry");
+
+    if (!token || !expiry) {
+        window.location.href = "/Admin/Login";
+        return false;
+    }
+
+    if (Date.now() > expiry * 1000) {
+        localStorage.removeItem("adminToken");
+        localStorage.removeItem("adminExpiry");
+
+        window.location.href = "/Admin/Login";
+        return false;
+    }
+
+    return true;
+    }
+
+    function authHeader() {
+        if (!checkAuth()) return {};
+
+        const token = localStorage.getItem("adminToken");
+
+        return {
+            "Authorization": "Bearer " + token
+        };
+    }
 
 $(document).ready(function () {
 
@@ -414,7 +444,7 @@ $(document).ready(function () {
 
 function loadDashboardStats() 
 { $.ajax({
-   url: API_BASE + "/dashboard", type: "GET",
+   url: API_BASE + "/dashboard", type: "GET", headers: authHeader(),
    success: function (data) { 
       $(".stat-card").eq(0).find(".stat-value").text(data.c_TotalUsers);
       $(".stat-card").eq(1).find(".stat-value").text(data.c_TotalArtists);
@@ -434,6 +464,7 @@ function loadChart(type) {
     $.ajax({
         url: API_BASE + "/revenue?type=" + type.toUpperCase(),
         type: "GET",
+        headers: authHeader(),
         success: function (res) {
             console.log(res);
             let result = {
@@ -514,6 +545,7 @@ function loadUserGrowthChart(type) {
          $.ajax({
         url: API_BASE + "/users-count?type=" + type.toUpperCase(),
         type: "GET",
+        headers: authHeader(),
         success: function (res) {
           console.log(res)
             let result = {
@@ -586,6 +618,7 @@ function loadUserPieChart() {
     $.ajax({
         url: API_BASE + "/total-count",
         type: "GET",
+        headers: authHeader(),
         success: function (res) {
             console.log(res);
             $("#userPieChart").kendoChart({
@@ -620,6 +653,7 @@ function loadCategoryChart() {
     $.ajax({
         url: API_BASE + "/top-category",
         type: "GET",
+        headers: authHeader(),
         success: function (res) {
             console.log(res);
             let categories = [];
@@ -657,6 +691,7 @@ function loadTopArtists() {
     $.ajax({
         url: API_BASE + "/top-artists", 
         type: "GET",
+        headers: authHeader(),
         success: function (data) {
             let html = "";
             console.log("data",data);
@@ -694,6 +729,7 @@ function loadRecentActivity() {
     $.ajax({
         url: API_BASE+"/recent-activity", 
         type: "GET",
+        headers: authHeader(),
         success: function (data) {
 
             let html = "";
