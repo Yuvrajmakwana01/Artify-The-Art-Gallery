@@ -8,7 +8,7 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/admin/artworks")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class AdminArtworkModerationApiController : ControllerBase
     {
         private readonly AdminArtworkService _service;

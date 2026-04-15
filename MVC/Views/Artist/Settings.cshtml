@@ -1,0 +1,105 @@
+﻿@{
+    ViewData["Title"] = "Settings";
+    Layout = "~/Views/Shared/_ArtistLayout.cshtml";
+}
+
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.common.min.css" rel="stylesheet" />
+<link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.default-v2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css" integrity="sha512-t7Few9xlddEmgd3oKZQahkNI4dS6l80+eGEzFQiqtyVYdvcSG2D3Iub77R20BdotfRPA9caaRkg1tyaJiPmO0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<style>
+    /* Premium UI tweaks */
+    body { background-color: #f8f9fa; }
+    .settings-container { max-width: 800px; margin: auto; }
+    .card { border: none; border-radius: 12px; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .card:hover { box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+    
+    /* Kendo Input Customization */
+    .k-input-solid { background: #fff; border-radius: 8px !important; padding: 10px; }
+    .k-input {  border-radius: 8px; padding: 15px; border: 2px solid #ced4da; }
+
+    .form-label { font-weight: 500; color: #495057; margin-bottom: 0.5rem; }
+    
+    /* Danger Zone Styling */
+    .danger-zone { border: 1px solid #ffccd5; background: #fff5f5; }
+</style>
+
+<div class="container settings-container py-5 animate__animated animate__fadeIn">
+    <h2 class="mb-4 fw-bold">Account Settings</h2>
+
+    <div class="card mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-4">
+                <i class="bi bi-person-badge fs-3 text-primary me-3"></i>
+                <div>
+                    <h5 class="mb-0">Personal Details</h5>
+                    <p class="text-muted small">Update your account info and subscription plan</p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label">Email Address</label>
+                    <input type="text" class="k-input k-input-md w-100" value="bob@artify.art" readonly />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Phone Number</label>
+                    <input type="text" class="k-input k-input-md w-100" placeholder="+1 (555) 000-0000" />
+                </div>
+            </div>
+
+            <div class="mt-4 p-3 rounded" style="background: #f0fdf4; border-left: 4px solid #22c55e;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong class="text-success">Verified Artist • Pro Plan</strong><br>
+                        <small class="text-muted">85% commission • Unlimited uploads</small>
+                    </div>
+                    <button class="k-button k-button-md k-button-solid-primary rounded-pill px-4">Upgrade Plan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-4">
+                <i class="bi bi-shield-lock fs-3 text-warning me-3"></i>
+                <div>
+                    <h5 class="mb-0">Security & Password</h5>
+                    <p class="text-muted small">Keep your account safe</p>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Current Password</label>
+                <input type="password" class="k-input k-input-md w-100" />
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">New Password</label>
+                    <input type="password" class="k-input k-input-md w-100" placeholder="••••••••" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" class="k-input k-input-md w-100" placeholder="••••••••" />
+                </div>
+            </div>
+            <button class="k-button k-button-md k-button-solid-primary mt-4 px-4">Update Password</button>
+        </div>
+    </div>
+
+    <div class="card danger-zone">
+        <div class="card-body p-4">
+            <h5 class="text-danger fw-bold"><i class="bi bi-exclamation-triangle"></i> Danger Zone</h5>
+            <p class="small text-muted">Permanent actions that cannot be undone.</p>
+            <div class="d-flex gap-3">
+                <button class="k-button k-button-md k-button-outline-danger">Deactivate</button>
+                <button class="k-button k-button-md k-button-solid-danger">Delete Account</button>
+            </div>
+        </div>
+    </div>
+</div>

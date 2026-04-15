@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 using Repository.Interfaces;
@@ -11,6 +12,8 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin")]
+
     public class AdminUserController : ControllerBase
     {
         private readonly IAdminUsersInterface _userRepository;

@@ -168,7 +168,37 @@
     var table, artistModal, deleteModal;
     var editId = null, deleteId = null;
     var currentSearch = "", currentStatus = "";
-    var debounceId = null;
+    var debounceId = null; 
+    
+    function checkAuth() {
+        const token = localStorage.getItem("adminToken");
+        const expiry = localStorage.getItem("adminExpiry");
+
+        if (!token || !expiry) {
+            window.location.href = "/Admin/Login";
+            return false;
+        }
+
+        if (Date.now() > expiry * 1000) {
+            localStorage.removeItem("adminToken");
+            localStorage.removeItem("adminExpiry");
+
+            window.location.href = "/Admin/Login";
+            return false;
+        }
+
+        return true;
+    }
+
+    function authHeader() {
+        if (!checkAuth()) return {};
+
+        const token = localStorage.getItem("adminToken");
+
+        return {
+            "Authorization": "Bearer " + token
+        };
+    }
 
     function escapeHtml(v){ return $("<div>").text(v == null ? "" : v).html(); }
     function normalizeStatus(s){ return s === "Active" ? "Active" : "Inactive"; }
@@ -198,7 +228,11 @@
 
     async function loadArtistsFromApi(){
         var query = $.param({ search: currentSearch || "", status: currentStatus || "" });
-        var rows = await $.getJSON(ADMIN_API_BASE + "/artists?" + query);
+        var rows = await $.ajax({
+            url: ADMIN_API_BASE + "/artists?" + query,
+            method: "GET",
+            headers: authHeader()
+        });
         artists = (rows || []).map(function(r){
             var name = r.artistName || "";
             var parts = name.split(" ").filter(Boolean);
@@ -294,7 +328,7 @@
             if (i === -1) return;
             await $.ajax({
                 url: ADMIN_API_BASE + "/artists/" + editId,
-                method: "PUT",
+                method: "PUT", headers: authHeader(),
                 contentType: "application/json",
                 data: JSON.stringify({
                     artistName: name,
@@ -307,7 +341,7 @@
         } else {
             await $.ajax({
                 url: ADMIN_API_BASE + "/artists",
-                method: "POST",
+                method: "POST", headers: authHeader(),
                 contentType: "application/json",
                 data: JSON.stringify({
                     artistName: name,
@@ -341,7 +375,7 @@
     async function confirmDelete(){
         var deletedArtist = artists.find(function(a){ return a.id === deleteId; });
         var deletedName = deletedArtist ? deletedArtist.name : "Artist";
-        await $.ajax({ url: ADMIN_API_BASE + "/artists/" + deleteId, method: "DELETE" });
+        await $.ajax({ url: ADMIN_API_BASE + "/artists/" + deleteId, method: "DELETE", headers: authHeader() });
         deleteId = null;
         deleteModal.hide();
         await applyFilters();
@@ -349,6 +383,8 @@
     }
 
     $(document).ready(async function(){
+    
+        if (!checkAuth()) return;
         artistModal = new bootstrap.Modal(document.getElementById("artistModal"));
         deleteModal = new bootstrap.Modal(document.getElementById("deleteModal"));
 

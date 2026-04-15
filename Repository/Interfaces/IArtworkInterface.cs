@@ -10,21 +10,15 @@ namespace Repository.Interfaces
     {
       
         Task<int> UploadArtwork(t_Artwork art);
-
-        // Task<IEnumerable<vm_Artwork>> GetAllArtworks(int artistId);
-
         Task<IEnumerable<vm_Artwork>> GetAllArtworks();
-
-
 
         Task<IEnumerable<dynamic>> GetCategories();
 
-        // Task<IEnumerable<t_Artwork>> GetApprovedArtworks();
+        Task<t_Artwork> GetById(int id);
 
-        // Task<IEnumerable<t_Artwork>> GetArtworksByArtist(int artistId);
-
-        // Task<int> UpdateApprovalStatus(int artworkId, string status, string adminNote);
-
-        // Task<int> DeleteArtwork(int artworkId);
+        Task<IEnumerable<t_Artwork>> GetApprovedArtworks();
+        Task<IEnumerable<t_Artwork>> GetArtworksByArtist(int artistId);
+        Task<int> DeleteArtwork(int artworkId);
+        Task<int> UpdateArtwork(t_Artwork art);
     }
 }
