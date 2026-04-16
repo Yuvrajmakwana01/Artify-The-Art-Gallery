@@ -30,26 +30,26 @@
     <div class="metric-card purple" data-badge="+14.2%">
         <div class="metric-icon purple-icon"><i class="fa fa-dollar-sign"></i></div>
         <span class="metric-label">Total Revenue</span>
-        <span class="metric-value">$2,847,392</span>
-        <span class="metric-sub"><span class="up">↑</span> 14.2% vs last month</span>
+        <span class="metric-value">$0.00</span>
+        <span class="metric-sub">Live from database</span>
     </div>
     <div class="metric-card green" data-badge="18,432 txns">
         <div class="metric-icon green-icon"><i class="fa fa-chart-line"></i></div>
         <span class="metric-label">Successful Txns</span>
-        <span class="metric-value">18,432</span>
-        <span class="metric-sub"><span class="up">↑</span> 8.7% this week</span>
+        <span class="metric-value">0</span>
+        <span class="metric-sub">Live from database</span>
     </div>
     <div class="metric-card amber" data-badge="23 requests">
         <div class="metric-icon amber-icon"><i class="fa fa-clock"></i></div>
         <span class="metric-label">Pending Payouts</span>
-        <span class="metric-value">$143,200</span>
-        <span class="metric-sub"><span class="up">↑</span> 23 requests awaiting</span>
+        <span class="metric-value">$0.00</span>
+        <span class="metric-sub">0 requests awaiting</span>
     </div>
     <div class="metric-card red" data-badge="2.1% rate">
         <div class="metric-icon red-icon"><i class="fa fa-exclamation-triangle"></i></div>
         <span class="metric-label">Failed / Refunded</span>
-        <span class="metric-value">$28,910</span>
-        <span class="metric-sub"><span class="dn">↓</span> 2.1% failed rate</span>
+        <span class="metric-value">$0.00</span>
+        <span class="metric-sub">Live from database</span>
     </div>
 </div>
 
@@ -62,7 +62,14 @@
             <li>Analytics Panel</li>
         </ul>
         <div><div id="transactionLogs"></div></div>
-        <div><div id="pendingPayouts"></div></div>
+        <div>
+            <div style="display:flex;justify-content:flex-end;margin:8px 0 12px 0;">
+                <select id="pendingArtistFilter" style="min-width:220px;padding:8px;border:1px solid #ddd;border-radius:8px;">
+                    <option value="">All Artists</option>
+                </select>
+            </div>
+            <div id="pendingPayouts"></div>
+        </div>
         <div><div id="payoutHistory"></div></div>
         <div><div id="analyticsPanel"></div></div>
     </div>
@@ -79,30 +86,163 @@
 <script src="https://kendo.cdn.telerik.com/2021.2.616/js/kendo.all.min.js"></script>
 
 <script>
+    var ADMIN_PAYOUT_API_BASE = "http://localhost:5183/api/AdminPayout";
+    var pendingArtistId = "";
+
+    function checkAuth() {
+        const token = localStorage.getItem("adminToken");
+        const expiry = localStorage.getItem("adminExpiry");
+        if (!token || !expiry) {
+            window.location.href = "/Admin/Login";
+            return false;
+        }
+
+        if (Date.now() > expiry * 1000) {
+            localStorage.removeItem("adminToken");
+            localStorage.removeItem("adminExpiry");
+            window.location.href = "/Admin/Login";
+            return false;
+        }
+        return true;
+    }
+
+    function authHeader() {
+        if (!checkAuth()) return {};
+        return {
+            "Authorization": "Bearer " + localStorage.getItem("adminToken")
+        };
+    }
+
+    function fmtCurrency(v) {
+        return "$" + Number(v || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function fmtDate(v) {
+        if (!v) return "-";
+        var d = new Date(v);
+        if (isNaN(d.getTime())) return "-";
+        return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "2-digit" });
+    }
+
     function statusTemplate(status) {
-        var cls = 'status-' + status.toLowerCase();
-        return '<span class="status-badge ' + cls + '">' + status + '</span>';
+        var normalized = (status || "Pending").toLowerCase();
+        var cls = 'status-' + normalized;
+        return '<span class="status-badge ' + cls + '">' + (status || "Pending") + '</span>';
     }
 
     function approvePayout(e) {
         e.preventDefault();
         var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
-        $.post("/Admin/ApprovePayout", { id: dataItem.id }, function () {
-            alert("Payout Approved");
+        $.ajax({
+            url: ADMIN_PAYOUT_API_BASE + "/approve/" + dataItem.id,
+            method: "POST",
+            headers: authHeader()
+        }).done(function () {
+            if (window.Swal) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Payout Approved",
+                    text: "Artist payout has been approved successfully.",
+                    timer: 1600,
+                    showConfirmButton: false
+                });
+            } else {
+                alert("Payout Approved");
+            }
             $("#pendingPayouts").data("kendoGrid").dataSource.read();
+            $("#payoutHistory").data("kendoGrid").dataSource.read();
+            loadAnalytics();
         });
     }
 
     function rejectPayout(e) {
         e.preventDefault();
         var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
-        $.post("/Admin/RejectPayout", { id: dataItem.id }, function () {
-            alert("Payout Rejected");
+        $.ajax({
+            url: ADMIN_PAYOUT_API_BASE + "/reject/" + dataItem.id,
+            method: "POST",
+            headers: authHeader()
+        }).done(function () {
+            if (window.Swal) {
+                Swal.fire({
+                    icon: "info",
+                    title: "Payout Rejected",
+                    text: "Payout request has been rejected.",
+                    timer: 1600,
+                    showConfirmButton: false
+                });
+            } else {
+                alert("Payout Rejected");
+            }
             $("#pendingPayouts").data("kendoGrid").dataSource.read();
+            $("#payoutHistory").data("kendoGrid").dataSource.read();
+            loadAnalytics();
+        });
+    }
+
+    function loadAnalytics() {
+        $.ajax({
+            url: ADMIN_PAYOUT_API_BASE + "/analytics",
+            method: "GET",
+            headers: authHeader()
+        }).done(function (res) {
+            $(".metric-card.purple .metric-value").text(fmtCurrency(res.totalRevenue));
+            $(".metric-card.green .metric-value").text(Number(res.successfulTransactions || 0).toLocaleString("en-US"));
+            $(".metric-card.amber .metric-value").text(fmtCurrency(res.pendingPayoutAmount));
+            $(".metric-card.amber .metric-sub").html('<span class="up">↑</span> ' + Number(res.pendingPayoutCount || 0) + ' requests awaiting');
+            $(".metric-card.red .metric-value").text(fmtCurrency(res.failedOrRefundedAmount));
+
+            var points = (res.monthlyNetPayoutSeries || []);
+            var categories = points.map(function (x) { return x.label; });
+            var values = points.map(function (x) { return x.value; });
+            var chart = $("#analyticsPanel").data("kendoChart");
+            if (chart) {
+                chart.setOptions({
+                    categoryAxis: { categories: categories },
+                    series: [{ data: values, color: "#ff7a00", opacity: 0.3, line: { width: 2.5, color: "#ff7a00" } }]
+                });
+            }
+        }).fail(function () {
+            $(".metric-card.purple .metric-sub").text("Unable to load analytics");
+            $(".metric-card.green .metric-sub").text("Unable to load analytics");
+            $(".metric-card.amber .metric-sub").text("Unable to load analytics");
+            $(".metric-card.red .metric-sub").text("Unable to load analytics");
+        });
+    }
+
+    function loadPendingArtists() {
+        $.ajax({
+            url: ADMIN_PAYOUT_API_BASE + "/pending-artists",
+            method: "GET",
+            headers: authHeader()
+        }).done(function (artists) {
+            var ddl = $("#pendingArtistFilter");
+            ddl.find("option:not([value=''])").remove();
+            (artists || []).forEach(function (a) {
+                ddl.append($("<option>", { value: String(a.artistId), text: a.artistName }));
+            });
+        });
+    }
+
+    function loadPendingPayouts(options) {
+        var url = ADMIN_PAYOUT_API_BASE + "/pending-payouts";
+        if (pendingArtistId) {
+            url += "?artistId=" + encodeURIComponent(pendingArtistId);
+        }
+
+        $.ajax({
+            url: url,
+            method: "GET",
+            headers: authHeader()
+        }).done(function (data) {
+            options.success(data);
+        }).fail(function (err) {
+            options.error(err);
         });
     }
 
     $(document).ready(function () {
+        if (!checkAuth()) return;
 
         $("#paymentTabStrip").kendoTabStrip({
             animation: { open: { effects: "fadeIn", duration: 300 } }
@@ -110,7 +250,16 @@
 
         $("#transactionLogs").kendoGrid({
             dataSource: {
-                transport: { read: "/Admin/GetTransactionLogs" },
+                transport: {
+                    read: function (options) {
+                        $.ajax({
+                            url: ADMIN_PAYOUT_API_BASE + "/transaction-logs",
+                            method: "GET",
+                            headers: authHeader()
+                        }).done(function (data) { options.success(data); })
+                          .fail(function (err) { options.error(err); });
+                    }
+                },
                 pageSize: 10
             },
             pageable: true,
@@ -119,26 +268,32 @@
                   template: '<span style="font-family:monospace;font-weight:600">#: transactionId #</span>' },
                 { field: "user", title: "User" },
                 { field: "amount", title: "Amount",
-                  template: '<span style="font-weight:600">#: amount #</span>' },
+                  template: '<span style="font-weight:600">#: kendo.toString(amount, "c2") #</span>' },
                 { field: "status", title: "Status",
                   template: '#= statusTemplate(status) #' },
                 { field: "date", title: "Date",
-                  template: '<span style="color:var(--text-muted)">#: date #</span>' }
+                  template: '<span style="color:var(--text-muted)">#: fmtDate(date) #</span>' }
             ]
         });
 
         $("#pendingPayouts").kendoGrid({
             dataSource: {
-                transport: { read: "/Admin/GetPendingPayouts" },
+                transport: {
+                    read: function (options) {
+                        loadPendingPayouts(options);
+                    }
+                },
                 pageSize: 10
             },
             pageable: true,
             columns: [
                 { field: "artistName", title: "Artist", template: '<span style="font-weight:500">#: artistName #</span>' },
+                { field: "requestMonth", title: "Request Month", template: '<span style="color:var(--text-muted)">#: requestMonth #</span>' },
+                { field: "ordersCount", title: "Orders", template: '<span style="font-weight:500">#: ordersCount #</span>' },
                 { field: "artwork", title: "Artwork", template: '<span style="color:var(--text-muted)">#: artwork #</span>' },
-                { field: "grossAmount", title: "Gross", template: '<span style="font-weight:600">#: grossAmount #</span>' },
-                { field: "commission", title: "Commission" },
-                { field: "netAmount", title: "Net", template: '<span style="font-weight:600">#: netAmount #</span>' },
+                { field: "grossAmount", title: "Gross", template: '<span style="font-weight:600">#: kendo.toString(grossAmount, "c2") #</span>' },
+                { field: "commission", title: "Commission", template: '<span>#: kendo.toString(commission, "c2") #</span>' },
+                { field: "netAmount", title: "Net", template: '<span style="font-weight:600">#: kendo.toString(netAmount, "c2") #</span>' },
                 {
                     command: [
                         { name: "approve", text: "✓ Approve", click: approvePayout },
@@ -151,16 +306,25 @@
 
         $("#payoutHistory").kendoGrid({
             dataSource: {
-                transport: { read: "/Admin/GetPayoutHistory" },
+                transport: {
+                    read: function (options) {
+                        $.ajax({
+                            url: ADMIN_PAYOUT_API_BASE + "/payout-history",
+                            method: "GET",
+                            headers: authHeader()
+                        }).done(function (data) { options.success(data); })
+                          .fail(function (err) { options.error(err); });
+                    }
+                },
                 pageSize: 10
             },
             pageable: true,
             columns: [
                 { field: "artistName", title: "Artist", template: '<span style="font-weight:500">#: artistName #</span>' },
-                { field: "amount", title: "Amount", template: '<span style="font-weight:600">#: amount #</span>' },
+                { field: "amount", title: "Amount", template: '<span style="font-weight:600">#: kendo.toString(amount, "c2") #</span>' },
                 { field: "status", title: "Status", template: '#= statusTemplate(status) #' },
                 { field: "processedDate", title: "Processed Date",
-                  template: '<span style="color:var(--text-muted)">#: processedDate #</span>' }
+                  template: '<span style="color:var(--text-muted)">#: fmtDate(processedDate) #</span>' }
             ]
         });
 
@@ -169,12 +333,12 @@
             legend: { visible: false },
             seriesDefaults: { type: "area" },
             series: [{
-                data: [45000, 62000, 78000, 55000, 92000, 84000, 105000, 98000],
+                data: [],
                 color: "#ff7a00", opacity: 0.3,
                 line: { width: 2.5, color: "#ff7a00" }
             }],
             categoryAxis: {
-                categories: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"],
+                categories: [],
                 labels: { font: "12px 'DM Sans'", color: "#9096a8" },
                 majorGridLines: { color: "#f0ece8" },
                 line: { visible: false }
@@ -190,6 +354,14 @@
             },
             chartArea: { background: "transparent", height: 320 }
         });
+
+        $("#pendingArtistFilter").on("change", function () {
+            pendingArtistId = $(this).val();
+            $("#pendingPayouts").data("kendoGrid").dataSource.read();
+        });
+
+        loadPendingArtists();
+        loadAnalytics();
     });
 </script>
 }

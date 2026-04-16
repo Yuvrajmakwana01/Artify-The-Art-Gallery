@@ -28,12 +28,13 @@ public class AdminArtistRepository : IAdminArtistInterface
                 ap.c_cover_image,
                 ap.c_rating_avg,
                 ap.c_is_verified,
+                COALESCE(ap.c_is_active, FALSE) AS is_active,
                 COALESCE(ap.c_rejected_count, 0) AS rejected_count,
                 COALESCE(COUNT(DISTINCT aw.c_artwork_id), 0)::int AS artworks_count,
                 COALESCE(SUM(oi.c_price_at_purchase), 0)::numeric(18,2) AS total_sales,
                 COALESCE(ap.c_created_at, u.c_created_at) AS created_at,
                 CASE
-                    WHEN ap.c_is_verified = TRUE THEN 'Active'
+                    WHEN COALESCE(ap.c_is_active, FALSE) = TRUE THEN 'Active'
                     WHEN COALESCE(ap.c_rejected_count, 0) > 0 THEN 'Inactive'
                     ELSE 'Under Review'
                 END AS status
@@ -47,13 +48,13 @@ public class AdminArtistRepository : IAdminArtistInterface
                     ap.c_artist_email ILIKE '%' || @search || '%')
                 AND (
                     @status IS NULL OR @status = '' OR
-                    (@status = 'Active' AND ap.c_is_verified = TRUE) OR
-                    (@status = 'Inactive' AND ap.c_is_verified = FALSE AND COALESCE(ap.c_rejected_count, 0) > 0) OR
-                    (@status = 'Under Review' AND ap.c_is_verified = FALSE AND COALESCE(ap.c_rejected_count, 0) = 0)
+                    (@status = 'Active' AND COALESCE(ap.c_is_active, FALSE) = TRUE) OR
+                    (@status = 'Inactive' AND COALESCE(ap.c_is_active, FALSE) = FALSE AND COALESCE(ap.c_rejected_count, 0) > 0) OR
+                    (@status = 'Under Review' AND COALESCE(ap.c_is_active, FALSE) = FALSE AND COALESCE(ap.c_rejected_count, 0) = 0)
                 )
             GROUP BY
                 ap.c_artist_id, ap.c_artist_name, ap.c_artist_email, ap.c_biography,
-                ap.c_cover_image, ap.c_rating_avg, ap.c_is_verified, ap.c_rejected_count,
+                ap.c_cover_image, ap.c_rating_avg, ap.c_is_verified, ap.c_is_active, ap.c_rejected_count,
                 ap.c_created_at, u.c_created_at
             ORDER BY ap.c_artist_id DESC;", _connection);
 
@@ -72,11 +73,11 @@ public class AdminArtistRepository : IAdminArtistInterface
                 CoverImage = reader.IsDBNull(4) ? null : reader.GetString(4),
                 RatingAvg = reader.GetDecimal(5),
                 IsVerified = reader.GetBoolean(6),
-                RejectedCount = reader.GetInt32(7),
-                ArtworksCount = reader.GetInt32(8),
-                TotalSales = reader.GetDecimal(9),
-                CreatedAt = reader.GetDateTime(10),
-                Status = reader.GetString(11)
+                RejectedCount = reader.GetInt32(8),
+                ArtworksCount = reader.GetInt32(9),
+                TotalSales = reader.GetDecimal(10),
+                CreatedAt = reader.GetDateTime(11),
+                Status = reader.GetString(12)
             });
         }
 
@@ -90,9 +91,9 @@ public class AdminArtistRepository : IAdminArtistInterface
         await using var cmd = new NpgsqlCommand(@"
             SELECT
                 COUNT(*)::int AS total_artists,
-                COUNT(*) FILTER (WHERE c_is_verified = TRUE)::int AS active,
-                COUNT(*) FILTER (WHERE c_is_verified = FALSE AND COALESCE(c_rejected_count, 0) > 0)::int AS inactive,
-                COUNT(*) FILTER (WHERE c_is_verified = FALSE AND COALESCE(c_rejected_count, 0) = 0)::int AS under_review,
+                COUNT(*) FILTER (WHERE COALESCE(c_is_active, FALSE) = TRUE)::int AS active,
+                COUNT(*) FILTER (WHERE COALESCE(c_is_active, FALSE) = FALSE AND COALESCE(c_rejected_count, 0) > 0)::int AS inactive,
+                COUNT(*) FILTER (WHERE COALESCE(c_is_active, FALSE) = FALSE AND COALESCE(c_rejected_count, 0) = 0)::int AS under_review,
                 COALESCE((
                     SELECT SUM(oi.c_price_at_purchase)
                     FROM t_order_item oi
@@ -153,13 +154,13 @@ public class AdminArtistRepository : IAdminArtistInterface
 
             var userId = Convert.ToInt32(await userCmd.ExecuteScalarAsync());
 
-            var (isVerified, rejectedCount) = MapStatusToArtistFlags(request.Status);
+            var (isVerified, isActive, rejectedCount) = MapStatusToArtistFlags(request.Status);
 
             await using var artistCmd = new NpgsqlCommand(@"
                 INSERT INTO t_artist_profile
-                (c_artist_id, c_artist_name, c_artist_email, c_password, c_biography, c_cover_image, c_rating_avg, c_is_verified, c_url, c_rejected_count)
+                (c_artist_id, c_artist_name, c_artist_email, c_password, c_biography, c_cover_image, c_rating_avg, c_is_verified, c_is_active, c_url, c_rejected_count)
                 VALUES
-                (@artistId, @artistName, @artistEmail, @password, @biography, @coverImage, 0.00, @isVerified, NULL, @rejectedCount);", _connection, tx);
+                (@artistId, @artistName, @artistEmail, @password, @biography, @coverImage, 0.00, @isVerified, @isActive, NULL, @rejectedCount);", _connection, tx);
 
             artistCmd.Parameters.AddWithValue("artistId", userId);
             artistCmd.Parameters.AddWithValue("artistName", request.ArtistName.Trim());
@@ -168,6 +169,7 @@ public class AdminArtistRepository : IAdminArtistInterface
             artistCmd.Parameters.AddWithValue("biography", (object?)request.Biography ?? DBNull.Value);
             artistCmd.Parameters.AddWithValue("coverImage", (object?)request.CoverImage ?? DBNull.Value);
             artistCmd.Parameters.AddWithValue("isVerified", isVerified);
+            artistCmd.Parameters.AddWithValue("isActive", isActive);
             artistCmd.Parameters.AddWithValue("rejectedCount", rejectedCount);
 
             await artistCmd.ExecuteNonQueryAsync();
@@ -189,7 +191,7 @@ public class AdminArtistRepository : IAdminArtistInterface
         await using var tx = await _connection.BeginTransactionAsync();
         try
         {
-            var (isVerified, rejectedCount) = MapStatusToArtistFlags(request.Status);
+            var (isVerified, isActive, rejectedCount) = MapStatusToArtistFlags(request.Status);
             var email = request.ArtistEmail.Trim();
 
             await using var artistCmd = new NpgsqlCommand(@"
@@ -199,6 +201,7 @@ public class AdminArtistRepository : IAdminArtistInterface
                     c_biography = @biography,
                     c_cover_image = @coverImage,
                     c_is_verified = @isVerified,
+                    c_is_active = @isActive,
                     c_rejected_count = @rejectedCount
                 WHERE c_artist_id = @artistId;", _connection, tx);
 
@@ -207,6 +210,7 @@ public class AdminArtistRepository : IAdminArtistInterface
             artistCmd.Parameters.AddWithValue("biography", (object?)request.Biography ?? DBNull.Value);
             artistCmd.Parameters.AddWithValue("coverImage", (object?)request.CoverImage ?? DBNull.Value);
             artistCmd.Parameters.AddWithValue("isVerified", isVerified);
+            artistCmd.Parameters.AddWithValue("isActive", isActive);
             artistCmd.Parameters.AddWithValue("rejectedCount", rejectedCount);
             artistCmd.Parameters.AddWithValue("artistId", artistId);
 
@@ -257,13 +261,13 @@ public class AdminArtistRepository : IAdminArtistInterface
         return affected > 0;
     }
 
-    private static (bool isVerified, int rejectedCount) MapStatusToArtistFlags(string? status)
+    private static (bool isVerified, bool isActive, int rejectedCount) MapStatusToArtistFlags(string? status)
     {
         return (status ?? "").Trim() switch
         {
-            "Active" => (true, 0),
-            "Inactive" => (false, 1),
-            _ => (false, 0)
+            "Active" => (true, true, 0),
+            "Inactive" => (false, false, 1),
+            _ => (false, false, 0)
         };
     }
 
