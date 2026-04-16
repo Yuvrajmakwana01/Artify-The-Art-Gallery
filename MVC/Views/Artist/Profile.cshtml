@@ -1,519 +1,209 @@
 @{
     ViewData["Title"] = "Edit Profile";
+    Layout = "~/Views/Shared/_ArtistLayout.cshtml";
 }
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2024.1.130/styles/kendo.default-ocean-blue.min.css" />
 
-<style>
-    body {
-        background: #f0f4f8;
-    }
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.common.min.css" rel="stylesheet" />
+<link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.default-v2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css" integrity="sha512-t7Few9xlddEmgd3oKZQahkNI4dS6l80+eGEzFQiqtyVYdvcSG2D3Iub77R20BdotfRPA9caaRkg1tyaJiPmO0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    .profile-card {
-        background: #ffffff;
-        border-radius: 16px;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-        overflow: hidden;
-    }
 
-    .card-header-band {
-        background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
-        padding: 28px 32px 20px;
-        color: white;
-    }
 
-    .card-header-band h3 {
-        font-size: 20px;
-        font-weight: 600;
-        margin: 0 0 4px;
-    }
+<div class="container sp-fade-up" style="max-width:780px">
+    <div class="studio-card">
+        <form id="editForm" enctype="multipart/form-data">
+            <input type="hidden" id="ArtistId" name="ArtistId" value="1" />
 
-    .card-header-band p {
-        font-size: 13px;
-        opacity: 0.8;
-        margin: 0;
-    }
-
-    .avatar-circle {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.25);
-        border: 2px solid rgba(255,255,255,0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 20px;
-        font-weight: 600;
-        color: white;
-        flex-shrink: 0;
-    }
-
-    .card-body-section {
-        padding: 28px 32px;
-    }
-
-    .section-title {
-        font-size: 11px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: #888;
-        margin-bottom: 14px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .section-title::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: #e8ecf0;
-    }
-
-    .k-form-label {
-        font-size: 13px;
-        font-weight: 500;
-        color: #374151;
-        margin-bottom: 6px;
-    }
-
-    .k-input, .k-textarea, .k-dropdownlist {
-        border-radius: 8px !important;
-        border: 1.5px solid #d1d5db !important;
-        font-size: 14px !important;
-        background: #fafafa !important;
-        transition: border-color 0.2s, box-shadow 0.2s !important;
-    }
-
-    .k-input:focus, .k-textarea:focus {
-        border-color: #1a73e8 !important;
-        box-shadow: 0 0 0 3px rgba(26,115,232,0.12) !important;
-        background: #fff !important;
-    }
-
-    .upload-zone {
-        border: 2px dashed #c9d4e0;
-        border-radius: 10px;
-        padding: 24px;
-        text-align: center;
-        background: #f8fafd;
-        cursor: pointer;
-        transition: border-color 0.2s, background 0.2s;
-        position: relative;
-    }
-
-    .upload-zone:hover {
-        border-color: #1a73e8;
-        background: #eef4fd;
-    }
-
-    .upload-zone input[type=file] {
-        position: absolute;
-        inset: 0;
-        opacity: 0;
-        cursor: pointer;
-    }
-
-    .upload-icon-wrap {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        background: #e8f0fe;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 10px;
-    }
-
-    .upload-zone p {
-        margin: 0;
-        font-size: 13px;
-        color: #6b7280;
-    }
-
-    .upload-zone span {
-        font-size: 11px;
-        color: #9ca3af;
-    }
-
-    .url-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 8px;
-    }
-
-    .url-prefix {
-        background: #f3f4f6;
-        border: 1.5px solid #d1d5db;
-        border-right: none;
-        border-radius: 8px 0 0 8px;
-        padding: 8px 10px;
-        font-size: 12px;
-        color: #9ca3af;
-        white-space: nowrap;
-        height: 38px;
-        display: flex;
-        align-items: center;
-    }
-
-    .url-item .k-input {
-        border-radius: 0 8px 8px 0 !important;
-        border-left: none !important;
-    }
-
-    .btn-remove-url {
-        width: 34px;
-        height: 34px;
-        border-radius: 8px;
-        border: 1.5px solid #e5e7eb;
-        background: white;
-        color: #9ca3af;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        flex-shrink: 0;
-        transition: all 0.15s;
-        font-size: 16px;
-        line-height: 1;
-    }
-
-    .btn-remove-url:hover {
-        background: #fef2f2;
-        border-color: #fca5a5;
-        color: #ef4444;
-    }
-
-    .btn-add-url {
-        background: none;
-        border: none;
-        color: #1a73e8;
-        font-size: 13px;
-        font-weight: 500;
-        cursor: pointer;
-        padding: 4px 0;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-top: 4px;
-    }
-
-    .btn-add-url:hover {
-        color: #0d47a1;
-    }
-
-    .status-toggle {
-        display: flex;
-        gap: 10px;
-    }
-
-    .status-opt {
-        flex: 1;
-        padding: 10px;
-        border-radius: 10px;
-        border: 1.5px solid #e5e7eb;
-        background: #fafafa;
-        text-align: center;
-        cursor: pointer;
-        font-size: 13px;
-        font-weight: 500;
-        color: #6b7280;
-        transition: all 0.15s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-    }
-
-    .status-opt.selected-active {
-        background: #f0fdf4;
-        border-color: #86efac;
-        color: #16a34a;
-    }
-
-    .status-opt.selected-inactive {
-        background: #fef2f2;
-        border-color: #fca5a5;
-        color: #dc2626;
-    }
-
-    .status-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: currentColor;
-    }
-
-    .card-footer-band {
-        background: #f8fafc;
-        border-top: 1px solid #e8ecf0;
-        padding: 16px 32px;
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-    }
-
-    .btn-cancel-custom {
-        padding: 9px 20px;
-        border-radius: 8px;
-        border: 1.5px solid #d1d5db;
-        background: white;
-        color: #374151;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.15s;
-    }
-
-    .btn-cancel-custom:hover {
-        background: #f3f4f6;
-    }
-
-    .btn-save-custom {
-        padding: 9px 24px;
-        border-radius: 8px;
-        border: none;
-        background: linear-gradient(135deg, #1a73e8, #0d47a1);
-        color: white;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: opacity 0.15s;
-    }
-
-    .btn-save-custom:hover {
-        opacity: 0.9;
-    }
-
-    #msgBox {
-        border-radius: 10px;
-        font-size: 13px;
-    }
-</style>
-
-<div class="container mt-5 mb-5" style="max-width: 680px;">
-
-    <div class="profile-card">
-
-        <!-- Header -->
-        <div class="card-header-band">
-            <div class="d-flex align-items-center gap-3">
-                <div class="avatar-circle">A</div>
-                <div>
-                    <h3>Edit Artist Profile</h3>
-                    <p>Update your public profile and social links</p>
+            <!-- CARD HEADER -->
+            <div class="header-group">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="avatar-wrapper">BS</div>
+                    <div>
+                        <h4 style="font-family:var(--font-display);font-size:1.3rem;font-weight:400;color:var(--sp-ink);margin:0">
+                            Edit Artist Profile
+                        </h4>
+                        <p style="font-size:0.82rem;color:var(--sp-muted);margin:0">Customize your professional presence</p>
+                    </div>
                 </div>
+                <button type="button" class="sp-btn sp-btn-amber" onclick="$('#editForm').submit()">
+                    <i class="bi bi-floppy-fill me-1"></i> Save Changes
+                </button>
             </div>
-        </div>
 
-        <!-- Body -->
-        <div class="card-body-section">
-
+            <!-- ALERT -->
             <div id="msgBox" class="alert d-none mb-4"></div>
 
-            <form id="editForm" enctype="multipart/form-data">
+            <!-- BASIC INFO -->
+            <div class="section-divider"><span>Basic Studio Info</span></div>
 
-                <input type="hidden" id="ArtistId" name="ArtistId" value="1" />
+            <div class="mb-4">
+                <label class="form-label">Artist Name</label>
+                <input type="text" class="k-input w-100" id="ArtistName" name="ArtistName" placeholder="Your name" />
+            </div>
 
-                <!-- Basic Info -->
-                <div class="section-title">Basic Info</div>
+            <div class="mb-4">
+                <label class="form-label">Biography</label>
+                <textarea class="k-textarea w-100" id="Biography" name="Biography" rows="4"
+                    placeholder="Share your artistic journey…"></textarea>
+            </div>
 
-                <div class="mb-3">
-                    <label class="k-form-label">Artist Name</label>
-                    <input type="text" class="k-input k-input-md w-100" id="ArtistName" name="ArtistName" placeholder="Enter artist name" />
-                </div>
-
-                <div class="mb-4">
-                    <label class="k-form-label">Biography</label>
-                    <textarea class="k-textarea w-100" id="Biography" name="Biography" rows="4" placeholder="Tell your story..."></textarea>
-                </div>
-
-                <!-- Status -->
-                <div class="section-title">Status</div>
-
-                <div class="mb-4">
-                    <div class="status-toggle" id="statusToggle">
-                        <div class="status-opt selected-active" id="optActive" onclick="setStatus(true)">
-                            <span class="status-dot"></span> Active
-                        </div>
-                        <div class="status-opt" id="optInactive" onclick="setStatus(false)">
-                            <span class="status-dot"></span> Inactive
-                        </div>
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label class="form-label d-block">Account Status</label>
+                    <div class="status-container" id="statusToggle">
+                        <button type="button" class="status-opt selected-active" id="optActive"  onclick="setStatus(true)">Active</button>
+                        <button type="button" class="status-opt"                 id="optInactive" onclick="setStatus(false)">Inactive</button>
                     </div>
                     <input type="hidden" id="IsActive" name="IsActive" value="true" />
                 </div>
+            </div>
 
-                <!-- Cover Image -->
-                <div class="section-title">Cover Image</div>
+            <!-- VISUALS -->
+            <div class="section-divider"><span>Visuals</span></div>
 
-                <div class="mb-4">
-                    <div class="upload-zone" id="uploadZone">
-                        <input type="file" id="CoverImageFile" name="CoverImageFile" accept="image/*" onchange="handleFileChange(this)" />
-                        <div class="upload-icon-wrap">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="2">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                <polyline points="17 8 12 3 7 8"/>
-                                <line x1="12" y1="3" x2="12" y2="15"/>
-                            </svg>
-                        </div>
-                        <p id="uploadLabel">Click to upload or drag &amp; drop</p>
-                        <span>PNG, JPG up to 10MB</span>
-                    </div>
+            <div class="mb-4">
+                <label class="form-label">Studio Cover Image</label>
+                <div class="sp-upload-zone" onclick="$('#CoverImageFile').click()" style="cursor:pointer">
+                    <input type="file" id="CoverImageFile" name="CoverImageFile" accept="image/*" class="d-none"
+                           onchange="handleFileChange(this)" />
+                    <div class="sp-upload-zone-icon"><i class="bi bi-cloud-arrow-up"></i></div>
+                    <div class="sp-upload-zone-label" id="uploadLabel">Click to upload brand imagery</div>
+                    <div class="sp-upload-zone-sub">PNG or JPG — up to 10 MB</div>
                 </div>
+            </div>
 
-                <!-- Social Links -->
-                <div class="section-title">Social Media Links</div>
-
-                <div id="urlContainer"></div>
-
-                <button type="button" class="btn-add-url" id="addUrlBtn">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                    </svg>
-                    Add another link
-                </button>
-
-            </form>
-        </div>
-
-        <!-- Footer -->
-        <div class="card-footer-band">
-            <button type="button" class="btn-cancel-custom">Cancel</button>
-            <button type="button" class="btn-save-custom" onclick="$('#editForm').submit()">
-                Save Changes
+            <!-- SOCIAL LINKS -->
+            <div class="section-divider"><span>Social Connections</span></div>
+            <div id="urlContainer"></div>
+            <button type="button" class="sp-btn sp-btn-outline mt-2" id="addUrlBtn" style="font-size:0.82rem">
+                <i class="bi bi-plus-circle me-1"></i> Add another link
             </button>
-        </div>
 
+        </form>
     </div>
 </div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 @section Scripts {
-<script>
-$(document).ready(function () {
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    // LOAD DATA
-    $.get("http://localhost:5183/api/ArtistApi/GetEditProfile", function (res) {
-        if (res.success) {
-            let d = res.data;
-
-            $("#ArtistName").val(d.artistName || "");
-            $("#Biography").val(d.biography || "");
-
-            // ✅ FIX: prevent null crash
-            setStatus(d.isActive ?? true);
-
-            $("#urlContainer").empty();
-
-            if (d.urls && d.urls.length > 0) {
-                d.urls.forEach(u => addUrl(u));
-            } else {
-                addUrl();
+    <script>
+        $(document).ready(function () {
+            // 1. Get User ID from LocalStorage (set during Login in your Controller)
+            const userData = JSON.parse(localStorage.getItem("userData"));
+            if (!userData || !userData.c_User_Id) {
+                Swal.fire("Error", "Session expired. Please login again.", "error");
+                return;
             }
+            const artistId = userData.c_User_Id;
+            $("#ArtistId").val(artistId);
+
+            // 2. Fetch Profile Data using the correct endpoint from your Repository
+            // Matches: [HttpGet("profile/{id}")] in your Controller
+            $.get(`http://localhost:5183/api/ArtistApi/profile/${artistId}`, function (data) {
+                if (data) {
+                    // Mapping fields from t_ArtistProfile model
+                    $("#ArtistName").val(data.artistName || "");
+                    $("#Biography").val(data.biography || "");
+                    
+                    // Set status toggle
+                    setStatus(data.isActive !== false);
+
+                    // Map URLs array
+                    $("#urlContainer").empty();
+                    if (data.urls && data.urls.length > 0) {
+                        data.urls.forEach(function(u) { addUrl(u); });
+                    } else { 
+                        addUrl(); 
+                    }
+
+                    // Optional: Update UI Avatar initials
+                    if(data.artistName) {
+                        const initials = data.artistName.split(' ').map(n => n[0]).join('').toUpperCase();
+                        $(".avatar-wrapper").text(initials.substring(0,2));
+                    }
+                }
+            });
+
+            // 3. Status Toggle Logic
+            window.setStatus = function (val) {
+                $("#IsActive").val(val ? "true" : "false");
+                if (val) {
+                    $("#optActive").addClass("selected-active");
+                    $("#optInactive").removeClass("selected-inactive");
+                } else {
+                    $("#optInactive").addClass("selected-inactive");
+                    $("#optActive").removeClass("selected-active");
+                }
+            };
+
+            // 4. Social Links Logic
+            window.addUrl = function (val) {
+                val = val || "";
+                var id = "url_" + Date.now();
+                $("#urlContainer").append(`
+                    <div class="url-item" id="wrap_${id}">
+                        <span class="url-prefix">https://</span>
+                        <input type="text" class="k-input url-input" value="${val}" placeholder="behance.net/username" />
+                        <button type="button" class="sp-btn sp-btn-danger" onclick="$('#wrap_${id}').remove()">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </div>
+                `);
+            };
+
+            $("#addUrlBtn").click(function() { addUrl(); });
+
+            // 5. Submit Logic
+            $("#editForm").submit(function (e) {
+    e.preventDefault();
+
+    var formData = new FormData();
+    formData.append("ArtistId", $("#ArtistId").val());
+    formData.append("ArtistName", $("#ArtistName").val());
+    formData.append("Biography", $("#Biography").val());
+    formData.append("IsActive", $("#IsActive").val());
+    
+    // 1. Append the file if selected
+    var fileInput = document.getElementById('CoverImageFile');
+    if (fileInput.files.length > 0) {
+        formData.append("CoverImageFile", fileInput.files[0]);
+    }
+
+    // 2. Append URLs correctly as an array for the model
+    $(".url-input").each(function(index) {
+        let val = $(this).val().trim();
+        if(val) {
+            formData.append(`Urls[${index}]`, val);
         }
     });
 
-    // STATUS TOGGLE
-    window.setStatus = function (val) {
-
-        // ✅ FIX: null safety
-        if (val === null || val === undefined) {
-            val = true;
+    $.ajax({
+        url: "http://localhost:5183/api/ArtistApi/profile", 
+        type: "POST",
+        data: formData,
+        contentType: false, // Required for FormData
+        processData: false, // Required for FormData
+        success: function (res) {
+            Swal.fire("Success", "Profile updated successfully!", "success")
+                .then(() => window.location.href = "/Artist/MyProfile");
+        },
+        error: function (xhr) {
+            Swal.fire("Error", "Failed to update profile: " + xhr.responseText, "error");
         }
-
-        $("#IsActive").val(val ? "true" : "false");
-
-        if (val) {
-            $("#optActive").addClass("selected-active").removeClass("selected-inactive");
-            $("#optInactive").removeClass("selected-active selected-inactive");
-        } else {
-            $("#optInactive").addClass("selected-inactive").removeClass("selected-active");
-            $("#optActive").removeClass("selected-active selected-inactive");
-        }
-    };
-
-    // ADD URL
-    window.addUrl = function (val = "") {
-        let id = "url_" + Date.now();
-
-        $("#urlContainer").append(`
-            <div class="url-item" id="wrap_${id}">
-                <span class="url-prefix">https://</span>
-                <input type="text" name="Urls" class="k-input k-input-md url-input" value="${val}" placeholder="instagram.com/yourprofile" style="flex:1;" />
-                <button type="button" class="btn-remove-url" onclick="$('#wrap_${id}').remove()">
-                    &times;
-                </button>
-            </div>
-        `);
-    };
-
-    $("#addUrlBtn").click(() => addUrl());
-
-    // FILE LABEL
-    window.handleFileChange = function (input) {
-        if (input.files && input.files[0]) {
-            $("#uploadLabel").text(input.files[0].name);
-        }
-    };
-
-    // SUBMIT
-    $("#editForm").submit(function (e) {
-        e.preventDefault();
-
-        let formData = new FormData();
-
-        formData.append("ArtistId", "1");
-        formData.append("ArtistName", $("#ArtistName").val() || "");
-        formData.append("Biography", $("#Biography").val() || "");
-        formData.append("IsActive", $("#IsActive").val());
-
-        let file = $("#CoverImageFile")[0].files[0];
-        if (file) formData.append("CoverImageFile", file);
-
-        $(".url-input").each(function (i) {
-            let val = $(this).val().trim();
-            if (val !== "") {
-                formData.append(`Urls[${i}]`, val);
-            }
-        });
-
-        $.ajax({
-            url: "http://localhost:5183/api/ArtistApi/EditProfile",
-            type: "POST",
-            data: formData,
-            processData: false,
-            contentType: false,
-
-            success: function (res) {
-                $("#msgBox")
-                    .removeClass("d-none alert-danger")
-                    .addClass("alert-success")
-                    .text(res?.message || "Success");
-            },
-
-            error: function (err) {
-
-                let msg = "Server error";
-
-                try {
-                    let res = JSON.parse(err.responseText);
-                    msg = res.message || msg;
-                } catch {}
-
-                $("#msgBox")
-                    .removeClass("d-none alert-success")
-                    .addClass("alert-danger")
-                    .text(msg);
-            }
-        });
     });
-
-    addUrl();
 });
-</script>
+
+        });
+
+        function handleFileChange(input) {
+            if (input.files && input.files[0]) {
+                $("#uploadLabel").text(input.files[0].name).css("color", "#d97706");
+            }
+        }
+    </script>
 }

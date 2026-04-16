@@ -4,12 +4,14 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
+
 namespace Repository.Models
 {
     public class t_ChangePassword
     {
         [Required]
         public int c_user_id { get; set; }
+        public int c_Artist_Id { get; set; }
 
         [Required(ErrorMessage = "Current password is required")]
         public string c_CurrentPassword { get; set; } = string.Empty;

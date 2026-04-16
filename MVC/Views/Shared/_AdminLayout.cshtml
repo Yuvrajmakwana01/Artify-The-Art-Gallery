@@ -37,7 +37,7 @@
 
                     <li class="nav-item">
                         <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
-                           asp-controller="Admin" asp-action="Index">
+                               asp-controller="Admin" asp-action="Index">
                             <i class="bi bi-speedometer2"></i>
                             <span>Dashboard</span>
                         </a>
@@ -45,7 +45,7 @@
 
                     <li class="nav-item">
                         <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Artists" ? "active" : "")"
-                           asp-controller="Admin" asp-action="Artists">
+                               asp-controller="Admin" asp-action="Artists">
                             <i class="bi bi-person"></i>
                             <span>Artists</span>
                         </a>
@@ -53,7 +53,7 @@
                     
                     <li class="nav-item">
                         <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Artworks" ? "active" : "")"
-                           asp-controller="Admin" asp-action="Artworks">
+                               asp-controller="Admin" asp-action="Artworks">
                             <i class="bi bi-bar-chart"></i>
                             <span>Artworks</span>
                         </a>
@@ -61,7 +61,7 @@
 
                     <li class="nav-item">
                         <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Users" ? "active" : "")"
-                           asp-controller="Admin" asp-action="Users">
+                               asp-controller="Admin" asp-action="Users">
                             <i class="bi bi-people"></i>
                             <span>Users</span>
                         </a>
@@ -69,7 +69,7 @@
 
                     <li class="nav-item">
                         <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Categories" ? "active" : "")"
-                           asp-controller="Admin" asp-action="Categories">
+                               asp-controller="Admin" asp-action="Categories">
                             <i class="bi bi-tags"></i>
                             <span>Categories</span>
                         </a>
@@ -77,7 +77,7 @@
 
                     <li class="nav-item">
                         <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Payouts" ? "active" : "")"
-                           asp-controller="Admin" asp-action="Payouts">
+                               asp-controller="Admin" asp-action="Payouts">
                             <i class="bi bi-cash-stack"></i>
                             <span>Payout Details</span>
                         </a>
@@ -85,7 +85,7 @@
 
                     <li class="nav-item">
                         <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Orders" ? "active" : "")"
-                           asp-controller="Admin" asp-action="Orders">
+                               asp-controller="Admin" asp-action="Orders">
                             <i class="bi bi-cart"></i>
                             <span>Orders Details</span>
                         </a>
@@ -93,7 +93,7 @@
 
                     <li class="nav-item">
                         <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "SalesSummary" ? "active" : "")"
-                           asp-controller="Admin" asp-action="SalesSummary">
+                               asp-controller="Admin" asp-action="SalesSummary">
                             <i class="bi bi-bar-chart"></i>
                             <span>Sales / Analytics</span>
                         </a>
@@ -108,7 +108,7 @@
                 <ul class="nav flex-column sidebar-nav">
 
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Account" asp-action="Logout">
+                        <a class="nav-link" href="javascript:void(0)" onclick="logout()">
                             <i class="bi bi-box-arrow-right"></i>
                             <span>Logout</span>
                         </a>
@@ -135,30 +135,30 @@
         <!-- TOPBAR -->
         <header class="topbar">
 
-    <!-- LEFT: PAGE TITLE -->
-    <div class="topbar-left">
-    </div>
+            <!-- LEFT: PAGE TITLE -->
+            <div class="topbar-left">
+            </div>
 
-    <!-- RIGHT: ACTIONS -->
-    <div class="topbar-actions">
+            <!-- RIGHT: ACTIONS -->
+            <div class="topbar-actions">
 
-        <!-- Notification -->
-        <div class="icon-btn position-relative">
-            <i class="bi bi-bell"></i>
-            <span class="notif-dot"></span>
-        </div>
+                <!-- Notification -->
+                <div class="icon-btn position-relative">
+                    <i class="bi bi-bell"></i>
+                    <span class="notif-dot"></span>
+                </div>
 
-        <!-- Divider -->
-        <div class="topbar-divider"></div>
+                <!-- Divider -->
+                <div class="topbar-divider"></div>
 
-        <!-- Profile -->
-        <div class="topbar-profile">
-            <div class="topbar-avatar">AA</div>
-        </div>
+                <!-- Profile -->
+                <div class="topbar-profile">
+                    <div class="topbar-avatar">AA</div>
+                </div>
 
-    </div>
+            </div>
 
-</header>
+        </header>
 
 
         <!-- PAGE CONTENT -->
@@ -183,5 +183,41 @@
 
     @await RenderSectionAsync("Scripts", required: false)
 
+    <script>
+            function logout() {
+                localStorage.removeItem("adminToken");
+                localStorage.removeItem("adminExpiry");   
+                localStorage.removeItem("adminData");
+
+                window.location.href = "/Home/Landingpage";
+            }
+    </script>
+    <script>
+            (function () {
+                const token = localStorage.getItem("adminToken");
+                const expiry = localStorage.getItem("adminExpiry");
+
+                // ❌ No token or expiry
+                if (!token || !expiry) {
+                    localStorage.clear();
+                    window.location.href = "/Admin/Login";
+                    return;
+                }
+
+                // ❌ Expired token
+                if (Date.now() > expiry * 1000) {
+                    localStorage.clear();
+                    window.location.href = "/Admin/Login";
+                    return;
+                }
+
+                // ❌ Invalid token format
+                if (!token.includes(".")) {
+                    localStorage.clear();
+                    window.location.href = "/Admin/Login";
+                }
+            })();
+    </script>
 </body>
+
 </html>

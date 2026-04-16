@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "The Luminous Canvas";
     Layout = null;
 }
@@ -9,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Join the Canvas — Artify</title>
+    <title>Join the Atelier — Artify</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -34,18 +33,18 @@
         /* ── FULL BACKGROUND MARQUEE ── */
         .canvas-background {
             position: fixed; inset: 0;
-            display: flex; gap: 20px; padding: 20px;
+            display: flex; gap: 15px; padding: 15px;
             z-index: 1;
         }
 
         .marquee-column {
-            display: flex; flex-direction: column; gap: 25px;
+            display: flex; flex-direction: column; gap: 15px;
             flex: 1;
         }
 
-        .col-slow { animation: scrollDown 70s linear infinite; }
-        .col-fast { animation: scrollUp 50s linear infinite; }
-        .col-mid { animation: scrollDown 60s linear infinite; }
+        .col-slow { animation: scrollDown 80s linear infinite; }
+        .col-fast { animation: scrollUp 60s linear infinite; }
+        .col-mid { animation: scrollDown 70s linear infinite; }
 
         .art-card {
             width: 100%; position: relative;
@@ -88,11 +87,10 @@
         .premium-label {
             font-size: 0.65rem; text-transform: uppercase;
             letter-spacing: 3px; font-weight: 700; color: var(--gold);
-            @* text-align: center; *@
             margin-bottom: 8px; display: block;
         }
 
-        h1 { font-family: 'Bodoni Moda', serif; font-size: 2rem; margin: 0 0 20px 0; color: #2D2424; }
+        h1 { font-family: 'Bodoni Moda', serif; font-size: 2.2rem; margin: 0 0 25px 0; color: var(--charcoal); }
 
         .k-textbox {
             width: 100% !important; border-radius: 0 !important;
@@ -102,6 +100,7 @@
         }
         .k-textbox:focus { border-bottom-color: var(--gold) !important; }
 
+        /* Gender Selector Styles */
         .gender-group {
             display: flex; gap: 10px; margin-bottom: 20px;
         }
@@ -112,13 +111,11 @@
             font-size: 0.75rem; cursor: pointer; transition: 0.3s; font-weight: 600;
         }
         .gender-pill input:checked + label {
-            background: #181C14; color: white; border-color: var(--charcoal);
+            background: var(--charcoal); color: white; border-color: var(--charcoal);
         }
 
         .btn-register {
-            @* background: var(--charcoal) !important;  *@
-            background: linear-gradient(45deg, #181C14, #021526) !important;
-            color: white !important;
+            background: var(--charcoal) !important; color: white !important;
             width: 100% !important; padding: 18px !important; border: none !important;
             font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
             cursor: pointer; transition: 0.3s; margin-top: 10px;
@@ -145,12 +142,7 @@
         }
         .profile-preview {
             width: 55px; height: 55px; border-radius: 50%; object-fit: cover;
-            border: 2px solid var(--gold); background: #eeeeeee0;
-        }
-
-        .custom-file-label {
-            color: var(--charcoal); font-size: 0.75rem; font-weight: 600;
-            cursor: pointer; transition: 0.3s;
+            border: 2px solid var(--gold); background: #eee;
         }
     </style>
 </head>
@@ -158,33 +150,26 @@
 
     <div class="canvas-background">
         <div class="marquee-column col-slow">
-            <div class="art-card"><img src="https://art.pixilart.com/1f9b037cb7caa4d.gif"></div>
+            <div class="art-card"><img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=500"></div>
             <div class="art-card"><img src="https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=500"></div>
             <div class="art-card"><img src="https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=500"></div>
             <div class="art-card"><img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=500"></div>
-            <div class="art-card"><img src="https://images.unsplash.com/photo-1593072188319-5006e116315e?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"></div>
-
-           
         </div>
         <div class="marquee-column col-fast">
             <div class="art-card"><img src="https://images.unsplash.com/photo-1576132710321-70529d201d4a?w=500"></div>
             <div class="art-card"><img src="https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=500"></div>
             <div class="art-card"><img src="https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?w=500"></div>
-            
         </div>
         <div class="marquee-column col-mid">
             <div class="art-card"><img src="https://images.unsplash.com/photo-1549490349-8643362247b5?w=500"></div>
             <div class="art-card"><img src="https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?w=500"></div>
             <div class="art-card"><img src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=500"></div>
-            
-            @* <div class="art-card"><img src="https://images.unsplash.com/photo-1593073862407-a3ce22748763?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"></div> *@
-
         </div>
     </div>
 
     <div class="ui-layer">
         <div class="floating-form animate__animated animate__fadeInUp">
-            <span class="premium-label">Access Studio</span>
+            <span class="premium-label">Access Terminal</span>
             <h1>Join Artify</h1>
 
             <form id="regForm">
@@ -196,14 +181,14 @@
                         <label for="fProfile" class="custom-file-label"><i class="bi bi-camera me-1"></i> Change Image</label>
                     </div>
                 </div>
-                <input id="txtFullName" name="c_Full_Name" required validationMessage="Name is required" placeholder="Full Name" />
-                <input id="txtUserName" name="c_UserName" required validationMessage="Choose a handle" placeholder="Username" />
-                <input id="txtEmail" name="c_Email" type="email" required data-email-msg="Invalid email" placeholder="Email" />
-                <input id="txtMobile" name="c_Mobile" required validationMessage="Mobile required" placeholder="Mobile Number" />
+                <input id="txtFullName" name="c_Full_Name" required validationMessage="Name is required" />
+                <input id="txtUserName" name="c_UserName" required validationMessage="Choose a handle"  />
+                <input id="txtEmail" name="c_Email" type="email" required data-email-msg="Invalid email" />
+                <input id="txtMobile" name="c_Mobile" required validationMessage="Mobile required"  />
 
-                <input id="txtPass" name="c_Password" type="password" required validationMessage="Password required" placeholder="Create Password" />
+                <input id="txtPass" name="c_Password" type="password" required validationMessage="Password required"  />
                 <div id="pwHint" style="font-size: 0.65rem; color: #888; margin-top: -10px; margin-bottom: 15px;">
-                    Uppercase, Number, Special required.
+                   Requires Uppercase, Number, Special required.
                 </div>
 
                 <span class="premium-label mb-4">Identity</span>
@@ -235,66 +220,80 @@
 
     <script>
         $(document).ready(function () {
-            $("#txtFullName, #txtUserName, #txtEmail, #txtPass, #txtMobile").kendoTextBox();
+            // Initialize Widgets
+            $("#txtFullName").kendoTextBox({ placeholder: "e.g. Leonardo Vinci" });
+            $("#txtUserName").kendoTextBox({ placeholder: "artist_handle" });
+            $("#txtEmail").kendoTextBox({ placeholder: "email@studio.com" });
+            $("#txtMobile").kendoTextBox({ placeholder: "+1 000 000 0000" });
+            $("#txtPass").kendoTextBox({ placeholder: "••••••••" });
+
             
-            // Image Preview
+
             $("#fProfile").change(function(){
-                if (this.files && this.files[0]) {
-                    let reader = new FileReader();
-                    reader.onload = e => $('#imgPreview').attr('src', e.target.result);
-                    reader.readAsDataURL(this.files[0]);
-                }
-            });
-            
+            if (this.files && this.files[0]) {
+                let reader = new FileReader();
+                reader.onload = e => $('#imgPreview').attr('src', e.target.result);
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+
             const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@@$!%*?&])[A-Za-z\d@@$!%*?&]{6,}$/;
-            const phoneRegex = /^[0-9]{10,12}$/;
 
             var validator = $("#regForm").kendoValidator({
+                validateOnBlur: true,
                 rules: {
-                    passwordComplexity: function(input) {
-                        if (input.is("[name='c_Password']") && input.val() !== "") {
+                    passwordFormat: function(input) {
+                        if (input.is("[name='c_Password']")) {
                             return passRegex.test(input.val());
-                        }
-                        return true;
-                    },
-                    mobileFormat: function(input) {
-                        if (input.is("[name='c_Mobile']") && input.val() !== "") {
-                            return phoneRegex.test(input.val());
                         }
                         return true;
                     }
                 },
                 messages: {
-                    passwordComplexity: "Weak password",
-                    mobileFormat: "Enter valid 10-12 digits"
+                    passwordFormat: "Security criteria not met."
                 }
             }).data("kendoValidator");
 
+            // Password strength feedback
+            $("#txtPass").on("input", function() {
+                if(passRegex.test($(this).val())) {
+                    $("#pwHint").addClass("valid").html("<i class='bi bi-check-circle-fill me-1'></i> Password Secure");
+                } else {
+                    $("#pwHint").removeClass("valid").html("<i class='bi bi-info-circle me-1'></i> Requires uppercase, number, and special char.");
+                }
+            });
+
             $("#btnGo").click(function () {
                 if (validator.validate()) {
+                    kendo.ui.progress($(".auth-card"), true);
                     const btn = $(this);
-                    kendo.ui.progress($(".floating-form"), true);
-                    btn.prop("disabled", true).text("Connecting...");
+                    const originalText = btn.text();
+                    btn.prop("disabled", true).text("Establishing Connection...");
 
                     $.ajax({
                         url: 'http://localhost:5183/api/ArtistApi/Register',
                         type: 'POST',
-                        data: new FormData($("#regForm")[0]),
-                        contentType: false, processData: false,
+                        data: new FormData($("#artistForm")[0]),
+                        contentType: false,
+                        processData: false,
                         success: function (res) {
-                            kendo.ui.progress($(".floating-form"), false);
+                            kendo.ui.progress($(".auth-card"), false);
                             if (res.success) {
-                                Swal.fire({ icon: 'success', title: 'Welcome', text: 'Identity confirmed.' })
-                                .then(() => window.location.href = "/Artist/Login");
+                                Swal.fire({ 
+                                    icon: 'success', 
+                                    title: 'Welcome to the collective', 
+                                    text: 'Your studio is being prepared.', 
+                                    confirmButtonColor: '#0f172a' 
+                                }).then(() => window.location.href = "/Artist/Login");
                             } else {
-                                btn.prop("disabled", false).text("Initialize Profile");
+                                btn.prop("disabled", false).text(originalText);
                                 Swal.fire('Error', res.message, 'error');
                             }
                         },
                         error: function () {
-                            kendo.ui.progress($(".floating-form"), false);
-                            btn.prop("disabled", false).text("Initialize Profile");
-                            Swal.fire('Error', 'Connection failed', 'warning');
+                            kendo.ui.progress($(".auth-card"), false);
+                            btn.prop("disabled", false).text(originalText);
+                            Swal.fire('Connection Error', 'Please check your server status.', 'warning');
                         }
                     });
                 }
@@ -303,5 +302,3 @@
     </script>
 </body>
 </html>
-
-

@@ -10,8 +10,8 @@ using Repository.Interfaces;
 using Repository.Implementations;
 using Repository.Services;
 using Repository;
-using Repository.Services;
 using API.Services;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +53,7 @@ builder.Services.AddScoped<IBuyerOrderInterface, BuyerOrderRepository>();
 // =========================
 builder.Services.AddScoped<AdminArtworkService>();
 builder.Services.AddSingleton<RabbitMQProducer>();
+builder.Services.AddScoped<EmailServices>();
 
 // ✅ FIXED Redis Registration
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
@@ -146,7 +147,8 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
-        )
+        ), 
+        RoleClaimType = ClaimTypes.Role
     };
 });
 

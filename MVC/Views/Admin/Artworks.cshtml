@@ -352,9 +352,34 @@ var currentPage   = 1;
 var pageSize      = 10;
 var totalArtworks = 0;
 
-// ── Auth header helper ───────────────────────────────────────────────
+function checkAuth() {
+    const token = localStorage.getItem("adminToken");
+    const expiry = localStorage.getItem("adminExpiry");
+
+    if (!token || !expiry) {
+        window.location.href = "/Admin/Login";
+        return false;
+    }
+
+    if (Date.now() > expiry * 1000) {
+        localStorage.removeItem("adminToken");
+        localStorage.removeItem("adminExpiry");
+
+        window.location.href = "/Admin/Login";
+        return false;
+    }
+
+    return true;
+}
+
 function authHeader() {
-    return { "Authorization": "Bearer " + localStorage.getItem("adminToken") };
+    if (!checkAuth()) return {};
+
+    const token = localStorage.getItem("adminToken");
+
+    return {
+        "Authorization": "Bearer " + token
+    };
 }
 
 // ── Load artworks from API ───────────────────────────────────────────
@@ -841,11 +866,7 @@ function formatDate(raw) {
 
 // ── Boot: load artworks on page ready ────────────────────────────────
 $(document).ready(function () {
-    // Redirect to login if no token present
-    if (!localStorage.getItem("adminToken")) {
-        window.location.href = "/Admin/Login";
-        return;
-    }
+    if (!checkAuth()) return;
     loadArtworks("All", 1, 10);
 });
 </script>

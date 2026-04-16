@@ -1,0 +1,94 @@
+﻿@{
+  Layout = "../Shared/_ArtistLayout.cshtml";
+}
+
+<style>
+  .card-custom {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    background: white;
+  }
+
+  .stat-title {
+    color: gray;
+    font-size: 14px;
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: bold;
+  }
+</style>
+
+<!-- 🔥 PAGE TITLE -->
+<h3 class="mb-3">💰 Earnings Overview</h3>
+
+<!-- 🔥 CARDS -->
+<div class="row g-3">
+
+  <div class="col-md-4">
+    <div class="card-custom">
+      <div class="stat-title">AVAILABLE BALANCE</div>
+      <div class="stat-value" id="availableBalance">$0</div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card-custom">
+      <div class="stat-title">REQUESTED BALANCE</div>
+      <div class="stat-value" id="requestedBalance">$0</div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card-custom">
+      <div class="stat-title">REVENUE (COMPLETED)</div>
+      <div class="stat-value" id="revenueBalance">$0</div>
+    </div>
+  </div>
+
+</div>
+
+<br />
+
+<!-- 🔥 OPTIONAL ACTION CARD -->
+<div class="card-custom">
+  <h5>Ready for Withdrawal</h5>
+  <p>
+    You have <b id="withdrawAmount">$0</b> available for payout.
+  </p>
+  <button class="btn btn-primary">Request Payout</button>
+</div>
+
+@section Scripts {
+  <script>
+    $(document).ready(function () {
+
+      const baseUrl = "http://localhost:5183/api/ArtistApi";
+
+      $.ajax({
+        url: `${baseUrl}/earnings-summary`,
+        type: "GET",
+        headers: {
+          "Authorization": "Bearer " + localStorage.getItem("authToken")
+        },
+        success: function (data) {
+
+          console.log("Earnings Data:", data);
+
+          $("#availableBalance").text("$" + data.availableBalance);
+          $("#requestedBalance").text("$" + data.requestedBalance);
+          $("#revenueBalance").text("$" + data.revenueBalance);
+
+          // Optional
+          $("#withdrawAmount").text("$" + data.availableBalance);
+        },
+        error: function () {
+          alert("Failed to load earnings data");
+        }
+      });
+
+    });
+  </script>
+}
