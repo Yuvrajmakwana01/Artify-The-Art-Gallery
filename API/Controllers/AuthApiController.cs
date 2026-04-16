@@ -14,6 +14,7 @@ using BCrypt.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
+using Repository.Services;
 
 
 namespace API.Controllers
@@ -24,12 +25,16 @@ namespace API.Controllers
     {
         private readonly IAuthInterface _auth;
         private readonly IConfiguration _config;
+        private readonly EmailServices _emailService;
+        private readonly RedisService _redis;
         // private readonly IWebHostEnvironment _env;
 
-        public AuthApiController(IAuthInterface auth, IConfiguration config)
+        public AuthApiController(IAuthInterface auth, IConfiguration config, EmailServices emailService, RedisService redis)
         {
             _auth = auth;
             _config = config;
+            _emailService = emailService;
+             _redis = redis;
         }
 
         [HttpPost("UserGoogleLogin")]
@@ -111,7 +116,24 @@ namespace API.Controllers
 
 
             int result = await _auth.UserRegister(model);
-            // model.c_PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.c_Password);
+            if (result > 0)
+            {
+                // 1. Template file read karein
+                string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "UserRegisterEmail.html");
+                string body = await System.IO.File.ReadAllTextAsync(templatePath);
+
+                // 2. DYNAMIC NAME REPLACE:
+                // Yahan 'model.c_UserName' aapki property ka naam hai jo register waqt aayi thi
+                body = body.Replace("{UserName}", model.c_UserName) 
+                        .Replace("{LoginUrl}", "http://localhost:5092/Auth/UserLogin");
+
+                string logoPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "mvc", "wwwroot", "images", "Logo.jpeg"));
+
+                // 3. Email send karein
+                await _emailService.SendEmailAsync(model.c_Email, "Welcome to Artify!", body, logoPath);
+
+                return Ok(new { message = "Registration successful" });
+            }
             return result switch
             {
                 0 => BadRequest("Email already exists"),
@@ -175,10 +197,9 @@ namespace API.Controllers
 
         }
 
-
         [HttpPost("UserForgotPassword")]
         public async Task<IActionResult> UserForgotPassword([FromBody] t_ForgotPassword model)
-        {
+        {   
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -189,12 +210,32 @@ namespace API.Controllers
             var otp = new Random().Next(100000, 999999).ToString();
             var expiryTime = DateTime.UtcNow.AddMinutes(5);
 
-            HttpContext.Session.SetString("ForgotPasswordEmail", model.c_Email.Trim().ToLower());
-            HttpContext.Session.SetString("ForgotPasswordOtp", otp);
-            HttpContext.Session.SetString("ForgotPasswordOtpExpiry", expiryTime.ToString("o"));
+            await _redis.SetOtpAsync(model.c_Email.ToLower().Trim(), otp);
 
-            // yahan aap email service call karogi
-            // await _emailService.SendForgotPasswordOtp(user.c_Email, user.c_FullName, otp);
+            try
+            {
+                // Template Path (API ke andar hi hai)
+                string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "UserOtpTemplate.html");
+                string body = await System.IO.File.ReadAllTextAsync(templatePath);
+
+                // Expiry time string banayein
+                var expiryDisplay = DateTime.Now.AddMinutes(5).ToString("hh:mm tt");
+
+                body = body.Replace("{{UserName}}", user.c_FullName)
+                        .Replace("{{OTP}}", otp)
+                        .Replace("2 minutes", $"2 minutes (Valid until {expiryDisplay})");  
+
+                // // --- DYNAMIC LOGO PATH ---
+                // // Maan lijiye structure hai: SolutionFolder/api aur SolutionFolder/mvc
+                string logoPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "mvc", "wwwroot", "images", "Logo.jpeg"));
+
+                // Service Call
+                await _emailService.SendEmailAsync(user.c_Email, "Reset Password", body, logoPath);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Error: " + ex.Message);
+            }
 
             return Ok(new
             {
@@ -202,36 +243,83 @@ namespace API.Controllers
             });
         }
 
+        [HttpPost("UserVerifyOtp")]
+        public async Task<IActionResult> UserVerifyOtpAsync([FromBody] t_VerifyOtp model)
+        {
+            
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+                
+             var email = model.c_Email.ToLower().Trim();
+
+            var savedOtp = await _redis.GetOtpAsync(email);
+
+            if (string.IsNullOrEmpty(savedOtp))
+                return BadRequest("OTP not found. Please request OTP again.");
+
+            if (savedOtp != model.c_Otp)
+                return BadRequest("Invalid OTP");
+            
+            // Success hone par ye line ADD karein:
+            await _redis.SetOtpVerifiedAsync(email);
+
+            // // ✅ OTP Verified flag set karo
+            // HttpContext.Session.SetString("OtpVerified", "true");
+
+
+            return Ok(new { message = "OTP verified successfully" });
+        }
+
         [HttpPost("UserResetPassword")]
         public async Task<IActionResult> UserResetPassword([FromBody] t_ResetPassword model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+ 
 
-            var sessionEmail = HttpContext.Session.GetString("ForgotPasswordEmail");
-            var sessionOtp = HttpContext.Session.GetString("ForgotPasswordOtp");
-            var sessionExpiry = HttpContext.Session.GetString("ForgotPasswordOtpExpiry");
+            var email = model.c_Email.ToLower().Trim();
 
-            if (string.IsNullOrEmpty(sessionEmail) || string.IsNullOrEmpty(sessionOtp) || string.IsNullOrEmpty(sessionExpiry))
-                return BadRequest("OTP session expired. Please request OTP again.");
+            // ✅ Check verified
+            var isVerified = await _redis.IsOtpVerifiedAsync(email);
 
-            if (sessionEmail != model.c_Email.Trim().ToLower())
-                return BadRequest("Invalid email");
+            if (!isVerified)
+                return BadRequest("OTP not verified");
+                
+            // model.c_NewPassword ko hash karein
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.c_NewPassword);
 
-            if (sessionOtp != model.c_Otp.Trim())
-                return BadRequest("Invalid OTP");
+            // Ab hashed password ko bhejien na ki plain password ko
+            var result = await _auth.UpdatePassword(model.c_Email, hashedPassword);
 
-            if (DateTime.UtcNow > DateTime.Parse(sessionExpiry))
-                return BadRequest("OTP expired");
+            if (result > 0)
+            {
+                // 1. Template Path
+                string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "UserPasswordChange.html");
+                string body = await System.IO.File.ReadAllTextAsync(templatePath);
 
-            var result = await _auth.UpdatePassword(model.c_Email, model.c_NewPassword);
+                // 2. Placeholder replacement
+                // Note: LoginUrl ko aap apne MVC login page ka absolute URL dein
+                string loginUrl = " http://localhost:5092/Auth/UserLogin";
 
+                body = body.Replace("{{UserName}}", model.c_Email) // Aap user object se name le sakte hain
+                           .Replace("{{LoginUrl}}", loginUrl);
+
+                // 3. Dynamic Logo Path (Git-friendly)
+                string logoPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "mvc", "wwwroot", "images", "Logo.jpeg"));
+
+                // 4. Send Success Email
+                await _emailService.SendEmailAsync(model.c_Email, "Security Alert: Password Changed", body, logoPath);
+
+                 // ✅ Cleanup after success
+                await _redis.DeleteOtpAsync(email);
+                await _redis.DeleteVerifiedFlagAsync(email);
+
+               
+                // Clear Sessions...
+                return Ok(new { message = "Password updated successfully" });
+            }
             if (result <= 0)
                 return StatusCode(500, "Password reset failed");
-
-            HttpContext.Session.Remove("ForgotPasswordEmail");
-            HttpContext.Session.Remove("ForgotPasswordOtp");
-            HttpContext.Session.Remove("ForgotPasswordOtpExpiry");
 
             return Ok(new
             {
@@ -239,12 +327,13 @@ namespace API.Controllers
             });
         }
 
-
         // ================= JWT TOKEN =================
         private string GenerateJwtToken(t_UserRegister user)
         {
             var claims = new[]
             {
+                new Claim("user_id", user.c_UserId.ToString()), // ✅ ADD
+                new Claim(JwtRegisteredClaimNames.Email, user.c_Email),
                 new Claim(ClaimTypes.NameIdentifier, user.c_UserId.ToString()),
                 new Claim(ClaimTypes.Name, user.c_UserName),
                 new Claim(ClaimTypes.Email, user.c_Email),

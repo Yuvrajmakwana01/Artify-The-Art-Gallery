@@ -1,281 +1,506 @@
 @{
-    ViewBag.Title = "Order ART-20260301";
+    ViewBag.Title = "Order Detail";
     Layout = "~/Views/Shared/_BuyerLayout.cshtml";
 }
 
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
     :root {
-        --bg: hsl(40, 33%, 96%);
-        --fg: hsl(30, 10%, 15%);
-        --card: hsl(40, 30%, 98%);
-        --primary: hsl(30, 30%, 30%);
-        --primary-fg: hsl(40, 33%, 96%);
-        --muted: hsl(35, 20%, 92%);
-        --muted-fg: hsl(30, 8%, 50%);
-        --accent: hsl(30, 40%, 82%);
-        --border: hsl(35, 20%, 87%);
-        --warm: hsl(32, 45%, 70%);
-        --warm-fg: hsl(30, 15%, 20%);
-        --success: hsl(145, 50%, 40%);
-        --warning: hsl(38, 90%, 55%);
-        --warning-fg: hsl(30, 15%, 15%);
-        --destructive: hsl(0, 65%, 55%);
-        --info: hsl(210, 60%, 50%);
+        --canvas:        #f5f0ea;
+        --canvas-2:      #ffffff;
+        --canvas-3:      #ede7df;
+        --surface:       #faf7f3;
+        --border:        rgba(0,0,0,0.06);
+        --border-2:      rgba(0,0,0,0.10);
+        --gold:          #9a6324;
+        --gold-bright:   #c08b3f;
+        --gold-light:    #dbb978;
+        --gold-dim:      rgba(154,99,36,0.08);
+        --gold-ring:     rgba(154,99,36,0.18);
+        --text:          #1c1814;
+        --text-2:        #5e554a;
+        --text-3:        #9e9488;
+        --success:       #15803d;
+        --success-bg:    rgba(21,128,61,0.08);
+        --warning-fg:    #92400e;
+        --warning-bg:    rgba(245,158,11,0.08);
+        --destructive:   #dc2626;
+        --destructive-bg: rgba(220,38,38,0.08);
+        --radius-sm:     10px;
+        --radius-md:     16px;
+        --radius-lg:     24px;
+        --radius-xl:     36px;
+        --shadow-sm:     0 1px 3px rgba(0,0,0,0.04);
+        --shadow-md:     0 4px 16px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.03);
+        --shadow-lg:     0 12px 40px rgba(0,0,0,0.08);
+        --shadow-gold:   0 8px 32px rgba(154,99,36,0.15);
     }
 
-    .detail-page { max-width: 900px; margin: 0 auto; font-family: 'Inter', sans-serif; }
-    .detail-page h1, .detail-page h2, .detail-page h3 { font-family: 'Playfair Display', serif; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--canvas); color: var(--text); }
 
+    .detail-page {
+        max-width: 940px; margin: 0 auto; padding: 3rem 2rem 5rem;
+        opacity: 0; transform: translateY(20px);
+        animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    @@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Back Link ── */
     .back-link {
-        display: inline-flex; align-items: center; gap: 6px;
-        font-size: 14px; color: var(--muted-fg); text-decoration: none;
-        transition: color 0.2s; margin-bottom: 24px;
+        display: inline-flex; align-items: center; gap: 7px;
+        color: var(--text-3); font-size: .88rem; font-weight: 500;
+        text-decoration: none; margin-bottom: 2rem;
+        transition: all 0.25s; padding: 6px 12px 6px 8px;
+        border-radius: var(--radius-sm);
     }
-    .back-link:hover { color: var(--fg); }
-    .back-link:hover .k-icon { transform: translateX(-2px); }
-    .back-link .k-icon { transition: transform 0.2s; font-size: 16px; }
+    .back-link:hover { color: var(--gold); background: var(--gold-dim); }
+    .back-link svg { flex-shrink: 0; transition: transform 0.25s; }
+    .back-link:hover svg { transform: translateX(-3px); }
 
-    /* Hero Banner */
-    .order-banner {
-        background: linear-gradient(135deg, hsla(30,30%,30%,0.08), hsla(30,40%,82%,0.3), hsla(32,45%,70%,0.15));
-        border-radius: 16px; padding: 32px; position: relative; overflow: hidden; margin-bottom: 24px;
+    /* ── Header ── */
+    .detail-header {
+        display: flex; justify-content: space-between; align-items: flex-start;
+        flex-wrap: wrap; gap: 1.25rem; margin-bottom: 2rem;
     }
-    .order-banner::before {
-        content: ''; position: absolute; inset: 0;
-        background: radial-gradient(circle at 70% 30%, hsla(32,45%,70%,0.12), transparent 60%);
+    .detail-header-left h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem; font-weight: 700; margin: 0 0 8px;
     }
-    .order-banner-inner { position: relative; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-    .order-banner-left .order-id-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-    .order-banner-left h2 { font-size: 28px; font-weight: 700; color: var(--fg); margin: 0; }
+    .detail-header-left .order-meta {
+        display: flex; align-items: center; gap: 16px;
+        font-size: .82rem; color: var(--text-3); flex-wrap: wrap; margin-top: 10px;
+    }
+    .detail-header-left .order-meta-item { display: flex; align-items: center; gap: 6px; }
+    .detail-header-right { display: flex; gap: 10px; flex-wrap: wrap; }
 
+    /* ── Buttons ── */
+    .btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 11px 20px; border-radius: var(--radius-md);
+        border: none; font-size: .84rem; font-weight: 600;
+        font-family: 'DM Sans', sans-serif;
+        cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+    }
+    .btn-outline {
+        background: var(--canvas-2); color: var(--text);
+        border: 1.5px solid var(--border-2);
+        box-shadow: var(--shadow-sm);
+    }
+    .btn-outline:hover {
+        border-color: var(--gold-bright); background: var(--gold-dim);
+        color: var(--gold); box-shadow: var(--shadow-md);
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+        color: #fff; border: none;
+        box-shadow: var(--shadow-sm);
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-gold);
+        filter: brightness(1.05);
+    }
+
+    /* ── Status Badge ── */
     .status-badge {
-        display: inline-flex; align-items: center; gap: 6px;
-        padding: 4px 12px; border-radius: 20px;
-        font-size: 14px; font-weight: 500; border: 1px solid;
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 4px 14px; border-radius: 100px;
+        font-size: .8rem; font-weight: 600; border: 1px solid;
     }
-    .status-delivered { background: hsla(145,50%,40%,0.1); color: var(--success); border-color: hsla(145,50%,40%,0.2); }
-    .status-processing { background: hsla(38,90%,55%,0.1); color: var(--warning-fg); border-color: hsla(38,90%,55%,0.2); }
-    .status-failed { background: hsla(0,65%,55%,0.1); color: var(--destructive); border-color: hsla(0,65%,55%,0.2); }
+    .status-delivered  { background: var(--success-bg); color: var(--success); border-color: rgba(21,128,61,0.15); }
+    .status-processing { background: var(--warning-bg); color: var(--warning-fg); border-color: rgba(245,158,11,0.15); }
+    .status-failed     { background: var(--destructive-bg); color: var(--destructive); border-color: rgba(220,38,38,0.15); }
 
-    .order-date { color: var(--muted-fg); display: flex; align-items: center; gap: 8px; font-size: 14px; }
-    .order-date .k-icon { font-size: 16px; }
-    .order-banner-right { text-align: right; }
-    .order-banner-right .label { font-size: 14px; color: var(--muted-fg); }
-    .order-banner-right .amount { font-size: 28px; font-weight: 700; color: var(--fg); }
+    /* ── Section Cards ── */
+    .section-card {
+        background: var(--canvas-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.75rem;
+        margin-bottom: 1.25rem;
+        box-shadow: var(--shadow-sm);
+        transition: box-shadow 0.3s, transform 0.3s;
+    }
+    .section-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+    .section-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1rem; font-weight: 700; color: var(--text);
+        margin: 0 0 1.25rem; display: flex; align-items: center; gap: 9px;
+    }
+    .section-title svg { color: var(--gold-bright); }
 
-    /* Info Grid */
-    .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
-    .info-card {
-        background: var(--card); border: 1px solid hsla(35,20%,87%,0.6);
-        border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 12px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    /* ── Item Rows ── */
+    .item-row {
+        display: flex; align-items: center; gap: 18px;
+        padding: 16px 0; border-bottom: 1px solid var(--border);
+        transition: padding-left 0.2s;
     }
-    .info-card-icon {
-        width: 40px; height: 40px; border-radius: 12px;
-        background: hsla(30,40%,82%,0.4);
-        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    .item-row:hover { padding-left: 6px; }
+    .item-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .item-row:first-child { padding-top: 0; }
+    .item-img {
+        width: 76px; height: 76px; border-radius: var(--radius-sm);
+        overflow: hidden; flex-shrink: 0;
+        background: var(--canvas-3); border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
     }
-    .info-card-icon .k-icon { font-size: 20px; color: var(--primary); }
-    .info-card-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); }
-    .info-card-value { font-size: 14px; font-weight: 500; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .item-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .item-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-3); }
+    .item-info { flex: 1; min-width: 0; }
+    .item-title {
+        font-size: .95rem; font-weight: 700; color: var(--text);
+        margin: 0 0 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .item-artist { font-size: .82rem; color: var(--text-3); }
+    .item-cat {
+        display: inline-block; margin-top: 6px;
+        padding: 3px 10px; border-radius: 100px;
+        background: var(--gold-dim); color: var(--gold);
+        font-size: .7rem; font-weight: 600; letter-spacing: 0.3px;
+    }
+    .item-price { font-size: 1rem; font-weight: 700; color: var(--text); white-space: nowrap; flex-shrink: 0; }
 
-    /* Detail Card */
-    .detail-card {
-        background: var(--card); border: 1px solid hsla(35,20%,87%,0.6);
-        border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-        margin-bottom: 24px;
+    /* ── Summary Rows ── */
+    .summary-row {
+        display: flex; justify-content: space-between; align-items: center;
+        font-size: .9rem; padding: 10px 0; color: var(--text-2);
     }
-    .detail-card-header {
-        background: hsla(30,40%,82%,0.2); border-bottom: 1px solid hsla(35,20%,87%,0.4);
-        padding: 16px 24px; display: flex; align-items: center; gap: 8px;
+    .summary-row span:last-child { font-weight: 600; color: var(--text); }
+    .summary-row.total {
+        padding-top: 16px; margin-top: 8px;
+        border-top: 2px solid var(--canvas-3);
+        font-size: 1.05rem;
     }
-    .detail-card-header h3 { font-size: 18px; font-weight: 600; color: var(--fg); margin: 0; }
-    .detail-card-header .k-icon { font-size: 20px; color: var(--primary); }
+    .summary-row.total span { color: var(--text); font-weight: 800; }
 
-    /* Artwork Item */
-    .artwork-item {
-        display: flex; align-items: center; gap: 16px; padding: 20px;
-        transition: background 0.2s;
+    /* ── Info Grid ── */
+    .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .info-item label {
+        font-size: .65rem; font-weight: 700; color: var(--text-3);
+        text-transform: uppercase; letter-spacing: 1.5px;
+        display: block; margin-bottom: 5px;
     }
-    .artwork-item:hover { background: hsla(30,40%,82%,0.1); }
-    .artwork-thumb {
-        width: 64px; height: 64px; border-radius: 12px; flex-shrink: 0;
-        background: linear-gradient(135deg, hsla(30,40%,82%,0.5), hsla(32,45%,70%,0.3));
-        display: flex; align-items: center; justify-content: center;
-    }
-    .artwork-thumb .k-icon { font-size: 28px; color: var(--muted-fg); }
-    .artwork-info { flex: 1; min-width: 0; }
-    .artwork-name { font-size: 15px; font-weight: 600; color: var(--fg); }
-    .artwork-artist { font-size: 14px; color: var(--muted-fg); }
-    .type-badge {
-        display: inline-flex; align-items: center; padding: 2px 8px;
-        border-radius: 20px; font-size: 12px; font-weight: 500; margin-top: 4px; border: 1px solid;
-    }
-    .type-digital { background: hsla(210,60%,50%,0.1); color: var(--info); border-color: hsla(210,60%,50%,0.2); }
-    .type-print { background: hsla(32,45%,70%,0.2); color: var(--warm-fg); border-color: hsla(32,45%,70%,0.3); }
-    .artwork-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-    .artwork-price { font-size: 18px; font-weight: 700; color: var(--fg); }
-    .download-btn {
-        padding: 6px 16px; border-radius: 20px;
-        border: 1px solid hsla(30,30%,30%,0.3); background: transparent;
-        color: var(--primary); font-size: 13px; font-weight: 500;
-        cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
-        transition: all 0.2s;
-    }
-    .download-btn:hover { background: var(--primary); color: var(--primary-fg); }
-    .item-divider { height: 1px; background: var(--border); margin: 0 24px; }
+    .info-item span { font-size: .92rem; color: var(--text); font-weight: 600; }
 
-    /* Payment Summary */
-    .summary-body { padding: 24px; }
-    .summary-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 12px; }
-    .summary-label { color: var(--muted-fg); }
-    .summary-value { color: var(--fg); }
-    .summary-value.free { color: var(--success); font-weight: 500; }
-    .summary-divider { height: 1px; background: var(--border); margin: 16px 0; }
-    .summary-total { display: flex; justify-content: space-between; align-items: center; }
-    .summary-total-label { font-size: 16px; font-weight: 600; color: var(--fg); }
-    .summary-total-value { font-size: 24px; font-weight: 700; color: var(--fg); }
+    /* ── Loading ── */
+    .loading-state { text-align: center; padding: 5rem 0; color: var(--text-3); }
+    .loading-spinner {
+        display: inline-block; width: 40px; height: 40px;
+        border: 3px solid var(--border-2); border-top-color: var(--gold-bright);
+        border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 18px;
+    }
+    @@keyframes spin { to { transform: rotate(360deg); } }
 
-    @@media (max-width: 640px) {
+    @@media(max-width: 600px) {
         .info-grid { grid-template-columns: 1fr; }
-        .order-banner { padding: 24px; }
-        .order-banner-inner { flex-direction: column; align-items: flex-start; }
-        .order-banner-right { text-align: left; }
-        .artwork-item { flex-wrap: wrap; }
+        .detail-header-right { width: 100%; }
+        .btn { flex: 1; justify-content: center; }
+        .detail-page { padding: 2rem 1rem 4rem; }
+        .detail-header-left h2 { font-size: 1.5rem; }
+    }
+
+    @@media print {
+        .no-print, .back-link, .detail-header-right { display: none !important; }
+        body { background: white !important; }
+        .section-card { box-shadow: none !important; border: 1px solid #ddd !important; }
+        .detail-page { animation: none; opacity: 1; transform: none; }
     }
 </style>
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<div class="detail-page" id="detailPage">
+    <div class="loading-state" id="loadingState">
+        <div class="loading-spinner"></div>
+        <p>Loading order details...</p>
+    </div>
 
-<div class="detail-page">
-    <!-- Back Link -->
-    <a href="/Buyer/Orders" class="back-link">
-        <span class="k-icon k-i-arrow-left"></span> Back to Orders
-    </a>
+    <div id="errorState" style="display:none;" class="loading-state">
+        <p id="errorMsg">Order not found.</p>
+        <a href="/Buyer/Orders" style="margin-top:16px;display:inline-block;color:var(--gold-bright);font-weight:600;">← Back to Orders</a>
+    </div>
 
-    <!-- Order Banner -->
-    <div class="order-banner">
-        <div class="order-banner-inner">
-            <div class="order-banner-left">
-                <div class="order-id-row">
-                    <h2>ART-20260301</h2>
-                    <span class="status-badge status-delivered">
-                        <span class="k-icon k-i-check-circle" style="font-size:14px;"></span>
-                        Delivered
+    <div id="orderContent" style="display:none;">
+
+        <a href="/Buyer/Orders" class="back-link no-print">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to Order History
+        </a>
+
+        <div class="detail-header">
+            <div class="detail-header-left">
+                <h2 id="orderIdHeading">Order</h2>
+                <span id="statusBadge" class="status-badge"></span>
+                <div class="order-meta" style="margin-top:10px;">
+                    <span class="order-meta-item">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <span id="orderDate"></span>
+                    </span>
+                    <span class="order-meta-item">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                        <span id="orderItemCount"></span>
                     </span>
                 </div>
-                <div class="order-date">
-                    <span class="k-icon k-i-calendar"></span> Placed on March 1, 2026
-                </div>
             </div>
-            <div class="order-banner-right">
-                <div class="label">Order Total</div>
-                <div class="amount">$249.99</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Info Grid -->
-    <div class="info-grid">
-        <div class="info-card">
-            <div class="info-card-icon">
-                <span class="k-icon k-i-currency"></span>
-            </div>
-            <div>
-                <div class="info-card-label">Payment</div>
-                <div class="info-card-value">Visa •••• 4242</div>
-            </div>
-        </div>
-        <div class="info-card">
-            <div class="info-card-icon">
-                <span class="k-icon k-i-marker-pin"></span>
-            </div>
-            <div>
-                <div class="info-card-label">Shipping</div>
-                <div class="info-card-value">124 Art Street</div>
-            </div>
-        </div>
-        <div class="info-card">
-            <div class="info-card-icon">
-                <span class="k-icon k-i-user"></span>
-            </div>
-            <div>
-                <div class="info-card-label">Buyer</div>
-                <div class="info-card-value">Sarah Mitchell</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Artworks -->
-    <div class="detail-card">
-        <div class="detail-card-header">
-            <span class="k-icon k-i-palette"></span>
-            <h3>Artworks (2)</h3>
-        </div>
-
-        <!-- Artwork 1 -->
-        <div class="artwork-item">
-            <div class="artwork-thumb">
-                <span class="k-icon k-i-image"></span>
-            </div>
-            <div class="artwork-info">
-                <div class="artwork-name">Ethereal Bloom</div>
-                <div class="artwork-artist">by Maya Chen</div>
-                <span class="type-badge type-digital">Digital</span>
-            </div>
-            <div class="artwork-right">
-                <span class="artwork-price">$149.99</span>
-                <button class="download-btn">
-                    <span class="k-icon k-i-download"></span> Download
+            <div class="detail-header-right no-print">
+                <button class="btn btn-outline" onclick="downloadInvoice()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="13" y2="15"/></svg>
+                    Invoice
+                </button>
+                <button class="btn btn-primary" onclick="downloadPdf()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download PDF
                 </button>
             </div>
         </div>
 
-        <div class="item-divider"></div>
+        <div class="section-card">
+            <p class="section-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                Artwork Items
+            </p>
+            <div id="itemsList"></div>
+        </div>
 
-        <!-- Artwork 2 -->
-        <div class="artwork-item">
-            <div class="artwork-thumb">
-                <span class="k-icon k-i-image"></span>
-            </div>
-            <div class="artwork-info">
-                <div class="artwork-name">Neon Cascade</div>
-                <div class="artwork-artist">by Liam Torres</div>
-                <span class="type-badge type-digital">Digital</span>
-            </div>
-            <div class="artwork-right">
-                <span class="artwork-price">$100.00</span>
-                <button class="download-btn">
-                    <span class="k-icon k-i-download"></span> Download
-                </button>
-            </div>
+        <div class="section-card">
+            <p class="section-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                Order Summary
+            </p>
+            <div id="summaryRows"></div>
         </div>
-    </div>
 
-    <!-- Payment Summary -->
-    <div class="detail-card">
-        <div class="detail-card-header">
-            <span class="k-icon k-i-file-txt"></span>
-            <h3>Payment Summary</h3>
+        <div class="section-card">
+            <p class="section-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Order Information
+            </p>
+            <div class="info-grid" id="infoGrid"></div>
         </div>
-        <div class="summary-body">
-            <div class="summary-row">
-                <span class="summary-label">Subtotal</span>
-                <span class="summary-value">$239.99</span>
-            </div>
-            <div class="summary-row">
-                <span class="summary-label">Tax</span>
-                <span class="summary-value">$10.00</span>
-            </div>
-            <div class="summary-row">
-                <span class="summary-label">Shipping</span>
-                <span class="summary-value free">Free</span>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-total">
-                <span class="summary-total-label">Total</span>
-                <span class="summary-total-value">$249.99</span>
-            </div>
-        </div>
+
     </div>
 </div>
+
+<script>
+    const BUYER_ID = (function () {
+        if (typeof window.buyerId !== 'undefined') return window.buyerId;
+        const m = document.querySelector('meta[name="buyer-id"]');
+        if (m) return parseInt(m.content, 10);
+        return null;
+    })();
+
+    function getOrderIdFromUrl() {
+        const parts = window.location.pathname.split('/');
+        const id    = parseInt(parts[parts.length - 1], 10);
+        return isNaN(id) ? null : id;
+    }
+
+    function imageUrl(path) {
+        if (!path) return null;
+        if (path.startsWith('http')) return path;
+        return window.location.origin + path;
+    }
+    function formatDate(iso) {
+        const d = new Date(iso);
+        return d.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    function formatRupee(n) {
+        return '$' + parseFloat(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function statusClass(s) {
+        const map = { delivered: 'status-delivered', processing: 'status-processing', failed: 'status-failed' };
+        return map[(s || '').toLowerCase()] || 'status-processing';
+    }
+    function statusIcon(s) {
+        const lower = (s || '').toLowerCase();
+        if (lower === 'delivered')
+            return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+        if (lower === 'failed')
+            return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+        return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+    }
+
+    var _orderData = null;
+
+    function populatePage(data) {
+        _orderData = data;
+        const o     = data.order;
+        const items = data.items;
+
+        document.getElementById('orderIdHeading').textContent =
+            'Order ORD-' + String(o.orderId).padStart(8, '0');
+        document.title = 'Order ORD-' + String(o.orderId).padStart(8, '0');
+
+        const badge = document.getElementById('statusBadge');
+        badge.className = 'status-badge ' + statusClass(o.orderStatus);
+        badge.innerHTML = statusIcon(o.orderStatus) + ' ' + o.orderStatus;
+
+        document.getElementById('orderDate').textContent     = formatDate(o.createdAt);
+        document.getElementById('orderItemCount').textContent =
+            items.length + ' item' + (items.length === 1 ? '' : 's');
+
+        const imgHtml = (path) => {
+            const url = imageUrl(path);
+            return url
+                ? `<img src="${url}" alt="Artwork" loading="lazy"/>`
+                : `<div class="item-img-placeholder"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`;
+        };
+
+        document.getElementById('itemsList').innerHTML = items.map(it => `
+            <div class="item-row">
+                <div class="item-img">${imgHtml(it.previewPath)}</div>
+                <div class="item-info">
+                    <p class="item-title">${it.title}</p>
+                    <p class="item-artist">by ${it.artistName}</p>
+                    ${it.categoryName ? `<span class="item-cat">${it.categoryName}</span>` : ''}
+                </div>
+                <span class="item-price">${formatRupee(it.priceAtPurchase)}</span>
+            </div>`).join('');
+
+        const subtotal     = items.reduce((s, it) => s + parseFloat(it.priceAtPurchase), 0);
+        @* const platformFees = Math.round(subtotal * 0.18 * 100) / 100; *@
+        const platformFees = total - subtotal;
+        const total        = parseFloat(o.totalAmount);
+
+        document.getElementById('summaryRows').innerHTML = `
+            <div class="summary-row">
+                <span>${items.length} artwork${items.length === 1 ? '' : 's'}</span>
+                <span>${formatRupee(subtotal)}</span>
+            </div>
+            <div class="summary-row">
+                <span>Platform Fees</span>
+                <span>${formatRupee(platformFees)}</span>
+            </div>
+            <div class="summary-row total">
+                <span>Total Paid</span>
+                <span>${formatRupee(total)}</span>
+            </div>`;
+
+        document.getElementById('infoGrid').innerHTML = `
+            <div class="info-item"><label>Order ID</label><span>ORD-${String(o.orderId).padStart(8, '0')}</span></div>
+            <div class="info-item"><label>Order Date</label><span>${formatDate(o.createdAt)}</span></div>
+            <div class="info-item"><label>Status</label><span>${o.orderStatus}</span></div>
+            <div class="info-item"><label>Payment</label><span>Online Payment</span></div>
+            <div class="info-item"><label>Items</label><span>${items.length}</span></div>
+            <div class="info-item"><label>Amount Paid</label><span>${formatRupee(total)}</span></div>`;
+    }
+
+    function downloadPdf() {
+        window.print();
+    }
+
+    function downloadInvoice() {
+        if (!_orderData) return;
+        const o     = _orderData.order;
+        const items = _orderData.items;
+
+        const subtotal     = items.reduce((s, it) => s + parseFloat(it.priceAtPurchase), 0);
+        const total        = parseFloat(o.totalAmount);
+        const platformFees = total - subtotal;
+        const orderId      = 'ORD-' + String(o.orderId).padStart(8, '0');
+        const date         = formatDate(o.createdAt);
+
+        const itemRows = items.map(it => `
+            <tr>
+                <td style="padding:10px 8px;border-bottom:1px solid #eee;">${it.title}</td>
+                <td style="padding:10px 8px;border-bottom:1px solid #eee;color:#777;">${it.artistName}</td>
+                <td style="padding:10px 8px;border-bottom:1px solid #eee;text-align:right;font-weight:600;">
+                    ${formatRupee(it.priceAtPurchase)}
+                </td>
+            </tr>`).join('');
+
+        const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<title>Invoice – ${orderId}</title>
+<style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Segoe UI',Arial,sans-serif;color:#222;background:#fff;padding:40px;}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;}
+    .brand{font-size:26px;font-weight:800;letter-spacing:-0.03em;color:#3b2a1a;}
+    .brand span{color:#c9833a;}
+    .inv-label{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:0.08em;}
+    .inv-id{font-size:22px;font-weight:700;color:#3b2a1a;margin-top:2px;}
+    .meta-row{display:flex;gap:32px;margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid #f0e8dc;}
+    .meta-item label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:3px;}
+    .meta-item span{font-size:14px;font-weight:600;color:#3b2a1a;}
+    table{width:100%;border-collapse:collapse;margin-bottom:24px;}
+    thead tr{background:#fdf6ec;}
+    thead th{padding:10px 8px;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:#888;font-weight:600;}
+    thead th:last-child{text-align:right;}
+    .total-section{margin-left:auto;width:260px;}
+    .total-row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;color:#555;}
+    .total-row.grand{border-top:2px solid #f0e8dc;margin-top:6px;padding-top:10px;font-size:16px;font-weight:700;color:#3b2a1a;}
+    .footer{margin-top:48px;padding-top:20px;border-top:1px solid #f0e8dc;text-align:center;font-size:12px;color:#aaa;}
+    .status-pill{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600;
+        background:${o.orderStatus.toLowerCase()==='delivered'?'rgba(34,139,34,0.1)':o.orderStatus.toLowerCase()==='failed'?'rgba(180,0,0,0.1)':'rgba(200,140,0,0.1)'};
+        color:${o.orderStatus.toLowerCase()==='delivered'?'#1a7a2e':o.orderStatus.toLowerCase()==='failed'?'#b40000':'#7a5500'};}
+</style>
+</head>
+<body>
+<div class="header">
+    <div><div class="brand">Arti<span>fy</span></div><div style="font-size:13px;color:#888;margin-top:4px;">The Art Gallery</div></div>
+    <div style="text-align:right;"><div class="inv-label">Invoice</div><div class="inv-id">${orderId}</div></div>
+</div>
+<div class="meta-row">
+    <div class="meta-item"><label>Date</label><span>${date}</span></div>
+    <div class="meta-item"><label>Status</label><span><span class="status-pill">${o.orderStatus}</span></span></div>
+    <div class="meta-item"><label>Items</label><span>${items.length}</span></div>
+</div>
+<table>
+    <thead>
+        <tr><th>Artwork</th><th>Artist</th><th style="text-align:right;">Price</th></tr>
+    </thead>
+    <tbody>${itemRows}</tbody>
+</table>
+<div class="total-section">
+    <div class="total-row"><span>Subtotal</span><span>${formatRupee(subtotal)}</span></div>
+    <div class="total-row"><span>Platform Fees</span><span>${formatRupee(platformFees)}</span></div>
+    <div class="total-row grand"><span>Total Paid</span><span>${formatRupee(total)}</span></div>
+</div>
+<div class="footer">
+    Thank you for your purchase! For queries contact support@artify.com
+    <br/>This is a computer-generated invoice and does not require a signature.
+</div>
+</body>
+</html>`;
+
+        const win = window.open('', '_blank');
+        if (win) {
+            win.document.write(html);
+            win.document.close();
+            setTimeout(() => win.print(), 600);
+        }
+    }
+
+    async function loadOrderDetail() {
+        const orderId = getOrderIdFromUrl();
+        if (!orderId) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorMsg').textContent = 'Invalid order ID.';
+            document.getElementById('errorState').style.display = '';
+            return;
+        }
+
+        try {
+            const res = await fetch(`http://localhost:5183/api/BuyerOrder/GetOrderDetail/${orderId}`, {
+                headers: {
+                    "Authorization": "Bearer " + localStorage.getItem("token");
+                }
+            });
+            if (!res.ok) throw new Error(res.status === 404 ? 'Order not found.' : 'Server error ' + res.status);
+
+            const data = await res.json();
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('orderContent').style.display = '';
+            populatePage(data);
+        } catch (err) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorMsg').textContent        = err.message || 'Failed to load order.';
+            document.getElementById('errorState').style.display   = '';
+        }
+    }
+
+    loadOrderDetail();
+</script>

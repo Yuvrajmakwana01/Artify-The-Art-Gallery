@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .email-container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e0d6c8; border-radius: 12px; overflow: hidden; font-family: sans-serif; }
+        .email-header { background-color: #1c1711; padding: 25px; text-align: center; }
+        .email-logo { font-size: 26px; color: #d4a853; letter-spacing: 5px; font-weight: bold; }
+        .email-body { padding: 40px; text-align: center; }
+        .success-circle { width: 60px; height: 60px; border-radius: 50%; background: #f2ebe0; border: 2px solid #b8761a; display: inline-block; line-height: 60px; color: #b8761a; font-size: 30px; margin-bottom: 20px; }
+        .email-title { font-size: 24px; font-style: italic; color: #1c1711; margin-bottom: 10px; }
+        .order-card { background: #fcfaf7; border: 1px solid #e0d6c8; border-radius: 10px; padding: 20px; text-align: left; margin: 25px 0; }
+        .order-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .label { color: #8a7d6e; }
+        .value { color: #1c1711; font-weight: bold; float: right; }
+        .total-amount { color: #b8761a; font-size: 18px; font-weight: 800; }
+        .footer { background-color: #f2ebe0; padding: 20px; text-align: center; font-size: 12px; color: #8a7d6e; }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+             <img src="cid:logo" alt="ARTIFY" class="logo-img" />
+        </div>
+        <div class="email-body">
+
+                <div class="success-icon-wrap">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 13l4 4L19 7" stroke="#b8761a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                
+            <h1 class="email-title">Payment Successful</h1>
+            <p style="color: #8a7d6e;">Hello <strong>{UserName}</strong>,<br>Your payment has been confirmed. Thank you for your purchase.</p>
+            
+            <div class="order-card">
+                <div style="color: #b8761a; font-weight: bold; margin-bottom: 15px; font-size: 12px; text-transform: uppercase;">Order Summary</div>
+                <div class="order-row"><span class="label">Order ID</span> <span class="value">#{OrderId}</span></div>
+                <div class="order-row"><span class="label">Artwork</span> <span class="value">{ArtworkName}</span></div>
+                <div class="order-row"><span class="label">Artist</span> <span class="value">{ArtistName}</span></div>
+                <div class="order-row" style="border:none; margin-top: 10px;">
+                    <span class="label" style="color:#1c1711; font-weight: bold;">Total Paid</span> 
+                    <span class="value total-amount">INR {Amount}</span>
+                </div>
+            </div>
+            <p style="font-size: 13px; color: #b8a89a;">Your digital invoice is attached to this email.</p>
+        </div>
+        <div class="footer">
+            &copy; 2026 Artify Marketplace. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

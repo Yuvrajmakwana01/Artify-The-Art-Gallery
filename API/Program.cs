@@ -10,6 +10,7 @@ using Repository.Interfaces;
 using Repository.Implementations;
 using Repository.Services;
 using Repository;
+using API.Services;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,6 +33,20 @@ builder.Services.AddScoped<IArtworkInterface, ArtworkRepository>();
 builder.Services.AddScoped<IUserProfileInterface, UserProfileRepository>();
 builder.Services.AddScoped<IAdminArtworkInterface, AdminArtworkRepository>();
 builder.Services.AddScoped<IAdminOrderInterface, AdminOrdersRepository>();
+
+//paymet 
+builder.Services.AddScoped<IBuyerUiArtworkInterface, BuyerUiArtworkRepository>();
+builder.Services.AddScoped<IPaymentInterface, PaymentRepository>();
+builder.Services.AddScoped<IWishlistInterface, WishlistRepository>();
+builder.Services.AddScoped<IOrderInterface, OrderRepository>();
+
+//paypal Service
+builder.Services.AddHttpClient<PaypalService>();
+builder.Services.AddScoped<InvoiceService>();
+
+builder.Services.AddScoped<EmailServices>();
+builder.Services.AddScoped<IBuyerOrderInterface, BuyerOrderRepository>();
+
 
 // =========================
 // Services

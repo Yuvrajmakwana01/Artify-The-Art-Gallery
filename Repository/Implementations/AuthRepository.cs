@@ -118,51 +118,46 @@ namespace Repository.Implementations
         }
 
         public async Task<t_UserRegister?> UserLogin(t_UserLogin model)
-        {
-            t_UserRegister user = new t_UserRegister();
+{
+    t_UserRegister user = null;
 
-            try
-            {
-                if (_conn.State == ConnectionState.Closed) await _conn.OpenAsync();
+    try
+    {
+        if (_conn.State == ConnectionState.Closed)
+            await _conn.OpenAsync();
 
-                var qry = @"SELECT c_user_id, c_full_name, c_username, c_email, c_password_hash, c_gender, c_mobile, c_profile_image
+        var qry = @"SELECT c_user_id, c_full_name, c_username, c_email, c_password_hash, c_gender, c_mobile, c_profile_image
                     FROM t_user WHERE LOWER(c_email) = @email";
 
-                using (var cmd = new NpgsqlCommand(qry, _conn))
-                {
-                    cmd.Parameters.AddWithValue("@email", model.c_Email.Trim().ToLower());
+        using (var cmd = new NpgsqlCommand(qry, _conn))
+        {
+            cmd.Parameters.AddWithValue("@email", model.c_Email.Trim().ToLower());
 
-                    var reader = await cmd.ExecuteReaderAsync();
+            using var reader = await cmd.ExecuteReaderAsync();
 
-                    if (!await reader.ReadAsync())
-                        return null;
+            if (!await reader.ReadAsync())
+                return null;
 
-                    user.c_UserId = Convert.ToInt32(reader["c_user_id"]);
-                    user.c_FullName = reader["c_full_name"].ToString();
-                    user.c_UserName = reader["c_username"].ToString();
-                    user.c_Email = reader["c_email"].ToString();
-                    user.c_PasswordHash = reader["c_password_hash"]?.ToString();
-                    user.c_Gender = reader["c_gender"].ToString();
-                    user.c_Mobile = reader["c_mobile"].ToString();
-                    user.c_ProfileImage = reader["c_profile_image"] == DBNull.Value ? null : reader["c_profile_image"].ToString();
-                }
-
-
-                return user;
-            }
-            catch (Exception ex)
+            user = new t_UserRegister
             {
-                Console.WriteLine("Error in user login:");
-                Console.WriteLine(ex.ToString()); // 🔥 IMPORTANT
-                Console.WriteLine($"DB Connection Error: {ex.Message}");
-                throw;
-
-            }
-            finally
-            {
-                await _conn.CloseAsync();
-            }
+                c_UserId = Convert.ToInt32(reader["c_user_id"]),
+                c_FullName = reader["c_full_name"].ToString(),
+                c_UserName = reader["c_username"].ToString(),
+                c_Email = reader["c_email"].ToString(),
+                c_PasswordHash = reader["c_password_hash"]?.ToString(),
+                c_Gender = reader["c_gender"].ToString(),
+                c_Mobile = reader["c_mobile"].ToString(),
+                c_ProfileImage = reader["c_profile_image"] == DBNull.Value ? null : reader["c_profile_image"].ToString()
+            };
         }
+
+        return user;
+    }
+    finally
+    {
+        await _conn.CloseAsync();
+    }
+}
 
         public async Task<t_UserRegister?> GetUserByEmail(string email)
         {
@@ -210,9 +205,10 @@ namespace Repository.Implementations
         {
             try
             {
-                await _conn.OpenAsync();
+                if (_conn.State != System.Data.ConnectionState.Open)
+                    await _conn.OpenAsync();
 
-                var hashedPassword = HashPassword(newPassword);
+                // var hashedPassword = HashPassword(newPassword);
 
                 var qry = @"
                     UPDATE t_user
@@ -220,7 +216,7 @@ namespace Repository.Implementations
                     WHERE LOWER(c_email) = LOWER(@email)";
 
                 using var cmd = new NpgsqlCommand(qry, _conn);
-                cmd.Parameters.AddWithValue("@passwordHash", hashedPassword);
+                cmd.Parameters.AddWithValue("@passwordHash", newPassword);
                 cmd.Parameters.AddWithValue("@email", email.Trim());
 
                 return await cmd.ExecuteNonQueryAsync();

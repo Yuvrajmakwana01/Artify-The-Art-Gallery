@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Welcome to Artify</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #faf7f2;
+            font-family: "Plus Jakarta Sans", Helvetica, Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border: 1px solid #e0d6c8;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(28, 23, 17, 0.05);
+        }
+
+        .header {
+            background-color: #1c1711;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .content {
+            padding: 40px;
+            text-align: center;
+            color: #1c1711;
+        }
+
+        h1 {
+            font-family: "Cormorant Garamond", serif;
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #8a7d6e;
+            margin-bottom: 30px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 16px 36px;
+            background-color: #b8761a;
+            color: #ffffff !important;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            border-radius: 8px;
+            letter-spacing: 1px;
+            transition: background 0.3s ease;
+        }
+
+        .features {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #f2ebe0;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .feature-item {
+            flex: 1;
+            padding: 0 10px;
+            font-size: 12px;
+            color: #3d3328;
+        }
+
+        .footer {
+            padding: 20px;
+            background-color: #f2ebe0;
+            text-align: center;
+            font-size: 12px;
+            color: #8a7d6e;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+         <div class="header">
+            <img src="cid:logo" alt="ARTIFY" class="logo-img" />
+        </div>
+
+        <div class="content">
+            <h1>Welcome to the Collection.</h1>
+            <p>
+                Hello <strong>{UserName}</strong>,<br /><br />
+                We're thrilled to have you join our community of art enthusiasts. 
+                Your account has been <strong>successfully created</strong>. 
+                Get ready to discover unique masterpieces and support artists from around the globe.
+            </p>
+
+            <a href="{LoginUrl}" class="cta-button">EXPLORE THE GALLERY</a>
+
+            <div class="features">
+                <div class="feature-item">
+                    <strong style="color: #7d5018;">CURATED ART</strong><br />Handpicked pieces for your unique taste.
+                </div>
+                <div class="feature-item">
+                    <strong style="color: #7d5018;">SECURE PAYMENTS</strong><br />World-class security for every transaction.
+                </div>
+                <div class="feature-item">
+                    <strong style="color: #7d5018;">GLOBAL ARTISTS</strong><br />Connect directly with creators worldwide.
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Artify Marketplace. <br />
+            You received this because you created an account on Artify. <br />
+            <a href="#" style="color: #b8761a">Support</a> |
+            <a href="#" style="color: #b8761a">Terms of Service</a>
+        </div>
+    </div>
+</body>
+
+</html>

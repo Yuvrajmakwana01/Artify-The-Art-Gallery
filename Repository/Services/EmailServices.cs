@@ -19,13 +19,26 @@ namespace Repository.Services
         {
             var section = config.GetSection("EmailSettings");
 
-            _emailSettings = new t_EmailSettings
+            _emailSettings = new t_EmailSetting
             {
                 Email = section["Email"],
                 Password = section["Password"],
                 Host = section["Host"],
                 Port = int.Parse(section["Port"])
             };
+        }
+
+        // ✅ COMMON METHOD (Use everywhere)
+        public async Task SendEmailAsync(
+            string toEmail,
+            string subject,
+            string body,
+            string logoPath = null,
+            byte[] attachment = null,
+            string fileName = null)
+        {
+            var email = new MimeMessage();
+            email.From.Add(new MailboxAddress("Artify Gallery", _emailSettings.Email));
 
             // ✅ ADDED (template path setup)
             _templateBasePath = Path.Combine(AppContext.BaseDirectory, "Templates");

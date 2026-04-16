@@ -10,5 +10,7 @@ namespace Repository.Interfaces
     {
         Task<UserProfile?> GetProfileById(int userId);
         Task<int> UpdateProfile(UserProfile profile);
+        Task<int> ChangePassword(int artistId, string oldPwd, string newPwd);
+
     }
 }

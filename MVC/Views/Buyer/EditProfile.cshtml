@@ -1,58 +1,139 @@
-@{
+@* @{
     ViewBag.Title = "Edit Profile";
     Layout = "~/Views/Shared/_BuyerLayout.cshtml";
 }
 
 <style>
     :root {
-        --bg: hsl(40, 33%, 96%); --fg: hsl(30, 10%, 15%); --card: hsl(40, 30%, 98%);
-        --primary: hsl(30, 30%, 30%); --primary-fg: hsl(40, 33%, 96%);
-        --muted: hsl(35, 20%, 92%); --muted-fg: hsl(30, 8%, 50%);
-        --accent: hsl(30, 40%, 82%); --border: hsl(35, 20%, 87%);
-        --warm: hsl(32, 45%, 70%); --warm-fg: hsl(30, 15%, 20%);
+        --bg: hsl(40, 33%, 96%);
+        --fg: hsl(30, 10%, 15%);
+        --card: hsl(40, 30%, 98%);
+        --primary: hsl(30, 30%, 30%);
+        --primary-fg: hsl(40, 33%, 96%);
+        --muted: hsl(35, 20%, 92%);
+        --muted-fg: hsl(30, 8%, 50%);
+        --accent: hsl(30, 40%, 82%);
+        --border: hsl(35, 20%, 87%);
+        --warm: hsl(32, 45%, 70%);
+        --warm-fg: hsl(30, 15%, 20%);
     }
+
     .edit-page { max-width: 672px; margin: 0 auto; font-family: 'Inter', sans-serif; }
     .edit-page h1, .edit-page h3 { font-family: 'Playfair Display', serif; }
+
     .edit-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
-    .back-btn { width: 40px; height: 40px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+    .back-btn {
+        width: 40px; height: 40px; border-radius: 50%; border: none;
+        background: transparent; cursor: pointer; display: flex;
+        align-items: center; justify-content: center; transition: background 0.2s;
+    }
     .back-btn:hover { background: var(--muted); }
     .back-btn .k-icon { font-size: 20px; color: var(--fg); }
     .edit-header-text h1 { font-size: 24px; font-weight: 700; color: var(--fg); margin: 0; }
     .edit-header-text p { font-size: 14px; color: var(--muted-fg); margin: 2px 0 0; }
-    .edit-card { background: var(--card); border: 1px solid hsla(35,20%,87%,0.6); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 24px; }
-    .edit-card-header { background: hsla(30,40%,82%,0.2); border-bottom: 1px solid hsla(35,20%,87%,0.4); padding: 16px 24px; display: flex; align-items: center; gap: 8px; }
+
+    .edit-card {
+        background: var(--card);
+        border: 1px solid hsla(35,20%,87%,0.6);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        margin-bottom: 24px;
+    }
+    .edit-card-header {
+        background: hsla(30,40%,82%,0.2);
+        border-bottom: 1px solid hsla(35,20%,87%,0.4);
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
     .edit-card-header h3 { font-size: 18px; font-weight: 600; color: var(--fg); margin: 0; }
     .edit-card-header .k-icon { font-size: 20px; color: var(--primary); }
     .edit-card-body { padding: 24px; }
+
+    /* Avatar Section */
     .avatar-section { display: flex; align-items: center; gap: 24px; }
     .avatar-wrapper { position: relative; flex-shrink: 0; }
-    .avatar-circle { width: 96px; height: 96px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), hsla(30,30%,30%,0.7)); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border: 4px solid var(--card); overflow: hidden; }
+    .avatar-circle {
+        width: 96px; height: 96px; border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), hsla(30,30%,30%,0.7));
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        border: 4px solid var(--card);
+    }
     .avatar-circle .k-icon { font-size: 36px; color: var(--primary-fg); }
-    .avatar-cam-btn { position: absolute; bottom: -4px; right: -4px; width: 36px; height: 36px; border-radius: 50%; background: var(--card); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; }
+    .avatar-cam-btn {
+        position: absolute; bottom: -4px; right: -4px;
+        width: 36px; height: 36px; border-radius: 50%;
+        background: var(--card); border: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer;
+        transition: transform 0.2s;
+    }
     .avatar-cam-btn:hover { transform: scale(1.1); }
     .avatar-cam-btn .k-icon { font-size: 14px; color: var(--fg); }
     .avatar-info strong { display: block; font-size: 14px; color: var(--fg); }
     .avatar-info .hint { font-size: 12px; color: var(--muted-fg); margin-top: 4px; }
-    .upload-btn { margin-top: 12px; padding: 6px 16px; border-radius: 20px; border: 1px solid var(--border); background: var(--card); color: var(--fg); font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; }
+    .upload-btn {
+        margin-top: 12px; padding: 6px 16px; border-radius: 20px;
+        border: 1px solid var(--border); background: var(--card);
+        color: var(--fg); font-size: 12px; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 6px;
+        transition: background 0.2s;
+    }
     .upload-btn:hover { background: var(--muted); }
+
+    /* Form Fields */
     .form-group { margin-bottom: 20px; }
-    .form-label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); margin-bottom: 6px; }
+    .form-label {
+        display: flex; align-items: center; gap: 6px;
+        font-size: 11px; font-weight: 600; text-transform: uppercase;
+        letter-spacing: 0.05em; color: var(--muted-fg); margin-bottom: 6px;
+    }
     .form-label .k-icon { font-size: 14px; }
-    .form-input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); font-size: 14px; color: var(--fg); font-family: 'Inter', sans-serif; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box; }
-    .form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px hsla(30,30%,30%,0.1); }
+    .form-input {
+        width: 100%; padding: 10px 14px; border-radius: 8px;
+        border: 1px solid var(--border); background: var(--card);
+        font-size: 14px; color: var(--fg); font-family: 'Inter', sans-serif;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        box-sizing: border-box;
+    }
+    .form-input:focus {
+        outline: none; border-color: var(--primary);
+        box-shadow: 0 0 0 3px hsla(30,30%,30%,0.1);
+    }
+    .form-hint { font-size: 12px; color: var(--muted-fg); margin-top: 4px; }
+    .form-divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+    /* Action Buttons */
     .edit-actions { display: flex; justify-content: flex-end; gap: 12px; padding-bottom: 32px; }
-    .btn-cancel { padding: 10px 24px; border-radius: 20px; border: 1px solid var(--border); background: var(--card); color: var(--fg); font-size: 14px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s; }
+    .btn-cancel {
+        padding: 10px 24px; border-radius: 20px; border: 1px solid var(--border);
+        background: var(--card); color: var(--fg); font-size: 14px; font-weight: 500;
+        cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+        transition: background 0.2s;
+    }
     .btn-cancel:hover { background: var(--muted); }
-    .btn-save { padding: 10px 24px; border-radius: 20px; border: none; background: var(--primary); color: var(--primary-fg); font-size: 14px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: opacity 0.2s; }
+    .btn-save {
+        padding: 10px 24px; border-radius: 20px; border: none;
+        background: var(--primary); color: var(--primary-fg); font-size: 14px;
+        font-weight: 500; cursor: pointer; display: inline-flex;
+        align-items: center; gap: 8px; transition: opacity 0.2s;
+    }
     .btn-save:hover { opacity: 0.9; }
-    @@media (max-width: 640px) { .avatar-section { flex-direction: column; text-align: center; } }
+
+    @@media (max-width: 640px) {
+        .avatar-section { flex-direction: column; text-align: center; }
+    }
 </style>
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <div class="edit-page">
+    <!-- Header -->
     <div class="edit-header">
-        <button class="back-btn" onclick="window.location.href='@Url.Action("Profile", "Buyer")'">
+        <button class="back-btn" onclick="window.location.href='@Url.Action("Index", "Profile")'">
             <span class="k-icon k-i-arrow-left"></span>
         </button>
         <div class="edit-header-text">
@@ -61,18 +142,300 @@
         </div>
     </div>
 
-    <!-- Avatar Section -->
-    <div class="edit-card">
-        <div class="edit-card-body">
+    @using (Html.BeginForm("EditProfile", "Buyer", FormMethod.Post))
+    {
+        <!-- Avatar Section -->
+        <div class="edit-card">
+            <div class="edit-card-body">
+                <div class="avatar-section">
+                    <div class="avatar-wrapper">
+                        <div class="avatar-circle">
+                            <span class="k-icon k-i-user"></span>
+                        </div>
+                        <div class="avatar-cam-btn">
+                            <span class="k-icon k-i-image"></span>
+                        </div>
+                    </div>
+                    <div class="avatar-info">
+                        <strong>Profile Photo</strong>
+                        <p class="hint">JPG, PNG or GIF. Max 2MB.</p>
+                        <button type="button" class="upload-btn">
+                            <span class="k-icon k-i-image"></span> Upload Photo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personal Information -->
+        <div class="edit-card">
+            <div class="edit-card-header">
+                <span class="k-icon k-i-user"></span>
+                <h3>Personal Information</h3>
+            </div>
+            <div class="edit-card-body">
+                <div class="form-group">
+                    <label class="form-label">
+                        <span class="k-icon k-i-user"></span> Full Name
+                    </label>
+                    <input type="text" name="FullName" class="form-input" value="Sarah Mitchell" placeholder="Enter your full name" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <span class="k-icon k-i-email"></span> Email Address
+                    </label>
+                    <input type="email" name="Email" class="form-input" value="sarah.mitchell@@email.com" placeholder="Enter your email" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <span class="k-icon k-i-tell-a-friend"></span> Phone Number
+                    </label>
+                    <input type="text" name="Phone" class="form-input" value="+1 (555) 234-5678" placeholder="Enter your phone number" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <span class="k-icon k-i-marker-pin"></span> Shipping Address
+                    </label>
+                    <input type="text" name="Address" class="form-input" value="124 Art Street, Brooklyn, NY 11201" placeholder="Enter your shipping address" />
+                </div>
+
+                <div class="form-divider"></div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">
+                        <span class="k-icon k-i-palette"></span> Preferred Art Styles
+                    </label>
+                    <input type="text" name="PreferredStyles" class="form-input" value="Abstract, Modern, Digital Illustration" placeholder="e.g. Abstract, Modern, Digital" />
+                    <p class="form-hint">Separate styles with commas</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="edit-actions">
+            <button type="button" class="btn-cancel" onclick="window.location.href='@Url.Action("Profile", "Buyer")'">
+                <span class="k-icon k-i-close"></span> Cancel
+            </button>
+            <button type="submit" class="btn-save">
+                <span class="k-icon k-i-save"></span> Save Changes
+            </button>
+        </div>
+    }
+</div> *@
+
+
+@{
+    ViewBag.Title = "Edit Profile";
+    Layout = "_BuyerLayout";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+
+<style>
+    :root {
+        --canvas:        #f5f0ea;
+        --canvas-2:      #ffffff;
+        --canvas-3:      #ede7df;
+        --surface:       #faf7f3;
+        --border:        rgba(0,0,0,0.06);
+        --border-2:      rgba(0,0,0,0.10);
+        --gold:          #9a6324;
+        --gold-bright:   #c08b3f;
+        --gold-light:    #dbb978;
+        --gold-dim:      rgba(154,99,36,0.08);
+        --gold-ring:     rgba(154,99,36,0.18);
+        --text:          #1c1814;
+        --text-2:        #5e554a;
+        --text-3:        #9e9488;
+        --radius-sm:     10px;
+        --radius-md:     16px;
+        --radius-lg:     24px;
+        --radius-xl:     36px;
+        --shadow-md:     0 4px 16px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.03);
+        --shadow-lg:     0 12px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+        --shadow-gold:   0 8px 32px rgba(154,99,36,0.15);
+    }
+
+    body { font-family: 'DM Sans', sans-serif; background: var(--canvas); color: var(--text); }
+
+    .edit-page { max-width: 680px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+
+    .studio-card {
+        background: var(--canvas-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* ── Section Divider ── */
+    .section-divider {
+        display: flex; align-items: center; gap: 14px;
+        padding: 1.5rem 2.25rem 0.85rem;
+    }
+    .section-divider span {
+        font-size: .65rem; font-weight: 700; letter-spacing: 2.5px;
+        text-transform: uppercase; color: var(--gold);
+        white-space: nowrap;
+        background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .section-divider::after {
+        content: ''; flex: 1; height: 1px;
+        background: linear-gradient(90deg, var(--border-2), transparent);
+    }
+
+    /* ── Alert ── */
+    #msgBox {
+        margin: 0 2.25rem; padding: 14px 18px;
+        border-radius: var(--radius-md); font-size: .88rem;
+        display: none; font-weight: 500;
+        backdrop-filter: blur(8px);
+    }
+    #msgBox.success { background: rgba(220,252,231,0.9); color: #166534; border: 1px solid #86efac; }
+    #msgBox.error   { background: rgba(254,226,226,0.9); color: #991b1b; border: 1px solid #fca5a5; }
+
+    /* ── Form Body ── */
+    .form-body { padding: 0 2.25rem 2.25rem; }
+
+    /* ── Avatar Section ── */
+    .avatar-section {
+        display: flex; align-items: center; gap: 28px;
+        padding: 1.75rem 0 .75rem;
+    }
+    .avatar-wrapper { position: relative; flex-shrink: 0; width: 100px; height: 100px; }
+    .avatar-circle {
+        width: 100px; height: 100px; border-radius: 50%;
+        background: linear-gradient(135deg, #2c221a, #5a4430);
+        display: flex; align-items: center; justify-content: center;
+        border: 4px solid var(--canvas-2);
+        box-shadow: 0 0 0 3px var(--border-2), var(--shadow-md);
+        overflow: hidden;
+        transition: transform 0.3s;
+    }
+    .avatar-circle:hover { transform: scale(1.05); }
+    .avatar-circle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: none; }
+    .avatar-circle i { font-size: 2.5rem; color: rgba(255,255,255,0.5); }
+    .avatar-cam-btn {
+        position: absolute; bottom: -2px; right: -2px;
+        width: 32px; height: 32px; border-radius: 50%;
+        background: var(--canvas-2); border: 2px solid var(--border-2);
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: var(--shadow-md); cursor: pointer;
+        transition: all 0.25s;
+    }
+    .avatar-cam-btn:hover { transform: scale(1.15); background: var(--gold); border-color: var(--gold); }
+    .avatar-cam-btn:hover i { color: #fff; }
+    .avatar-cam-btn i { font-size: .8rem; color: var(--text-2); transition: color 0.25s; }
+
+    .avatar-info strong { display: block; font-size: .95rem; color: var(--text); font-weight: 600; }
+    .avatar-info .hint  { font-size: .76rem; color: var(--text-3); margin-top: 4px; line-height: 1.4; }
+    .upload-btn {
+        margin-top: 12px; display: inline-flex; align-items: center; gap: 7px;
+        padding: 8px 18px; border-radius: 100px;
+        border: 1px solid var(--border-2); background: var(--canvas-3);
+        color: var(--text-2); font-size: .78rem; font-family: 'DM Sans', sans-serif;
+        cursor: pointer; transition: all 0.3s; font-weight: 500;
+    }
+    .upload-btn:hover {
+        background: var(--gold-dim); border-color: var(--gold-bright); color: var(--gold);
+        box-shadow: 0 2px 12px var(--gold-ring);
+    }
+
+    /* ── Form Fields ── */
+    .form-group { margin-bottom: 1.5rem; }
+    .form-label {
+        display: flex; align-items: center; gap: 7px;
+        font-size: .65rem; font-weight: 700; letter-spacing: 2px;
+        text-transform: uppercase; color: var(--text-3); margin-bottom: 8px;
+    }
+    .form-label i { font-size: .75rem; }
+    .form-input {
+        width: 100%; padding: 13px 16px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid var(--border-2);
+        background: var(--canvas); font-size: .92rem; color: var(--text);
+        font-family: 'DM Sans', sans-serif;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-sizing: border-box; appearance: none;
+    }
+    .form-input:focus {
+        outline: none; border-color: var(--gold-bright);
+        box-shadow: 0 0 0 4px var(--gold-dim);
+        background: var(--canvas-2);
+    }
+    .form-input::placeholder { color: var(--text-3); }
+    select.form-input { cursor: pointer; }
+
+    /* ── Actions Footer ── */
+    .edit-actions {
+        display: flex; justify-content: flex-end; gap: 12px;
+        padding: 1.5rem 2.25rem;
+        background: linear-gradient(180deg, var(--surface) 0%, rgba(250,247,243,0.8) 100%);
+        border-top: 1px solid var(--border);
+    }
+    .btn-amber {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 12px 26px;
+        background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+        color: #fff; border: none; border-radius: var(--radius-md);
+        font-family: 'DM Sans', sans-serif;
+        font-size: .86rem; font-weight: 600; letter-spacing: .3px;
+        cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-amber:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-gold);
+        filter: brightness(1.05);
+    }
+    .btn-amber:active { transform: translateY(0); }
+    .btn-cancel-outline {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 12px 24px;
+        background: transparent; color: var(--text-2);
+        border: 1.5px solid var(--border-2); border-radius: var(--radius-md);
+        font-family: 'DM Sans', sans-serif;
+        font-size: .86rem; font-weight: 500;
+        cursor: pointer; transition: all 0.3s; text-decoration: none;
+    }
+    .btn-cancel-outline:hover { background: var(--canvas-3); color: var(--text); border-color: var(--text-3); }
+
+    /* ── Fade-up ── */
+    .sp-fade-up { opacity: 0; transform: translateY(24px); animation: fadeUp .55s cubic-bezier(0.22,1,0.36,1) forwards; }
+    @@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+    @@media (max-width: 640px) {
+        .avatar-section { flex-direction: column; text-align: center; align-items: center; }
+        .edit-actions { flex-direction: column; }
+        .btn-amber, .btn-cancel-outline { width: 100%; justify-content: center; }
+        .form-body { padding: 0 1.5rem 1.75rem; }
+        .section-divider { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .edit-actions { padding: 1.25rem 1.5rem; }
+        .edit-page { padding: 2rem 1rem 4rem; }
+    }
+</style>
+
+<div class="edit-page sp-fade-up">
+    <div class="studio-card">
+
+        <div id="msgBox"></div>
+
+        <!-- Avatar Section -->
+        <div class="section-divider"><span>Profile Photo</span></div>
+        <div class="form-body">
             <div class="avatar-section">
                 <div class="avatar-wrapper">
                     <div class="avatar-circle">
-                        <span class="k-icon k-i-user" id="avatarIcon"></span>
-                        <img id="avatarImg" src="" alt="Profile"
-                             style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;" />
+                        <img id="avatarImg" src="" alt="Profile" />
+                        <i class="bi bi-person" id="avatarIcon"></i>
                     </div>
                     <div class="avatar-cam-btn" onclick="$('#fileInput').click()">
-                        <span class="k-icon k-i-image"></span>
+                        <i class="bi bi-camera"></i>
                     </div>
                 </div>
                 <div class="avatar-info">
@@ -80,45 +443,40 @@
                     <p class="hint">JPG, PNG or GIF. Max 2MB.</p>
                     <input type="file" id="fileInput" accept="image/*" style="display:none;" />
                     <button type="button" class="upload-btn" onclick="$('#fileInput').click()">
-                        <span class="k-icon k-i-image"></span> Upload Photo
+                        <i class="bi bi-cloud-arrow-up"></i> Upload Photo
                     </button>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Personal Information -->
-    <div class="edit-card">
-        <div class="edit-card-header">
-            <span class="k-icon k-i-user"></span>
-            <h3>Personal Information</h3>
-        </div>
-        <div class="edit-card-body">
+        <!-- Personal Information -->
+        <div class="section-divider"><span>Personal Information</span></div>
+        <div class="form-body">
 
             <div class="form-group">
                 <label class="form-label">
-                    <span class="k-icon k-i-user"></span> Username
+                    <i class="bi bi-person"></i> Username
                 </label>
                 <input type="text" id="userName" class="form-input" placeholder="Enter your username" />
             </div>
 
             <div class="form-group">
                 <label class="form-label">
-                    <span class="k-icon k-i-user"></span> Full Name
+                    <i class="bi bi-person-badge"></i> Full Name
                 </label>
                 <input type="text" id="fullName" class="form-input" placeholder="Enter your full name" />
             </div>
 
             <div class="form-group">
                 <label class="form-label">
-                    <span class="k-icon k-i-tell-a-friend"></span> Mobile Number
+                    <i class="bi bi-telephone"></i> Mobile Number
                 </label>
                 <input type="text" id="mobile" class="form-input" placeholder="Enter your mobile number" />
             </div>
 
-            <div class="form-group" style="margin-bottom: 0;">
+            <div class="form-group" style="margin-bottom:0;">
                 <label class="form-label">
-                    <span class="k-icon k-i-user"></span> Gender
+                    <i class="bi bi-gender-ambiguous"></i> Gender
                 </label>
                 <select id="gender" class="form-input">
                     <option value="">Select Gender</option>
@@ -129,103 +487,146 @@
             </div>
 
         </div>
-    </div>
 
-    <!-- Actions -->
-    <div class="edit-actions">
-        <button type="button" class="btn-cancel" onclick="window.location.href='@Url.Action("Profile", "Buyer")'">
-            <span class="k-icon k-i-close"></span> Cancel
-        </button>
-        <button type="button" class="btn-save" id="btnSave">
-            <span class="k-icon k-i-save"></span> Save Changes
-        </button>
+        <!-- Actions -->
+        <div class="edit-actions">
+            <a href="@Url.Action("Profile", "Buyer")" class="btn-cancel-outline">
+                <i class="bi bi-x-lg"></i> Cancel
+            </a>
+            <button type="button" class="btn-amber" id="btnSaveBottom">
+                <i class="bi bi-floppy-fill"></i> Save Changes
+            </button>
+        </div>
+
     </div>
 </div>
 
 @section Scripts {
-    <script>
-        var testUserId = 8; // ⚠️ HARDCODED FOR TESTING
-        var currentImagePath = '';
+<script>
+    function getUserIdFromToken() {
+        let token = localStorage.getItem("token");
+        if (!token) return null;
 
-        $(document).ready(function () {
+        let payload = token.split('.')[1];
+        let decoded = JSON.parse(atob(payload));
 
-            // Load existing data into form
-            $.ajax({
-                url: 'http://localhost:5183/api/UserProfile/GetProfile/' + testUserId,
-                type: 'GET',
-                success: function (response) {
-                    if (response.success) {
-                        var u = response.data;
+        // 👇 Check this key based on your backend
+        return decoded["c_UserId"] || decoded["userId"] || decoded["sub"];
+    }
+    
+    // ✅ FIX 1: safe userId
+    var testUserId =  getUserIdFromToken();
+    var currentImagePath = '';
+    if (!testUserId) {
+        alert("User not logged in");
+        window.location.href = "/Auth/UserLogin";
+    }
 
-                        $('#userName').val(u.c_UserName || '');
-                        $('#fullName').val(u.c_FullName || '');
-                        $('#mobile').val(u.c_Mobile     || '');
-                        $('#gender').val(u.c_Gender     || '');
+    function showMsg(msg, type) {
+        alert(msg);
+    }
 
-                        currentImagePath = u.c_Image || '';
+    // ✅ FIX 2: validation improved
+    function validateForm() {
+        const mobile = $('#mobile').val().trim();
 
-                        if (u.c_Image) {
-                            $('#avatarIcon').hide();
-                            $('#avatarImg').attr('src', u.c_Image).show();
-                        }
-                    }
-                },
-                error: function () {
-                    console.log('Failed to load profile data');
-                }
-            });
+        if (!$('#userName').val().trim()) return showMsg('Username required');
+        if (!$('#fullName').val().trim()) return showMsg('Full name required');
 
-            // Preview selected image
-            $('#fileInput').change(function () {
-                var file = this.files[0];
-                if (file) {
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        $('#avatarIcon').hide();
-                        $('#avatarImg').attr('src', e.target.result).show();
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
+        if (!/^[6-9]\d{9}$/.test(mobile)) {
+            showMsg('Enter valid mobile number');
+            return false;
+        }
 
-            // Save button
-            $('#btnSave').click(function () {
-                var formData = new FormData();
-                formData.append("c_UserId",   parseInt(testUserId));
-                formData.append("c_UserName", $('#userName').val());
-                formData.append("c_FullName", $('#fullName').val());
-                formData.append("c_Mobile",   $('#mobile').val());
-                formData.append("c_Gender",   $('#gender').val());
+        return true;
+    }
 
-                // If new image selected append file, else keep existing path
-                var fileInput = $('#fileInput')[0];
-                if (fileInput.files.length > 0) {
-                    formData.append("c_ImageFile", fileInput.files[0]);
+    function doSave() {
+        if (!validateForm()) return;
+
+        var fd = new FormData();
+        fd.append("c_UserId", parseInt(testUserId));
+        fd.append("c_UserName", $('#userName').val());
+        fd.append("c_FullName", $('#fullName').val());
+        fd.append("c_Mobile", $('#mobile').val());
+        fd.append("c_Gender", $('#gender').val());
+
+        var file = $('#fileInput')[0].files[0];
+
+        if (file) fd.append("c_ImageFile", file);
+        else fd.append("c_Image", currentImagePath);
+
+        $.ajax({
+            url: 'http://localhost:5183/api/UserProfile/UpdateProfile',
+            type: 'PUT',
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("token");
+            },
+            data: fd,
+            contentType: false,
+            processData: false,
+
+            success: function (res) {
+                if (res.success) {
+                    alert("Saved");
+                    window.location.href = '/Buyer/Profile';
                 } else {
-                    formData.append("c_Image", currentImagePath);
+                    alert(res.message);
                 }
-
-                $.ajax({
-                    url: 'http://localhost:5183/api/UserProfile/UpdateProfile',
-                    type: 'PUT',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    success: function (response) {
-                        if (response.success) {
-                            alert('Profile updated successfully!');
-                            window.location.href = '@Url.Action("Profile", "Buyer")';
-                        } else {
-                            alert('Failed: ' + response.message);
-                        }
-                    },
-                    error: function (xhr) {
-                        console.log("Error:", xhr.responseText);
-                        alert('Something went wrong. Please try again.');
-                    }
-                });
-            });
-
+            },
+            error: function () {
+                alert("Error saving profile");
+            }
         });
-    </script>
+    }
+
+    (document).ready(function () {
+
+        // Load profile with JWT token
+        $.ajax({
+            url: 'http://localhost:5183/api/UserProfile/GetProfile',
+            type: 'GET',
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("token");
+            },
+            success: function (res) {
+                if (!res.success) return;
+
+                let u = res.data;
+
+                $('#userName').val(u.c_UserName);
+                $('#fullName').val(u.c_FullName);
+                $('#mobile').val(u.c_Mobile);
+                $('#gender').val(u.c_Gender);
+
+                currentImagePath = u.c_Image;
+
+                if (u.c_Image) {
+                    $('#avatarImg')
+                        .attr('src', u.c_Image.startsWith('/uploads/')
+                            ? u.c_Image
+                            : '/uploads/' + u.c_Image)
+                        .show();
+                }
+            },
+            error: function () {
+                alert("Session expired. Please login again.");
+                window.location.href = "/Auth/UserLogin";
+            }
+        });
+
+        $('#btnSaveBottom').click(doSave);
+
+        $('#fileInput').change(function () {
+            let file = this.files[0];
+            if (!file) return;
+
+            let reader = new FileReader();
+            reader.onload = e => {
+                $('#avatarImg').attr('src', e.target.result).show();
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+</script>
 }
