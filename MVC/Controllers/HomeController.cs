@@ -16,12 +16,17 @@ public class HomeController : Controller
     {
         return View();
     }
-    public IActionResult LandingpageNew()
+    // public IActionResult LandingpageNew()
+    // {
+    //     return View();
+    // }
+    
+    public IActionResult Index()
     {
         return View();
     }
-    
-    public IActionResult Index()
+
+    public IActionResult AboutUs()
     {
         return View();
     }

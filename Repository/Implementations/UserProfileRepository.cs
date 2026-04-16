@@ -143,5 +143,60 @@ namespace Repository.Implementations
             }
             return status;
         }
+
+          public async Task<int> ChangePassword(int Userid, string oldPwd, string newPwd)
+        {
+            try
+            {
+                // 1. Connection state check (Safety)
+                if (_conn.State != System.Data.ConnectionState.Open)
+                {
+                    await _conn.OpenAsync();
+                }
+
+                // 2. Fetch current hashed password
+                var cmd = new NpgsqlCommand("SELECT c_password_hash FROM t_user WHERE c_user_id = @id", _conn);
+                cmd.Parameters.AddWithValue("@id", Userid);
+
+                var dbValue = await cmd.ExecuteScalarAsync();
+
+                // Agar user ID galat hai ya password null hai
+                if (dbValue == null || dbValue == DBNull.Value)
+                {
+                    return -1; // User not found
+                }
+
+                string currentHashed = dbValue.ToString();
+
+                // 3. Verify Old Password (BCrypt check)
+                // Ensure BCrypt.Net-Next NuGet package is installed
+                bool isValid = BCrypt.Net.BCrypt.Verify(oldPwd, currentHashed);
+                if (!isValid) return 0; // Password mismatch
+
+                // 4. Update with New Hash
+                string newHashed = BCrypt.Net.BCrypt.HashPassword(newPwd);
+                var upCmd = new NpgsqlCommand("UPDATE t_user SET c_password_hash = @pwd WHERE c_user_id = @id", _conn);
+                upCmd.Parameters.AddWithValue("@pwd", newHashed);
+                upCmd.Parameters.AddWithValue("@id", Userid);
+
+                int rowsAffected = await upCmd.ExecuteNonQueryAsync();
+                return rowsAffected > 0 ? 1 : -1;
+            }
+            catch (Exception ex)
+            {
+                // Console pe check karein exact error kya hai
+                Console.WriteLine("CRITICAL ERROR: " + ex.Message);
+                throw; // Taaki API ko pata chale ki error aayi hai
+            }
+            finally
+            {
+                // Connection hamesha close hona chahiye
+                if (_conn.State == System.Data.ConnectionState.Open)
+                {
+                    await _conn.CloseAsync();
+                }
+            }
+        }
+
     }
 }

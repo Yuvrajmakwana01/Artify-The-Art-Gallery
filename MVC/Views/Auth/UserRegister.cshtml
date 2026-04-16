@@ -156,6 +156,7 @@
     /* Password wrapper */
     .pass-wrapper {
         position: relative;
+        display: block; /* Ensure full width */
     }
 
     .pass-wrapper .k-textbox,
@@ -165,7 +166,7 @@
 
     .pass-toggle {
         position: absolute;
-        right: 10px;
+        right: 8px;
         top: 50%;
         transform: translateY(-50%);
         background: none;
@@ -174,7 +175,7 @@
         color: hsl(25, 15%, 45%);
         display: flex;
         align-items: center;
-        z-index: 5;
+        z-index: 10;
         padding: 0;
         line-height: 1;
     }
@@ -501,7 +502,7 @@
                                 </svg>
                             </button>
                         </div>
-                    </div>
+                    </div>      
                 </div>
 
                 <p class="pass-hint">
@@ -565,8 +566,8 @@ $(function () {
     $("#c_FullName").kendoTextBox();
     $("#c_UserName").kendoTextBox();
     $("#c_Email").kendoTextBox();
-    $("#c_Password").kendoTextBox();
-    $("#c_ConfirmPassword").kendoTextBox();
+    $("#c_Password").kendoTextBox({clearButton: false});
+    $("#c_ConfirmPassword").kendoTextBox({clearButton: false});
 
 
     // ════════════════════════════════════════════════

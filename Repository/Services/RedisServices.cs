@@ -67,5 +67,50 @@ namespace Repository.Services
         {
             return $"{Prefix}{status.ToLower()}_{page}_{pageSize}";
         }
-    }
+
+
+            //redis service for user forgot password otp
+            // 🔹 SET OTP
+            public async Task SetOtpAsync(string email, string otp)
+            {
+                var key = $"otp:{email.ToLower().Trim()}";
+                await _db.StringSetAsync(key, otp, TimeSpan.FromMinutes(5));
+            }
+            public async Task SetOtpVerifiedAsync(string email)
+{
+    // Yahan ToLower() aur Trim() zaroor lagayein
+    var key = $"otp_verified:{email.ToLower().Trim()}"; 
+    await _db.StringSetAsync(key, "true", TimeSpan.FromMinutes(10));
+}
+
+           // 🔹 CHECK VERIFIED FLAG
+public async Task<bool> IsOtpVerifiedAsync(string email)
+{
+    // Yahan bhi ToLower() aur Trim() lagayein
+    var key = $"otp_verified:{email.ToLower().Trim()}";
+    var val = await _db.StringGetAsync(key);
+    return val == "true";
+}
+
+            // 🔹 GET OTP
+            public async Task<string?> GetOtpAsync(string email)
+            {
+                var key = $"otp:{email.ToLower().Trim()}";
+                return await _db.StringGetAsync(key);
+            }
+
+            // 🔹 DELETE OTP
+            public async Task DeleteOtpAsync(string email)
+            {
+                var key = $"otp:{email.ToLower().Trim()}";
+                await _db.KeyDeleteAsync(key);
+            }
+            
+            // 🔹 DELETE VERIFIED FLAG (Cleanup ke waqt kaam aayega)
+            public async Task DeleteVerifiedFlagAsync(string email)
+            {
+                var key = $"otp_verified:{email.ToLower().Trim()}";
+                await _db.KeyDeleteAsync(key);
+            }
+        }
 }

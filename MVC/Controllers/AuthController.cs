@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
+using Repository.Models;
 
 namespace MVC.Controllers
 {
@@ -30,6 +31,30 @@ namespace MVC.Controllers
             ViewBag.BackgroundImageUrl = "https://yourwebsite.com/api/images/auth/forgot-password-bg";
             return View();
         }
+       
+
+         public IActionResult UserVerifyOtp(t_VerifyOtp model)
+        {
+            ViewBag.BackgroundImageUrl = "https://yourwebsite.com/api/images/auth/forgot-password-bg";
+            return View(model);
+        }
+
+         public IActionResult UserResetPassword(string email, string otp)
+        {
+            ViewBag.BackgroundImageUrl = "https://yourwebsite.com/api/images/auth/forgot-password-bg";
+            // Agar values missing hain toh wapas forgot password pe bhej sakte hain (Security check)
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(otp))
+            {
+                return RedirectToAction("UserForgotPassword");
+            }
+
+            var model = new Repository.Models.t_ResetPassword
+            {
+                c_Email = email,
+                c_Otp = otp
+            };
+            return View(model);
+        }
 
         public IActionResult UserRegister()
         {
@@ -39,6 +64,8 @@ namespace MVC.Controllers
         public IActionResult UserLogin()
         {
             ViewBag.BackgroundImageUrl = "https://yourwebsite.com/api/images/auth/login-bg";
+            // HttpContext.Session.SetString("JWToken", token);
+            // Response.Cookies.Append("token", token);
             return View();
         }
 

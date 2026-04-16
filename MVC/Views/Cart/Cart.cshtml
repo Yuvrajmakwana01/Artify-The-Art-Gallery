@@ -1,0 +1,828 @@
+@{
+    ViewData["Title"] = "Cart | Artify";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+    <style>
+            :root {
+                --background: hsl(36, 33%, 97%);
+                --foreground: hsl(30, 10%, 15%);
+                --card: hsl(36, 30%, 95%);
+                --card-white: #ffffff;
+                --primary: hsl(30, 45%, 25%);
+                --primary-foreground: hsl(36, 33%, 97%);
+                --secondary: hsl(32, 25%, 88%);
+                --muted: hsl(30, 10%, 45%);
+                --accent: hsl(38, 60%, 55%);
+                --accent-foreground: hsl(30, 10%, 10%);
+                --border: hsl(32, 20%, 85%);
+                --wishlist: #DC4A4A;
+            }
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Inter', sans-serif;
+                background: var(--background);
+                color: var(--foreground);
+                line-height: 1.6;
+            }
+
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+                font-family: 'Playfair Display', serif;
+            }
+
+            .navbar {
+                position: sticky;
+                top: 0;
+                z-index: 50;
+                background: hsla(36, 33%, 97%, 0.85);
+                backdrop-filter: blur(14px);
+                border-bottom: 1px solid var(--border);
+            }
+
+            .navbar-inner {
+                max-width: 1200px;
+                margin: 0 auto;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 1rem 1.5rem;
+            }
+
+            .logo-wrap {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+            }
+
+            .back-btn {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                border: none;
+                background: transparent;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--muted);
+                text-decoration: none;
+                transition: all 0.2s;
+            }
+
+            .back-btn:hover {
+                background: var(--secondary);
+                color: var(--foreground);
+            }
+
+            .logo {
+                font-family: 'Playfair Display', serif;
+                font-size: 1.875rem;
+                font-weight: 700;
+                color: var(--foreground);
+                text-decoration: none;
+                letter-spacing: -0.025em;
+                transition: color 0.3s;
+            }
+
+            .logo:hover {
+                color: var(--accent);
+            }
+
+            .nav-links {
+                display: flex;
+                gap: 2rem;
+            }
+
+            .nav-links a {
+                font-size: 0.875rem;
+                font-weight: 500;
+                color: var(--muted);
+                text-decoration: none;
+                transition: color 0.3s;
+                position: relative;
+                padding-bottom: 2px;
+            }
+
+            .nav-links a::after {
+                content: '';
+                position: absolute;
+                bottom: -2px;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: var(--accent);
+                transform: scaleX(0);
+                transition: transform 0.25s;
+            }
+
+            .nav-links a:hover {
+                color: var(--foreground);
+            }
+
+            .nav-links a:hover::after {
+                transform: scaleX(1);
+            }
+
+            .nav-actions {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .icon-btn {
+                position: relative;
+                width: 38px;
+                height: 38px;
+                border-radius: 50%;
+                border: none;
+                background: transparent;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--muted);
+                transition: all 0.2s;
+                text-decoration: none;
+            }
+
+            .icon-btn:hover {
+                background: var(--secondary);
+                color: var(--foreground);
+            }
+
+            .badge {
+                position: absolute;
+                top: -2px;
+                right: -2px;
+                min-width: 18px;
+                height: 18px;
+                padding: 0 4px;
+                border-radius: 9999px;
+                background: var(--accent);
+                color: #fff;
+                font-size: 10px;
+                font-weight: 700;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .badge.zero {
+                display: none;
+            }
+
+            .avatar-btn {
+                width: 38px;
+                height: 38px;
+                border-radius: 50%;
+                border: none;
+                background: var(--primary);
+                color: var(--primary-foreground);
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .page {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 2.5rem 1.5rem 4rem;
+            }
+
+            .page-header {
+                margin-bottom: 2.5rem;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+                font-weight: 700;
+            }
+
+            .page-header p {
+                font-size: 14px;
+                color: var(--muted);
+                margin-top: 4px;
+            }
+
+            .empty-state {
+                text-align: center;
+                padding: 80px 24px;
+            }
+
+            .empty-state svg {
+                color: var(--muted);
+                opacity: 0.25;
+                margin-bottom: 20px;
+            }
+
+            .empty-state h2 {
+                font-size: 1.4rem;
+                font-weight: 600;
+                color: var(--muted);
+            }
+
+            .empty-state p {
+                font-size: 14px;
+                color: var(--muted);
+                margin-top: 8px;
+            }
+
+            .empty-state a {
+                display: inline-block;
+                margin-top: 24px;
+                padding: 12px 28px;
+                border-radius: 8px;
+                background: var(--primary);
+                color: var(--primary-foreground);
+                text-decoration: none;
+                font-size: 14px;
+                font-weight: 600;
+                transition: opacity 0.2s;
+            }
+
+            .empty-state a:hover {
+                opacity: 0.88;
+            }
+
+            .cart-layout {
+                display: grid;
+                grid-template-columns: 1fr 360px;
+                gap: 28px;
+                align-items: start;
+            }
+
+            .cart-items {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .cart-item {
+                background: var(--card-white);
+                border-radius: 1rem;
+                border: 1px solid var(--border);
+                display: flex;
+                gap: 16px;
+                overflow: hidden;
+                transition: box-shadow 0.2s;
+                animation: fade-up 0.4s ease-out forwards;
+                opacity: 0;
+            }
+
+            .cart-item:hover {
+                box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+            }
+
+            .cart-item-img {
+                width: 120px;
+                flex-shrink: 0;
+                aspect-ratio: 4/5;
+                overflow: hidden;
+                cursor: pointer;
+            }
+
+            .cart-item-img img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+                transition: transform 0.4s;
+            }
+
+            .cart-item:hover .cart-item-img img {
+                transform: scale(1.05);
+            }
+
+            .cart-item-info {
+                flex: 1;
+                padding: 16px 16px 16px 0;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
+            .cart-item-top h3 {
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            .cart-item-top h3:hover {
+                color: var(--primary);
+            }
+
+            .cart-item-top .artist {
+                font-size: 13px;
+                color: var(--muted);
+                margin-top: 3px;
+            }
+
+            .cart-item-top .cat {
+                display: inline-block;
+                margin-top: 8px;
+                padding: 3px 10px;
+                border-radius: 9999px;
+                background: hsla(38, 60%, 55%, 0.12);
+                color: var(--accent);
+                font-size: 12px;
+                font-weight: 500;
+            }
+
+            .cart-item-bottom {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-top: 16px;
+            }
+
+            .cart-item-price {
+                font-size: 1.2rem;
+                font-weight: 700;
+            }
+
+            .remove-btn {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 8px 14px;
+                border-radius: 8px;
+                border: 1.5px solid var(--border);
+                background: transparent;
+                font-size: 13px;
+                font-weight: 500;
+                font-family: 'Inter', sans-serif;
+                cursor: pointer;
+                color: var(--muted);
+                transition: all 0.2s;
+            }
+
+            .remove-btn:hover {
+                border-color: var(--wishlist);
+                color: var(--wishlist);
+                background: rgba(220, 74, 74, 0.04);
+            }
+
+            .order-summary {
+                background: var(--card-white);
+                border-radius: 1rem;
+                border: 1px solid var(--border);
+                padding: 24px;
+                position: sticky;
+                top: 88px;
+            }
+
+            .order-summary h2 {
+                font-size: 1.1rem;
+                font-weight: 700;
+                margin-bottom: 20px;
+            }
+
+            .summary-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 14px;
+                margin-bottom: 12px;
+            }
+
+            .summary-row span:first-child {
+                color: var(--muted);
+            }
+
+            .summary-row.total {
+                padding-top: 16px;
+                border-top: 1px solid var(--border);
+                margin-top: 4px;
+                font-size: 16px;
+                font-weight: 700;
+            }
+
+            .summary-row.total span:first-child {
+                color: var(--foreground);
+            }
+
+            .checkout-btn {
+                width: 100%;
+                margin-top: 20px;
+                padding: 15px;
+                border-radius: 10px;
+                border: none;
+                background: var(--primary);
+                color: var(--primary-foreground);
+                font-size: 15px;
+                font-weight: 600;
+                font-family: 'Inter', sans-serif;
+                cursor: pointer;
+                transition: opacity 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .checkout-btn:hover {
+                opacity: 0.88;
+            }
+
+            .continue-btn {
+                width: 100%;
+                margin-top: 10px;
+                padding: 13px;
+                border-radius: 10px;
+                border: 1.5px solid var(--border);
+                background: transparent;
+                color: var(--foreground);
+                font-size: 14px;
+                font-weight: 500;
+                font-family: 'Inter', sans-serif;
+                cursor: pointer;
+                transition: all 0.2s;
+                text-decoration: none;
+                display: block;
+                text-align: center;
+            }
+
+            .continue-btn:hover {
+                border-color: var(--accent);
+                color: var(--primary);
+            }
+
+            .promo-row {
+                display: flex;
+                gap: 8px;
+                margin-bottom: 16px;
+            }
+
+            .promo-input {
+                flex: 1;
+                padding: 10px 14px;
+                border-radius: 8px;
+                border: 1.5px solid var(--border);
+                font-size: 13px;
+                font-family: 'Inter', sans-serif;
+                outline: none;
+                background: var(--background);
+                transition: border-color 0.2s;
+                color: var(--foreground);
+            }
+
+            .promo-input:focus {
+                border-color: var(--accent);
+            }
+
+            .promo-btn {
+                padding: 10px 16px;
+                border-radius: 8px;
+                border: 1.5px solid var(--border);
+                background: transparent;
+                font-size: 13px;
+                font-weight: 600;
+                font-family: 'Inter', sans-serif;
+                cursor: pointer;
+                transition: all 0.2s;
+                color: var(--foreground);
+            }
+
+            .promo-btn:hover {
+                border-color: var(--accent);
+                background: hsla(38, 60%, 55%, 0.07);
+            }
+
+            .loading-state {
+                text-align: center;
+                padding: 4rem 1.5rem;
+                color: var(--muted);
+            }
+
+            .loading-spinner {
+                display: inline-block;
+                width: 36px;
+                height: 36px;
+                border: 3px solid var(--border);
+                border-top-color: var(--accent);
+                border-radius: 50%;
+                animation: spin 0.8s linear infinite;
+                margin-bottom: 1rem;
+            }
+
+            @@keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            @@keyframes fade-up {
+                from {
+                    opacity: 0;
+                    transform: translateY(14px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @@media(max-width:900px) {
+                .cart-layout {
+                    grid-template-columns: 1fr;
+                }
+
+                .order-summary {
+                    position: static;
+                }
+            }
+
+            @@media(max-width:768px) {
+                .nav-links {
+                    display: none;
+                }
+            }
+
+            @@media(max-width:480px) {
+                .cart-item-img {
+                    width: 90px;
+                }
+            }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-inner">
+            <div class="logo-wrap">
+                <a href="javascript:history.back()" class="back-btn" title="Back">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12" />
+                        <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                </a>
+                <a href="/Buyer/ExploreArt" class="logo">Artify</a>
+            </div>
+            <div class="nav-links">
+                <a href="/Buyer/ExploreArt">Explore Arts</a>
+                <a href="#">Categories</a>
+                <a href="#">Trending</a>
+            </div>
+            <div class="nav-actions">
+                <a href="/Wishlist" class="icon-btn" title="Wishlist">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                    </svg>
+                    <span class="badge zero" id="wishlistBadge">0</span>
+                </a>
+                <a href="/Cart" class="icon-btn" title="Cart">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1" />
+                        <circle cx="20" cy="21" r="1" />
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                    </svg>
+                    <span class="badge zero" id="cartBadge">0</span>
+                </a>
+                <button class="avatar-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page">
+        <div class="page-header">
+            <h1>My Cart</h1>
+            <p id="countText">Loading...</p>
+        </div>
+        <div id="content">
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading your cart...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+            // ── API base URL ──────────────────────────────────────────────────────
+            var API_BASE = 'http://localhost:5183';
+
+            // ─── Helpers ──────────────────────────────────────────────────────────
+            var allArtworks = {};
+            
+            function isLoggedIn() {
+                const token = localStorage.getItem("token");
+                return token !== null && token !== "";
+            }
+            function requireLogin(returnUrl) {
+                window.location.href = `/Auth/UserLogin?returnUrl=${returnUrl}`;
+            }
+
+            // ── Check login when Cart page loads ──────────────────────
+            document.addEventListener('DOMContentLoaded', function () {
+                if (!isLoggedIn()) {
+                    requireLogin('/Cart');
+                    return;
+                }
+                loadCartArtworks(); // your existing function to fetch cart from API
+            });
+
+            function imageUrl(path) {
+                if (!path) return '';
+                if (path.startsWith('http')) return path;
+                return window.location.origin + path;
+            }
+
+            const getCart = () => { try { return new Set(JSON.parse(localStorage.getItem('artify_cart') || '[]')); } catch { return new Set(); } }; const getWishlist = () => { try { return new Set(JSON.parse(sessionStorage.getItem('artify_wishlist') || '[]')); } catch { return new Set(); } };
+            const saveCart = s => localStorage.setItem('artify_cart', JSON.stringify([...s]));
+            function updateBadges() {
+                const wSize = getWishlist().size, cSize = getCart().size;
+                const wb = document.getElementById('wishlistBadge'), cb = document.getElementById('cartBadge');
+                wb.textContent = wSize; wb.className = 'badge' + (wSize === 0 ? ' zero' : '');
+                cb.textContent = cSize; cb.className = 'badge' + (cSize === 0 ? ' zero' : '');
+            }
+
+            function removeFromCart(artworkId) {
+                const ct = getCart();
+                ct.delete(artworkId);
+                saveCart(ct);
+                updateBadges();
+                render();
+            }
+
+            function goToDetail(artworkId) {
+                window.location.href = '/Buyer/ArtworkDetail/' + artworkId;
+            }
+
+            function goToCheckout() {
+                const ct = getCart();
+                const items = [...ct].map(id => allArtworks[id]).filter(Boolean);
+                if (items.length === 0) return;
+
+                const checkoutCart = items.map(a => ({
+                    ArtworkId: a.artworkId,
+                    name: a.title,
+                    artist: a.artistName,
+                    price: parseFloat(a.price),
+                    previewUrl: imageUrl(a.previewPath),
+                    icon: null
+                }));
+
+                sessionStorage.setItem('artify_checkout_cart', JSON.stringify(checkoutCart));
+                window.location.href = '/Payment/Payment';
+            }
+
+            function render() {
+                const ct = getCart();
+                const items = [...ct].map(id => allArtworks[id]).filter(Boolean);
+                const total = items.reduce((s, a) => s + parseFloat(a.price), 0);
+
+                document.getElementById('countText').textContent = items.length + ' item' + (items.length === 1 ? '' : 's');
+
+                if (items.length === 0) {
+                    document.getElementById('content').innerHTML = `
+                            <div class="empty-state">
+                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                                </svg>
+                                <h2>Your cart is empty</h2>
+                                <p>Add artworks you love and they'll appear here</p>
+                                <a href="/Buyer/ExploreArt">Explore Art</a>
+                            </div>`;
+                    return;
+                }
+
+                document.getElementById('content').innerHTML = `
+                        <div class="cart-layout">
+                            <div class="cart-items" id="cartItems"></div>
+                            <div class="order-summary">
+                                <h2>Order Summary</h2>
+                                <div class="promo-row">
+                                    <input type="text" class="promo-input" placeholder="Promo code" />
+                                    <button class="promo-btn">Apply</button>
+                                </div>
+                                <div class="summary-row">
+                                    <span>${items.length} item${items.length === 1 ? '' : 's'}</span>
+                                    <span>&#8377;${total.toLocaleString('en-IN')}</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Shipping</span>
+                                    <span style="color:#22c55e;font-weight:600;">Free</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Tax (18% GST)</span>
+                                    <span>&#8377;${Math.round(total * 0.18).toLocaleString('en-IN')}</span>
+                                </div>
+                                <div class="summary-row total">
+                                    <span>Total</span>
+                                    <span>&#8377;${Math.round(total * 1.18).toLocaleString('en-IN')}</span>
+                                </div>
+                                <button class="checkout-btn" onclick="goToCheckout()">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                                    </svg>
+                                    Proceed to Checkout
+                                </button>
+                                <a href="/Buyer/ExploreArt" class="continue-btn">Continue Shopping</a>
+                            </div>
+                        </div>`;
+
+                document.getElementById('cartItems').innerHTML = items.map((a, i) => `
+                        <div class="cart-item" style="animation-delay:${i * 0.06}s">
+                            <div class="cart-item-img" onclick="goToDetail(${a.artworkId})">
+                                <img src="${imageUrl(a.previewPath)}" alt="${a.title}" loading="lazy" />
+                            </div>
+                            <div class="cart-item-info">
+                                <div class="cart-item-top">
+                                    <h3 onclick="goToDetail(${a.artworkId})">${a.title}</h3>
+                                    <p class="artist">by ${a.artistName}</p>
+                                    <span class="cat">${a.categoryName}</span>
+                                </div>
+                                <div class="cart-item-bottom">
+                                    <span class="cart-item-price">&#8377;${parseFloat(a.price).toLocaleString('en-IN')}</span>
+                                    <button class="remove-btn" onclick="removeFromCart(${a.artworkId})">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="3 6 5 6 21 6"/>
+                                            <path d="M19 6l-1 14H6L5 6"/>
+                                            <path d="M10 11v6"/><path d="M14 11v6"/>
+                                            <path d="M9 6V4h6v2"/>
+                                        </svg>
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>`).join('');
+            }
+
+            // ─── Fetch artworks from API ───────────────────────────────────────────
+            async function loadCartArtworks() {
+                const ct = getCart();
+
+                if (ct.size === 0) {
+                    document.getElementById('countText').textContent = '0 items';
+                    document.getElementById('content').innerHTML = `
+                <div class="empty-state">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                    </svg>
+                    <h2>Your cart is empty</h2>
+                    <p>Add artworks you love and they'll appear here</p>
+                    <a href="/Buyer/ExploreArt">Explore Art</a>
+                </div>`;
+                    return;
+                }
+
+                try {
+                    const token = localStorage.getItem("token"); // ✅ ADD THIS
+
+                    const res = await fetch(API_BASE + '/api/artwork', {
+                        headers: {
+                            'Authorization': `Bearer ${token}` // ✅ ADD THIS
+                        }
+                    });
+
+                    if (!res.ok) throw new Error('Server error');
+
+                    const data = await res.json();
+                    data.forEach(a => { allArtworks[a.artworkId] = a; });
+
+                    render();
+                } catch (err) {
+                    console.error('Failed to load artworks:', err);
+                    document.getElementById('content').innerHTML =
+                        '<div class="loading-state"><p>Failed to load cart items. Please try again.</p></div>';
+                }
+            }
+            // ─── Init ─────────────────────────────────────────────────────────────
+            updateBadges();
+            loadCartArtworks();
+    </script>
+</body>
+
+</html>

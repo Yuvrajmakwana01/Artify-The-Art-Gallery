@@ -3,216 +3,546 @@
     Layout = "~/Views/Shared/_BuyerLayout.cshtml";
 }
 
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+
 <style>
+    /* ══════════════════════════════════════════════════════════════
+       ARTIFY PROFILE — LUXURY EDITION
+       ══════════════════════════════════════════════════════════════ */
+
     :root {
-        --bg: hsl(40, 33%, 96%); --fg: hsl(30, 10%, 15%); --card: hsl(40, 30%, 98%);
-        --primary: hsl(30, 30%, 30%); --primary-fg: hsl(40, 33%, 96%);
-        --muted: hsl(35, 20%, 92%); --muted-fg: hsl(30, 8%, 50%);
-        --accent: hsl(30, 40%, 82%); --accent-fg: hsl(30, 15%, 20%);
-        --border: hsl(35, 20%, 87%); --warm: hsl(32, 45%, 70%);
-        --warm-fg: hsl(30, 15%, 20%); --success: hsl(145, 50%, 40%);
-        --destructive: hsl(0, 65%, 55%);
+        --canvas:        #f5f0ea;
+        --canvas-2:      #ffffff;
+        --canvas-3:      #ede7df;
+        --surface:       #faf7f3;
+        --surface-2:     #f2ede5;
+        --surface-glass: rgba(255,255,255,0.72);
+        --border:        rgba(0,0,0,0.06);
+        --border-2:      rgba(0,0,0,0.10);
+        --gold:          #9a6324;
+        --gold-bright:   #c08b3f;
+        --gold-light:    #dbb978;
+        --gold-dim:      rgba(154,99,36,0.08);
+        --gold-ring:     rgba(154,99,36,0.18);
+        --gold-glow:     rgba(192,139,63,0.35);
+        --text:          #1c1814;
+        --text-2:        #5e554a;
+        --text-3:        #9e9488;
+        --verified:      #15803d;
+        --verified-bg:   #dcfce7;
+        --verified-bdr:  #86efac;
+        --radius-sm:     10px;
+        --radius-md:     16px;
+        --radius-lg:     24px;
+        --radius-xl:     36px;
+        --shadow-sm:     0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+        --shadow-md:     0 4px 16px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.03);
+        --shadow-lg:     0 12px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+        --shadow-gold:   0 8px 32px rgba(154,99,36,0.15);
     }
-    .profile-page { max-width: 900px; margin: 0 auto; font-family: 'Inter', sans-serif; }
-    .profile-page h1, .profile-page h2, .profile-page h3, .profile-page h4 { font-family: 'Playfair Display', serif; }
-    .profile-hero { background: linear-gradient(135deg, hsla(30,30%,30%,0.08), hsla(30,40%,82%,0.3), hsla(32,45%,70%,0.15)); border-radius: 16px; padding: 48px; position: relative; overflow: hidden; margin-bottom: 32px; }
-    .profile-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 50%, hsla(32,45%,70%,0.15), transparent 60%); }
-    .profile-hero-inner { position: relative; display: flex; align-items: flex-start; gap: 40px; }
-    .profile-avatar { position: relative; flex-shrink: 0; }
-    .profile-avatar-circle { width: 112px; height: 112px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), hsla(30,30%,30%,0.7)); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border: 4px solid var(--card); overflow: hidden; }
-    .profile-avatar-circle .k-icon { font-size: 40px; color: var(--primary-fg); }
-    .profile-avatar-cam { position: absolute; bottom: -4px; right: -4px; width: 36px; height: 36px; border-radius: 50%; background: var(--card); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; }
-    .profile-avatar-cam:hover { transform: scale(1.1); }
-    .profile-avatar-cam .k-icon { font-size: 16px; color: var(--fg); }
-    .profile-info { flex: 1; }
-    .profile-name { font-size: 32px; font-weight: 700; color: var(--fg); margin: 0; }
-    .profile-email { color: var(--muted-fg); margin-top: 4px; font-size: 14px; }
-    .profile-badges { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
-    .profile-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .badge-collector { background: hsla(30,30%,30%,0.1); color: var(--primary); border: 1px solid hsla(30,30%,30%,0.2); }
-    .badge-verified { background: hsla(145,50%,40%,0.1); color: var(--success); border: 1px solid hsla(145,50%,40%,0.2); }
-    .profile-stats { display: flex; gap: 32px; margin-top: 24px; }
-    .profile-stat { text-align: center; }
-    .profile-stat-value { font-size: 24px; font-weight: 700; color: var(--fg); }
-    .profile-stat-label { font-size: 12px; color: var(--muted-fg); }
-    .stat-divider { width: 1px; height: 40px; background: var(--border); align-self: center; }
-    .profile-edit-btn { padding: 8px 20px; border-radius: 20px; border: 1px solid var(--border); background: var(--card); color: var(--fg); font-size: 14px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; flex-shrink: 0; text-decoration: none; }
-    .profile-edit-btn:hover { background: var(--muted); }
-    .profile-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
-    .profile-card { background: var(--card); border: 1px solid hsla(35,20%,87%,0.6); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    .card-header { background: hsla(30,40%,82%,0.2); border-bottom: 1px solid hsla(35,20%,87%,0.4); padding: 16px 24px; display: flex; align-items: center; gap: 8px; }
-    .card-header h3 { font-size: 18px; font-weight: 600; color: var(--fg); margin: 0; }
-    .card-header .k-icon { font-size: 20px; color: var(--primary); }
-    .card-body { padding: 24px; }
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .info-item-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); margin-bottom: 4px; }
-    .info-item-value { font-size: 14px; font-weight: 500; color: var(--fg); }
-    .card-divider { height: 1px; background: var(--border); margin: 20px 0; }
-    .style-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-    .style-tag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; background: hsla(32,45%,70%,0.2); color: var(--warm-fg); border: 1px solid hsla(32,45%,70%,0.3); }
-    .quick-link { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; text-decoration: none; transition: background 0.2s; margin-bottom: 8px; }
-    .quick-link:hover { background: hsla(30,40%,82%,0.4); }
-    .quick-link-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-    .quick-link-icon.orders { background: hsla(30,30%,30%,0.1); }
-    .quick-link-icon.orders .k-icon { color: var(--primary); }
-    .quick-link-icon.wishlist { background: hsla(0,65%,55%,0.1); }
-    .quick-link-icon.wishlist .k-icon { color: var(--destructive); }
-    .quick-link-text strong { display: block; font-size: 14px; color: var(--fg); font-weight: 500; }
-    .quick-link-text span { font-size: 12px; color: var(--muted-fg); }
+
+    body { font-family: 'DM Sans', sans-serif; background: var(--canvas); color: var(--text); }
+
+    .profile-page { max-width: 940px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+
+    /* ── COVER BANNER ── */
+    .cover-banner {
+        position: relative; height: 220px;
+        border-radius: var(--radius-xl); overflow: hidden;
+        background: linear-gradient(135deg, #1c1814 0%, #2c221a 40%, #3d2e1e 70%, #1c1814 100%);
+        box-shadow: var(--shadow-lg);
+    }
+    .cover-banner::before {
+        content: ''; position: absolute; inset: 0;
+        background:
+            radial-gradient(ellipse 80% 120% at 10% 60%, rgba(192,139,63,0.30) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 100% at 85% 20%, rgba(219,185,120,0.18) 0%, transparent 55%),
+            radial-gradient(ellipse 40% 60% at 50% 80%, rgba(154,99,36,0.12) 0%, transparent 50%);
+    }
+    .cover-banner::after {
+        content: ''; position: absolute; inset: 0;
+        background-image:
+            repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(255,255,255,0.018) 40px, rgba(255,255,255,0.018) 41px),
+            repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(255,255,255,0.012) 40px, rgba(255,255,255,0.012) 41px);
+    }
+    .cover-noise {
+        position: absolute; inset: 0; opacity: 0.03;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+        pointer-events: none;
+    }
+    .cover-fade {
+        position: absolute; bottom: 0; left: 0; right: 0; height: 100px;
+        background: linear-gradient(to bottom, transparent, rgba(245,240,234,0.5));
+        pointer-events: none;
+    }
+    .cover-ornament {
+        position: absolute; left: 32px; top: 50%;
+        transform: translateY(-50%); z-index: 2; opacity: 0.4;
+    }
+    .cover-ornament span {
+        font-family: 'Playfair Display', serif;
+        font-size: 6rem; font-weight: 800; font-style: italic;
+        color: var(--gold-light); line-height: 1; display: block; user-select: none;
+    }
+    .cover-badge {
+        position: absolute; top: 22px; right: 24px;
+        background: rgba(28,24,20,0.65);
+        border: 1px solid rgba(255,255,255,0.12);
+        backdrop-filter: blur(16px) saturate(1.2);
+        -webkit-backdrop-filter: blur(16px) saturate(1.2);
+        border-radius: 100px; padding: 7px 16px 7px 12px;
+        display: flex; align-items: center; gap: 8px;
+        font-size: .72rem; font-weight: 500;
+        color: rgba(255,255,255,0.75); letter-spacing: .6px; z-index: 2;
+    }
+    .cover-badge .dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: #4ade80;
+        box-shadow: 0 0 8px #4ade80, 0 0 16px rgba(74,222,128,0.3);
+        flex-shrink: 0;
+        animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @@keyframes pulse-dot {
+        0%, 100% { box-shadow: 0 0 8px #4ade80, 0 0 16px rgba(74,222,128,0.3); }
+        50% { box-shadow: 0 0 12px #4ade80, 0 0 24px rgba(74,222,128,0.5); }
+    }
+
+    /* ── AVATAR ANCHOR ── */
+    .avatar-anchor {
+        position: relative; z-index: 10;
+        display: flex; align-items: flex-end; gap: 1.75rem;
+        padding: 0 2.5rem; margin-top: -50px; margin-bottom: 2rem;
+    }
+    .avatar-ring {
+        width: 130px; height: 130px; border-radius: 50%;
+        padding: 4px;
+        background: linear-gradient(145deg, var(--gold-bright) 0%, var(--gold-light) 50%, var(--gold) 100%);
+        flex-shrink: 0;
+        box-shadow: 0 0 0 5px var(--canvas), var(--shadow-gold);
+        position: relative;
+        transition: transform 0.3s ease;
+    }
+    .avatar-ring:hover { transform: scale(1.03); }
+    .avatar-ring img {
+        width: 100%; height: 100%; border-radius: 50%;
+        object-fit: cover; border: 4px solid var(--canvas-2);
+        display: block; background: var(--canvas-3);
+    }
+    .avatar-ring .avatar-fallback {
+        width: 100%; height: 100%; border-radius: 50%;
+        background: linear-gradient(135deg, #2c221a, #5a4430);
+        border: 4px solid var(--canvas-2);
+        display: flex; align-items: center; justify-content: center;
+    }
+    .avatar-ring .avatar-fallback i { font-size: 2.8rem; color: rgba(255,255,255,0.5); }
+    .avatar-cam {
+        position: absolute; bottom: 4px; right: 4px;
+        width: 36px; height: 36px; border-radius: 50%;
+        background: var(--canvas-2); border: 2px solid var(--border-2);
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: var(--shadow-md); cursor: pointer;
+        transition: all 0.25s ease;
+    }
+    .avatar-cam:hover {
+        background: var(--gold); border-color: var(--gold);
+        transform: scale(1.1);
+    }
+    .avatar-cam:hover i { color: #fff; }
+    .avatar-cam i { font-size: .82rem; color: var(--text-2); transition: color 0.25s; }
+
+    .avatar-meta { padding-bottom: 14px; flex: 1; min-width: 0; }
+    .avatar-meta h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.2rem; font-weight: 700; color: var(--text);
+        margin: 0 0 4px; line-height: 1.15;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .avatar-meta .handle {
+        font-size: .85rem; color: var(--gold); font-weight: 500;
+        letter-spacing: .4px; display: inline-block;
+    }
+    .avatar-meta .verified-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        font-size: .7rem; font-weight: 600;
+        background: var(--verified-bg); color: var(--verified);
+        border: 1px solid var(--verified-bdr);
+        border-radius: 100px; padding: 4px 12px;
+        margin-left: 10px; vertical-align: middle;
+    }
+    .edit-btn { margin-left: auto; padding-bottom: 14px; flex-shrink: 0; }
+    .btn-edit {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 12px 26px; background: var(--text);
+        border: none; border-radius: var(--radius-md);
+        color: #fff; font-family: 'DM Sans', sans-serif;
+        font-size: .84rem; font-weight: 600;
+        text-decoration: none; letter-spacing: .3px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;
+        box-shadow: var(--shadow-sm);
+    }
+    .btn-edit:hover {
+        background: var(--gold); color: #fff;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-gold);
+    }
+    .btn-edit:active { transform: translateY(0); }
+
+    /* ── STATS STRIP ── */
+    .stats-strip {
+        display: grid; grid-template-columns: repeat(3, 1fr);
+        gap: 0; 
+        background: var(--surface-glass);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden; margin-bottom: 2.25rem;
+        box-shadow: var(--shadow-md);
+    }
+    .stat-cell {
+        padding: 1.5rem 1.25rem; text-align: center;
+        border-right: 1px solid var(--border);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    .stat-cell:last-child { border-right: none; }
+    .stat-cell:hover { background: var(--gold-dim); }
+    .stat-cell:hover .stat-value { color: var(--gold); }
+    .stat-value {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.6rem; font-weight: 600; color: var(--text);
+        line-height: 1.2; margin-bottom: 6px;
+        transition: color 0.3s;
+        word-break: break-word;
+    }
+    .stat-label {
+        font-size: .65rem; font-weight: 700; letter-spacing: 2px;
+        text-transform: uppercase; color: var(--text-3);
+    }
+
+    /* ── TWO-COLUMN LAYOUT ── */
+    .content-cols { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 1.5rem; }
+
+    /* ── PANELS ── */
+    .panel {
+        background: var(--canvas-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        transition: box-shadow 0.3s ease, transform 0.3s ease;
+    }
+    .panel:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+    .panel-head {
+        padding: 1.25rem 1.75rem;
+        border-bottom: 1px solid var(--border);
+        display: flex; align-items: center; gap: 10px;
+        background: linear-gradient(180deg, var(--surface) 0%, var(--canvas-2) 100%);
+    }
+    .panel-head .ph-icon {
+        width: 32px; height: 32px; border-radius: var(--radius-sm);
+        background: linear-gradient(135deg, var(--gold-dim), rgba(154,99,36,0.15));
+        display: flex; align-items: center; justify-content: center;
+        color: var(--gold); font-size: .82rem; flex-shrink: 0;
+    }
+    .panel-head h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.05rem; font-weight: 600; color: var(--text);
+        margin: 0; letter-spacing: .2px;
+    }
+    .panel-body { padding: 1.75rem; }
+
+    /* ── INFO ROWS ── */
+    .info-row {
+        display: flex; flex-direction: column; gap: 5px;
+        padding: 1.1rem 0;
+        border-bottom: 1px solid var(--border);
+        transition: padding-left 0.2s;
+    }
+    .info-row:hover { padding-left: 8px; }
+    .info-row:first-child { padding-top: 0; }
+    .info-row:last-child  { border-bottom: none; padding-bottom: 0; }
+    .info-label {
+        font-size: .65rem; font-weight: 700; letter-spacing: 2px;
+        text-transform: uppercase; color: var(--text-3);
+    }
+    .info-value {
+        font-size: .94rem; color: var(--text); font-weight: 400;
+        word-break: break-word; line-height: 1.5;
+    }
+    .info-value.empty { color: var(--text-3); font-style: italic; font-weight: 300; }
+
+    /* ── QUICK LINKS ── */
+    .quick-link-pill {
+        display: flex; align-items: center; gap: 14px;
+        padding: 14px 16px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        margin-bottom: 10px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        position: relative;
+        overflow: hidden;
+    }
+    .quick-link-pill::before {
+        content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+        width: 0; background: linear-gradient(135deg, var(--gold-dim), rgba(154,99,36,0.05));
+        transition: width 0.3s ease;
+    }
+    .quick-link-pill:hover::before { width: 100%; }
+    .quick-link-pill:last-child { margin-bottom: 0; }
+    .quick-link-pill:hover {
+        border-color: var(--gold-bright);
+        transform: translateX(4px);
+        box-shadow: 0 4px 16px var(--gold-ring);
+    }
+    .ql-icon {
+        width: 36px; height: 36px; border-radius: var(--radius-sm);
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0; position: relative; z-index: 1;
+        font-size: .9rem;
+        transition: transform 0.3s;
+    }
+    .quick-link-pill:hover .ql-icon { transform: scale(1.1); }
+    .ql-icon.orders   { background: linear-gradient(135deg, var(--gold-dim), rgba(154,99,36,0.15)); color: var(--gold); }
+    .ql-icon.wishlist { background: linear-gradient(135deg, rgba(220,74,74,.08), rgba(220,74,74,.15)); color: #dc4a4a; }
+    .ql-text { position: relative; z-index: 1; }
+    .ql-text strong { display: block; font-size: .9rem; color: var(--text); font-weight: 600; }
+    .ql-text span   { font-size: .76rem; color: var(--text-3); }
+    .ql-arrow {
+        margin-left: auto; color: var(--text-3); font-size: .85rem;
+        transition: all 0.3s; position: relative; z-index: 1;
+    }
+    .quick-link-pill:hover .ql-arrow { color: var(--gold); transform: translateX(3px); }
+
+    /* ── SKELETON ── */
+    .skeleton {
+        background: linear-gradient(90deg, var(--canvas-3) 25%, #e8e2da 50%, var(--canvas-3) 75%);
+        background-size: 200% 100%; animation: shimmer 1.5s infinite;
+        border-radius: 6px; display: inline-block;
+    }
+    @@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    /* ── ANIMATIONS ── */
+    .fade-up {
+        opacity: 0; transform: translateY(24px);
+        animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    @@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+    .delay-1 { animation-delay: .1s; }
+    .delay-2 { animation-delay: .2s; }
+    .delay-3 { animation-delay: .35s; }
+
+    /* ── RESPONSIVE ── */
     @@media (max-width: 768px) {
-        .profile-hero { padding: 24px; }
-        .profile-hero-inner { flex-direction: column; align-items: center; text-align: center; gap: 20px; }
-        .profile-stats { justify-content: center; }
-        .profile-grid { grid-template-columns: 1fr; }
-        .info-grid { grid-template-columns: 1fr; }
-        .profile-badges { justify-content: center; }
+        .profile-page { padding: 1.5rem 1rem 4rem; }
+        .avatar-anchor { flex-wrap: wrap; padding: 0 1.25rem; margin-top: -40px; gap: 1rem; }
+        .avatar-ring { width: 100px; height: 100px; }
+        .avatar-meta h2 { font-size: 1.6rem; }
+        .edit-btn { width: 100%; }
+        .btn-edit { width: 100%; justify-content: center; }
+        .content-cols { grid-template-columns: 1fr; }
+        .cover-banner { height: 170px; border-radius: var(--radius-lg); }
+        .cover-ornament { display: none; }
+    }
+    @@media (max-width: 480px) {
+        .profile-page { padding: 1rem 0.75rem 3rem; }
+        .stats-strip { border-radius: var(--radius-md); }
+        .panel { border-radius: var(--radius-md); }
     }
 </style>
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
 <div class="profile-page">
-    <div class="profile-hero">
-        <div class="profile-hero-inner">
-            <div class="profile-avatar">
-                <div class="profile-avatar-circle">
-                    <span class="k-icon k-i-user" id="avatarIcon"></span>
-                    <img id="avatarImg" src="" alt="Profile"
-                         style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;" />
-                </div>
-                <div class="profile-avatar-cam">
-                    <span class="k-icon k-i-image"></span>
-                </div>
+
+    <!-- Cover Banner -->
+    <div class="cover-banner fade-up">
+        <div class="cover-noise"></div>
+        <div class="cover-fade"></div>
+    </div>
+
+    <!-- Avatar + Name + Edit Button -->
+    <div class="avatar-anchor fade-up delay-1">
+        <div class="avatar-ring">
+            <img id="avatarImg" src="" alt="Profile" style="display:none;" />
+            <div class="avatar-fallback" id="avatarFallback">
+                <i class="bi bi-person"></i>
             </div>
-            <div class="profile-info">
-                <h1 class="profile-name" id="profileName">—</h1>
-                <p class="profile-email" id="profileEmail">—</p>
-                <div class="profile-badges">
-                    <span class="profile-badge badge-collector">
-                        <span class="k-icon k-i-palette"></span> Art Collector
-                    </span>
-                    <span class="profile-badge badge-verified">
-                        <span class="k-icon k-i-check-circle"></span> Verified Buyer
-                    </span>
-                </div>
-                <div class="profile-stats">
-                    <div class="profile-stat">
-                        <div class="profile-stat-value">12</div>
-                        <div class="profile-stat-label">Artworks</div>
-                    </div>
-                    <div class="stat-divider"></div>
-                    <div class="profile-stat">
-                        <div class="profile-stat-value">5</div>
-                        <div class="profile-stat-label">Orders</div>
-                    </div>
-                    <div class="stat-divider"></div>
-                    <div class="profile-stat">
-                        <div class="profile-stat-value">8</div>
-                        <div class="profile-stat-label">Artists</div>
-                    </div>
-                </div>
+            <div class="avatar-cam">
+                <i class="bi bi-camera"></i>
             </div>
-            <a href="@Url.Action("EditProfile", "Buyer")" class="profile-edit-btn">
-                <span class="k-icon k-i-edit"></span> Edit Profile
+        </div>
+        <div class="avatar-meta">
+            <h2 id="profileName">
+                <span class="skeleton" style="width:180px;height:1.8rem;">&nbsp;</span>
+            </h2>
+            <span id="profileEmail" class="handle">—</span>
+        </div>
+        <div class="edit-btn">
+            <a href="@Url.Action("EditProfile", "Buyer")" class="btn-edit">
+                <i class="bi bi-pencil-square"></i> Edit Profile
             </a>
         </div>
     </div>
 
-    <div class="profile-grid">
-        <!-- Left: Personal Info -->
+    <!-- Stats Strip -->
+    <div class="stats-strip fade-up delay-2">
+        <div class="stat-cell">
+            <div class="stat-value" id="statName">
+                <span class="skeleton" style="width:80px;height:1.4rem;">&nbsp;</span>
+            </div>
+            <div class="stat-label">Full Name</div>
+        </div>
+        <div class="stat-cell">
+            <div class="stat-value" id="statGender">
+                <span class="skeleton" style="width:50px;height:1.4rem;">&nbsp;</span>
+            </div>
+            <div class="stat-label">Gender</div>
+        </div>
+        <div class="stat-cell">
+            <div class="stat-value" id="statEmail">
+                <span class="skeleton" style="width:80px;height:1.4rem;">&nbsp;</span>
+            </div>
+            <div class="stat-label">Email</div>
+        </div>
+    </div>
+
+    <!-- Two-column content -->
+    <div class="content-cols fade-up delay-3">
+
+        <!-- Left: Personal Information -->
         <div>
-            <div class="profile-card">
-                <div class="card-header">
-                    <span class="k-icon k-i-user"></span>
+            <div class="panel">
+                <div class="panel-head">
+                    <div class="ph-icon"><i class="bi bi-person"></i></div>
                     <h3>Personal Information</h3>
                 </div>
-                <div class="card-body">
-                    <div class="info-grid">
-                        <div>
-                            <div class="info-item-label">Full Name</div>
-                            <div class="info-item-value" id="infoFullName">—</div>
-                        </div>
-                        <div>
-                            <div class="info-item-label">Username</div>
-                            <div class="info-item-value" id="infoUserName">—</div>
-                        </div>
-                        <div>
-                            <div class="info-item-label">Email Address</div>
-                            <div class="info-item-value" id="infoEmail">—</div>
-                        </div>
-                        <div>
-                            <div class="info-item-label">Phone Number</div>
-                            <div class="info-item-value" id="infoMobile">—</div>
-                        </div>
-                        <div>
-                            <div class="info-item-label">Gender</div>
-                            <div class="info-item-value" id="infoGender">—</div>
-                        </div>
+                <div class="panel-body">
+                    <div class="info-row">
+                        <span class="info-label">Full Name</span>
+                        <span id="infoFullName" class="info-value">
+                            <span class="skeleton" style="width:130px;height:.9rem;">&nbsp;</span>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Username</span>
+                        <span id="infoUserName" class="info-value">
+                            <span class="skeleton" style="width:100px;height:.9rem;">&nbsp;</span>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email Address</span>
+                        <span id="infoEmail" class="info-value">
+                            <span class="skeleton" style="width:160px;height:.9rem;">&nbsp;</span>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phone Number</span>
+                        <span id="infoMobile" class="info-value">
+                            <span class="skeleton" style="width:110px;height:.9rem;">&nbsp;</span>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Gender</span>
+                        <span id="infoGender" class="info-value">
+                            <span class="skeleton" style="width:60px;height:.9rem;">&nbsp;</span>
+                        </span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Right Sidebar — only Quick Links, member since removed -->
+        <!-- Right: Quick Links -->
         <div>
-            <div class="profile-card">
-                <div class="card-header">
+            <div class="panel">
+                <div class="panel-head">
+                    <div class="ph-icon"><i class="bi bi-lightning-charge"></i></div>
                     <h3>Quick Links</h3>
                 </div>
-                <div class="card-body" style="padding: 16px;">
-                    <a href="@Url.Action("Orders", "Buyer")" class="quick-link">
-                        <div class="quick-link-icon orders">
-                            <span class="k-icon k-i-cart"></span>
-                        </div>
-                        <div class="quick-link-text">
+                <div class="panel-body">
+                    <a href="@Url.Action("Orders", "Buyer")" class="quick-link-pill">
+                        <div class="ql-icon orders"><i class="bi bi-bag-check"></i></div>
+                        <div class="ql-text">
                             <strong>My Orders</strong>
                             <span>View purchase history</span>
                         </div>
+                        <i class="bi bi-arrow-up-right ql-arrow"></i>
                     </a>
-                    <a href="#" class="quick-link">
-                        <div class="quick-link-icon wishlist">
-                            <span class="k-icon k-i-heart"></span>
-                        </div>
-                        <div class="quick-link-text">
+                    <a href="@Url.Action("Wishlist", "Wishlist")" class="quick-link-pill">
+                        <div class="ql-icon wishlist"><i class="bi bi-heart"></i></div>
+                        <div class="ql-text">
                             <strong>Wishlist</strong>
                             <span>Saved artworks</span>
                         </div>
+                        <i class="bi bi-arrow-up-right ql-arrow"></i>
+                    </a>
+                    <a href="@Url.Action("ChangePassword", "Buyer")" class="quick-link-pill">
+                        <div class="ql-icon" style="background: linear-gradient(135deg, var(--gold-dim), rgba(154,99,36,0.15)); color: var(--gold);">
+                            <i class="bi bi-shield-lock"></i>
+                        </div>
+                        <div class="ql-text">
+                            <strong>Change Password</strong>
+                            <span>Update your security settings</span>
+                        </div>
+                        <i class="bi bi-arrow-up-right ql-arrow"></i>
                     </a>
                 </div>
             </div>
         </div>
+
     </div>
+
 </div>
 
 @section Scripts {
     <script>
         $(document).ready(function () {
-            var testUserId = 8; // ⚠️ HARDCODED FOR TESTING
+
+            var token = localStorage.getItem("token");
+
+            if (!token) {
+                alert("Please login first");
+                window.location.href = "/Auth/UserLogin";
+                return;
+            }
 
             $.ajax({
-                url: 'http://localhost:5183/api/UserProfile/GetProfile/' + testUserId,
+                url: 'http://localhost:5183/api/UserProfile/GetProfile',
                 type: 'GET',
+                headers: {
+                    "Authorization": "Bearer " + token ;
+                },
                 success: function (response) {
                     if (response.success) {
                         var u = response.data;
 
-                        $('#profileName').text(u.c_FullName || u.c_UserName || '—');
+                        var name = u.c_FullName || u.c_UserName || '—';
+                        $('#profileName').text(name);
                         $('#profileEmail').text(u.c_Email || '—');
 
                         if (u.c_Image) {
-                            $('#avatarIcon').hide();
+                            $('#avatarFallback').hide();
                             $('#avatarImg').attr('src', u.c_Image).show();
                         }
 
-                        $('#infoFullName').text(u.c_FullName  || '—');
-                        $('#infoUserName').text(u.c_UserName  || '—');
-                        $('#infoEmail').text(u.c_Email        || '—');
-                        $('#infoMobile').text(u.c_Mobile      || '—');
-                        $('#infoGender').text(u.c_Gender      || '—');
+                        $('#statName').text(u.c_FullName || '—');
+                        $('#statGender').text(u.c_Gender || '—');
+                        $('#statEmail').text(u.c_Email || '—');
+
+                        $('#infoFullName').text(u.c_FullName || '—');
+                        $('#infoUserName').text(u.c_UserName || '—');
+                        $('#infoEmail').text(u.c_Email || '—');
+                        $('#infoMobile').text(u.c_Mobile || '—');
+                        $('#infoGender').text(u.c_Gender || '—');
                     }
                 },
                 error: function () {
-                    console.log('Failed to load profile data');
+                    alert("Session expired. Please login again.");
+                    window.location.href = "/Auth/UserLogin";
                 }
             });
         });
