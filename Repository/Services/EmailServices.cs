@@ -12,7 +12,7 @@ namespace Repository.Services
 {
     public class EmailServices
     {
-        private readonly t_EmailSettings _emailSettings;
+        private readonly t_EmailSetting _emailSettings;
         private readonly string _templateBasePath; // ✅ ADDED
 
         public EmailServices(IConfiguration config)
@@ -41,7 +41,7 @@ namespace Repository.Services
             email.From.Add(new MailboxAddress("Artify Gallery", _emailSettings.Email));
 
             // ✅ ADDED (template path setup)
-            _templateBasePath = Path.Combine(AppContext.BaseDirectory, "Templates");
+            // _templateBasePath = Path.Combine(AppContext.BaseDirectory, "Templates");
         }
 
         public async Task SendEmailWithLogo(string toEmail, string subject, string body, string logoPath)
