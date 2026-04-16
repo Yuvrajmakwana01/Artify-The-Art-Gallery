@@ -33,6 +33,7 @@ builder.Services.AddScoped<IArtworkInterface, ArtworkRepository>();
 builder.Services.AddScoped<IUserProfileInterface, UserProfileRepository>();
 builder.Services.AddScoped<IAdminArtworkInterface, AdminArtworkRepository>();
 builder.Services.AddScoped<IAdminOrderInterface, AdminOrdersRepository>();
+builder.Services.AddScoped<IAdminPayoutInterface, AdminPayoutRepository>();
 
 //paymet 
 builder.Services.AddScoped<IBuyerUiArtworkInterface, BuyerUiArtworkRepository>();

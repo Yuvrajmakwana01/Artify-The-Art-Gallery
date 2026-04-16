@@ -301,6 +301,9 @@
     function openAddDialog(){
         editId = null;
         $("#fldName").val(""); $("#fldEmail").val(""); $("#fldStatus").val("Active"); $("#fldAvatar").val("NA");
+        $("#fldName").prop("disabled", false);
+        $("#fldEmail").prop("disabled", false);
+        $("#fldAvatar").prop("disabled", false);
         $("#errName,#errEmail").hide();
         $("#artistModalTitle").text("Add New Artist"); $("#btnSaveArtist").text("Add Artist");
         artistModal.show();
@@ -310,6 +313,9 @@
         var a = artists.find(function(x){ return x.id === id; }); if(!a) return;
         editId = id;
         $("#fldName").val(a.name); $("#fldEmail").val(a.email); $("#fldStatus").val(a.status); $("#fldAvatar").val(a.avatar);
+        $("#fldName").prop("disabled", true);
+        $("#fldEmail").prop("disabled", true);
+        $("#fldAvatar").prop("disabled", true);
         $("#errName,#errEmail").hide();
         $("#artistModalTitle").text("Edit Artist"); $("#btnSaveArtist").text("Save Changes");
         artistModal.show();
@@ -331,8 +337,8 @@
                 method: "PUT", headers: authHeader(),
                 contentType: "application/json",
                 data: JSON.stringify({
-                    artistName: name,
-                    artistEmail: email,
+                    artistName: artists[i].name,
+                    artistEmail: artists[i].email,
                     biography: artists[i].biography || "",
                     coverImage: artists[i].coverImage,
                     status: status
