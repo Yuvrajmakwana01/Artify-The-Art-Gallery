@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Npgsql;
@@ -21,83 +22,180 @@ namespace Repository.Implementations
         }
 
 
+        // public async Task<int> Register(t_Artist data)
+        // {
+        //     try
+        //     {
+        //         await _conn.OpenAsync();
+        //         // Check for existing email
+        //         NpgsqlCommand chk = new NpgsqlCommand("SELECT 1 FROM t_artist_profile WHERE c_artist_email = @email", _conn);
+        //         chk.Parameters.AddWithValue("@email", data.c_Email);
+        //         if (await chk.ExecuteScalarAsync() != null) return 0;
+
+        //         string passwordHash = BCrypt.Net.BCrypt.HashPassword(data.c_Password);
+
+        //         string sql = @"INSERT INTO t_artist_profile (c_artist_email, c_password, c_artist_name, c_username, c_gender, c_mobile, c_profile_image, c_cover_image, c_url, c_biography) 
+        //        VALUES (@email, @pwd, @fname, @uname, @gender, @mobile, @img, @cover, @social, @biography)";
+
+        //         using (NpgsqlCommand cmd = new NpgsqlCommand(sql, _conn))
+        //         {
+        //             cmd.Parameters.AddWithValue("@email", data.c_Email);
+        //             cmd.Parameters.AddWithValue("@pwd", passwordHash);
+        //             cmd.Parameters.AddWithValue("@fname", data.c_Full_Name);
+        //             cmd.Parameters.AddWithValue("@uname", data.c_UserName);
+        //             cmd.Parameters.AddWithValue("@gender", data.c_Gender);
+        //             cmd.Parameters.AddWithValue("@mobile", data.c_Mobile ?? (object)DBNull.Value);
+        //             cmd.Parameters.AddWithValue("@img", data.c_Profile_Image ?? (object)DBNull.Value);
+        //             cmd.Parameters.AddWithValue("@cover", data.c_Cover_Image ?? (object)DBNull.Value);
+        //             cmd.Parameters.AddWithValue("@social", new string[] { data.c_Social_Media_Link ?? "" });
+        //             cmd.Parameters.AddWithValue("@biography", data.c_BioGraphy ?? (object)DBNull.Value);
+
+        //             await cmd.ExecuteNonQueryAsync();
+        //             return 1;
+        //         }
+        //     }
+        //     finally { await _conn.CloseAsync(); }
+        // }
+
+        // public async Task<t_Artist> Login(vm_Login user)
+        // {
+        //     Console.WriteLine("Data" + user.c_Email + user.c_Password);
+        //     t_Artist UserData = null; // Return null if login fails
+        //     var qry = "SELECT * FROM t_artist_profile WHERE c_artist_email = @email";
+
+        //     try
+        //     {
+        //         await _conn.OpenAsync();
+        //         using (NpgsqlCommand com = new NpgsqlCommand(qry, _conn))
+        //         {
+        //             com.Parameters.AddWithValue("@email", user.c_Email);
+        //             using (var reader = await com.ExecuteReaderAsync())
+        //             {
+        //                 if (await reader.ReadAsync())
+        //                 {
+        //                     string storedHash = reader["c_password"].ToString();
+        //                     if (BCrypt.Net.BCrypt.Verify(user.c_Password, storedHash))
+        //                     {
+        //                         UserData = new t_Artist
+        //                         {
+        //                             // Ensure these column names match your actual DB schema
+        //                             c_User_Id = Convert.ToInt32(reader["c_artist_id"]),
+        //                             c_UserName = reader["c_username"].ToString(),
+        //                             c_Email = reader["c_artist_email"].ToString(),
+        //                             c_Full_Name = reader["c_artist_name"].ToString(),
+        //                             c_Profile_Image = reader["c_profile_image"]?.ToString()
+        //                         };
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         Console.WriteLine("Login Error: " + ex.Message);
+        //     }
+        //     finally { await _conn.CloseAsync(); }
+        //     return UserData;
+        // }
+
+
         public async Task<int> Register(t_Artist data)
         {
             try
             {
                 await _conn.OpenAsync();
-                // Check for existing email
-                NpgsqlCommand chk = new NpgsqlCommand("SELECT 1 FROM t_artist_profile WHERE c_artist_email = @email", _conn);
+                // Check redundancy
+                var chk = new NpgsqlCommand("SELECT 1 FROM t_artist_profile WHERE c_artist_email = @email", _conn);
                 chk.Parameters.AddWithValue("@email", data.c_Email);
                 if (await chk.ExecuteScalarAsync() != null) return 0;
 
-                string passwordHash = BCrypt.Net.BCrypt.HashPassword(data.c_Password);
+                string sql = @"INSERT INTO t_artist_profile 
+                    (c_artist_email, c_password, c_artist_name, c_username, c_gender, c_mobile, c_profile_image, c_cover_image, c_url, c_biography, c_is_active) 
+                    VALUES (@email, @pwd, @fname, @uname, @gender, @mobile, @img, @cover, @social, @bio, FALSE)";
 
-                string sql = @"INSERT INTO t_artist_profile (c_artist_email, c_password, c_artist_name, c_username, c_gender, c_mobile, c_profile_image, c_cover_image, c_url, c_biography) 
-               VALUES (@email, @pwd, @fname, @uname, @gender, @mobile, @img, @cover, @social, @biography)";
+                using var cmd = new NpgsqlCommand(sql, _conn);
+                cmd.Parameters.AddWithValue("@email", data.c_Email);
+                cmd.Parameters.AddWithValue("@pwd", BCrypt.Net.BCrypt.HashPassword(data.c_Password));
+                cmd.Parameters.AddWithValue("@fname", data.c_Full_Name);
+                cmd.Parameters.AddWithValue("@uname", data.c_UserName);
+                cmd.Parameters.AddWithValue("@gender", data.c_Gender);
+                cmd.Parameters.AddWithValue("@mobile", (object)data.c_Mobile ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@img", (object)data.c_Profile_Image ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@cover", (object)data.c_Cover_Image ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@social", new string[] { data.c_Social_Media_Link ?? "" });
+                cmd.Parameters.AddWithValue("@bio", (object)data.c_BioGraphy ?? DBNull.Value);
 
-                using (NpgsqlCommand cmd = new NpgsqlCommand(sql, _conn))
-                {
-                    cmd.Parameters.AddWithValue("@email", data.c_Email);
-                    cmd.Parameters.AddWithValue("@pwd", passwordHash);
-                    cmd.Parameters.AddWithValue("@fname", data.c_Full_Name);
-                    cmd.Parameters.AddWithValue("@uname", data.c_UserName);
-                    cmd.Parameters.AddWithValue("@gender", data.c_Gender);
-                    cmd.Parameters.AddWithValue("@mobile", data.c_Mobile ?? (object)DBNull.Value);
-                    cmd.Parameters.AddWithValue("@img", data.c_Profile_Image ?? (object)DBNull.Value);
-                    cmd.Parameters.AddWithValue("@cover", data.c_Cover_Image ?? (object)DBNull.Value);
-                    cmd.Parameters.AddWithValue("@social", new string[] { data.c_Social_Media_Link ?? "" });
-                    cmd.Parameters.AddWithValue("@biography", data.c_BioGraphy ?? (object)DBNull.Value);
-
-                    await cmd.ExecuteNonQueryAsync();
-                    return 1;
-                }
+                return await cmd.ExecuteNonQueryAsync();
             }
             finally { await _conn.CloseAsync(); }
         }
 
+
         public async Task<t_Artist> Login(vm_Login user)
         {
-            Console.WriteLine("Data" + user.c_Email + user.c_Password);
-            t_Artist UserData = null; // Return null if login fails
-            var qry = "SELECT * FROM t_artist_profile WHERE c_artist_email = @email";
+            t_Artist? artist = null;
+
+            // Select all necessary columns to populate the t_Artist object
+            const string sql = @"
+                SELECT 
+                    c_artist_id, 
+                    c_username, 
+                    c_artist_email, 
+                    c_password, 
+                    c_artist_name, 
+                    c_profile_image, 
+                    c_is_active 
+                FROM t_artist_profile 
+                WHERE c_artist_email = @email";
 
             try
             {
-                await _conn.OpenAsync();
-                using (NpgsqlCommand com = new NpgsqlCommand(qry, _conn))
+                if (_conn.State != ConnectionState.Open) await _conn.OpenAsync();
+
+                using var cmd = new NpgsqlCommand(sql, _conn);
+                cmd.Parameters.AddWithValue("@email", user.c_Email);
+
+                using var reader = await cmd.ExecuteReaderAsync();
+
+                if (await reader.ReadAsync())
                 {
-                    com.Parameters.AddWithValue("@email", user.c_Email);
-                    using (var reader = await com.ExecuteReaderAsync())
+                    // 1. Extract the hashed password from the DB
+                    string storedHash = reader["c_password"].ToString() ?? string.Empty;
+
+                    // 2. Verify the plain text password against the hash
+                    if (BCrypt.Net.BCrypt.Verify(user.c_Password, storedHash))
                     {
-                        if (await reader.ReadAsync())
+                        // 3. Populate the model if verification succeeds
+                        artist = new t_Artist
                         {
-                            string storedHash = reader["c_password"].ToString();
-                            if (BCrypt.Net.BCrypt.Verify(user.c_Password, storedHash))
-                            {
-                                UserData = new t_Artist
-                                {
-                                    // Ensure these column names match your actual DB schema
-                                    c_User_Id = Convert.ToInt32(reader["c_artist_id"]),
-                                    c_UserName = reader["c_username"].ToString(),
-                                    c_Email = reader["c_artist_email"].ToString(),
-                                    c_Full_Name = reader["c_artist_name"].ToString(),
-                                    c_Profile_Image = reader["c_profile_image"]?.ToString()
-                                };
-                            }
-                        }
+                            c_User_Id = Convert.ToInt32(reader["c_artist_id"]),
+                            c_UserName = reader["c_username"].ToString() ?? "",
+                            c_Email = reader["c_artist_email"].ToString() ?? "",
+                            c_Full_Name = reader["c_artist_name"].ToString() ?? "",
+                            c_Profile_Image = reader["c_profile_image"]?.ToString(),
+                            
+                            // Map the boolean status for the "Awaiting Approval" check
+                            c_Is_Active = !reader.IsDBNull(reader.GetOrdinal("c_is_active")) && reader.GetBoolean(reader.GetOrdinal("c_is_active"))
+                        };
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Login Error: " + ex.Message);
+                // Log exception as per your logging strategy
+                Console.WriteLine($"Database Login Error: {ex.Message}");
+                throw; 
             }
-            finally { await _conn.CloseAsync(); }
-            return UserData;
+            finally
+            {
+                if (_conn.State == ConnectionState.Open) await _conn.CloseAsync();
+            }
+
+            // Returns null if user not found OR password incorrect
+            return artist;
         }
 
-
+        
         public async Task<t_Artist_Dashboard> GetDashboardData(int artistId)
         {
             try
@@ -370,15 +468,15 @@ namespace Repository.Implementations
 
                 return await upCmd.ExecuteNonQueryAsync();
             }
-            finally 
-            { 
-                await _conn.CloseAsync(); 
+            finally
+            {
+                await _conn.CloseAsync();
             }
         }
 
 
 
-public async Task<t_Artist_EarningsSummary> GetEarningsSummary(int artistId)
+        public async Task<t_Artist_EarningsSummary> GetEarningsSummary(int artistId)
         {
             var result = new t_Artist_EarningsSummary();
 

@@ -3,249 +3,408 @@
     Layout = "~/Views/Shared/_ArtistLayout.cshtml";
 }
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.common.min.css" rel="stylesheet" />
 <link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.default-v2.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css" integrity="sha512-t7Few9xlddEmgd3oKZQahkNI4dS6l80+eGEzFQiqtyVYdvcSG2D3Iub77R20BdotfRPA9caaRkg1tyaJiPmO0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
 
-<div class="gallery-section sp-fade-up">
+<style>
+    :root{--navy:#14122a;--gold:#a0692a;--gold-dim:rgba(160,105,42,.1);
+          --paper:#faf8f5;--white:#fff;--border:rgba(0,0,0,.07);
+          --text:#1a1612;--text-2:#6b6057;--text-3:#a89e94;--radius:14px;}
+    body{font-family:'Outfit',sans-serif;background:var(--paper);}
 
-    <!-- PAGE HEADER -->
-    <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-2">
-        <div>
-            <div class="stat-badge mb-3 animate__animated animate__fadeInDown">
-                <i class="bi bi-stars"></i>
-                <span><span id="artCount">0</span> Masterpieces</span>
-            </div>
-            <p class="gallery-title animate__animated animate__fadeInLeft">The Digital Collection</p>
-        </div>
-        <div class="d-flex flex-wrap gap-2 align-items-center animate__animated animate__fadeInRight pb-1">
-            <input id="catFilter" />
-            <a href="/Artist/Upload" class="btn-upload">
-                <i class="bi bi-plus-lg"></i> New Artwork
-            </a>
-        </div>
+    .pg-title{font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:700;color:var(--navy);margin:0 0 4px;}
+    .pg-sub{font-size:.85rem;color:var(--text-3);}
+    .stat-badge{display:inline-flex;align-items:center;gap:7px;background:var(--gold-dim);border:1px solid rgba(160,105,42,.2);
+                border-radius:100px;padding:6px 14px;font-size:.75rem;font-weight:600;color:var(--gold);margin-bottom:.75rem;}
+
+    /* Filter row */
+    .filter-row{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin-bottom:1.5rem;}
+    .btn-upload{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;background:var(--navy);
+                color:#fff;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;
+                border:none;cursor:pointer;transition:all .2s;}
+    .btn-upload:hover{background:#1e1b38;color:#fff;transform:translateY(-1px);}
+
+    /* Status filter chips */
+    .status-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem;}
+    .s-chip{padding:5px 14px;border-radius:100px;font-size:.72rem;font-weight:600;border:1px solid;
+            cursor:pointer;transition:all .15s;background:transparent;}
+    .s-chip.active,.s-chip:hover{opacity:1;}
+    .s-chip-all{border-color:var(--navy);color:var(--navy);}
+    .s-chip-all.active,.s-chip-all:hover{background:var(--navy);color:#fff;}
+    .s-chip-approved{border-color:#86efac;color:#166534;}
+    .s-chip-approved.active,.s-chip-approved:hover{background:#dcfce7;}
+    .s-chip-pending{border-color:#fcd34d;color:#92400e;}
+    .s-chip-pending.active,.s-chip-pending:hover{background:#fffbeb;}
+    .s-chip-rejected{border-color:#fca5a5;color:#991b1b;}
+    .s-chip-rejected.active,.s-chip-rejected:hover{background:#fee2e2;}
+
+    /* Art grid */
+    .art-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:1.1rem;}
+    .art-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);
+              overflow:hidden;transition:transform .2s,box-shadow .2s;}
+    .art-card:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.09);}
+    .art-card .img-wrap{position:relative;height:190px;background:var(--paper);overflow:hidden;}
+    .art-card .img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .4s;}
+    .art-card:hover .img-wrap img{transform:scale(1.04);}
+    .art-card .img-wrap .no-img{display:flex;align-items:center;justify-content:center;height:100%;
+                                  flex-direction:column;gap:6px;color:var(--text-3);}
+    .art-card .img-wrap .no-img i{font-size:2rem;opacity:.35;}
+
+    /* Status badge on card */
+    .status-tag{position:absolute;top:10px;right:10px;padding:3px 11px;border-radius:100px;
+                font-size:.65rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border:1px solid;
+                backdrop-filter:blur(8px);}
+    .st-approved{background:rgba(220,252,231,.9);color:#166534;border-color:#86efac;}
+    .st-pending{background:rgba(255,251,235,.9);color:#92400e;border-color:#fcd34d;}
+    .st-rejected{background:rgba(254,226,226,.9);color:#991b1b;border-color:#fca5a5;}
+
+    .art-card .body{padding:.9rem 1rem;}
+    .art-card .body h4{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:700;
+                        color:var(--text);margin:0 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .art-card .body .meta{font-size:.72rem;color:var(--text-3);margin-bottom:6px;}
+    .art-card .body .price{font-size:.95rem;font-weight:600;color:var(--navy);}
+    .admin-note{font-size:.73rem;color:#991b1b;background:#fee2e2;border:1px solid #fca5a5;
+                border-radius:8px;padding:6px 10px;margin-top:7px;}
+
+    .art-card .actions{display:flex;gap:6px;padding:0 1rem .85rem;}
+    .act-btn{flex:1;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--paper);
+             font-size:.72rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;
+             gap:4px;color:var(--text-2);transition:all .15s;font-family:'Outfit',sans-serif;}
+    .act-btn:hover{border-color:var(--navy);color:var(--navy);background:var(--white);}
+    .act-btn.del:hover{border-color:#991b1b;color:#991b1b;background:#fee2e2;}
+
+    /* Empty state */
+    .empty{text-align:center;padding:4rem 1rem;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);}
+    .empty i{font-size:2.2rem;color:var(--text-3);opacity:.4;display:block;margin-bottom:.75rem;}
+    .empty h3{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--text-2);margin-bottom:4px;}
+    .empty p{font-size:.83rem;color:var(--text-3);}
+
+    #edit_cat{
+        max-width:100%;
+    }
+    /* Edit window */
+    #editWin{display:none;}
+    .form-label{font-size:.75rem;font-weight:600;color:var(--text-2);display:block;margin-bottom:5px;}
+</style>
+
+<!-- Page header -->
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+    <div>
+        <div class="stat-badge"><i class="bi bi-images"></i> <span id="artCount">0</span> Artworks</div>
+        <h1 class="pg-title">My Gallery</h1>
+        <p class="pg-sub">Manage and track all your submitted artworks.</p>
     </div>
-
-    <!-- ARTWORK GRID -->
-    <div id="artworkListView"></div>
-
-    <!-- PAGER -->
-    <div id="pager"></div>
-
-    <!-- EDIT WINDOW (hidden, opened by Kendo Window) -->
-    <div id="editWindow" style="display:none">
-        <form id="updateForm" enctype="multipart/form-data" class="p-1">
-            <input type="hidden" id="c_artwork_id" name="c_artwork_id" />
-
-            <div class="mb-3 text-center">
-                <img id="imgPreview" src=""
-                     style="max-width:160px;border-radius:12px;display:block;margin:0 auto 12px;border:1px solid var(--sp-border)" />
-                <input type="file" id="ArtworkFile" name="ArtworkFile" class="form-control" style="max-width:93%" />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Title</label>
-                <input id="edit_c_title" name="c_title" class="w-100" />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Description</label>
-                <input id="edit_c_description" name="c_description" class="w-100" />
-            </div>
-
-            <input type="hidden" id="c_approval_status_hidden" name="c_approval_status" />
-
-            <div class="mb-3">
-                <label class="form-label">Category</label>
-                <input id="edit_c_category_id" name="c_category_id" class="w-100" />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Price ($)</label>
-                <input id="edit_c_price" name="c_price" class="w-100" />
-            </div>
-
-            <button type="button" id="btnSaveUpdate" class="sp-btn sp-btn-amber py-2" style="width: 90%;">
-                <i class="bi bi-floppy-fill me-1"></i> Save Changes
-            </button>
-        </form>
-    </div>
+    <a href="/Artist/Upload" class="btn-upload mt-2"><i class="bi bi-plus-lg"></i> New Artwork</a>
 </div>
 
-<!-- ARTWORK TEMPLATE -->
-<script type="text/x-kendo-template" id="artTemplate">
-    <div class="art-card">
-        <div class="image-container">
-            <img src="#:c_preview_path#" class="art-img" alt="#:c_title#" loading="lazy">
-            <div class="art-overlay">
-                <div class="action-group">
-                    <a href="javascript:void(0)" class="btn-glass" onclick="editArtwork(#:c_artwork_id#)" title="Edit">
-                        <i class="bi bi-pencil-square"></i>
-                    </a>
-                    <a href="javascript:void(0)" class="btn-glass" onclick="deleteArtwork(#:c_artwork_id#)" title="Delete">
-                        <i class="bi bi-trash"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="art-details">
-            <div class="art-category">#:categoryName#</div>
-            <h3 class="art-name">#:c_title#</h3>
-            <span class="art-price">$#:c_price#</span>
-        </div>
-    </div>
-</script>
+<!-- Status filter chips -->
+<div class="status-chips">
+    <span class="s-chip s-chip-all active"     data-status="">All</span>
+    <span class="s-chip s-chip-approved"        data-status="Approved">✓ Approved</span>
+    <span class="s-chip s-chip-pending"         data-status="Pending">⏳ Pending</span>
+    <span class="s-chip s-chip-rejected"        data-status="Rejected">✕ Rejected</span>
+</div>
 
+<!-- Filter by category -->
+<div class="filter-row">
+    <input id="catFilter" style="width:220px;" />
+</div>
+
+<!-- Art grid -->
+<div class="art-grid" id="artGrid"></div>
+<div class="empty" id="emptyState" style="display:none;">
+    <i class="bi bi-images"></i>
+    <h3>No artworks here</h3>
+    <p>Upload your first masterpiece to get started.</p>
+</div>
+
+<!-- Kendo pager -->
+<div id="pager" style="margin-top:1rem;"></div>
+
+<!-- Edit window -->
+<div id="editWin">
+    <form id="updateForm" enctype="multipart/form-data" style="padding:4px;">
+        <input type="hidden" id="edit_id"     name="c_artwork_id" />
+        <input type="hidden" id="edit_status" name="c_approval_status" />
+        <div class="text-center mb-3">
+            <img id="imgPreview" src="" style="max-width:150px;border-radius:10px;border:1px solid var(--border);display:block;margin:0 auto 10px;" />
+            <input type="file" id="ArtworkFile" name="ArtworkFile" class="form-control" style="max-width:92%;" />
+        </div>
+        <div class="mb-3"><label class="form-label">Title</label><input id="edit_title" name="c_title" style="width:100%;" /></div>
+        <div class="mb-3"><label class="form-label">Description</label><textarea id="edit_desc" name="c_description" style="width:100%;" rows="3"></textarea></div>
+        <div class="row g-3 mb-3">
+            <div class="col-6"><label class="form-label">Category</label><input id="edit_cat" name="c_category_id" style="width:100%;" /></div>
+            <div class="col-6"><label class="form-label">Price ($)</label><input id="edit_price" name="c_price" style="width:100%;" /></div>
+        </div>
+        <button type="button" id="btnSave"
+                style="width:100%;height:44px;background:var(--navy);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:.85rem;">
+            <i class="bi bi-floppy-fill me-1"></i> Save & Re-submit
+        </button>
+    </form>
+</div>
 @section Scripts {
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/authHelper.js"></script>
+<script>
+$(function () {
+    if (!AuthHelper.requireAuth()) return;
 
-    <script>
-        var ds;
-        $(document).ready(function () {
-            ds = new kendo.data.DataSource({
-                transport: {
-                    read: { url: "http://localhost:5183/api/ArtistApi/GetAll", dataType: "json" }
-                },
-                schema: {
-                    data: "data",
-                    total: function(res) { return res.data ? res.data.length : 0; }
-                },
-                pageSize: 9,
-                change: function() { $("#artCount").text(this.total()); }
-            });
+    var BASE = AuthHelper.API_BASE;
+    var allArtworks = [];
+    var filtered = [];
+    var activeStatus = "";
+    var pageSize = 9;
+    var currentPage = 1;
 
-            $("#artworkListView").kendoListView({
-                dataSource: ds,
-                template: kendo.template($("#artTemplate").html()),
-                tagName: "div",
-                contentElement: false
-            });
-
-            $("#pager").kendoPager({
-                dataSource: ds,
-                responsive: true,
-                buttonCount: 5
-            });
-
+    // Initialize Kendo components after auth check
+    function initKendoComponents() {
+        // Category filter
+        if (!$("#catFilter").data("kendoDropDownList")) {
             $("#catFilter").kendoDropDownList({
-                optionLabel: "Filter by Style",
+                optionLabel: "Filter by Category",
                 dataTextField: "name",
                 dataValueField: "name",
                 dataSource: {
-                    transport: { read: { url: "http://localhost:5183/api/ArtistApi/GetCategories", dataType: "json" } }
-                },
-                change: function() {
-                    var v = this.value();
-                    ds.filter(v ? { field: "categoryName", operator: "eq", value: v } : {});
-                }
-            });
-
-            $("#ArtworkFile").change(function() {
-                if (this.files && this.files[0]) {
-                    var reader = new FileReader();
-                    reader.onload = function(e) { $('#imgPreview').attr('src', e.target.result); };
-                    reader.readAsDataURL(this.files[0]);
-                }
-            });
-        });
-
-        function deleteArtwork(id) {
-            Swal.fire({
-                title: 'Remove this artwork?',
-                text: "This action cannot be undone.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#c8873a',
-                cancelButtonColor: '#9ca3af',
-                confirmButtonText: 'Yes, remove it'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: 'http://localhost:5183/api/ArtistApi/Delete/' + id,
-                        type: 'DELETE',
-                        success: function() {
-                            Swal.fire('Removed', 'Your artwork has been deleted.', 'success');
-                            ds.read();
+                    transport: {
+                        read: {
+                            url: BASE + "/GetCategories",
+                            dataType: "json",
+                            beforeSend: function(xhr) {
+                                xhr.setRequestHeader("Authorization", "Bearer " + AuthHelper.getToken());
+                            }
                         }
-                    });
+                    }
+                },
+                change: function () { renderGrid(); }
+            });
+        }
+        
+        // Edit window
+        if (!$("#editWin").data("kendoWindow")) {
+            $("#editWin").kendoWindow({
+                title: "Edit Artwork", width: "500px", modal: true,
+                visible: false, resizable: false, actions: ["Close"]
+            });
+        }
+        
+        // Edit form fields
+        if (!$("#edit_title").data("kendoTextBox")) {
+            $("#edit_title").kendoTextBox();
+            $("#edit_desc").kendoTextArea({ rows: 3 });
+            $("#edit_price").kendoNumericTextBox({ format: "c2", min: 0 });
+            $("#edit_cat").kendoDropDownList({
+                dataTextField: "name", dataValueField: "id",
+                optionLabel: "Select Category…",
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: BASE + "/GetCategories",
+                            dataType: "json",
+                            beforeSend: function(xhr) {
+                                xhr.setRequestHeader("Authorization", "Bearer " + AuthHelper.getToken());
+                            }
+                        }
+                    }
                 }
             });
         }
+    }
+    
+    initKendoComponents();
 
-        var editWindow = $("#editWindow").kendoWindow({
-        title: "Edit Masterpiece",
-        width: "500px",
-        visible: false,
-        modal: true,
-        actions: ["Close"]
-    }).data("kendoWindow");
-
-    // 2. Initialize inputs inside the window (Move these inside ready)
-    $("#edit_c_title").kendoTextBox();
-    $("#edit_c_price").kendoNumericTextBox({ format: "c2" });
-    $("#edit_c_description").kendoTextArea({ rows: 5, placeholder: "Enter text..." });
-    $("#edit_c_category_id").kendoDropDownList({
-        dataTextField: "name",
-        dataValueField: "id",
-        dataSource: { transport: { read: { url: "http://localhost:5183/api/ArtistApi/GetCategories" } } },
-        optionLabel: "Select Category..."
+    // Status chip filter
+    $(".s-chip").on("click", function () {
+        $(".s-chip").removeClass("active");
+        $(this).addClass("active");
+        activeStatus = $(this).data("status");
+        currentPage = 1;
+        renderGrid();
     });
 
-        
+    // Load artworks
+    function loadArtworks() {
+        $.ajax({
+            url: BASE + "/GetMyArtworks",
+            type: "GET",
+            success: function (res) {
+                allArtworks = res.data || [];
+                renderGrid();
+            },
+            error: function (xhr) {
+                console.error("Load artworks error:", xhr.status);
+                if (xhr.status !== 401) {
+                    Swal.fire({ icon: "error", title: "Failed to load artworks", confirmButtonColor: "#14122a" });
+                }
+            }
+        });
+    }
 
-        $("#btnSaveUpdate").click(function() {
-            var formData = new FormData();
-            formData.append("c_artwork_id", $("#c_artwork_id").val());
-            formData.append("c_title", $("#edit_c_title").data("kendoTextBox").value());
-            formData.append("c_description", $("#edit_c_description").data("kendoTextArea").value());
-            formData.append("c_price", $("#edit_c_price").data("kendoNumericTextBox").value());
+    // Render grid
+    function renderGrid() {
+        var catFilterWidget = $("#catFilter").data("kendoDropDownList");
+        var catVal = catFilterWidget ? catFilterWidget.value() : "";
 
-            var categoryValue = $("#edit_c_category_id").data("kendoDropDownList").value();
-            var categoryId = parseInt(categoryValue);
-            if (!isNaN(categoryId)) formData.append("c_category_id", categoryId);
+        filtered = allArtworks.filter(function (a) {
+            var statusOk = !activeStatus || a.c_approval_status === activeStatus;
+            var catOk = !catVal || (a.c_category_name === catVal || a.CategoryName === catVal);
+            return statusOk && catOk;
+        });
 
-            formData.append("c_approval_status", $("#c_approval_status_hidden").val());
+        $("#artCount").text(filtered.length);
 
-            var fileInput = $("#ArtworkFile")[0].files[0];
-            if (fileInput) formData.append("ArtworkFile", fileInput);
+        if (!filtered.length) {
+            $("#artGrid").empty().hide();
+            $("#emptyState").show();
+            $("#pager").empty();
+            return;
+        }
 
+        $("#emptyState").hide();
+        $("#artGrid").show();
+
+        var start = (currentPage - 1) * pageSize;
+        var page = filtered.slice(start, start + pageSize);
+
+        var html = "";
+        page.forEach(function (a) {
+            var sc = a.c_approval_status === "Approved" ? "approved"
+                   : a.c_approval_status === "Rejected" ? "rejected" : "pending";
+            var imgHtml = a.c_preview_path
+                ? '<img src="' + a.c_preview_path + '" alt="' + (a.c_title || "") + '" loading="lazy" />'
+                : '<div class="no-img"><i class="bi bi-image"></i><span style="font-size:.72rem;">No preview</span></div>';
+            var noteHtml = (sc === "rejected" && a.c_admin_note)
+                ? '<div class="admin-note"><i class="bi bi-chat-left-text me-1"></i>' + a.c_admin_note + '</div>' : '';
+
+            html += '<div class="art-card">'
+                + '<div class="img-wrap">' + imgHtml
+                + '<span class="status-tag st-' + sc + '">' + (a.c_approval_status || "Pending") + '</span></div>'
+                + '<div class="body">'
+                + '<h4>' + (a.c_title || "Untitled") + '</h4>'
+                + '<div class="meta">' + (a.c_category_name || a.CategoryName || "—") + '</div>'
+                + '<div class="price">$' + parseFloat(a.c_price || 0).toFixed(2) + '</div>'
+                + noteHtml + '</div>'
+                + '<div class="actions">'
+                + '<button class="act-btn" onclick="window.openEdit(' + a.c_artwork_id + ')"><i class="bi bi-pencil"></i> Edit</button>'
+                + '<button class="act-btn del" onclick="window.deleteArtwork(' + a.c_artwork_id + ')"><i class="bi bi-trash3"></i></button>'
+                + '</div></div>';
+        });
+        $("#artGrid").html(html);
+
+        // Simple pager
+        var totalPages = Math.ceil(filtered.length / pageSize);
+        if (totalPages > 1) {
+            var pagerHtml = '<div style="display:flex;gap:6px;justify-content:center;margin-top:1rem;">';
+            for (var i = 1; i <= totalPages; i++) {
+                pagerHtml += '<button onclick="window.goPage(' + i + ')" style="width:36px;height:36px;border-radius:8px;border:1px solid '
+                    + (i === currentPage ? 'var(--navy)' : 'var(--border)')
+                    + ';background:' + (i === currentPage ? 'var(--navy)' : '#fff')
+                    + ';color:' + (i === currentPage ? '#fff' : 'var(--text-2)')
+                    + ';font-weight:600;cursor:pointer;font-size:.8rem;">' + i + '</button>';
+            }
+            pagerHtml += '</div>';
+            $("#pager").html(pagerHtml);
+        } else {
+            $("#pager").empty();
+        }
+    }
+
+    window.goPage = function (p) { currentPage = p; renderGrid(); };
+
+    window.openEdit = function (id) {
+        $.ajax({
+            url: BASE + "/GetById/" + id,
+            type: "GET",
+            success: function (data) {
+                $("#edit_id").val(data.c_artwork_id);
+                $("#edit_status").val(data.c_approval_status);
+                if ($("#edit_title").data("kendoTextBox")) {
+                    $("#edit_title").data("kendoTextBox").value(data.c_title || "");
+                    $("#edit_price").data("kendoNumericTextBox").value(data.c_price || 0);
+                    $("#edit_desc").data("kendoTextArea").value(data.c_description || "");
+                    $("#edit_cat").data("kendoDropDownList").value(data.c_category_id);
+                }
+                $("#imgPreview").attr("src", data.c_preview_path || "");
+                $("#ArtworkFile").val("");
+                var editWindow = $("#editWin").data("kendoWindow");
+                if (editWindow) editWindow.center().open();
+            },
+            error: function(xhr) {
+                console.error("Get artwork error:", xhr.status);
+                Swal.fire({ icon: "error", title: "Failed to load artwork", confirmButtonColor: "#14122a" });
+            }
+        });
+    };
+
+    $("#btnSave").on("click", function () {
+        var fd = new FormData($("#updateForm")[0]);
+        var f = $("#ArtworkFile")[0].files[0];
+        if (f) fd.append("ArtworkFile", f);
+
+        $.ajax({
+            url: BASE + "/Update",
+            type: "PUT",
+            data: fd,
+            contentType: false,
+            processData: false,
+            success: function (res) {
+                if (res.success) {
+                    Swal.fire({ icon: "success", title: "Updated!", text: res.message, timer: 1800, showConfirmButton: false });
+                    var editWindow = $("#editWin").data("kendoWindow");
+                    if (editWindow) editWindow.close();
+                    loadArtworks();
+                } else {
+                    Swal.fire({ icon: "error", title: "Update failed", text: res.message, confirmButtonColor: "#14122a" });
+                }
+            },
+            error: function(xhr) {
+                Swal.fire({ icon: "error", title: "Update failed", text: "Please try again.", confirmButtonColor: "#14122a" });
+            }
+        });
+    });
+
+    window.deleteArtwork = function (id) {
+        Swal.fire({
+            title: "Remove this artwork?",
+            text: "This cannot be undone.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#991b1b",
+            cancelButtonColor: "#14122a",
+            confirmButtonText: "Yes, delete"
+        }).then(function (r) {
+            if (!r.isConfirmed) return;
             $.ajax({
-                url: 'http://localhost:5183/api/ArtistApi/Update',
-                type: 'PUT',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function() {
-                    Swal.fire('Saved', 'Your artwork has been updated!', 'success');
-                    editWindow.close();
-                    $("#ArtworkFile").val('');
-                    ds.read();
+                url: BASE + "/Delete/" + id,
+                type: "DELETE",
+                success: function (res) {
+                    if (res.success) {
+                        Swal.fire({ icon: "success", title: "Deleted", timer: 1200, showConfirmButton: false });
+                        loadArtworks();
+                    }
                 },
                 error: function(xhr) {
-                    console.error("Server Error:", xhr.responseText);
-                    Swal.fire('Error', 'Something went wrong. Check console for details.', 'error');
+                    Swal.fire({ icon: "error", title: "Delete failed", text: "Please try again.", confirmButtonColor: "#14122a" });
                 }
             });
         });
+    };
 
-        function editArtwork(id) {
-            $.get("http://localhost:5183/api/ArtistApi/GetById/" + id, function(data) {
-                $("#c_artwork_id").val(data.c_artwork_id);
-                $("#edit_c_title").data("kendoTextBox").value(data.c_title);
-                $("#edit_c_price").data("kendoNumericTextBox").value(data.c_price);
-                $("#edit_c_category_id").data("kendoDropDownList").value(data.c_category_id);
-                $("#edit_c_description").data("kendoTextArea").value(data.c_description);
-                $("#c_approval_status_hidden").val(data.c_approval_status);
-                $("#ArtworkFile").val('');
-                $("#imgPreview").attr("src", data.c_preview_path);
-                editWindow.center().open();
-            });
-        }
-    </script>
+    // Preview on file select
+    $("#ArtworkFile").on("change", function () {
+        var f = this.files && this.files[0];
+        if (!f) return;
+        var r = new FileReader();
+        r.onload = function (e) { $("#imgPreview").attr("src", e.target.result); };
+        r.readAsDataURL(f);
+    });
+
+    loadArtworks();
+});
+</script>
 }

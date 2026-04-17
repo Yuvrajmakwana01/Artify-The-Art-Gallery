@@ -1,6 +1,6 @@
 @{
     ViewBag.Title = "Profile";
-    Layout = "~/Views/Shared/_BuyerLayout.cshtml";
+    @* Layout = "~/Views/Shared/_BuyerLayout.cshtml"; *@
 }
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700&display=swap" rel="stylesheet" />
@@ -357,6 +357,8 @@
     }
 </style>
 
+
+
 <div class="profile-page">
 
     <!-- Cover Banner -->
@@ -472,7 +474,7 @@
                         </div>
                         <i class="bi bi-arrow-up-right ql-arrow"></i>
                     </a>
-                    <a href="@Url.Action("Wishlist", "Wishlist")" class="quick-link-pill">
+                    <a href="@Url.Action("Index", "Wishlist")" class="quick-link-pill">
                         <div class="ql-icon wishlist"><i class="bi bi-heart"></i></div>
                         <div class="ql-text">
                             <strong>Wishlist</strong>
@@ -490,6 +492,16 @@
                         </div>
                         <i class="bi bi-arrow-up-right ql-arrow"></i>
                     </a>
+                    <a href="@Url.Action("Logout", "Auth")" class="quick-link-pill">
+                        <div class="ql-icon" style="background: linear-gradient(135deg, rgba(220,74,74,.08), rgba(220,74,74,.15)); color:#dc4a4a;">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </div>
+                        <div class="ql-text">
+                            <strong>Logout</strong>
+                            <span>Sign out from your account</span>
+                        </div>
+                        <i class="bi bi-arrow-up-right ql-arrow"></i>
+                    </a>
                 </div>
             </div>
         </div>
@@ -501,6 +513,9 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
+            $(document).on('click', 'a[href*="Logout"]', function () {
+                localStorage.removeItem("token");
+            });
 
             var token = localStorage.getItem("token");
 
@@ -514,7 +529,7 @@
                 url: 'http://localhost:5183/api/UserProfile/GetProfile',
                 type: 'GET',
                 headers: {
-                    "Authorization": "Bearer " + token ;
+                    "Authorization": "Bearer " + token 
                 },
                 success: function (response) {
                     if (response.success) {

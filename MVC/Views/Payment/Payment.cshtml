@@ -516,7 +516,7 @@ h1, h2, h3, h4, h5, h6 {
                 <span id="successDate">00-00-0000</span> &bull; Bill ID: <strong id="successBillId">#0</strong>
             </div>
 
-            <div class="modal-action-buttons">
+            @* <div class="modal-action-buttons">
                 <button class="modal-btn" onclick="successDownloadPdf()">
                     <span style="color:#ef4444;font-size:12px;">PDF</span>
                     Download
@@ -525,7 +525,7 @@ h1, h2, h3, h4, h5, h6 {
                     <span style="color:#64748b;font-size:12px;">&#128438;</span>
                     Print Receipt
                 </button>
-            </div>
+            </div> *@
         </div>
         <div class="scalloped-bottom"></div>
     </div>
@@ -621,14 +621,19 @@ h1, h2, h3, h4, h5, h6 {
             <div class="co-card sticky-summary" style="position:sticky;top:88px;">
                 <p class="card-title">Your Order</p>
                 <div id="order-items-list"></div>
+                <!-- ── CHANGED: added platform fee row and renamed IDs ── -->
                 <div class="totals">
                     <div class="summary-row">
                         <span>Subtotal</span>
                         <span id="subtotal-val">$0.00</span>
                     </div>
                     <div class="summary-row">
-                        <span>Platform fee</span>
+                        <span>Shipping</span>
                         <span style="color:var(--success);font-weight:600;">Free</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Platform fee (2%)</span>
+                        <span id="fee-val">$0.00</span>
                     </div>
                     <div class="summary-row grand">
                         <span>Total</span>
@@ -661,6 +666,7 @@ const PAY_API          = '@Html.Raw(apiBase)';
 console.log("Api:" + PAY_API);
 const PAYPAL_CLIENT_ID = '@Html.Raw(payPalClientId)';
 const PAYPAL_CURRENCY  = '@Html.Raw(payPalCurrency)';
+const PLATFORM_FEE_RATE = 0.02; // ── CHANGED: 18% platform fee constant ──
 let   successOrderId   = 0;
 
 const successModal = document.getElementById('successModal');
@@ -745,13 +751,14 @@ function validateForm() {
 }
 
 // ── Render order items ─────────────────────────────────────────────────────
+// ── CHANGED: calculate and display subtotal, platform fee (18%), and grand total ──
 (function renderOrder() {
     const list   = document.getElementById('order-items-list');
     const symbol = currencySymbol(PAYPAL_CURRENCY);
-    let total    = 0;
+    let subtotal = 0;
 
     cart.forEach(item => {
-        total += Number(item.price);
+        subtotal += Number(item.price);
         const row = document.createElement('div');
         row.className = 'order-item';
         const thumb = item.previewUrl
@@ -767,8 +774,13 @@ function validateForm() {
         list.appendChild(row);
     });
 
-    document.getElementById('subtotal-val').textContent = symbol + total.toLocaleString('en-US');
-    document.getElementById('total-val').textContent    = symbol + total.toLocaleString('en-US');
+    // ── CHANGED: compute fee and grand total ──
+    const platformFee = Math.round(subtotal * PLATFORM_FEE_RATE);
+    const grandTotal  = subtotal + platformFee;
+
+    document.getElementById('subtotal-val').textContent = symbol + subtotal.toLocaleString('en-US');
+    document.getElementById('fee-val').textContent      = symbol + platformFee.toLocaleString('en-US');
+    document.getElementById('total-val').textContent    = symbol + grandTotal.toLocaleString('en-US');
 })();
 
 // ── PayPal API calls ────────────────────────────────────────────────────────
@@ -786,21 +798,20 @@ async function createPaypalOrder() {
     if (!response.ok) throw new Error(await response.text());
     const data = await response.json();
     if (data.success && data.orderId) {
-        return data.orderId; // 🔥 SIRF ID RETURN KAREIN, data nahi
+        return data.orderId;
     } else {
         throw new Error(data.message || 'Failed to create PayPal order.');
     }
-    return data.orderId;
 }
 
 async function verifyPaypalOrder(paypalOrderId) {
-    const token = localStorage.getItem('token'); // ✅ ADD THIS LINE
+    const token = localStorage.getItem('token');
 
     const response = await fetch(`${PAY_API}/api/payment/verify-paypal`, {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json', 
-            'Authorization': `Bearer ${token}` // ✅ NOW WORKS
+            'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
             PaypalOrderId: paypalOrderId,
@@ -873,21 +884,20 @@ if (!PAYPAL_CLIENT_ID || PAYPAL_CLIENT_ID === 'YOUR_PAYPAL_SANDBOX_CLIENT_ID') {
             try {
                 const result = await verifyPaypalOrder(data.orderID);
 
-                // 🔥 CLEAR MAIN CART (IMPORTANT FIX)
-sessionStorage.removeItem('artify_cart');
-
-// Optional cleanup
-sessionStorage.removeItem('artify_checkout_cart');
-localStorage.removeItem('artvault_cart');
+                localStorage.removeItem('artify_cart');
+                sessionStorage.removeItem('artify_checkout_cart');
+                sessionStorage.removeItem('artify_checkout_meta');
+                localStorage.removeItem('artvault_cart');
 
                 successOrderId = result.orderId;
                 bindSuccessActions(result.orderId);
 
+                // ── CHANGED: show grand total (with fee) in the success modal ──
                 const totalAmt = document.getElementById('total-val').textContent;
                 const now      = new Date();
                 const currDate = ("0" + now.getDate()).slice(-2) + "-"
-                               + ("0" + (now.getMonth() + 1)).slice(-2) + "-"
-                               + now.getFullYear();
+                                + ("0" + (now.getMonth() + 1)).slice(-2) + "-"
+                                + now.getFullYear();
 
                 document.getElementById('successAmount').textContent  = totalAmt;
                 document.getElementById('successDate').textContent    = currDate;

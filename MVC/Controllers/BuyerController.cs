@@ -9,26 +9,24 @@ using Microsoft.Extensions.Logging;
 namespace MVC.Controllers
 {
     // [Route("[controller]")]
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    // [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    // [SessionAuthorize]
     public class BuyerController : Controller
     {
         private readonly ILogger<BuyerController> _logger;
 
-                private HttpClient GetClient()
+        private HttpClient GetClient()
         {
             var client = new HttpClient();
-
             var token = HttpContext.Request.Cookies["token"];
 
-            if (string.IsNullOrEmpty(token))
+            if (!string.IsNullOrEmpty(token))
             {
-                throw new Exception("User not logged in");
+                client.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
             }
 
-            client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-            return client;
+            return client; // ✅ Exception mat throw karo
         }
 
 
@@ -42,7 +40,7 @@ namespace MVC.Controllers
             _logger = logger;
         }
 
-         public IActionResult ChangePassword()
+        public IActionResult ChangePassword()
         {
             return View();
         }
@@ -55,7 +53,7 @@ namespace MVC.Controllers
         {
             return View();
         }
-       
+
         public IActionResult Orders()
         {
             return View();
@@ -64,16 +62,16 @@ namespace MVC.Controllers
         {
             return View();
         }
-        
-        // [HttpGet("/Buyer/ExploreArt")]
-       public IActionResult ExploreArt()
-        {
-            var token = HttpContext.Request.Cookies["token"]; // OR check localStorage via JS
 
-            if (string.IsNullOrEmpty(token))
-            {
-                return RedirectToAction("UserLogin", "Auth");
-            }
+        // [HttpGet("/Buyer/ExploreArt")]
+        public IActionResult ExploreArt()
+        {
+            // var token = HttpContext.Request.Cookies["token"]; // OR check localStorage via JS
+
+            // if (string.IsNullOrEmpty(token))
+            // {
+            //     return RedirectToAction("UserLogin", "Auth");
+            // }
 
             return View();
         }
@@ -89,7 +87,7 @@ namespace MVC.Controllers
             ViewData["ApiBaseUrl"] = configuration["ApiBaseUrl"] ?? string.Empty;
             return View("ArtworkDetail");
         }
-       
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

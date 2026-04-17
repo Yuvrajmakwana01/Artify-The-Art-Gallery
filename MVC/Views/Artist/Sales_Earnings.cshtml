@@ -1,94 +1,146 @@
 ﻿@{
-  Layout = "../Shared/_ArtistLayout.cshtml";
+    ViewData["Title"] = "Earnings";
+    Layout = "~/Views/Shared/_ArtistLayout.cshtml";
 }
 
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+
 <style>
-  .card-custom {
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    padding: 20px;
-    background: white;
-  }
+    :root{--navy:#14122a;--gold:#a0692a;--gold-dim:rgba(160,105,42,.1);
+          --paper:#faf8f5;--white:#fff;--border:rgba(0,0,0,.08);
+          --text:#1a1612;--text-2:#6b6057;--text-3:#a89e94;--radius:16px;}
+    body{font-family:'Outfit',sans-serif;background:var(--paper);}
 
-  .stat-title {
-    color: gray;
-    font-size: 14px;
-  }
+    .pg-title{font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:700;color:var(--navy);margin:0 0 1.5rem;}
+    .earn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;margin-bottom:1.5rem;}
+    .earn-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;
+               transition:transform .2s,box-shadow .2s;}
+    .earn-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.07);}
+    .earn-card .ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+                    font-size:.95rem;margin-bottom:.85rem;flex-shrink:0;}
+    .earn-card .lbl{font-size:.68rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;}
+    .earn-card .val{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--navy);line-height:1;}
+    .earn-card .sub{font-size:.75rem;color:var(--text-3);margin-top:4px;}
 
-  .stat-value {
-    font-size: 28px;
-    font-weight: bold;
-  }
+    .ico-avail{background:rgba(22,101,52,.1);color:#166534;}
+    .ico-req{background:#fffbeb;color:#92400e;}
+    .ico-rev{background:var(--gold-dim);color:var(--gold);}
+
+    /* Withdrawal card */
+    .withdraw-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.75rem;margin-bottom:1.25rem;}
+    .withdraw-card h4{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:700;color:var(--navy);margin-bottom:.4rem;}
+    .withdraw-card p{font-size:.88rem;color:var(--text-2);margin-bottom:1.25rem;}
+    .btn-withdraw{height:46px;padding:0 28px;background:var(--navy);color:#fff;border:none;border-radius:10px;
+                  font-family:'Outfit',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;
+                  transition:all .2s;display:inline-flex;align-items:center;gap:8px;}
+    .btn-withdraw:hover{background:#1e1b38;transform:translateY(-1px);box-shadow:0 6px 20px rgba(20,18,42,.3);}
+    .btn-withdraw:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+    .gold-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;}
+
+    /* History table placeholder */
+    .history-panel{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;}
+    .history-panel h4{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.1rem;}
+    .empty-hist{text-align:center;padding:2.5rem;color:var(--text-3);font-size:.88rem;}
+
+    /* Skel */
+    .skel{background:linear-gradient(90deg,#f3f0eb 25%,#e8e2da 50%,#f3f0eb 75%);
+          background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px;display:inline-block;}
+    @@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    @@media(max-width:640px){.earn-grid{grid-template-columns:1fr}}
 </style>
 
-<!-- 🔥 PAGE TITLE -->
-<h3 class="mb-3">💰 Earnings Overview</h3>
+<h1 class="pg-title">Earnings Overview</h1>
 
-<!-- 🔥 CARDS -->
-<div class="row g-3">
-
-  <div class="col-md-4">
-    <div class="card-custom">
-      <div class="stat-title">AVAILABLE BALANCE</div>
-      <div class="stat-value" id="availableBalance">$0</div>
+<!-- Earn cards -->
+<div class="earn-grid">
+    <div class="earn-card">
+        <div class="ico ico-avail"><i class="bi bi-wallet2"></i></div>
+        <div class="lbl">Available Balance</div>
+        <div class="val" id="availableBalance"><span class="skel" style="width:80px;height:1.8rem;">&nbsp;</span></div>
+        <div class="sub">Ready for withdrawal</div>
     </div>
-  </div>
-
-  <div class="col-md-4">
-    <div class="card-custom">
-      <div class="stat-title">REQUESTED BALANCE</div>
-      <div class="stat-value" id="requestedBalance">$0</div>
+    <div class="earn-card">
+        <div class="ico ico-req"><i class="bi bi-hourglass-split"></i></div>
+        <div class="lbl">Requested Balance</div>
+        <div class="val" id="requestedBalance"><span class="skel" style="width:80px;height:1.8rem;">&nbsp;</span></div>
+        <div class="sub">Processing payout</div>
     </div>
-  </div>
-
-  <div class="col-md-4">
-    <div class="card-custom">
-      <div class="stat-title">REVENUE (COMPLETED)</div>
-      <div class="stat-value" id="revenueBalance">$0</div>
+    <div class="earn-card">
+        <div class="ico ico-rev"><i class="bi bi-graph-up-arrow"></i></div>
+        <div class="lbl">Total Revenue</div>
+        <div class="val" id="revenueBalance"><span class="skel" style="width:80px;height:1.8rem;">&nbsp;</span></div>
+        <div class="sub">Completed transactions</div>
     </div>
-  </div>
-
 </div>
 
-<br />
-
-<!-- 🔥 OPTIONAL ACTION CARD -->
-<div class="card-custom">
-  <h5>Ready for Withdrawal</h5>
-  <p>
-    You have <b id="withdrawAmount">$0</b> available for payout.
-  </p>
-  <button class="btn btn-primary">Request Payout</button>
+<!-- Withdraw card -->
+<div class="withdraw-card">
+    <h4>Request a Payout</h4>
+    <p>You have <strong id="withdrawAmt">$0.00</strong> available for withdrawal. Payouts are processed within 3–5 business days.</p>
+    <button class="btn-withdraw" id="btnPayout" disabled>
+        <div class="gold-dot"></div> Request Payout
+    </button>
 </div>
+
+<!-- Payout history placeholder -->
+<div class="history-panel">
+    <h4>Payout History</h4>
+    <div class="empty-hist">
+        <i class="bi bi-clock-history" style="font-size:1.5rem;display:block;margin-bottom:.5rem;opacity:.4;"></i>
+        No payout history available yet.
+    </div>
+</div>
+
 
 @section Scripts {
-  <script>
-    $(document).ready(function () {
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/authHelper.js"></script>
+<script>
+$(function () {
+    if (!AuthHelper.requireAuth()) return;
 
-      const baseUrl = "http://localhost:5183/api/ArtistApi";
+    var BASE = AuthHelper.API_BASE;
 
-      $.ajax({
-        url: `${baseUrl}/earnings-summary`,
+    function fmt(v) {
+        return "$" + parseFloat(v || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    $.ajax({
+        url: BASE + "/earnings-summary",
         type: "GET",
-        headers: {
-          "Authorization": "Bearer " + localStorage.getItem("authToken")
-        },
         success: function (data) {
-
-          console.log("Earnings Data:", data);
-
-          $("#availableBalance").text("$" + data.availableBalance);
-          $("#requestedBalance").text("$" + data.requestedBalance);
-          $("#revenueBalance").text("$" + data.revenueBalance);
-
-          // Optional
-          $("#withdrawAmount").text("$" + data.availableBalance);
+            var avail = data.availableBalance || 0;
+            $("#availableBalance").text(fmt(avail));
+            $("#requestedBalance").text(fmt(data.requestedBalance));
+            $("#revenueBalance").text(fmt(data.revenueBalance));
+            $("#withdrawAmt").text(fmt(avail));
+            if (avail > 0) $("#btnPayout").prop("disabled", false);
         },
-        error: function () {
-          alert("Failed to load earnings data");
+        error: function (xhr) {
+            console.error("Earnings error:", xhr.status);
+            if (xhr.status !== 401) {
+                Swal.fire({ icon: "error", title: "Could not load earnings", confirmButtonColor: "#14122a" });
+            }
         }
-      });
-
     });
-  </script>
+
+    $("#btnPayout").on("click", function () {
+        Swal.fire({
+            title: "Request Payout?",
+            text: "This will initiate a withdrawal of your available balance.",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#14122a",
+            confirmButtonText: "Yes, request"
+        }).then(function (r) {
+            if (r.isConfirmed) {
+                Swal.fire({ icon: "success", title: "Request Submitted", text: "Your payout will be processed within 3–5 business days.", confirmButtonColor: "#14122a" });
+            }
+        });
+    });
+});
+</script>
 }

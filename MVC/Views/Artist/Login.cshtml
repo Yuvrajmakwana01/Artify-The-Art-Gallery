@@ -1,319 +1,210 @@
 ﻿@{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Sign In";
     Layout = null;
 }
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Artify - Login</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Artify — Sign In</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
     <link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.common.min.css" rel="stylesheet" />
     <link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.default-v2.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
     <style>
-        :root {
-            --accent: #6c3fff;
-            --accent-hover: #5a32d1;
-            --text-main: #1a1a1a;
-            --text-muted: #666666;
-            --glass-card: rgba(255, 255, 255, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.4);
-        }
-
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            height: 100vh;
-            overflow: hidden;
-            font-family: 'Inter', sans-serif;
-            background: #f0f2f5;
-        }
-
-        /* ── Spline Background ── */
-        .spline-bg {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        .spline-bg iframe {
-            width: 100%;
-            height: calc(100% + 100px); 
-            border: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-        .viewport {
-            position: fixed;
-            inset: 0;
-            z-index: 2;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(circle at center, transparent 0%, rgba(255, 255, 255, 0.2) 100%);
-        }
-
-        /* ── Professional Redesigned Card ── */
-        .card {
-            width: 100%;
-            max-width: 420px;
-            background: var(--glass-card);
-            backdrop-filter: blur(20px) saturate(160%);
-            -webkit-backdrop-filter: blur(20px) saturate(160%);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 40px;
-            box-shadow: 
-                0 20px 40px rgba(0,0,0,0.1),
-                inset 0 0 0 1px rgba(255,255,255,0.5);
-            text-align: center;
-        }
-
-        .card-title {
-            font-family: 'Syne', sans-serif;
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--text-main);
-            margin-bottom: 4px;
-        }
-
-        .card-sub {
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            margin-bottom: 30px;
-        }
-
-        /* ── Social Login ── */
-        .google-btn {
-            width: 100%;
-            height: 48px;
-            background: #ffffff !important;
-            border: 1px solid #e0e0e0 !important;
-            border-radius: 12px !important;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            color: #3c4043 !important;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.2s;
-            margin-bottom: 24px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .google-btn:hover {
-            background: #f8f9fa !important;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transform: translateY(-1px);
-        }
-
-        /* ── Divider ── */
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 24px 0;
-        }
-        .divider::before, .divider::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: rgba(0,0,0,0.1);
-        }
-        .divider span {
-            padding: 0 15px;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            font-weight: 700;
-        }
-
-        /* ── Inputs ── */
-        .field-group {
-            text-align: left;
-            margin-bottom: 18px;
-        }
-
-        .field-label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-main);
-            margin-bottom: 6px;
-            display: block;
-        }
-
-        /* Using white backgrounds for inputs ensures legibility regardless of BG color */
-        .k-textbox {
-            background: #ffffff !important;
-            border: 1px solid #dcdcdc !important;
-            border-radius: 10px !important;
-            padding: 12px 16px !important;
-            color: var(--text-main) !important;
-            width: 100% !important;
-            font-size: 0.95rem !important;
-            height: auto !important;
-            transition: border-color 0.2s;
-        }
-
-        .k-textbox:focus {
-            border-color: var(--accent) !important;
-            box-shadow: 0 0 0 3px rgba(108, 63, 255, 0.1) !important;
-        }
-
-        /* ── Submit Button ── */
-        .btn-enter {
-            width: 100%;
-            padding: 14px;
-            background: var(--accent) !important;
-            border: none !important;
-            border-radius: 12px !important;
-            color: #ffffff !important;
-            font-family: 'Syne', sans-serif !important;
-            font-weight: 700 !important;
-            font-size: 1rem !important;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: all 0.3s;
-        }
-
-        .btn-enter:hover {
-            background: var(--accent-hover) !important;
-            transform: translateY(-1px);
-            box-shadow: 0 8px 15px rgba(108, 63, 255, 0.3);
-        }
-
-        /* ── Register Link ── */
-        .register-btn {
-            display: inline-block;
-            margin-top: 25px;
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: opacity 0.2s;
-        }
-
-        .register-btn:hover {
-            opacity: 0.8;
-            text-decoration: underline;
-        }
-
-        .k-tooltip-validation {
-            background: #ff4757 !important;
-            margin-top: 5px;
-            border-radius: 6px;
-        }
-
-        @@media (max-width: 480px) {
-            .card { padding: 30px 20px; margin: 15px; }
-        }
+        :root{--navy:#14122a;--gold:#c9a96e;--paper:#faf8f5;--text:#1a1612;--muted:#6b6057;--border:rgba(0,0,0,.09)}
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'DM Sans',sans-serif;background:var(--paper);min-height:100vh;
+             display:flex;align-items:center;justify-content:center;padding:2rem 1rem;}
+        body::before{content:'';position:fixed;inset:0;pointer-events:none;
+            background:radial-gradient(ellipse 60% 55% at 8% 15%,rgba(201,169,110,.08) 0%,transparent 70%),
+                        radial-gradient(ellipse 55% 65% at 92% 85%,rgba(20,18,42,.07) 0%,transparent 70%);}
+        .wrap{width:100%;max-width:430px;position:relative;z-index:1;}
+        .brand{display:flex;align-items:center;gap:10px;margin-bottom:1.75rem;justify-content:center;}
+        .brand-dot{width:30px;height:30px;border-radius:8px;background:var(--navy);display:flex;align-items:center;justify-content:center;}
+        .brand-dot span{width:9px;height:9px;border-radius:50%;background:var(--gold);display:block;}
+        .brand-name{font-family:'Syne',sans-serif;font-size:.78rem;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--text);}
+        .card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:2.5rem;box-shadow:0 2px 20px rgba(0,0,0,.06);}
+        .card h1{font-family:'Syne',sans-serif;font-size:1.65rem;font-weight:800;color:var(--navy);margin-bottom:4px;}
+        .card .sub{font-size:.88rem;color:var(--muted);margin-bottom:2rem;}
+        .field{display:flex;flex-direction:column;gap:6px;margin-bottom:1.1rem;}
+        .field label{font-size:.73rem;font-weight:600;color:var(--muted);letter-spacing:.3px;}
+        .k-textbox{background:#faf8f5!important;border:1px solid var(--border)!important;border-radius:10px!important;
+                   padding:12px 14px!important;width:100%!important;font-family:'DM Sans',sans-serif!important;
+                   font-size:.9rem!important;color:var(--text)!important;transition:border-color .18s,box-shadow .18s!important;}
+        .k-textbox:focus{border-color:var(--gold)!important;box-shadow:0 0 0 3px rgba(201,169,110,.2)!important;}
+        .k-callout{display:none!important}
+        .k-tooltip-validation{background:transparent!important;color:#c0392b!important;box-shadow:none!important;
+                               border:none!important;font-size:.72rem!important;padding:4px 0 0!important;}
+        .pw-wrap{position:relative;}
+        .pw-wrap .k-textbox{padding-right:56px!important;}
+        .pw-toggle{position:absolute;right:0;top:0;bottom:0;width:46px;display:flex;align-items:center;
+                   justify-content:center;background:none;border:none;cursor:pointer;color:var(--muted);
+                   font-size:.72rem;font-weight:600;font-family:'DM Sans',sans-serif;letter-spacing:.3px;}
+        .pw-toggle:hover{color:var(--navy);}
+        .btn-login{width:100%;height:50px;border-radius:12px;border:none;background:var(--navy);color:#fff;
+                   font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;letter-spacing:1px;
+                   text-transform:uppercase;cursor:pointer;margin-top:.5rem;transition:all .2s;
+                   display:flex;align-items:center;justify-content:center;gap:8px;}
+        .btn-login:hover{background:#1e1b38;transform:translateY(-1px);box-shadow:0 6px 22px rgba(20,18,42,.3);}
+        .btn-login:disabled{opacity:.6;transform:none;cursor:not-allowed;}
+        .gold-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;}
+        .pending-banner{display:none;background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;
+                         padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.85rem;color:#92400e;}
+        .pending-banner strong{display:block;margin-bottom:3px;font-size:.88rem;}
+        .divider{display:flex;align-items:center;gap:12px;margin:1.5rem 0;}
+        .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+        .divider span{font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:600;}
+        .footer-note{text-align:center;font-size:.85rem;color:var(--muted);}
+        .footer-note a{color:#8a5e1a;font-weight:600;text-decoration:none;}
+        .footer-note a:hover{text-decoration:underline;}
     </style>
 </head>
 <body>
-
-    <div class="spline-bg">
-         <iframe src='https://my.spline.design/portfoliocreatedby100rav-vne8BpuDr6wO29LUPoUJ32tY/' frameborder='0'></iframe>
+<div class="wrap">
+    <div class="brand">
+        <div class="brand-dot"><span></span></div>
+        <span class="brand-name">Artify</span>
     </div>
 
-    <div class="viewport">
-        <div class="card animate__animated animate__fadeInUp">
-            <h2 class="card-title">Artify</h2>
-            <p class="card-sub">Login to your creative studio</p>
+    <div class="card">
+        <h1>Welcome back</h1>
+        <p class="sub">Sign in to your creative studio.</p>
 
-            <a href="#" class="google-btn">
-                <svg width="20" height="20" viewBox="0 0 48 48">
-                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-                </svg>
-                Continue with Google
-            </a>
-
-            <div class="divider">
-                <span>OR EMAIL</span>
-            </div>
-
-            <form id="loginForm">
-                <div class="field-group">
-                    <label class="field-label" for="txtEmail">Email Address</label>
-                    <input id="txtEmail" name="c_Email" class="k-textbox" type="email" required 
-                           placeholder="artist@example.com" data-email-msg="Invalid email" data-required-msg="Email is required" />
-                </div>
-
-                <div class="field-group">
-                    <label class="field-label" for="txtPassword">Password</label>
-                    <input id="txtPassword" name="c_Password" type="password" class="k-textbox" required 
-                           placeholder="••••••••" data-required-msg="Password is required" />
-                </div>
-
-                <button type="button" id="btnLogin" class="btn-enter">SIGN IN</button>
-            </form>
-
-            <a href="/Artist/Register" class="register-btn">Don't have an account? Sign Up</a>
+        <!-- Shown when account is pending approval -->
+        <div class="pending-banner" id="pendingBanner">
+            <strong>⏳ Account Pending Approval</strong>
+            Your registration is under review. You will receive access once an admin approves your account.
         </div>
+
+        <form id="loginForm" novalidate>
+            <div class="field">
+                <label for="txtEmail">Email Address</label>
+                <input id="txtEmail" name="c_Email" type="email" required
+                       placeholder="artist@example.com"
+                       data-email-msg="Please enter a valid email"
+                       data-required-msg="Email is required" />
+            </div>
+            <div class="field">
+                <label for="txtPassword">Password</label>
+                <div class="pw-wrap">
+                    <input id="txtPassword" name="c_Password" type="password" required
+                           placeholder="••••••••"
+                           data-required-msg="Password is required" />
+                    <button type="button" class="pw-toggle" id="togglePw">Show</button>
+                </div>
+            </div>
+            <button type="button" class="btn-login" id="btnLogin">
+                <div class="gold-dot"></div>
+                <span id="btnText">Sign In</span>
+            </button>
+        </form>
+
+        <div class="divider"><span>New here?</span></div>
+        <p class="footer-note">
+            Don't have an account? <a href="/Artist/Register">Create one</a>
+        </p>
     </div>
+</div>
 
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+$(function () {
 
-    <script>
-        $(document).ready(function () {
-            var validator = $("#loginForm").kendoValidator().data("kendoValidator");
+    $("#txtEmail,#txtPassword").kendoTextBox();
 
-            $("#btnLogin").click(function () {
-                if (validator.validate()) {
-                    kendo.ui.progress($(".card"), true);
-                    const btn = $(this);
-                    btn.prop("disabled", true).text("AUTHENTICATING...");
+    // Password show / hide
+    $("#togglePw").on("click", function () {
+        var inp = $("#txtPassword")[0];
+        if (inp.type === "password") { inp.type = "text";     $(this).text("Hide"); }
+        else                         { inp.type = "password"; $(this).text("Show"); }
+    });
 
-                    $.ajax({
-                        url: 'http://localhost:5183/api/ArtistApi/Login',
-                        type: 'POST',
-                        data: new FormData($("#loginForm")[0]),
-                        contentType: false,
-                        processData: false,
-                        success: function (res) {
-                            kendo.ui.progress($(".card"), false);
-                            if (res.success) {
-                                // 1. Save the token
-                                localStorage.setItem("authToken", res.token);
-        
-                                // 2. FIX: Change 'res.data' to 'res.userData' 
-                                // JavaScript usually converts C# PascalCase to camelCase in JSON
-                                localStorage.setItem("userData", JSON.stringify(res.userData));
-                                Swal.fire({ icon: 'success', title: 'Welcome!', showConfirmButton: false, timer: 1200 })
-                                    .then(() => window.location.href = "/Artist/DashBoard");
-                            } else {
-                                btn.prop("disabled", false).text("SIGN IN");
-                                Swal.fire('Error', res.message || 'Login failed', 'error');
-                            }
-                        },
-                        error: function () {
-                            kendo.ui.progress($(".card"), false);
-                            btn.prop("disabled", false).text("SIGN IN");
-                            Swal.fire('Error', 'Server connection failed', 'warning');
-                        }
+    var validator = $("#loginForm").kendoValidator().data("kendoValidator");
+
+    $("#btnLogin").on("click", function () {
+        if (!validator.validate()) return;
+
+        var btn = $(this);
+        btn.prop("disabled", true);
+        $("#btnText").text("Signing in…");
+        $("#pendingBanner").hide();
+
+        $.ajax({
+            url:         "http://localhost:5183/api/ArtistApi/Login",
+            type:        "POST",
+            data:        new FormData($("#loginForm")[0]),
+            contentType: false,
+            processData: false,
+            // ─────────────────────────────────────────────────
+            // withCredentials:true is set HERE and ONLY here.
+            // This is the only call that needs to receive the
+            // Set-Cookie header from the API. Setting it globally
+            // via $.ajaxSetup would conflict with CORS on other
+            // endpoints that use a different policy (wildcard).
+            // ─────────────────────────────────────────────────
+            xhrFields: { withCredentials: true },
+            success: function (res) {
+    btn.prop("disabled", false);
+    $("#btnText").text("Sign In");
+
+    if (res.success) {
+        localStorage.setItem("authToken", res.token);
+        localStorage.setItem("userData", JSON.stringify(res.userData));
+
+        // ✅ NEW: Write session on the MVC server before redirecting
+        $.ajax({
+            url: "/Artist/SetSession",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                artistId: res.userData.c_User_Id,
+                token: res.token
+            }),
+            success: function () {
+                Swal.fire({
+                    icon: "success",
+                    title: "Welcome!",
+                    showConfirmButton: false,
+                    timer: 1100
+                }).then(function () {
+                    window.location.href = "/Artist/DashBoard";
+                });
+            },
+            error: function () {
+                Swal.fire({ icon: "error", title: "Session error", text: "Could not establish session." });
+            }
+        });
+
+                } else if (res.inactive) {
+                    $("#pendingBanner").slideDown(200);
+
+                } else {
+                    Swal.fire({
+                        icon:             "error",
+                        title:            "Sign-in failed",
+                        text:             res.message || "Invalid email or password.",
+                        confirmButtonColor: "#14122a"
                     });
                 }
-            });
+            },
+            error: function (xhr) {
+                btn.prop("disabled", false);
+                $("#btnText").text("Sign In");
+                var msg = (xhr.responseJSON && xhr.responseJSON.message) || "Could not reach the server.";
+                Swal.fire({ icon: "warning", title: "Connection error", text: msg, confirmButtonColor: "#14122a" });
+            }
         });
-    </script>
+    });
+
+    // Allow Enter key to submit
+    $(document).on("keypress", function (e) {
+        if (e.key === "Enter") $("#btnLogin").trigger("click");
+    });
+});
+</script>
 </body>
 </html>

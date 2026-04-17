@@ -1,200 +1,148 @@
 @{
-    ViewData["Title"] = "Sales & Earnings";
-    Layout = "~/Views/Shared/_ArtisLayout.cshtml";
+    ViewData["Title"] = "Sales History";
+    Layout = "~/Views/Shared/_ArtistLayout.cshtml";
 }
 
-<!-- Bootstrap -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-
-<!-- DataTables -->
-<link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet" />
-
-<!-- Icons -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.common.min.css" rel="stylesheet" />
+<link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.default-v2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
 
 <style>
-    :root {
-        --primary: #7c3aed;
-        --bg-main: #f3f4f6;
-        --border: #e5e7eb;
-    }
+    :root{--navy:#14122a;--gold:#a0692a;--gold-dim:rgba(160,105,42,.1);
+          --paper:#faf8f5;--white:#fff;--border:rgba(0,0,0,.08);
+          --text:#1a1612;--text-2:#6b6057;--text-3:#a89e94;--radius:16px;}
+    body{font-family:'Outfit',sans-serif;background:var(--paper);}
 
-    body {
-        background: var(--bg-main);
-        font-family: 'Segoe UI', sans-serif;
-    }
+    .pg-title{font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:700;color:var(--navy);margin:0 0 1.5rem;}
 
-    /* SIDEBAR */
-    .sidebar {
-        position: fixed;
-        width: 220px;
-        height: 100%;
-        background: #fff;
-        border-right: 1px solid var(--border);
-        padding: 20px;
-    }
+    /* Summary strip */
+    .summary-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;}
+    .s-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;}
+    .s-card .lbl{font-size:.68rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;}
+    .s-card .val{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:var(--navy);}
 
-    .sidebar .nav-link {
-        color: #6b7280;
-        margin-bottom: 10px;
-        border-radius: 8px;
-    }
+    /* Kendo Grid panel */
+    .grid-panel{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;}
+    .grid-panel h4{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.1rem;}
+    .k-grid{border:1px solid var(--border)!important;border-radius:12px!important;}
+    .k-grid th{background:var(--paper)!important;font-size:.7rem;font-weight:600;letter-spacing:1px;
+               text-transform:uppercase;color:var(--text-3);border-color:var(--border)!important;}
+    .k-grid td{font-size:.85rem;border-color:var(--border)!important;vertical-align:middle;}
+    .badge-status{padding:4px 12px;border-radius:100px;font-size:.67rem;font-weight:700;
+                  text-transform:uppercase;letter-spacing:.4px;border:1px solid;display:inline-block;}
+    .b-completed{background:#dcfce7;color:#166534;border-color:#86efac;}
+    .b-processing{background:#fffbeb;color:#92400e;border-color:#fcd34d;}
+    .b-pending{background:#fffbeb;color:#92400e;border-color:#fcd34d;}
 
-    .sidebar .nav-link:hover,
-    .sidebar .nav-link.active {
-        background: #ede9fe;
-        color: var(--primary);
-    }
-
-    /* MAIN */
-    .main {
-        margin-left: 220px;
-    }
-
-    /* TOPBAR */
-    .topbar {
-        background: #fff;
-        padding: 15px 25px;
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .content {
-        padding: 25px;
-    }
-
-    .card-box {
-        background: #fff;
-        border-radius: 12px;
-        padding: 20px;
-        border: 1px solid var(--border);
-    }
-
-    .status-badge {
-        padding: 5px 10px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .completed { background: #dcfce7; color: #16a34a; }
-    .processing { background: #fef9c3; color: #d97706; }
-
+    @@media(max-width:640px){.summary-strip{grid-template-columns:1fr}}
 </style>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-    <h5 class="mb-4"><i class="bi bi-palette"></i> ArtSpace</h5>
+<h1 class="pg-title">Sales History</h1>
 
-    <nav class="nav flex-column">
-        <a class="nav-link active" href="#">Dashboard</a>
-        <a class="nav-link" href="#">Sales History</a>
-        <a class="nav-link" href="#">Artworks</a>
-        <a class="nav-link" href="#">Earnings</a>
-        <a class="nav-link" href="#">Settings</a>
-    </nav>
+<!-- Summary strip -->
+<div class="summary-strip">
+    <div class="s-card">
+        <div class="lbl">Total Earnings</div>
+        <div class="val" id="sumEarnings">$—</div>
+    </div>
+    <div class="s-card">
+        <div class="lbl">Total Sales</div>
+        <div class="val" id="sumSales">—</div>
+    </div>
+    <div class="s-card">
+        <div class="lbl">Artworks Sold</div>
+        <div class="val" id="sumArtworks">—</div>
+    </div>
 </div>
 
-<!-- MAIN -->
-<div class="main">
-
-    <!-- TOPBAR -->
-    <div class="topbar">
-        <h5><i class="bi bi-bar-chart"></i> Sales & Earnings</h5>
-
-        <div class="d-flex align-items-center gap-3">
-            <input type="text" class="form-control" placeholder="Search..." style="width:200px;" />
-            <i class="bi bi-bell"></i>
-            <div class="bg-primary text-white rounded-circle px-2">A</div>
-        </div>
-    </div>
-
-    <!-- CONTENT -->
-    <div class="content">
-
-        <!-- CARDS -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card-box">
-                    <h6>Total Earnings</h6>
-                    <h4>$12,450</h4>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card-box">
-                    <h6>Balance</h6>
-                    <h4>$3,205</h4>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card-box">
-                    <h6>Commission</h6>
-                    <h4>$1,867</h4>
-                </div>
-            </div>
-        </div>
-
-        <!-- TABLE -->
-        <div class="card-box">
-            <table id="salesTable" class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Artwork</th>
-                        <th>Buyer</th>
-                        <th>Date</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-            </table>
-        </div>
-
-    </div>
+<!-- Sales grid (Kendo) -->
+<div class="grid-panel">
+    <h4>Transaction History</h4>
+    <div id="salesGrid"></div>
 </div>
 
 @section Scripts {
-
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- ★ Auth helper ★ -->
+<script src="/js/authHelper.js"></script>
 <script>
+$(function () {
+    if (!AuthHelper.requireAuth()) return;
 
-    const salesData = [
-        { artwork: "Neon Dreams", buyer: "Alex", date: "2023-10-12", amount: 850, status: "Completed" },
-        { artwork: "Static Motion", buyer: "Sarah", date: "2023-10-11", amount: 2400, status: "Processing" },
-        { artwork: "Vortex Waves", buyer: "Marcus", date: "2023-10-09", amount: 420, status: "Completed" }
-    ];
+    var BASE = "http://localhost:5183/api/ArtistApi";
 
-    function getBadge(status) {
-        let cls = status === "Completed" ? "completed" : "processing";
-        return `<span class="status-badge ${cls}">${status}</span>`;
-    }
-
-    $(document).ready(function () {
-
-        $('#salesTable').DataTable({
-            data: salesData,
-            columns: [
-                { data: 'artwork' },
-                { data: 'buyer' },
-                { data: 'date' },
-                {
-                    data: 'amount',
-                    render: function (d) { return "$" + d; }
-                },
-                {
-                    data: 'status',
-                    render: function (d) { return getBadge(d); }
-                }
-            ]
-        });
-
+    // ── Dashboard data for summary strip ──────────────────
+    $.ajax({
+        url: BASE + "/dashboard", type: "GET",
+        success: function (data) {
+            var earn = parseFloat(data.c_TotalEarning || 0);
+            $("#sumEarnings").text("$" + earn.toLocaleString("en-US", { minimumFractionDigits: 2 }));
+            $("#sumSales").text(data.c_TotalSellCount || 0);
+            $("#sumArtworks").text(data.c_TotalArtworkCount || 0);
+        }
     });
 
+    // ── Sales Kendo Grid ───────────────────────────────────
+    // Pulls the artist's artworks and displays sell stats
+    $.ajax({
+        url: BASE + "/GetMyArtworks", type: "GET",
+        success: function (res) {
+            var rows = (res.data || []).filter(function (a) { return a.c_sell_count > 0; });
+
+            if (!rows.length) {
+                $("#salesGrid").html(
+                    '<div style="text-align:center;padding:3rem;color:var(--text-3);font-size:.88rem;">'
+                    + '<i class="bi bi-bag-x" style="font-size:1.8rem;display:block;margin-bottom:.6rem;opacity:.4;"></i>'
+                    + 'No sales recorded yet.</div>');
+                return;
+            }
+
+            $("#salesGrid").kendoGrid({
+                dataSource: {
+                    data:     rows,
+                    pageSize: 10,
+                    schema: {
+                        model: {
+                            fields: {
+                                c_title:            { type: "string"  },
+                                CategoryName:       { type: "string"  },
+                                c_price:            { type: "number"  },
+                                c_sell_count:       { type: "number"  },
+                                c_approval_status:  { type: "string"  }
+                            }
+                        }
+                    }
+                },
+                pageable: { buttonCount: 5 },
+                sortable: true,
+                filterable: { mode: "row" },
+                columns: [
+                    { field: "c_title",      title: "Artwork",   width: 200 },
+                    { field: "CategoryName", title: "Category",  width: 130 },
+                    { field: "c_price",      title: "Price",     width: 100,
+                      template: "$#= parseFloat(c_price).toFixed(2) #" },
+                    { field: "c_sell_count", title: "Units Sold",width: 110 },
+                    { title: "Revenue", width: 120,
+                      template: function (d) {
+                          return "$" + (parseFloat(d.c_price) * d.c_sell_count).toFixed(2);
+                      }},
+                    { field: "c_approval_status", title: "Status", width: 120,
+                      template: function (d) {
+                          var s  = d.c_approval_status || "Pending";
+                          var cl = s === "Approved" ? "b-completed" : s === "Rejected" ? "" : "b-pending";
+                          return '<span class="badge-status ' + cl + '">' + s + '</span>';
+                      }}
+                ]
+            });
+        },
+        error: function () {
+            Swal.fire({ icon: "error", title: "Could not load sales", confirmButtonColor: "#14122a" });
+        }
+    });
+});
 </script>
 }

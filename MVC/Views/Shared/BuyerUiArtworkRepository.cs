@@ -1,0 +1,94 @@
+using Microsoft.Extensions.Configuration;
+using Npgsql;
+using NpgsqlTypes;
+using Repository.Interfaces;
+using Repository.Models;
+
+namespace Repository.Implementations;
+
+public class BuyerUiArtworkRepository : IBuyerUiArtworkInterface
+{
+    private readonly string _connectionString;
+
+    public BuyerUiArtworkRepository(IConfiguration config)
+    {
+        _connectionString = config.GetConnectionString("pgconn");
+    }
+
+    // ── SHARED SQL ────────────────────────────────────────────────────────
+    private const string SelectColumns = @"
+        SELECT
+            a.c_artwork_id,
+            a.c_artist_id,
+            a.c_category_id,
+            a.c_title,
+            a.c_description,
+            a.c_price,
+            a.c_preview_path,
+            a.c_original_path,
+            a.c_approval_status,
+            a.c_created_at,
+            a.c_likes_count,
+            a.c_sell_count,
+            ap.c_artist_name,
+            cat.c_category_name
+        FROM t_artwork a
+        JOIN t_artist_profile ap  ON ap.c_artist_id   = a.c_artist_id
+        JOIN t_category       cat ON cat.c_category_id = a.c_category_id";
+
+    // ── MAPPER ────────────────────────────────────────────────────────────
+    private static t_BuyerUiArtwork MapRow(NpgsqlDataReader r) => new()
+    {
+        ArtworkId      = r.GetInt32(0),
+        ArtistId       = r.GetInt32(1),
+        CategoryId     = r.GetInt32(2),
+        Title          = r.GetString(3),
+        Description    = r.IsDBNull(4)  ? null : r.GetString(4),
+        Price          = r.GetDecimal(5),
+        PreviewPath    = r.IsDBNull(6)  ? null : r.GetString(6),
+        OriginalPath   = r.IsDBNull(7)  ? null : r.GetString(7),
+        ApprovalStatus = r.GetString(8),
+        CreatedAt      = r.GetDateTime(9),
+        LikesCount     = r.GetInt32(10),
+        SellCount      = r.GetInt32(11),
+        ArtistName     = r.GetString(12),
+        CategoryName   = r.GetString(13),
+    };
+
+    // ── GET ALL APPROVED ──────────────────────────────────────────────────
+    public async Task<List<t_BuyerUiArtwork>> GetAllApprovedAsync()
+    {
+        var list = new List<t_BuyerUiArtwork>();
+
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        await using var cmd = new NpgsqlCommand(
+            SelectColumns + " WHERE a.c_approval_status = 'Approved' ORDER BY a.c_created_at DESC",
+            conn);
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+
+        while (await reader.ReadAsync())
+            list.Add(MapRow(reader));
+
+        return list;
+    }
+
+    // ── GET BY ID ─────────────────────────────────────────────────────────
+    public async Task<t_BuyerUiArtwork?> GetByIdAsync(int artworkId)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        await using var cmd = new NpgsqlCommand(
+            SelectColumns + " WHERE a.c_artwork_id = @id AND a.c_approval_status = 'Approved'",
+            conn);
+
+        cmd.Parameters.Add("@id", NpgsqlDbType.Integer).Value = artworkId;
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+
+        return await reader.ReadAsync() ? MapRow(reader) : null;
+    }
+}

@@ -26,6 +26,8 @@ namespace Repository.Services
                 Host = section["Host"],
                 Port = int.Parse(section["Port"])
             };
+            _templateBasePath = Path.Combine(AppContext.BaseDirectory, "Templates");
+
         }
 
         // ✅ COMMON METHOD (Use everywhere)
@@ -41,7 +43,6 @@ namespace Repository.Services
             email.From.Add(new MailboxAddress("Artify Gallery", _emailSettings.Email));
 
             // ✅ ADDED (template path setup)
-            // _templateBasePath = Path.Combine(AppContext.BaseDirectory, "Templates");
         }
 
         public async Task SendEmailWithLogo(string toEmail, string subject, string body, string logoPath)

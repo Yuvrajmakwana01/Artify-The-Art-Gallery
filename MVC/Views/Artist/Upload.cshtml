@@ -132,144 +132,131 @@
         </div>
     </div>
 </div>
-
 @section Scripts {
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/authHelper.js"></script>
 
-    <script>
-        $(document).ready(function () {
-            // 1. Initialize Kendo Validator
-            var validator = $("#artworkForm").kendoValidator({
-                rules: {
-                    uploadRequired: function(input) {
-                        if (input.is("[name='ArtworkFile']")) {
-                            return input.closest(".k-upload").find(".k-file").length > 0;
-                        }
-                        return true;
-                    }
-                },
-                messages: {
-                    uploadRequired: "Please select an artwork file"
-                }
-            }).data("kendoValidator");
+<script>
+$(document).ready(function () {
+    if (!AuthHelper.requireAuth()) return;
 
-            // 2. Initialize UI Components
-            $("#c_title").kendoTextBox({ 
-                change: function() { $("#viewTitle").text(this.value() || "Artwork Title"); } 
-            });
+    var BASE = AuthHelper.API_BASE;
+    var userData = AuthHelper.getUser();
 
-            $("#c_price").kendoNumericTextBox({ 
-                format: "c2", 
-                min: 0,
-                change: function() { $("#viewPrice").text(kendo.toString(this.value(), "c2") || "$0.00"); } 
-            });
-
-            $("#c_description").kendoTextArea({ 
-                rows: 3,
-                change: function() { $("#viewDesc").text(this.value() || "The description you write will appear here..."); }
-            });
-            
-            $("#c_category_id").kendoDropDownList({
-                dataTextField: "name", 
-                dataValueField: "id",
-                optionLabel: "Select Genre...",
-                dataSource: { 
-                    transport: { 
-                        read: { url: "http://localhost:5183/api/ArtistApi/GetCategories", dataType: "json" } 
-                    } 
-                },
-                change: function() { $("#viewCategory").text(this.text()); }
-            });
-
-            $("#ArtworkFile").kendoUpload({
-                multiple: false,
-                validation: { allowedExtensions: [".jpg", ".jpeg", ".png"] },
-                select: function(e) {
-                    var file = e.files[0].rawFile;
-                    if (file) {
-                        var reader = new FileReader();
-                        reader.onload = function(ev) { 
-                            $("#iconPlaceholder").hide(); 
-                            $("#imgPlaceholder").attr("src", ev.target.result).show(); 
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                },
-                remove: function() {
-                    $("#imgPlaceholder").hide();
-                    $("#iconPlaceholder").show();
-                }
-            });
-
-            // 3. Optimized Submit Logic
-            $("#btnPublish").click(function() {
-                if (validator.validate()) {
-                    var userDataRaw = localStorage.getItem("userData");
-                    
-                    if (!userDataRaw || userDataRaw === "undefined") {
-                        kendo.alert("Session expired. Please log in again.");
-                        return;
-                    }
-
-                    var user = JSON.parse(userDataRaw);
-                    var formData = new FormData($("#artworkForm")[0]);
-                    
-                    // Append Artist ID from session
-                    if (user && user.c_User_Id) {
-                        formData.append("c_artist_id", user.c_User_Id);
-                    } else {
-                        kendo.alert("Artist profile error. Please log in.");
-                        return;
-                    }
-
-                    // Show loading state
-                    kendo.ui.progress($(".glass-panel"), true);
-
-                    $.ajax({
-                        url: 'http://localhost:5183/api/ArtistApi/Upload',
-                        type: 'POST',
-                        data: formData,
-                        processData: false, 
-                        contentType: false,
-                        success: function(res) {
-    kendo.ui.progress($(".glass-panel"), false);
-    if(res.success) {
-        // SweetAlert2 Success
-        Swal.fire({
-            title: 'Masterpiece Published!',
-            text: res.message,
-            icon: 'success',
-            confirmButtonText: 'View Gallery',
-            confirmButtonColor: '#6366f1',
-            timer: 2000,
-            timerProgressBar: true
-        }).then(() => {
-            window.location.href = "/Artist/Gallery";
+    if (!userData || !userData.c_User_Id) {
+        Swal.fire("Error", "Please login again.", "error").then(function() {
+            window.location.href = "/Artist/Login";
         });
-    } else {
-        // SweetAlert2 Error
-        Swal.fire({
-            title: 'Upload Failed',
-            text: res.message || 'Something went wrong.',
-            icon: 'error',
-            confirmButtonColor: '#a855f7'
-        });
+        return;
     }
-},
-error: function(xhr) {
-    kendo.ui.progress($(".glass-panel"), false);
-    Swal.fire({
-        title: 'Connection Error',
-        text: 'Unable to reach the server. Please check your internet.',
-        icon: 'warning'
+
+    // Initialize Kendo components
+    $("#c_title").kendoTextBox({ 
+        change: function() { $("#viewTitle").text(this.value() || "Artwork Title"); } 
     });
-    console.log(xhr.responseText);
-}
+
+    $("#c_price").kendoNumericTextBox({ 
+        format: "c2", 
+        min: 0,
+        change: function() { $("#viewPrice").text(kendo.toString(this.value(), "c2") || "$0.00"); } 
+    });
+
+    $("#c_description").kendoTextArea({ 
+        rows: 3,
+        change: function() { $("#viewDesc").text(this.value() || "The description you write will appear here..."); }
+    });
+    
+    $("#c_category_id").kendoDropDownList({
+        dataTextField: "name", 
+        dataValueField: "id",
+        optionLabel: "Select Genre...",
+        dataSource: { 
+            transport: { 
+                read: { 
+                    url: BASE + "/GetCategories", 
+                    dataType: "json",
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader("Authorization", "Bearer " + AuthHelper.getToken());
+                    }
+                } 
+            } 
+        },
+        change: function() { $("#viewCategory").text(this.text()); }
+    });
+
+    $("#ArtworkFile").kendoUpload({
+        multiple: false,
+        validation: { allowedExtensions: [".jpg", ".jpeg", ".png"] },
+        select: function(e) {
+            var file = e.files[0].rawFile;
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(ev) { 
+                    $("#iconPlaceholder").hide(); 
+                    $("#imgPlaceholder").attr("src", ev.target.result).show(); 
+                };
+                reader.readAsDataURL(file);
+            }
+        },
+        remove: function() {
+            $("#imgPlaceholder").hide();
+            $("#iconPlaceholder").show();
+        }
+    });
+
+    // Submit
+    $("#btnPublish").click(function() {
+        var validator = $("#artworkForm").data("kendoValidator");
+        if (validator && !validator.validate()) return;
+
+        var formData = new FormData($("#artworkForm")[0]);
+        formData.append("c_artist_id", userData.c_User_Id);
+
+        var btn = $(this);
+        btn.prop("disabled", true).html('<i class="k-icon k-i-loading me-2"></i> PUBLISHING...');
+
+        $.ajax({
+            url: BASE + '/Upload',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(res) {
+                btn.prop("disabled", false).html('<i class="k-icon k-i-check me-2"></i> PUBLISH TO GALLERY');
+                if (res.success) {
+                    Swal.fire({
+                        title: 'Masterpiece Published!',
+                        text: res.message,
+                        icon: 'success',
+                        confirmButtonText: 'View Gallery',
+                        confirmButtonColor: '#6366f1',
+                        timer: 2000,
+                        timerProgressBar: true
+                    }).then(function() {
+                        window.location.href = "/Artist/Gallery";
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Upload Failed',
+                        text: res.message || 'Something went wrong.',
+                        icon: 'error',
+                        confirmButtonColor: '#a855f7'
                     });
                 }
-            });
+            },
+            error: function(xhr) {
+                btn.prop("disabled", false).html('<i class="k-icon k-i-check me-2"></i> PUBLISH TO GALLERY');
+                var msg = xhr.responseText || 'Unable to reach the server.';
+                Swal.fire({
+                    title: 'Connection Error',
+                    text: msg,
+                    icon: 'warning'
+                });
+            }
         });
-    </script>
+    });
+});
+</script>
 }

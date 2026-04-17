@@ -45,6 +45,9 @@ namespace Repository.Models
 
         public string ? c_Social_Media_Link { get; set; }
         
+
+        public bool c_Is_Active { get; set; } = false;
+
         public IFormFile? ProfilePicture { get; set; }
 
         public IFormFile? CoverPicture { get; set; }

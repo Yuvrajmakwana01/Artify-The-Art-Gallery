@@ -40,14 +40,37 @@
             font-family: 'Inter', sans-serif;
         }
 
-        /* ANIMATED BACKGROUND */
+                /* 🔥 PREMIUM BACKGROUND */
         .animated-bg {
             position: fixed;
             inset: 0;
             z-index: 0;
-            background: linear-gradient(120deg, #fff7f0, #ffe4cc, #ffd6b3, #fff1e6);
-            background-size: 300% 300%;
-            animation: gradientMove 12s ease infinite;
+            
+            background:
+                radial-gradient(circle at 20% 30%, rgba(255,126,95,0.25), transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(255,180,120,0.25), transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(255,220,180,0.2), transparent 60%),
+                linear-gradient(120deg, #fff8f3, #ffe9d6, #ffd8c2);
+
+            background-blend-mode: screen;
+            animation: gradientMove 18s ease infinite;
+        }
+
+        /* ✨ Add subtle noise texture */
+        .animated-bg::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url("https://www.transparenttextures.com/patterns/noise.png");
+            opacity: 0.15;
+            mix-blend-mode: overlay;
+        }
+
+        /* Smooth movement */
+        @@keyframes gradientMove {
+            0% { transform: scale(1) translate(0, 0); }
+            50% { transform: scale(1.1) translate(-20px, 20px); }
+            100% { transform: scale(1) translate(0, 0); }
         }
 
         @@keyframes gradientMove {
@@ -225,11 +248,26 @@
 
             transform: translate(-50%, -50%);
         }
+        
+        .swal2-popup {
+            border-radius: 20px !important;
+            backdrop-filter: blur(20px);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .swal2-title {
+            font-weight: 700;
+        }
+
+        .swal2-confirm {
+            border-radius: 12px !important;
+            padding: 10px 20px !important;
+        }
     </style>
 
 </head>
 <body>
-
+    <div id="kNotification"></div>
 
     <div class="mouse-light"></div>
      <!-- ✅ Animated Background -->
@@ -257,14 +295,14 @@
 
                 <div class="field-group">
                     <label>Email</label>
-                    <input id="c_Email" name="c_Email" class="k-textbox" />
+                    <input id="c_Email" name="c_Email" class="k-textbox" required/>
                     <span class="field-error" data-for="c_Email"></span>
                 </div>
 
                 <div class="field-group">
                     <label>Password</label>
                     <div class="pass-wrapper">
-                        <input id="c_Password" name="c_Password" type="password" class="k-textbox" />
+                        <input id="c_Password" name="c_Password" type="password" class="k-textbox" required/>
 
                         <button type="button" class="pass-toggle"
                                 onclick="togglePass('c_Password', 'eyeIcon')">
@@ -274,7 +312,7 @@
                     <span class="field-error" data-for="c_Password"></span>
                 </div>
 
-                <button type="submit" class="btn-enter">SIGN IN</button>
+                <button type="submit" id="loginBtn" class="btn-enter">SIGN IN</button>
 
             </form>
 
@@ -300,14 +338,21 @@
             }).data("kendoNotification");
             
             function showFieldErrors(errors) {
-                $(".field-error").text(""); // clear old errors
+                $(".field-error").text("");
+                $(".k-textbox").css("border-color", "#ddd");
 
                 Object.keys(errors).forEach(field => {
                     const messages = errors[field];
 
                     const el = $(`.field-error[data-for='${field}']`);
+                    const input = $(`[name='${field}']`);
+
                     if (el.length) {
-                        el.text(messages[0]); // show first error
+                        el.text(messages[0]);
+                    }
+
+                    if (input.length) {
+                        input.css("border-color", "#ff4d4f"); // 🔴 highlight
                     }
                 });
             }
@@ -316,7 +361,17 @@
             function showError(msg)   { notification.show({ message: msg }, "error");   }
 
             var validator = $("#loginForm").kendoValidator({
-                messages: { required: "#= message #", email: "#= message #" }
+                messages: {
+                    required: function(input) {
+                        if (input.attr("name") === "c_Email") {
+                            return "Email is required";
+                        }
+                        if (input.attr("name") === "c_Password") {
+                            return "Password is required";
+                        }
+                        return "This field is required";
+                    }
+                }
             }).data("kendoValidator");
 
             window.togglePass = function (inputId, iconId) {
@@ -350,10 +405,28 @@
                     processData: false,
                     success: function (res) {
                         if (!res.success) {
+
                             if (res.errors) {
-                                
+                                showFieldErrors(res.errors);   // 🔥 show field-wise errors
                             } else {
-                                showError(res.message || "Invalid credentials.");
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Access Denied",
+                                    text: res.message || "Invalid email or password",
+                                    background: "rgba(255,255,255,0.85)",
+                                    backdrop: `
+                                        rgba(0,0,0,0.4)
+                                        url("https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif")
+                                        left top
+                                        no-repeat
+                                    `,
+                                    color: "#1a1a1a",
+                                    confirmButtonText: "Try Again",
+                                    confirmButtonColor: "#ff7e5f",
+                                    showClass: {
+                                        popup: "animate__animated animate__shakeX"
+                                    }
+                                });
                             }
 
                             btn.prop("disabled", false).text("SIGN IN");
@@ -388,7 +461,16 @@
                             }
                         }
                         else if (xhr.status === 401) {
-                            showError("Invalid email or password.");
+                            Swal.fire({
+                                icon: "error",
+                                title: "Invalid Credentials",
+                                text: "Email or password is incorrect",
+                                confirmButtonColor: "#ff7e5f",
+                                background: "rgba(255,255,255,0.9)",
+                                showClass: {
+                                    popup: "animate__animated animate__shakeX"
+                                }
+                            });
                         }
                         else {
                             showError("Server error. Try again.");

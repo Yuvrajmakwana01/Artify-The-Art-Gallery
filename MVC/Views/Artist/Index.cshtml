@@ -255,13 +255,14 @@ section{padding:100px 60px}
 <div class="cursor-ring" id="cursorRing"></div>
 
 <nav class="navbar" id="navbar">
-  <a href="#" class="nav-logo">
+  <a asp-controller="Home" asp-action="Landingpage" class="nav-logo" >
     <div class="nav-logo-icon">
       <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
     </div>
     Art<span class="acc">Space</span>
   </a>
   <ul class="nav-links">
+    <li><a asp-controller="Home" asp-action="Landingpage">Home</a></li>
     <li><a href="#artworks">Explore</a></li>
     <li><a href="#categories">Categories</a></li>
     <li><a href="#how">How It Works</a></li>

@@ -26,20 +26,18 @@
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: var(--background); color: var(--foreground); line-height: 1.6; }
-        h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display', serif; }
+        h1,h2,h3,h4,h5,h6 { font-family: 'Playfair Display', serif; }
 
         .navbar { position: sticky; top: 0; z-index: 50; background: hsla(36,33%,97%,0.85); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); }
         .navbar-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; }
         .logo-wrap { display: flex; align-items: center; gap: 14px; }
         .back-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); text-decoration: none; transition: all 0.2s; }
         .back-btn:hover { background: var(--secondary); color: var(--foreground); }
-        .logo { font-family: 'Playfair Display', serif; font-size: 1.875rem; font-weight: 700; color: var(--foreground); text-decoration: none; letter-spacing: -0.025em; transition: color 0.3s; }
+        .logo { font-family: 'Playfair Display', serif; font-size: 1.875rem; font-weight: 700; color: var(--foreground); text-decoration: none; letter-spacing: -0.025em; }
         .logo:hover { color: var(--accent); }
         .nav-links { display: flex; gap: 2rem; }
-        .nav-links a { font-size: 0.875rem; font-weight: 500; color: var(--muted); text-decoration: none; transition: color 0.3s; position: relative; padding-bottom: 2px; }
-        .nav-links a::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background: var(--accent); transform: scaleX(0); transition: transform 0.25s; }
+        .nav-links a { font-size: 0.875rem; font-weight: 500; color: var(--muted); text-decoration: none; transition: color 0.3s; }
         .nav-links a:hover { color: var(--foreground); }
-        .nav-links a:hover::after { transform: scaleX(1); }
         .nav-actions { display: flex; align-items: center; gap: 0.75rem; }
         .icon-btn { position: relative; width: 38px; height: 38px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); transition: all 0.2s; text-decoration: none; }
         .icon-btn:hover { background: var(--secondary); color: var(--foreground); }
@@ -54,13 +52,20 @@
         .clear-btn { padding: 10px 20px; border-radius: 8px; border: 1.5px solid var(--wishlist); background: transparent; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; color: var(--wishlist); transition: all 0.2s; }
         .clear-btn:hover { background: var(--wishlist); color: #fff; }
 
+        /* Loading */
+        .loading-state { text-align: center; padding: 4rem 1.5rem; color: var(--muted); }
+        .loading-spinner { display: inline-block; width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
+        @@keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Empty */
         .empty-state { text-align: center; padding: 80px 24px; }
         .empty-state svg { color: var(--muted); opacity: 0.25; margin-bottom: 20px; }
         .empty-state h2 { font-size: 1.4rem; font-weight: 600; color: var(--muted); }
         .empty-state p { font-size: 14px; color: var(--muted); margin-top: 8px; }
-        .empty-state a { display: inline-block; margin-top: 24px; padding: 12px 28px; border-radius: 8px; background: var(--primary); color: var(--primary-foreground); text-decoration: none; font-size: 14px; font-weight: 600; transition: opacity 0.2s; }
+        .empty-state a { display: inline-block; margin-top: 24px; padding: 12px 28px; border-radius: 8px; background: var(--primary); color: var(--primary-foreground); text-decoration: none; font-size: 14px; font-weight: 600; }
         .empty-state a:hover { opacity: 0.88; }
 
+        /* Grid */
         .art-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
         .art-card { background: var(--card-white); border-radius: 1rem; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: transform 0.3s, box-shadow 0.3s; animation: fade-up 0.45s ease-out forwards; opacity: 0; }
         .art-card:hover { transform: translateY(-5px); box-shadow: 0 16px 36px rgba(0,0,0,0.11); }
@@ -86,20 +91,16 @@
         .remove-btn { margin-top: 12px; width: 100%; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; transition: all 0.2s; border: 1.5px solid var(--wishlist); background: transparent; color: var(--wishlist); }
         .remove-btn:hover { background: var(--wishlist); color: #fff; }
 
-        .loading-state { text-align: center; padding: 4rem 1.5rem; color: var(--muted); }
-        .loading-spinner { display: inline-block; width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
-        @@keyframes spin { to { transform: rotate(360deg); } }
-        @@keyframes fade-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-
+        @@keyframes fade-up { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
         @@media(max-width:1024px) { .art-grid { grid-template-columns: repeat(3, 1fr); } }
         @@media(max-width:768px) { .art-grid { grid-template-columns: repeat(2, 1fr); } .nav-links { display: none; } }
         @@media(max-width:480px) { .art-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
+    @await Html.PartialAsync("_NavbarPartial")
 
-    <!-- Navbar -->
-    <nav class="navbar">
+    @* <nav class="navbar">
         <div class="navbar-inner">
             <div class="logo-wrap">
                 <a href="javascript:history.back()" class="back-btn" title="Back">
@@ -113,11 +114,11 @@
                 <a href="#">Trending</a>
             </div>
             <div class="nav-actions">
-                <a href="/Wishlist" class="icon-btn" title="Wishlist">
+                <a href="/Wishlist/Index" class="icon-btn" title="Wishlist">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
                     <span class="badge zero" id="wishlistBadge">0</span>
                 </a>
-                <a href="/Cart" class="icon-btn" title="Cart">
+                <a href="/Cart/Index" class="icon-btn" title="Cart">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                     <span class="badge zero" id="cartBadge">0</span>
                 </a>
@@ -126,7 +127,7 @@
                 </button>
             </div>
         </div>
-    </nav>
+    </nav> *@
 
     <div class="page">
         <div class="page-header">
@@ -134,7 +135,14 @@
                 <h1>My Wishlist</h1>
                 <p id="countText">Loading...</p>
             </div>
-            <button class="clear-btn" onclick="clearAll()">Clear All</button>
+
+            <div style="display:flex; gap:10px;">
+                <a href="/Buyer/ExploreArt" class="clear-btn" style="text-decoration:none; display:flex; align-items:center;">
+                    Go Back to Explore Art
+                </a>
+
+                <button class="clear-btn" onclick="clearAll()">Clear All</button>
+            </div>
         </div>
         <div id="content">
             <div class="loading-state">
@@ -145,136 +153,139 @@
     </div>
 
     <script>
-        // ── API base URL ──────────────────────────────────────────────────────
         var API_BASE = 'http://localhost:5183';
+        var loadedItems = [];
 
-        // ─── Helpers ──────────────────────────────────────────────────────────
-        var allArtworks = {};
-
+        function getToken() { return localStorage.getItem('token'); }
+        function authFetch(url, options) {
+            options = options || {};
+            var token = getToken();
+            return fetch(url, Object.assign({}, options, {
+                headers: Object.assign({ 'Content-Type': 'application/json' },
+                    token ? { 'Authorization': 'Bearer ' + token } : {},
+                    options.headers || {})
+            }));
+        }
         function imageUrl(path) {
-            if (!path) return '';
+            if (!path) return 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600';
             if (path.startsWith('http')) return path;
             return window.location.origin + path;
         }
 
-        const getWishlist  = () => { try { return new Set(JSON.parse(sessionStorage.getItem('artify_wishlist') || '[]')); } catch { return new Set(); } };
-        const getCart      = () => { try { return new Set(JSON.parse(sessionStorage.getItem('artify_cart')     || '[]')); } catch { return new Set(); } };
-        const saveWishlist = s  => sessionStorage.setItem('artify_wishlist', JSON.stringify([...s]));
-        const saveCart     = s  => sessionStorage.setItem('artify_cart',     JSON.stringify([...s]));
+        // ── localStorage helpers (same keys as ExploreArt) ───────────────────
+        function getWishlist() { try { return JSON.parse(localStorage.getItem('artify_wishlist') || '[]'); } catch(e) { return []; } }
+        function saveWishlist(arr) { localStorage.setItem('artify_wishlist', JSON.stringify(arr)); }
+        function getCart() { try { return JSON.parse(localStorage.getItem('artify_cart') || '[]'); } catch(e) { return []; } }
+        function saveCart(arr) { localStorage.setItem('artify_cart', JSON.stringify(arr)); }
+        function isInCart(id) { return getCart().indexOf(id) !== -1; }
 
         function updateBadges() {
-            const wSize = getWishlist().size, cSize = getCart().size;
-            const wb = document.getElementById('wishlistBadge'), cb = document.getElementById('cartBadge');
+            var wSize = getWishlist().length, cSize = getCart().length;
+            var wb = document.getElementById('wishlistBadge'), cb = document.getElementById('cartBadge');
             wb.textContent = wSize; wb.className = 'badge' + (wSize === 0 ? ' zero' : '');
             cb.textContent = cSize; cb.className = 'badge' + (cSize === 0 ? ' zero' : '');
         }
 
         function removeFromWishlist(artworkId) {
-            const wl = getWishlist();
-            wl.delete(artworkId);
-            saveWishlist(wl);
+            var wl = getWishlist();
+            var idx = wl.indexOf(artworkId);
+            if (idx !== -1) { wl.splice(idx, 1); saveWishlist(wl); }
+            loadedItems = loadedItems.filter(function(x) { return x.artworkId !== artworkId; });
             updateBadges();
-            render();
+            render(loadedItems);
         }
 
         function addToCart(artworkId) {
-            const ct = getCart();
-            if (!ct.has(artworkId)) {
-                ct.add(artworkId);
-                saveCart(ct);
-                updateBadges();
-                render();
-            }
+            if (isInCart(artworkId)) return;
+            var ct = getCart();
+            ct.push(artworkId);
+            saveCart(ct);
+            updateBadges();
+            render(loadedItems); // re-render to show "In Cart" state
         }
 
         function clearAll() {
-            saveWishlist(new Set());
+            saveWishlist([]);
+            loadedItems = [];
             updateBadges();
-            render();
+            render([]);
         }
 
-        function render() {
-            const wl    = getWishlist();
-            const ct    = getCart();
-            const items = [...wl].map(id => allArtworks[id]).filter(Boolean);
-
+        function render(items) {
             document.getElementById('countText').textContent = items.length + ' item' + (items.length === 1 ? '' : 's') + ' saved';
 
             if (items.length === 0) {
-                document.getElementById('content').innerHTML = `
-                    <div class="empty-state">
-                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-                        <h2>Your wishlist is empty</h2>
-                        <p>Save artworks you love and they'll appear here</p>
-                        <a href="/Buyer/ExploreArt">Explore Art</a>
-                    </div>`;
+                document.getElementById('content').innerHTML =
+                    '<div class="empty-state">'
+                    + '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'
+                    + '<h2>Your wishlist is empty</h2>'
+                    + '<p>Save artworks you love and they\'ll appear here</p>'
+                    + '<a href="/Buyer/ExploreArt">Explore Art</a>'
+                    + '</div>';
                 return;
             }
 
-            document.getElementById('content').innerHTML = `<div class="art-grid">${items.map((a, i) => {
-                const inCart = ct.has(a.artworkId);
-                const url    = '/Buyer/ArtworkDetail/' + a.artworkId;
-                return `<div class="art-card" style="animation-delay:${i * 0.07}s">
-                    <div class="card-img">
-                        <img src="${imageUrl(a.previewPath)}" alt="${a.title}" loading="lazy"/>
-                        <div class="overlay"></div>
-                        <span class="cat-badge">${a.categoryName}</span>
-                        <div class="quick-actions">
-                            <a href="${url}" class="view-btn">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View
-                            </a>
-                            <button class="cart-btn ${inCart ? 'in-cart' : ''}" ${inCart ? 'disabled' : ''} onclick="addToCart(${a.artworkId})">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                                ${inCart ? 'In Cart' : 'Add'}
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-info">
-                        <h3>${a.title}</h3>
-                        <p class="artist">by ${a.artistName}</p>
-                        <div class="meta">
-                            <span class="price">&#8377;${parseFloat(a.price).toLocaleString('en-IN')}</span>
-                        </div>
-                        <button class="remove-btn" onclick="removeFromWishlist(${a.artworkId})">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-                            Remove from Wishlist
-                        </button>
-                    </div>
-                </div>`;
-            }).join('')}</div>`;
+            var html = '<div class="art-grid">'
+                + items.map(function(a, i) {
+                    var inCart = isInCart(a.artworkId);
+                    var img = imageUrl(a.previewPath);
+                    var detailUrl = '/Buyer/ArtworkDetail/' + a.artworkId;
+                    return '<div class="art-card" style="animation-delay:' + (i * 0.07) + 's">'
+                        + '<div class="card-img">'
+                        + '<img src="' + img + '" alt="' + a.title + '" loading="lazy"/>'
+                        + '<div class="overlay"></div>'
+                        + '<span class="cat-badge">' + (a.categoryName || '') + '</span>'
+                        + '<div class="quick-actions">'
+                        + '<a href="' + detailUrl + '" class="view-btn">'
+                        + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View</a>'
+                        + '<button class="cart-btn ' + (inCart ? 'in-cart' : '') + '" ' + (inCart ? 'disabled' : 'onclick="addToCart(' + a.artworkId + ')"') + '>'
+                        + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>'
+                        + (inCart ? 'In Cart' : 'Add') + '</button>'
+                        + '</div></div>'
+                        + '<div class="card-info">'
+                        + '<h3>' + a.title + '</h3>'
+                        + '<p class="artist">by ' + a.artistName + '</p>'
+                        + '<div class="meta"><span class="price">&#8377;' + Number(a.price).toLocaleString('en-IN') + '</span></div>'
+                        + '<button class="remove-btn" onclick="removeFromWishlist(' + a.artworkId + ')">'
+                        + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>Remove from Wishlist</button>'
+                        + '</div></div>';
+                }).join('')
+                + '</div>';
+
+            document.getElementById('content').innerHTML = html;
         }
 
-        // ─── Fetch artworks from API ───────────────────────────────────────────
-        async function loadWishlistArtworks() {
-            const wl = getWishlist();
-            if (wl.size === 0) {
-                document.getElementById('countText').textContent = '0 items saved';
-                document.getElementById('content').innerHTML = `
-                    <div class="empty-state">
-                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-                        <h2>Your wishlist is empty</h2>
-                        <p>Save artworks you love and they'll appear here</p>
-                        <a href="/Buyer/ExploreArt">Explore Art</a>
-                    </div>`;
+        async function loadWishlist() {
+            var wishlistIds = getWishlist(); // array of artworkIds
+            updateBadges();
+
+            if (wishlistIds.length === 0) {
+                loadedItems = [];
+                render([]);
                 return;
             }
 
             try {
-                const res = await fetch(API_BASE + '/api/artwork');
-                if (!res.ok) throw new Error('Server error');
-                const data = await res.json();
-                data.forEach(a => { allArtworks[a.artworkId] = a; });
-                render();
-            } catch (err) {
-                console.error('Failed to load artworks:', err);
+                var res = await authFetch(API_BASE + '/api/artwork');
+                if (!res.ok) throw new Error('Failed');
+                var data = await res.json();
+
+                var all = Array.isArray(data) ? data
+                    : (data.$values || data.items || data.data || data.artworks || []);
+
+                // Keep only artworks that are in the wishlist
+                loadedItems = wishlistIds
+                    .map(function(id) { return all.find(function(a) { return a.artworkId === id; }); })
+                    .filter(Boolean);
+
+                render(loadedItems);
+            } catch(err) {
                 document.getElementById('content').innerHTML =
-                    '<div class="loading-state"><p>Failed to load wishlist. Please try again.</p></div>';
+                    '<div class="loading-state"><p>Failed to load wishlist. <a href="/Buyer/ExploreArt" style="color:var(--accent)">Continue shopping</a></p></div>';
             }
         }
 
-        // ─── Init ─────────────────────────────────────────────────────────────
-        updateBadges();
-        loadWishlistArtworks();
+        document.addEventListener('DOMContentLoaded', loadWishlist);
     </script>
 </body>
 </html>

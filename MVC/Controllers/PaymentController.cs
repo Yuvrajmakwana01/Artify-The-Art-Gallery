@@ -15,7 +15,7 @@ namespace MVC.Controllers
         {
             ViewData["PayPalClientId"] = _configuration["PayPal:ClientId"] ?? string.Empty;
             ViewData["PayPalCurrency"] = _configuration["PayPal:Currency"] ?? "USD";
-            ViewData["ApiBaseUrl"] = _configuration["ApiBaseUrl"] ?? string.Empty;
+            ViewData["PaymentApiBaseUrl"] = _configuration["ApiBaseUrl"] ?? string.Empty;
         }
 
         public IActionResult Index()

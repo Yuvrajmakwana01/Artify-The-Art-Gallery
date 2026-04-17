@@ -86,124 +86,127 @@
         </form>
     </div>
 </div>
+
+
 @section Scripts {
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/authHelper.js"></script>
 
-    <script>
-        $(document).ready(function () {
-            // 1. Get User ID from LocalStorage (set during Login in your Controller)
-            const userData = JSON.parse(localStorage.getItem("userData"));
-            if (!userData || !userData.c_User_Id) {
-                Swal.fire("Error", "Session expired. Please login again.", "error");
-                return;
-            }
-            const artistId = userData.c_User_Id;
-            $("#ArtistId").val(artistId);
-
-            // 2. Fetch Profile Data using the correct endpoint from your Repository
-            // Matches: [HttpGet("profile/{id}")] in your Controller
-            $.get(`http://localhost:5183/api/ArtistApi/profile/${artistId}`, function (data) {
-                if (data) {
-                    // Mapping fields from t_ArtistProfile model
-                    $("#ArtistName").val(data.artistName || "");
-                    $("#Biography").val(data.biography || "");
-                    
-                    // Set status toggle
-                    setStatus(data.isActive !== false);
-
-                    // Map URLs array
-                    $("#urlContainer").empty();
-                    if (data.urls && data.urls.length > 0) {
-                        data.urls.forEach(function(u) { addUrl(u); });
-                    } else { 
-                        addUrl(); 
-                    }
-
-                    // Optional: Update UI Avatar initials
-                    if(data.artistName) {
-                        const initials = data.artistName.split(' ').map(n => n[0]).join('').toUpperCase();
-                        $(".avatar-wrapper").text(initials.substring(0,2));
-                    }
-                }
-            });
-
-            // 3. Status Toggle Logic
-            window.setStatus = function (val) {
-                $("#IsActive").val(val ? "true" : "false");
-                if (val) {
-                    $("#optActive").addClass("selected-active");
-                    $("#optInactive").removeClass("selected-inactive");
-                } else {
-                    $("#optInactive").addClass("selected-inactive");
-                    $("#optActive").removeClass("selected-active");
-                }
-            };
-
-            // 4. Social Links Logic
-            window.addUrl = function (val) {
-                val = val || "";
-                var id = "url_" + Date.now();
-                $("#urlContainer").append(`
-                    <div class="url-item" id="wrap_${id}">
-                        <span class="url-prefix">https://</span>
-                        <input type="text" class="k-input url-input" value="${val}" placeholder="behance.net/username" />
-                        <button type="button" class="sp-btn sp-btn-danger" onclick="$('#wrap_${id}').remove()">
-                            <i class="bi bi-trash3"></i>
-                        </button>
-                    </div>
-                `);
-            };
-
-            $("#addUrlBtn").click(function() { addUrl(); });
-
-            // 5. Submit Logic
-            $("#editForm").submit(function (e) {
-    e.preventDefault();
-
-    var formData = new FormData();
-    formData.append("ArtistId", $("#ArtistId").val());
-    formData.append("ArtistName", $("#ArtistName").val());
-    formData.append("Biography", $("#Biography").val());
-    formData.append("IsActive", $("#IsActive").val());
-    
-    // 1. Append the file if selected
-    var fileInput = document.getElementById('CoverImageFile');
-    if (fileInput.files.length > 0) {
-        formData.append("CoverImageFile", fileInput.files[0]);
+<script>
+$(document).ready(function () {
+    var userData = AuthHelper.getUser();
+    if (!userData || !userData.c_User_Id) {
+        Swal.fire("Error", "Session expired. Please login again.", "error").then(function() {
+            window.location.href = "/Artist/Login";
+        });
+        return;
     }
 
-    // 2. Append URLs correctly as an array for the model
-    $(".url-input").each(function(index) {
-        let val = $(this).val().trim();
-        if(val) {
-            formData.append(`Urls[${index}]`, val);
+    var artistId = userData.c_User_Id;
+    var BASE = AuthHelper.API_BASE;
+    $("#ArtistId").val(artistId);
+
+    window.setStatus = function (val) {
+        $("#IsActive").val(val ? "true" : "false");
+        if (val) {
+            $("#optActive").addClass("selected-active");
+            $("#optInactive").removeClass("selected-inactive");
+        } else {
+            $("#optInactive").addClass("selected-inactive");
+            $("#optActive").removeClass("selected-active");
+        }
+    };
+
+    window.addUrl = function (val) {
+        val = val || "";
+        var id = "url_" + Date.now();
+        $("#urlContainer").append(`
+            <div class="url-item" id="wrap_${id}">
+                <span class="url-prefix">https://</span>
+                <input type="text" class="k-input url-input" value="${val}" placeholder="behance.net/username" />
+                <button type="button" class="sp-btn sp-btn-danger" onclick="$('#wrap_${id}').remove()">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </div>
+        `);
+    };
+
+    $("#addUrlBtn").click(function() { addUrl(); });
+
+    // Fetch Profile Data
+    $.ajax({
+        url: BASE + "/profile/" + artistId,
+        type: "GET",
+        success: function (data) {
+            if (data) {
+                $("#ArtistName").val(data.artistName || "");
+                $("#Biography").val(data.biography || "");
+                setStatus(data.isActive !== false);
+
+                $("#urlContainer").empty();
+                if (data.urls && data.urls.length > 0) {
+                    data.urls.forEach(function(u) { addUrl(u); });
+                } else {
+                    addUrl();
+                }
+
+                if (data.artistName) {
+                    var initials = data.artistName.split(' ').map(function(n) { return n[0]; }).join('').toUpperCase();
+                    $(".avatar-wrapper").text(initials.substring(0, 2));
+                }
+            }
+        },
+        error: function(xhr) {
+            console.error("Fetch profile error:", xhr.status);
+            Swal.fire("Error", "Could not load profile data.", "error");
         }
     });
 
-    $.ajax({
-        url: "http://localhost:5183/api/ArtistApi/profile", 
-        type: "POST",
-        data: formData,
-        contentType: false, // Required for FormData
-        processData: false, // Required for FormData
-        success: function (res) {
-            Swal.fire("Success", "Profile updated successfully!", "success")
-                .then(() => window.location.href = "/Artist/MyProfile");
-        },
-        error: function (xhr) {
-            Swal.fire("Error", "Failed to update profile: " + xhr.responseText, "error");
+    // Submit Logic
+    $("#editForm").submit(function (e) {
+        e.preventDefault();
+
+        var formData = new FormData();
+        formData.append("ArtistId", $("#ArtistId").val());
+        formData.append("ArtistName", $("#ArtistName").val());
+        formData.append("Biography", $("#Biography").val());
+        formData.append("IsActive", $("#IsActive").val());
+
+        var fileInput = document.getElementById('CoverImageFile');
+        if (fileInput.files.length > 0) {
+            formData.append("CoverImageFile", fileInput.files[0]);
         }
+
+        $(".url-input").each(function(index) {
+            var val = $(this).val().trim();
+            if (val) {
+                formData.append(`Urls[${index}]`, val);
+            }
+        });
+
+        $.ajax({
+            url: BASE + "/profile",
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (res) {
+                Swal.fire("Success", "Profile updated successfully!", "success")
+                    .then(function() { window.location.href = "/Artist/MyProfile"; });
+            },
+            error: function (xhr) {
+                Swal.fire("Error", "Failed to update profile: " + xhr.responseText, "error");
+            }
+        });
     });
 });
 
-        });
-
-        function handleFileChange(input) {
-            if (input.files && input.files[0]) {
-                $("#uploadLabel").text(input.files[0].name).css("color", "#d97706");
-            }
-        }
-    </script>
+function handleFileChange(input) {
+    if (input.files && input.files[0]) {
+        $("#uploadLabel").text(input.files[0].name).css("color", "#d97706");
+    }
+}
+</script>
 }
