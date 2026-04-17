@@ -1,201 +1,194 @@
 @{
+    ViewData["Title"] = "Dashboard";
     Layout = "../Shared/_ArtistLayout.cshtml";
 }
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
 
 <style>
-    .dashboard-header {
-    background: linear-gradient(135deg, #1c1b18, #553939);
-    color: white;
-    border-radius: 16px;
-    padding: 30px;
-    margin-bottom: 20px;
-    }
+    :root{--navy:#14122a;--gold:#a0692a;--gold-dim:rgba(160,105,42,.1);
+          --paper:#faf8f5;--white:#fff;--border:rgba(0,0,0,.07);
+          --text:#1a1612;--text-2:#6b6057;--text-3:#a89e94;--radius:16px;}
+    body{font-family:'Outfit',sans-serif;background:var(--paper);}
 
-    .chart-container {
-    position: relative;
-    width: 100%;
-    height: 300px;
-    /* 🔥 CONTROL HEIGHT HERE */
-    }
+    .dash-hero{background:var(--navy);border-radius:var(--radius);padding:2rem 2.25rem;
+               margin-bottom:1.5rem;position:relative;overflow:hidden;}
+    .dash-hero::before{content:'';position:absolute;width:280px;height:280px;border-radius:50%;
+                        border:1px solid rgba(201,169,110,.12);top:-100px;right:-60px;}
+    .dash-hero::after{content:'';position:absolute;width:150px;height:150px;border-radius:50%;
+                       border:1px solid rgba(201,169,110,.08);bottom:-40px;right:80px;}
+    .dash-hero h2{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:700;color:#fff;
+                  margin:0 0 4px;position:relative;z-index:1;}
+    .dash-hero .bio{font-size:.85rem;color:rgba(255,255,255,.5);position:relative;z-index:1;margin:0 0 1rem;}
+    .dash-hero .earning{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:700;
+                         color:var(--gold);position:relative;z-index:1;line-height:1;}
+    .dash-hero .earning-label{font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;
+                               color:rgba(255,255,255,.4);margin-top:2px;position:relative;z-index:1;}
 
-    .card-custom {
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    padding: 20px;
-    background: white;
-    }
+    .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;}
+    .stat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;
+               transition:transform .2s,box-shadow .2s;}
+    .stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.07);}
+    .stat-card .lbl{font-size:.68rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;}
+    .stat-card .val{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--navy);line-height:1;}
+    .stat-card .ico{width:36px;height:36px;border-radius:10px;background:var(--gold-dim);
+                    display:flex;align-items:center;justify-content:center;color:var(--gold);
+                    font-size:.9rem;margin-bottom:.75rem;}
 
-    .stat-title {
-    color: gray;
-    font-size: 14px;
-    }
+    .chart-panel{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.25rem;}
+    .chart-panel h5{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;}
+    .chart-wrap{position:relative;height:280px;}
 
-    .stat-value {
-    font-size: 28px;
-    font-weight: bold;
-    }
+    .skel{background:linear-gradient(90deg,#f3f0eb 25%,#e8e2da 50%,#f3f0eb 75%);
+          background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px;display:inline-block;}
+    @@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    @@media(max-width:768px){.stat-row{grid-template-columns:repeat(2,1fr)}}
 </style>
 
-<!-- 🔥 HEADER -->
-<div class="dashboard-header">
-    <h2 id="artistName">Welcome</h2>
-    <p id="artistBio"></p>
-    <h1 id="totalEarnings">$0</h1>
+<div class="dash-hero">
+    <h2 id="artistName">Loading...</h2>
+    <p class="bio" id="artistBio"></p>
+    <div class="earning" id="totalEarnings">$—</div>
+    <div class="earning-label">Total Earnings</div>
 </div>
 
-<!-- 🔥 CARDS -->
-<div class="row g-3">
-
-    <div class="col-md-3">
-        <div class="card-custom">
-            <div class="stat-title">ARTWORKS</div>
-            <div class="stat-value" id="artworks">0</div>
-        </div>
+<div class="stat-row">
+    <div class="stat-card">
+        <div class="ico"><i class="bi bi-images"></i></div>
+        <div class="lbl">Artworks</div>
+        <div class="val" id="artworks">—</div>
     </div>
-
-    <div class="col-md-3">
-        <div class="card-custom">
-            <div class="stat-title">LIKES</div>
-            <div class="stat-value" id="likes">0</div>
-        </div>
+    <div class="stat-card">
+        <div class="ico"><i class="bi bi-heart"></i></div>
+        <div class="lbl">Likes</div>
+        <div class="val" id="likes">—</div>
     </div>
-
-    <div class="col-md-3">
-        <div class="card-custom">
-            <div class="stat-title">SALES</div>
-            <div class="stat-value" id="sales">0</div>
-        </div>
+    <div class="stat-card">
+        <div class="ico"><i class="bi bi-bag-check"></i></div>
+        <div class="lbl">Sales</div>
+        <div class="val" id="sales">—</div>
     </div>
-
-    <div class="col-md-3">
-        <div class="card-custom">
-            <div class="stat-title">RATING</div>
-            <div class="stat-value" id="rating">0</div>
-        </div>
-    </div>
-
-</div>
-
-<br />
-
-<!-- 🔥 CHART SECTION (Placeholder for now) -->
-<div class="card-custom">
-    <h5>Revenue (Last 12 Months)</h5>
-    <div class="chart-container">
-        <canvas id="revenueChart"></canvas>
+    <div class="stat-card">
+        <div class="ico"><i class="bi bi-star"></i></div>
+        <div class="lbl">Rating</div>
+        <div class="val" id="rating">—</div>
     </div>
 </div>
 
-<br />
+<div class="chart-panel">
+    <h5>Revenue — Last 12 Months</h5>
+    <div class="chart-wrap"><canvas id="revenueChart"></canvas></div>
+</div>
 
-<div class="card-custom">
+<div class="chart-panel">
     <h5>Sales by Category</h5>
-    <div class="chart-container">
-        <canvas id="categoryChart"></canvas>
-    </div>
+    <div class="chart-wrap"><canvas id="categoryChart"></canvas></div>
 </div>
-
-
 
 @section Scripts {
-    <script>
-        
-        $(document).ready(function () {
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/authHelper.js"></script>
+<script>
+$(function () {
+    if (!AuthHelper.requireAuth()) return;
 
-        const baseUrl = "http://localhost:5183/api/ArtistApi";
+    var BASE = AuthHelper.API_BASE;
+    
+    // Show loading state
+    function showLoading() {
+        $("#artistName").text("Loading...");
+        $("#artworks, #likes, #sales, #rating").text("—");
+        $("#totalEarnings").text("$—");
+    }
+    
+    showLoading();
 
-        $.ajax({
-        url: `${baseUrl}/dashboard`,
+    // Dashboard data
+    $.ajax({
+        url: BASE + "/dashboard",
         type: "GET",
-        headers: {
-        "Authorization": "Bearer " + localStorage.getItem("authToken")
-        },
         success: function (data) {
-
-        console.log("API DATA:", data); // 🔥 DEBUG FIRST
-
-        // HEADER
-        $("#artistName").text("Welcome, " + data.c_ArtistName);
-        $("#artistBio").text(data.c_Biography);
-        $("#rating").text(data.c_RatingAvg);
-
-        // CARDS
-        $("#artworks").text(data.c_TotalArtworkCount);
-        $("#likes").text(data.c_TotalLikeCount);
-        $("#sales").text(data.c_TotalSellCount);
-
-        $("#totalEarnings").text("$" + data.c_TotalEarning);
+            if (data) {
+                $("#artistName").text("Welcome, " + (data.c_ArtistName || "Artist"));
+                $("#artistBio").text(data.c_Biography || "");
+                $("#rating").text(parseFloat(data.c_RatingAvg || 0).toFixed(1));
+                $("#artworks").text(data.c_TotalArtworkCount || 0);
+                $("#likes").text(data.c_TotalLikeCount || 0);
+                $("#sales").text(data.c_TotalSellCount || 0);
+                $("#totalEarnings").text("$" + parseFloat(data.c_TotalEarning || 0).toLocaleString("en-US", { minimumFractionDigits: 2 }));
+            }
         },
-        error: function () {
-        alert("Failed to load dashboard");
+        error: function (xhr) {
+            console.error("Dashboard error:", xhr.status, xhr.statusText);
+            if (xhr.status === 401) return;
+            Swal.fire({ icon: "error", title: "Could not load dashboard", text: "Please refresh the page.", confirmButtonColor: "#14122a" });
         }
-        });
+    });
 
-        $.ajax({
-        url: `${baseUrl}/revenue`,
+    // Revenue chart
+    $.ajax({
+        url: BASE + "/revenue",
         type: "GET",
-        headers: {
-        "Authorization": "Bearer " + localStorage.getItem("authToken")
-        },
         success: function (res) {
+            var allMonths = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+            var map = {};
+            (res || []).forEach(function (x) { map[x.month] = x.revenue; });
+            var finalData = allMonths.map(function (m) { return map[m] || 0; });
 
-        const allMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-        const revenueMap = {};
-
-        res.forEach(x => {
-        revenueMap[x.month] = x.revenue;
-        });
-
-        const finalData = allMonths.map(m => revenueMap[m] || 0);
-
-        new Chart(document.getElementById("revenueChart"), {
-        type: 'line',
-        data: {
-        labels: allMonths,
-        datasets: [{
-        label: "Revenue",
-        data: finalData
-        }]
+            new Chart(document.getElementById("revenueChart"), {
+                type: "line",
+                data: {
+                    labels: allMonths,
+                    datasets: [{
+                        label: "Revenue ($)",
+                        data: finalData,
+                        borderColor: "#a0692a",
+                        backgroundColor: "rgba(160,105,42,.08)",
+                        borderWidth: 2,
+                        pointBackgroundColor: "#a0692a",
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
         },
-        options: {
-        responsive: true,
-        maintainAspectRatio: false
+        error: function (xhr) {
+            console.error("Revenue error:", xhr.status);
         }
-        });
-        }
-        });
+    });
 
-
-        $.ajax({
-        url: `${baseUrl}/category-sales`,
+    // Category pie chart
+    $.ajax({
+        url: BASE + "/category-sales",
         type: "GET",
-        headers: {
-        "Authorization": "Bearer " + localStorage.getItem("authToken")
-        },
         success: function (res) {
+            var labels = (res || []).map(function (x) { return x.category; });
+            var data = (res || []).map(function (x) { return x.sales; });
+            var colors = ["#a0692a","#14122a","#c9a96e","#4a3728","#6b4226","#e8d5b7"];
 
-        const labels = res.map(x => x.category);
-        const data = res.map(x => x.sales);
-
-        new Chart(document.getElementById("categoryChart"), {
-        type: 'pie',
-        data: {
-        labels: labels,
-        datasets: [{
-        data: data
-        }]
+            new Chart(document.getElementById("categoryChart"), {
+                type: "doughnut",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderWidth: 2,
+                        borderColor: "#fff"
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "right" } } }
+            });
         },
-        options: {
-        responsive: true,
-        maintainAspectRatio: false
+        error: function (xhr) {
+            console.error("Category sales error:", xhr.status);
         }
-        });
-        }
-        });
-
-        });
-    </script>
+    });
+});
+</script>
 }

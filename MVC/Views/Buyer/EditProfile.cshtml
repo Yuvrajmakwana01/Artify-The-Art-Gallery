@@ -229,7 +229,7 @@
 
 @{
     ViewBag.Title = "Edit Profile";
-    Layout = "_BuyerLayout";
+    @* Layout = "_BuyerLayout"; *@
 }
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700&display=swap" rel="stylesheet" />
@@ -319,7 +319,12 @@
         transition: transform 0.3s;
     }
     .avatar-circle:hover { transform: scale(1.05); }
-    .avatar-circle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: none; }
+    .avatar-circle img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+    }
     .avatar-circle i { font-size: 2.5rem; color: rgba(255,255,255,0.5); }
     .avatar-cam-btn {
         position: absolute; bottom: -2px; right: -2px;
@@ -431,7 +436,8 @@
             <div class="avatar-section">
                 <div class="avatar-wrapper">
                     <div class="avatar-circle">
-                        <img id="avatarImg" src="" alt="Profile" />
+                        @* <img id="avatarImg" src="" alt="Profile" /> *@
+                        <img id="profileImg" src="/images/default.png" />
                         <i class="bi bi-person" id="avatarIcon"></i>
                     </div>
                     <div class="avatar-cam-btn" onclick="$('#fileInput').click()">
@@ -502,65 +508,117 @@
 </div>
 
 @section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
+    function showMsg(message, type = 'success') {
+        Swal.fire({
+            icon: type,              // success | error | warning | info
+            title: message,
+            confirmButtonColor: '#c08b3f'
+        });
+    }
     function getUserIdFromToken() {
         let token = localStorage.getItem("token");
         if (!token) return null;
 
-        let payload = token.split('.')[1];
-        let decoded = JSON.parse(atob(payload));
-
+        try {
+            let payload = token.split('.')[1];
+            let decoded = JSON.parse(atob(payload));
+            return decoded["user_id"] || decoded["c_UserId"] || decoded["userId"] || decoded["sub"];
+        } catch {
+            return null;
+        }
         // 👇 Check this key based on your backend
-        return decoded["c_UserId"] || decoded["userId"] || decoded["sub"];
+        return decoded["user_id"] || decoded["c_UserId"] || decoded["userId"] || decoded["sub"];
     }
     
     // ✅ FIX 1: safe userId
     var testUserId =  getUserIdFromToken();
     var currentImagePath = '';
     if (!testUserId) {
-        alert("User not logged in");
-        window.location.href = "/Auth/UserLogin";
+        showMsg("User not logged in", "warning");
+        setTimeout(() => {
+            window.location.href = "/Auth/UserLogin";
+        }, 1500);
     }
 
-    function showMsg(msg, type) {
+    @* function showMsg(msg, type) {
         alert(msg);
-    }
+    } *@
+    
+
 
     // ✅ FIX 2: validation improved
     function validateForm() {
         const mobile = $('#mobile').val().trim();
 
-        if (!$('#userName').val().trim()) return showMsg('Username required');
-        if (!$('#fullName').val().trim()) return showMsg('Full name required');
+        if (!$('#userName').val().trim()) {
+            showMsg('Username required', 'error');
+            return false;
+        }
+
+        if (!$('#fullName').val().trim()) {
+            showMsg('Full name required', 'error');
+            return false;
+        }
 
         if (!/^[6-9]\d{9}$/.test(mobile)) {
-            showMsg('Enter valid mobile number');
+            showMsg('Enter valid mobile number', 'error');
             return false;
         }
 
         return true;
     }
+    
+    function setProfileImage(imageName) {
+        if (!imageName) {
+            $('#profileImg').attr('src', '/images/default.png').show();
+            $('#avatarIcon').show();
+            return;
+        }
 
+        let finalPath = '';
+
+        if (imageName.startsWith("/profile_images")) {
+            finalPath = "https://localhost:5092" + imageName;
+        } else {
+            finalPath = "https://localhost:5092/UserImages/" + imageName;
+        }
+
+        $('#profileImg').attr('src', finalPath).show();
+        $('#avatarIcon').hide();
+    }
+    
+    $('#fileInput').change(function (e) {
+        const file = e.target.files[0];
+        if (file) {
+            $('#profileImg').attr('src', URL.createObjectURL(file)).show();
+            $('#avatarIcon').hide(); // icon hide
+        }
+    });
     function doSave() {
         if (!validateForm()) return;
 
         var fd = new FormData();
-        fd.append("c_UserId", parseInt(testUserId));
+        @* fd.append("c_UserId", parseInt(testUserId)); *@
+
+
         fd.append("c_UserName", $('#userName').val());
         fd.append("c_FullName", $('#fullName').val());
         fd.append("c_Mobile", $('#mobile').val());
         fd.append("c_Gender", $('#gender').val());
-
         var file = $('#fileInput')[0].files[0];
-
-        if (file) fd.append("c_ImageFile", file);
-        else fd.append("c_Image", currentImagePath);
+        if (file) {
+            fd.append("c_ImageFile", file);
+        }
+        
 
         $.ajax({
             url: 'http://localhost:5183/api/UserProfile/UpdateProfile',
             type: 'PUT',
             headers: {
-                "Authorization": "Bearer " + localStorage.getItem("token");
+                "Authorization": "Bearer " + localStorage.getItem("token")
             },
             data: fd,
             contentType: false,
@@ -568,26 +626,28 @@
 
             success: function (res) {
                 if (res.success) {
-                    alert("Saved");
-                    window.location.href = '/Buyer/Profile';
+                    showMsg("Profile Updated Successfully");
+                    setTimeout(() => {
+                        window.location.href = '/Buyer/Profile';
+                    }, 1500);
                 } else {
-                    alert(res.message);
+                    showMsg(res.message, "error");
                 }
             },
             error: function () {
-                alert("Error saving profile");
+                showMsg("Error saving profile", "error");
             }
         });
     }
 
-    (document).ready(function () {
+    $(document).ready(function () {
 
         // Load profile with JWT token
         $.ajax({
             url: 'http://localhost:5183/api/UserProfile/GetProfile',
             type: 'GET',
             headers: {
-                "Authorization": "Bearer " + localStorage.getItem("token");
+                "Authorization": "Bearer " + localStorage.getItem("token")
             },
             success: function (res) {
                 if (!res.success) return;
@@ -599,7 +659,7 @@
                 $('#mobile').val(u.c_Mobile);
                 $('#gender').val(u.c_Gender);
 
-                currentImagePath = u.c_Image;
+                @* currentImagePath = u.c_Image;
 
                 if (u.c_Image) {
                     $('#avatarImg')
@@ -608,25 +668,25 @@
                             : '/uploads/' + u.c_Image)
                         .show();
                 }
+                if (u.c_Image) {
+                    $('#avatarImg')
+                        .attr('src', 'http://localhost:5183/' + u.c_Image)
+                        .show();
+                } *@
+                setProfileImage(u.c_Image || u.c_ProfileImage);
+                currentImagePath = u.c_Image || u.c_ProfileImage;
             },
             error: function () {
-                alert("Session expired. Please login again.");
-                window.location.href = "/Auth/UserLogin";
+                showMsg("Session expired. Please login again.", "warning");
+                setTimeout(() => {
+                    window.location.href = "/Auth/UserLogin";
+                }, 1500);
             }
         });
 
         $('#btnSaveBottom').click(doSave);
 
-        $('#fileInput').change(function () {
-            let file = this.files[0];
-            if (!file) return;
 
-            let reader = new FileReader();
-            reader.onload = e => {
-                $('#avatarImg').attr('src', e.target.result).show();
-            };
-            reader.readAsDataURL(file);
-        });
     });
 </script>
 }

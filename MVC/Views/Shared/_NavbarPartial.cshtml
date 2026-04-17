@@ -1,0 +1,52 @@
+<nav class="navbar">
+    <div class="navbar-inner">
+        <a asp-controller="Buyer" asp-action="ExploreArt" class="logo">Artify</a>
+
+        <div class="nav-links">
+            <a asp-controller="Buyer" asp-action="ExploreArt" class="active">Explore Arts</a>
+            <a asp-controller="Buyer" asp-action="ExploreArt" asp-fragment="categories">Categories</a>
+            <a asp-controller="Artist" asp-action="Index">Artists</a>
+        </div>
+
+        <div class="nav-actions">
+            <a asp-controller="Wishlist" asp-action="Index" class="icon-btn" title="Wishlist">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                </svg>
+                <span class="badge zero" id="wishlistBadge">0</span>
+            </a>
+
+            <a asp-controller="Cart" asp-action="Index" class="icon-btn" title="Cart">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="21" r="1" />
+                    <circle cx="20" cy="21" r="1" />
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                </svg>
+                <span class="badge zero" id="cartBadge">0</span>
+            </a>
+
+            <a asp-controller="Buyer" asp-action="Profile" class="avatar-btn" title="My Account">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                </svg>
+            </a>
+
+            <!-- Logout Button -->
+            <form asp-controller="Auth" asp-action="Logout" method="post" style="display:inline;">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="icon-btn logout-btn" title="Logout">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>

@@ -10,14 +10,12 @@ namespace Repository.Implementations
 {
     public class ArtworkRepository : IArtworkInterface
     {
-
         private readonly NpgsqlConnection _conn;
 
         public ArtworkRepository(NpgsqlConnection connection)
         {
             _conn = connection;
         }
-
 
         public async Task<int> UploadArtwork(t_Artwork art)
         {
@@ -49,7 +47,6 @@ namespace Repository.Implementations
             }
         }
 
-
         public async Task<IEnumerable<dynamic>> GetCategories()
         {
             var categories = new List<dynamic>();
@@ -74,12 +71,10 @@ namespace Repository.Implementations
             return categories;
         }
 
-
         public async Task<IEnumerable<vm_Artwork>> GetAllArtworks()
         {
             List<vm_Artwork> artworkList = new List<vm_Artwork>();
 
-            // Removed the WHERE clause or changed it to include Pending
             string sql = @"SELECT a.*, c.c_category_name as CategoryName, u.c_full_name as ArtistName 
                    FROM t_artwork a
                    LEFT JOIN t_category c ON a.c_category_id = c.c_category_id
@@ -99,7 +94,6 @@ namespace Repository.Implementations
                         {
                             artworkList.Add(new vm_Artwork
                             {
-                                // Use reader.GetFieldValue<int> or explicit casting with null checks
                                 c_artwork_id = reader.IsDBNull(reader.GetOrdinal("c_artwork_id")) ? 0 : (int)reader["c_artwork_id"],
                                 c_title = reader["c_title"]?.ToString() ?? "Untitled",
                                 c_description = reader["c_description"]?.ToString() ?? "",
@@ -115,7 +109,6 @@ namespace Repository.Implementations
             }
             catch (Exception ex)
             {
-                // Log the error so you can see if a column name is misspelled
                 System.Diagnostics.Debug.WriteLine(ex.Message);
             }
             finally { await _conn.CloseAsync(); }
@@ -123,8 +116,6 @@ namespace Repository.Implementations
             return artworkList;
         }
 
-
-        
         public async Task<IEnumerable<t_Artwork>> GetApprovedArtworks()
         {
             var list = new List<t_Artwork>();
@@ -147,10 +138,16 @@ namespace Repository.Implementations
             return list;
         }
 
+        // ✅ FIXED: Added all missing columns including c_preview_path
         public async Task<IEnumerable<t_Artwork>> GetArtworksByArtist(int artistId)
         {
             var list = new List<t_Artwork>();
-            string sql = "SELECT * FROM t_artwork WHERE c_artist_id = @aid";
+            string sql = @"SELECT c_artwork_id, c_artist_id, c_category_id, c_title, c_description, 
+                                  c_price, c_preview_path, c_original_path, c_approval_status, 
+                                  c_admin_note, c_likes_count, c_sell_count
+                           FROM t_artwork 
+                           WHERE c_artist_id = @aid 
+                           ORDER BY c_artwork_id DESC";
 
             await _conn.OpenAsync();
             using (var cmd = new NpgsqlCommand(sql, _conn))
@@ -158,18 +155,25 @@ namespace Repository.Implementations
                 cmd.Parameters.AddWithValue("aid", artistId);
                 using (var reader = await cmd.ExecuteReaderAsync())
                 {
-                    while (await reader.ReadAsync()) list.Add(new t_Artwork
+                    while (await reader.ReadAsync())
                     {
-                        c_artwork_id = reader.GetInt32(reader.GetOrdinal("c_artwork_id")),
-                        c_artist_id = reader.GetInt32(reader.GetOrdinal("c_artist_id")),
-                        c_category_id = reader.GetInt32(reader.GetOrdinal("c_category_id")),
-                        c_title = reader.GetString(reader.GetOrdinal("c_title")),
-                        c_description = reader.IsDBNull(reader.GetOrdinal("c_description")) ? "" : reader.GetString(reader.GetOrdinal("c_description")),
-                        c_price = reader.GetDecimal(reader.GetOrdinal("c_price")),
-                        c_approval_status = reader.GetString(reader.GetOrdinal("c_approval_status"))
-
-
-                    });
+                        var artwork = new t_Artwork
+                        {
+                            c_artwork_id = reader.GetInt32(reader.GetOrdinal("c_artwork_id")),
+                            c_artist_id = reader.GetInt32(reader.GetOrdinal("c_artist_id")),
+                            c_category_id = reader.GetInt32(reader.GetOrdinal("c_category_id")),
+                            c_title = reader.GetString(reader.GetOrdinal("c_title")),
+                            c_description = reader.IsDBNull(reader.GetOrdinal("c_description")) ? "" : reader.GetString(reader.GetOrdinal("c_description")),
+                            c_price = reader.GetDecimal(reader.GetOrdinal("c_price")),
+                            c_approval_status = reader.GetString(reader.GetOrdinal("c_approval_status")),
+                            c_preview_path = reader.IsDBNull(reader.GetOrdinal("c_preview_path")) ? null : reader.GetString(reader.GetOrdinal("c_preview_path")),
+                            c_original_path = reader.IsDBNull(reader.GetOrdinal("c_original_path")) ? null : reader.GetString(reader.GetOrdinal("c_original_path")),
+                            c_admin_note = reader.IsDBNull(reader.GetOrdinal("c_admin_note")) ? null : reader.GetString(reader.GetOrdinal("c_admin_note")),
+                            c_likes_count = reader.IsDBNull(reader.GetOrdinal("c_likes_count")) ? 0 : reader.GetInt32(reader.GetOrdinal("c_likes_count")),
+                            c_sell_count = reader.IsDBNull(reader.GetOrdinal("c_sell_count")) ? 0 : reader.GetInt32(reader.GetOrdinal("c_sell_count"))
+                        };
+                        list.Add(artwork);
+                    }
                 }
             }
             await _conn.CloseAsync();
@@ -187,11 +191,8 @@ namespace Repository.Implementations
             }
         }
 
-
-
         public async Task<int> UpdateArtwork(t_Artwork art)
         {
-            // The SQL uses COALESCE: if @prev is null, use the current c_preview_path
             string sql = @"UPDATE t_artwork 
                    SET c_title = @title, 
                        c_description = @desc, 
@@ -210,9 +211,6 @@ namespace Repository.Implementations
                 cmd.Parameters.AddWithValue("price", art.c_price);
                 cmd.Parameters.AddWithValue("id", art.c_artwork_id);
                 cmd.Parameters.AddWithValue("cid", art.c_category_id);
-                cmd.Parameters.AddWithValue("approval_status", art.c_approval_status ?? (object)DBNull.Value);
-
-                // Pass null if no file was uploaded
                 cmd.Parameters.AddWithValue("prev", art.c_preview_path ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("orig", art.c_original_path ?? (object)DBNull.Value);
 
@@ -220,10 +218,13 @@ namespace Repository.Implementations
             }
         }
 
-
         public async Task<t_Artwork> GetById(int id)
         {
-            string sql = "SELECT * FROM t_artwork WHERE c_artwork_id = @id";
+            string sql = @"SELECT c_artwork_id, c_artist_id, c_category_id, c_title, c_description, 
+                                  c_price, c_preview_path, c_original_path, c_approval_status, 
+                                  c_admin_note, c_likes_count, c_sell_count
+                           FROM t_artwork 
+                           WHERE c_artwork_id = @id";
 
             try
             {
@@ -247,7 +248,11 @@ namespace Repository.Implementations
                                 c_description = reader["c_description"]?.ToString(),
                                 c_price = Convert.ToDecimal(reader["c_price"]),
                                 c_preview_path = reader["c_preview_path"]?.ToString(),
-                                c_original_path = reader["c_original_path"]?.ToString()
+                                c_original_path = reader["c_original_path"]?.ToString(),
+                                c_approval_status = reader["c_approval_status"]?.ToString(),
+                                c_admin_note = reader["c_admin_note"]?.ToString(),
+                                c_likes_count = reader["c_likes_count"] != DBNull.Value ? Convert.ToInt32(reader["c_likes_count"]) : 0,
+                                c_sell_count = reader["c_sell_count"] != DBNull.Value ? Convert.ToInt32(reader["c_sell_count"]) : 0
                             };
                         }
                     }
@@ -257,60 +262,7 @@ namespace Repository.Implementations
             {
                 await _conn.CloseAsync();
             }
-            return null; // Return null if artwork not found
+            return null;
         }
-
-
-
-
-        // public async Task<IEnumerable<vm_Artwork>> GetAllArtworks(int artistId) // Add parameter
-        // {
-        //     List<vm_Artwork> artworkList = new List<vm_Artwork>();
-
-        //     // Add WHERE a.c_artist_id = @artistId
-        //     string sql = @"SELECT a.*, c.c_category_name as CategoryName, u.c_full_name as ArtistName 
-        //            FROM t_artwork a
-        //            LEFT JOIN t_category c ON a.c_category_id = c.c_category_id
-        //            LEFT JOIN t_user u ON a.c_artist_id = u.c_user_id
-        //            WHERE a.c_artist_id = @artistId
-        //            ORDER BY a.c_created_at DESC";
-
-        //     try
-        //     {
-        //         if (_conn.State != System.Data.ConnectionState.Open)
-        //             await _conn.OpenAsync();
-
-        //         using (var cmd = new NpgsqlCommand(sql, _conn))
-        //         {
-        //             // Bind the parameter to prevent SQL Injection
-        //             cmd.Parameters.AddWithValue("artistId", artistId);
-
-        //             using (var reader = await cmd.ExecuteReaderAsync())
-        //             {
-        //                 while (await reader.ReadAsync())
-        //                 {
-        //                     artworkList.Add(new vm_Artwork
-        //                     {
-        //                         c_artwork_id = reader.IsDBNull(reader.GetOrdinal("c_artwork_id")) ? 0 : (int)reader["c_artwork_id"],
-        //                         c_title = reader["c_title"]?.ToString() ?? "Untitled",
-        //                         c_description = reader["c_description"]?.ToString() ?? "",
-        //                         c_price = reader["c_price"] != DBNull.Value ? Convert.ToDecimal(reader["c_price"]) : 0m,
-        //                         c_preview_path = reader["c_preview_path"]?.ToString() ?? "",
-        //                         c_likes_count = reader["c_likes_count"] != DBNull.Value ? Convert.ToInt32(reader["c_likes_count"]) : 0,
-        //                         CategoryName = reader["CategoryName"]?.ToString() ?? "Uncategorized",
-        //                         ArtistName = reader["ArtistName"]?.ToString() ?? "Unknown Artist"
-        //                     });
-        //                 }
-        //             }
-        //         }
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         System.Diagnostics.Debug.WriteLine(ex.Message);
-        //     }
-        //     finally { await _conn.CloseAsync(); }
-
-        //     return artworkList;
-        // }
     }
 }

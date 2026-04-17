@@ -31,15 +31,15 @@ namespace MVC.Controllers
             ViewBag.BackgroundImageUrl = "https://yourwebsite.com/api/images/auth/forgot-password-bg";
             return View();
         }
-       
 
-         public IActionResult UserVerifyOtp(t_VerifyOtp model)
+
+        public IActionResult UserVerifyOtp(t_VerifyOtp model)
         {
             ViewBag.BackgroundImageUrl = "https://yourwebsite.com/api/images/auth/forgot-password-bg";
             return View(model);
         }
 
-         public IActionResult UserResetPassword(string email, string otp)
+        public IActionResult UserResetPassword(string email, string otp)
         {
             ViewBag.BackgroundImageUrl = "https://yourwebsite.com/api/images/auth/forgot-password-bg";
             // Agar values missing hain toh wapas forgot password pe bhej sakte hain (Security check)
@@ -98,7 +98,7 @@ namespace MVC.Controllers
                 {
                     c_Email = email,        // Name match karo vm_GoogleLogin se
                     c_FullName = name,
-                    c_GoogleId = googleId, 
+                    c_GoogleId = googleId,
                 };
 
                 var content = new StringContent(JsonSerializer.Serialize(googleData), Encoding.UTF8, "application/json");
@@ -122,7 +122,7 @@ namespace MVC.Controllers
                         if (!string.IsNullOrEmpty(token))
                         {
                             HttpContext.Session.SetString("JWToken", token);
-                            return RedirectToAction("EditProfile", "Buyer");
+                            return RedirectToAction("ExploreArt", "Buyer");
                         }
                     }
                 }
@@ -130,13 +130,25 @@ namespace MVC.Controllers
                 {
                     var errorBody = await response.Content.ReadAsStringAsync();
                     // Debug karein ya console mein dekhein ki error kya hai
-                    Console.WriteLine($"API Error: {errorBody}"); 
+                    Console.WriteLine($"API Error: {errorBody}");
                     return Content($"API ne error diya: {errorBody}"); // Temporary check ke liye
                 }
-                
+
             }
 
             return RedirectToAction("UserLogin");
+        }
+
+
+        public IActionResult Logout()
+        {
+            // Sirf session clear karo
+            HttpContext.Session.Clear();
+
+            // Google auth / cookie signout NAHI karna (as you said)
+            // Isliye SignOutAsync use nahi kar rahe
+
+            return RedirectToAction("Landingpage", "Home");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

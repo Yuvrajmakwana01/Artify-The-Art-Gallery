@@ -31,1261 +31,557 @@
                 --radius: 0.75rem;
             }
 
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
-
-            body {
-                font-family: 'Inter', sans-serif;
-                background: var(--background);
-                color: var(--foreground);
-                line-height: 1.6;
-            }
-
-            h1,
-            h2,
-            h3,
-            h4,
-            h5,
-            h6 {
-                font-family: 'Playfair Display', serif;
-            }
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Inter', sans-serif; background: var(--background); color: var(--foreground); line-height: 1.6; }
+            h1,h2,h3,h4,h5,h6 { font-family: 'Playfair Display', serif; }
 
             /* ── Navbar ── */
-            .navbar {
-                position: sticky;
-                top: 0;
-                z-index: 50;
-                background: hsla(36, 33%, 97%, 0.85);
-                backdrop-filter: blur(14px);
-                border-bottom: 1px solid var(--border);
-            }
-
-            .navbar-inner {
-                max-width: 1200px;
-                margin: 0 auto;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 1rem 1.5rem;
-            }
-
-            .logo {
-                font-family: 'Playfair Display', serif;
-                font-size: 1.875rem;
-                font-weight: 700;
-                color: var(--foreground);
-                text-decoration: none;
-                letter-spacing: -0.025em;
-                transition: color 0.3s;
-            }
-
-            .logo:hover {
-                color: var(--accent);
-            }
-
-            .nav-links {
-                display: flex;
-                gap: 2rem;
-            }
-
-            .nav-links a {
-                font-size: 0.875rem;
-                font-weight: 500;
-                color: var(--muted);
-                text-decoration: none;
-                transition: color 0.3s;
-                position: relative;
-                padding-bottom: 2px;
-            }
-
-            .nav-links a::after {
-                content: '';
-                position: absolute;
-                bottom: -2px;
-                left: 0;
-                right: 0;
-                height: 2px;
-                background: var(--accent);
-                transform: scaleX(0);
-                transition: transform 0.25s;
-            }
-
-            .nav-links a:hover,
-            .nav-links a.active {
-                color: var(--foreground);
-            }
-
-            .nav-links a:hover::after,
-            .nav-links a.active::after {
-                transform: scaleX(1);
-            }
-
-            .nav-actions {
-                display: flex;
-                align-items: center;
-                gap: 0.75rem;
-            }
-
-            .icon-btn {
-                position: relative;
-                width: 38px;
-                height: 38px;
-                border-radius: 50%;
-                border: none;
-                background: transparent;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: var(--muted);
-                transition: all 0.2s;
-                text-decoration: none;
-            }
-
-            .icon-btn:hover {
-                background: var(--secondary);
-                color: var(--foreground);
-            }
-
-            .badge {
-                position: absolute;
-                top: -2px;
-                right: -2px;
-                min-width: 18px;
-                height: 18px;
-                padding: 0 4px;
-                border-radius: 9999px;
-                background: var(--accent);
-                color: #fff;
-                font-size: 10px;
-                font-weight: 700;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .badge.zero {
-                display: none;
-            }
-
-            .avatar-btn {
-                width: 38px;
-                height: 38px;
-                border-radius: 50%;
-                border: none;
-                background: var(--primary);
-                color: var(--primary-foreground);
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: opacity 0.2s;
-            }
-
-            .avatar-btn:hover {
-                opacity: 0.85;
-            }
+            .navbar { position: sticky; top: 0; z-index: 50; background: hsla(36, 33%, 97%, 0.85); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); }
+            .navbar-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; }
+            .logo { font-family: 'Playfair Display', serif; font-size: 1.875rem; font-weight: 700; color: var(--foreground); text-decoration: none; letter-spacing: -0.025em; transition: color 0.3s; }
+            .logo:hover { color: var(--accent); }
+            .nav-links { display: flex; gap: 2rem; }
+            .nav-links a { font-size: 0.875rem; font-weight: 500; color: var(--muted); text-decoration: none; transition: color 0.3s; position: relative; padding-bottom: 2px; }
+            .nav-links a::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background: var(--accent); transform: scaleX(0); transition: transform 0.25s; }
+            .nav-links a:hover, .nav-links a.active { color: var(--foreground); }
+            .nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
+            .nav-actions { display: flex; align-items: center; gap: 0.75rem; }
+            .icon-btn { position: relative; width: 38px; height: 38px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); transition: all 0.2s; text-decoration: none; }
+            .icon-btn:hover { background: var(--secondary); color: var(--foreground); }
+            .badge { position: absolute; top: -2px; right: -2px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9999px; background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+            .badge.zero { display: none; }
+            .avatar-btn { width: 38px; height: 38px; border-radius: 50%; border: none; background: var(--primary); color: var(--primary-foreground); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s; }
+            .avatar-btn:hover { opacity: 0.85; }
 
             /* ── Hero ── */
-            .hero {
-                position: relative;
-                overflow: hidden;
-                min-height: 52vh;
-                display: flex;
-                align-items: center;
-                padding: 5rem 0 3rem;
-            }
+            .hero { position: relative; overflow: hidden; min-height: 52vh; display: flex; align-items: center; padding: 5rem 0 3rem; }
 
-            .hero-bg {
-                position: absolute;
-                inset: 0;
-                overflow: hidden;
-                pointer-events: none;
-            }
+            /* Floating art images behind hero text */
+            .hero-floating-images { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+            .hero-float-img { position: absolute; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 30px -8px hsla(30, 10%, 15%, 0.2); opacity: 0.45; }
+            .hero-float-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-            .hero-content {
-                max-width: 1200px;
-                margin: 0 auto;
-                padding: 0 1.5rem;
-                position: relative;
-                z-index: 10;
-                text-align: center;
-            }
+            /* Individual floating image positions & animations */
+            .hero-float-img:nth-child(1) { width: 180px; height: 240px; top: 5%; left: -2%; transform: rotate(-6deg); animation: heroFloat1 12s ease-in-out infinite; }
+            .hero-float-img:nth-child(2) { width: 150px; height: 200px; top: 10%; right: 2%; transform: rotate(5deg); animation: heroFloat2 14s ease-in-out infinite; }
+            .hero-float-img:nth-child(3) { width: 130px; height: 170px; bottom: 8%; left: 8%; transform: rotate(4deg); animation: heroFloat3 11s ease-in-out infinite; }
+            .hero-float-img:nth-child(4) { width: 160px; height: 210px; bottom: 5%; right: 5%; transform: rotate(-4deg); animation: heroFloat4 13s ease-in-out infinite; }
+            .hero-float-img:nth-child(5) { width: 120px; height: 160px; top: 30%; left: 15%; transform: rotate(-3deg); animation: heroFloat5 10s ease-in-out infinite; }
+            .hero-float-img:nth-child(6) { width: 140px; height: 180px; top: 25%; right: 12%; transform: rotate(6deg); animation: heroFloat6 15s ease-in-out infinite; }
 
-            .hero-badge {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.5rem;
-                padding: 0.4rem 1rem;
-                background: var(--secondary);
-                border-radius: 9999px;
-                margin-bottom: 1.25rem;
-            }
+            @@keyframes heroFloat1 { 0%, 100% { transform: rotate(-6deg) translate(0, 0); } 25% { transform: rotate(-4deg) translate(15px, -20px); } 50% { transform: rotate(-7deg) translate(30px, -10px); } 75% { transform: rotate(-5deg) translate(10px, 15px); } }
+            @@keyframes heroFloat2 { 0%, 100% { transform: rotate(5deg) translate(0, 0); } 25% { transform: rotate(3deg) translate(-20px, 15px); } 50% { transform: rotate(6deg) translate(-10px, 25px); } 75% { transform: rotate(4deg) translate(-25px, 5px); } }
+            @@keyframes heroFloat3 { 0%, 100% { transform: rotate(4deg) translate(0, 0); } 25% { transform: rotate(2deg) translate(20px, -15px); } 50% { transform: rotate(5deg) translate(10px, -25px); } 75% { transform: rotate(3deg) translate(25px, -5px); } }
+            @@keyframes heroFloat4 { 0%, 100% { transform: rotate(-4deg) translate(0, 0); } 25% { transform: rotate(-2deg) translate(-15px, -20px); } 50% { transform: rotate(-5deg) translate(-25px, -10px); } 75% { transform: rotate(-3deg) translate(-10px, 10px); } }
+            @@keyframes heroFloat5 { 0%, 100% { transform: rotate(-3deg) translate(0, 0); } 33% { transform: rotate(-1deg) translate(18px, -12px); } 66% { transform: rotate(-4deg) translate(-8px, 18px); } }
+            @@keyframes heroFloat6 { 0%, 100% { transform: rotate(6deg) translate(0, 0); } 33% { transform: rotate(4deg) translate(-18px, 14px); } 66% { transform: rotate(7deg) translate(12px, -16px); } }
 
-            .hero-badge span {
-                font-size: 0.8rem;
-                font-weight: 500;
-                color: var(--secondary-foreground);
-            }
-
-            .hero h1 {
-                font-size: clamp(2.2rem, 5vw, 3.5rem);
-                font-weight: 700;
-                line-height: 1.1;
-                color: var(--foreground);
-            }
-
-            .hero h1 .accent-text {
-                color: var(--accent);
-            }
-
-            .hero p {
-                margin-top: 1rem;
-                font-size: 1rem;
-                color: var(--muted);
-                max-width: 34rem;
-                margin-left: auto;
-                margin-right: auto;
-            }
+            .hero-content { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 10; text-align: center; }
+            .hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; background: var(--secondary); border-radius: 9999px; margin-bottom: 1.25rem; }
+            .hero-badge span { font-size: 0.8rem; font-weight: 500; color: var(--secondary-foreground); }
+            .hero h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; color: var(--foreground); }
+            .hero h1 .accent-text { color: var(--accent); }
+            .hero p { margin-top: 1rem; font-size: 1rem; color: var(--muted); max-width: 34rem; margin-left: auto; margin-right: auto; }
 
             /* ── Discover Marquee ── */
-            .discover-section {
-                padding: 4rem 0 2rem;
-                overflow: hidden;
-                position: relative;
-            }
-
-            .discover-section .section-header {
-                text-align: center;
-                margin-bottom: 2.5rem;
-            }
-
-            .discover-section .section-header h2 {
-                font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-                font-weight: 700;
-                color: var(--foreground);
-            }
-
-            .discover-section .section-header h2 span {
-                color: var(--accent);
-            }
-
-            .discover-section .section-header p {
-                margin-top: 0.75rem;
-                font-size: 1rem;
-                color: var(--muted);
-                max-width: 28rem;
-                margin-left: auto;
-                margin-right: auto;
-            }
-
-            .marquee-wrapper {
-                position: relative;
-            }
-
-            .marquee-wrapper::before,
-            .marquee-wrapper::after {
-                content: '';
-                position: absolute;
-                top: 0;
-                bottom: 0;
-                width: 120px;
-                z-index: 2;
-                pointer-events: none;
-            }
-
-            .marquee-wrapper::before {
-                left: 0;
-                background: linear-gradient(to right, var(--background), transparent);
-            }
-
-            .marquee-wrapper::after {
-                right: 0;
-                background: linear-gradient(to left, var(--background), transparent);
-            }
-
-            .marquee-track {
-                display: flex;
-                gap: 1.25rem;
-                width: max-content;
-                animation: marquee-scroll 35s linear infinite;
-            }
-
-            .marquee-wrapper:hover .marquee-track {
-                animation-play-state: paused;
-            }
-
-            .marquee-track-reverse {
-                animation-direction: reverse;
-                animation-duration: 40s;
-            }
-
-            .marquee-item {
-                flex-shrink: 0;
-                width: 280px;
-                height: 180px;
-                border-radius: var(--radius);
-                overflow: hidden;
-                position: relative;
-                box-shadow: 0 4px 20px -4px hsla(30, 10%, 15%, 0.12);
-                transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s;
-            }
-
-            .marquee-item:hover {
-                transform: scale(1.06);
-                box-shadow: 0 8px 32px -4px hsla(38, 60%, 55%, 0.25);
-            }
-
-            .marquee-item img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-
-            .marquee-item:hover img {
-                transform: scale(1.08);
-            }
-
-            .marquee-item .marquee-overlay {
-                position: absolute;
-                inset: 0;
-                background: linear-gradient(to top, hsla(30, 10%, 15%, 0.35), transparent 60%);
-                opacity: 0;
-                transition: opacity 0.4s;
-            }
-
-            .marquee-item:hover .marquee-overlay {
-                opacity: 1;
-            }
-
-            .marquee-row {
-                margin-bottom: 1.25rem;
-            }
-
-            @@keyframes marquee-scroll {
-                0% {
-                    transform: translateX(0);
-                }
-
-                100% {
-                    transform: translateX(-50%);
-                }
-            }
+            .discover-section { padding: 4rem 0 2rem; overflow: hidden; position: relative; }
+            .discover-section .section-header { text-align: center; margin-bottom: 2.5rem; }
+            .discover-section .section-header h2 { font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 700; color: var(--foreground); }
+            .discover-section .section-header h2 span { color: var(--accent); }
+            .discover-section .section-header p { margin-top: 0.75rem; font-size: 1rem; color: var(--muted); max-width: 28rem; margin-left: auto; margin-right: auto; }
+            .marquee-wrapper { position: relative; }
+            .marquee-wrapper::before, .marquee-wrapper::after { content: ''; position: absolute; top: 0; bottom: 0; width: 120px; z-index: 2; pointer-events: none; }
+            .marquee-wrapper::before { left: 0; background: linear-gradient(to right, var(--background), transparent); }
+            .marquee-wrapper::after { right: 0; background: linear-gradient(to left, var(--background), transparent); }
+            .marquee-track { display: flex; gap: 1.25rem; width: max-content; animation: marquee-scroll 35s linear infinite; }
+            .marquee-wrapper:hover .marquee-track { animation-play-state: paused; }
+            .marquee-track-reverse { animation-direction: reverse; animation-duration: 40s; }
+            .marquee-item { flex-shrink: 0; width: 280px; height: 180px; border-radius: var(--radius); overflow: hidden; position: relative; box-shadow: 0 4px 20px -4px hsla(30, 10%, 15%, 0.12); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s; }
+            .marquee-item:hover { transform: scale(1.06); box-shadow: 0 8px 32px -4px hsla(38, 60%, 55%, 0.25); }
+            .marquee-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+            .marquee-item:hover img { transform: scale(1.08); }
+            .marquee-item .marquee-overlay { position: absolute; inset: 0; background: linear-gradient(to top, hsla(30, 10%, 15%, 0.35), transparent 60%); opacity: 0; transition: opacity 0.4s; }
+            .marquee-item:hover .marquee-overlay { opacity: 1; }
+            .marquee-row { margin-bottom: 1.25rem; }
+            @@keyframes marquee-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
             /* ── Curated Collections ── */
-            .curated-section {
-                padding: 3rem 0 4rem;
-                overflow: hidden;
-            }
-
-            .curated-section .section-header {
-                text-align: center;
-                margin-bottom: 2.5rem;
-            }
-
-            .curated-section .section-header h2 {
-                font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-                font-weight: 700;
-                color: var(--foreground);
-            }
-
-            .curated-section .section-header p {
-                margin-top: 0.75rem;
-                font-size: 1rem;
-                color: var(--muted);
-                max-width: 30rem;
-                margin-left: auto;
-                margin-right: auto;
-            }
-
-            .curated-grid {
-                max-width: 1200px;
-                margin: 0 auto;
-                padding: 0 1.5rem;
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                grid-template-rows: auto auto;
-                gap: 1rem;
-            }
-
-            .curated-grid .curated-card:nth-child(1) {
-                grid-column: span 2;
-                grid-row: span 2;
-            }
-
-            .curated-grid .curated-card:nth-child(4) {
-                grid-column: span 2;
-            }
-
-            .curated-card {
-                position: relative;
-                border-radius: var(--radius);
-                overflow: hidden;
-                min-height: 200px;
-                box-shadow: 0 4px 20px -4px hsla(30, 10%, 15%, 0.1);
-                cursor: pointer;
-                transition: box-shadow 0.4s;
-            }
-
-            .curated-card:hover {
-                box-shadow: 0 12px 40px -6px hsla(38, 60%, 55%, 0.25);
-            }
-
-            .curated-card img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                display: block;
-                transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-
-            .curated-card:hover img {
-                transform: scale(1.08);
-            }
-
-            .curated-card .curated-overlay {
-                position: absolute;
-                inset: 0;
-                background: linear-gradient(to top, hsla(30, 10%, 15%, 0.55), transparent 60%);
-                display: flex;
-                flex-direction: column;
-                justify-content: flex-end;
-                padding: 1.25rem;
-                opacity: 0;
-                transition: opacity 0.4s;
-            }
-
-            .curated-card:hover .curated-overlay {
-                opacity: 1;
-            }
-
-            .curated-overlay h3 {
-                font-size: 1.1rem;
-                font-weight: 600;
-                color: #fff;
-                margin-bottom: 0.25rem;
-            }
-
-            .curated-overlay span {
-                font-size: 0.8rem;
-                color: hsla(0, 0%, 100%, 0.7);
-                font-family: 'Inter', sans-serif;
-            }
+            .curated-section { padding: 3rem 0 4rem; overflow: hidden; }
+            .curated-section .section-header { text-align: center; margin-bottom: 2.5rem; }
+            .curated-section .section-header h2 { font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 700; color: var(--foreground); }
+            .curated-section .section-header p { margin-top: 0.75rem; font-size: 1rem; color: var(--muted); max-width: 30rem; margin-left: auto; margin-right: auto; }
+            .curated-grid { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: auto auto; gap: 1rem; }
+            .curated-grid .curated-card:nth-child(1) { grid-column: span 2; grid-row: span 2; }
+            .curated-grid .curated-card:nth-child(4) { grid-column: span 2; }
+            .curated-card { position: relative; border-radius: var(--radius); overflow: hidden; min-height: 200px; box-shadow: 0 4px 20px -4px hsla(30, 10%, 15%, 0.1); cursor: pointer; transition: box-shadow 0.4s; }
+            .curated-card:hover { box-shadow: 0 12px 40px -6px hsla(38, 60%, 55%, 0.25); }
+            .curated-card img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+            .curated-card:hover img { transform: scale(1.08); }
+            .curated-card .curated-overlay { position: absolute; inset: 0; background: linear-gradient(to top, hsla(30, 10%, 15%, 0.55), transparent 60%); display: flex; flex-direction: column; justify-content: flex-end; padding: 1.25rem; opacity: 0; transition: opacity 0.4s; }
+            .curated-card:hover .curated-overlay { opacity: 1; }
+            .curated-overlay h3 { font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 0.25rem; }
+            .curated-overlay span { font-size: 0.8rem; color: hsla(0, 0%, 100%, 0.7); font-family: 'Inter', sans-serif; }
 
             /* ── Search + Filter ── */
-            .search-section {
-                max-width: 1200px;
-                margin: 0 auto;
-                padding: 1.5rem;
-            }
-
-            .search-row {
-                display: flex;
-                gap: 1rem;
-                margin-bottom: 1rem;
-            }
-
-            .search-input-wrap {
-                position: relative;
-                flex: 1;
-            }
-
-            .search-input-wrap svg {
-                position: absolute;
-                left: 14px;
-                top: 50%;
-                transform: translateY(-50%);
-                width: 18px;
-                height: 18px;
-                color: var(--muted);
-                pointer-events: none;
-            }
-
-            .search-input-wrap input {
-                width: 100%;
-                padding: 0.75rem 1rem 0.75rem 2.75rem;
-                border: 1.5px solid var(--border);
-                border-radius: var(--radius);
-                background: white;
-                font-size: 0.9rem;
-                font-family: 'Inter', sans-serif;
-                outline: none;
-                transition: border-color 0.2s;
-                color: var(--foreground);
-            }
-
-            .search-input-wrap input:focus {
-                border-color: var(--accent);
-            }
-
-            .filter-btn {
-                padding: 0.75rem 1.25rem;
-                border: 1.5px solid var(--border);
-                border-radius: var(--radius);
-                background: white;
-                font-size: 0.875rem;
-                font-weight: 500;
-                font-family: 'Inter', sans-serif;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                transition: all 0.2s;
-                color: var(--foreground);
-            }
-
-            .filter-btn:hover {
-                border-color: var(--accent);
-            }
-
-            .categories {
-                display: flex;
-                gap: 0.5rem;
-                flex-wrap: wrap;
-            }
-
-            .cat-btn {
-                padding: 0.45rem 1.1rem;
-                border: 1.5px solid var(--border);
-                border-radius: 9999px;
-                background: white;
-                font-size: 0.8rem;
-                font-weight: 500;
-                font-family: 'Inter', sans-serif;
-                cursor: pointer;
-                transition: all 0.2s;
-                color: var(--foreground);
-            }
-
-            .cat-btn:hover {
-                border-color: var(--accent);
-                color: var(--accent);
-            }
-
-            .cat-btn.active {
-                background: var(--primary);
-                color: var(--primary-foreground);
-                border-color: var(--primary);
-            }
+            .search-section { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+            .search-row { display: flex; gap: 1rem; margin-bottom: 1rem; }
+            .search-input-wrap { position: relative; flex: 1; }
+            .search-input-wrap svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--muted); pointer-events: none; }
+            .search-input-wrap input { width: 100%; padding: 0.75rem 1rem 0.75rem 2.75rem; border: 1.5px solid var(--border); border-radius: var(--radius); background: white; font-size: 0.9rem; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; color: var(--foreground); }
+            .search-input-wrap input:focus { border-color: var(--accent); }
+            .filter-btn { padding: 0.75rem 1.25rem; border: 1.5px solid var(--border); border-radius: var(--radius); background: white; font-size: 0.875rem; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: all 0.2s; color: var(--foreground); }
+            .filter-btn:hover { border-color: var(--accent); }
+            .categories { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+            .cat-btn { padding: 0.45rem 1.1rem; border: 1.5px solid var(--border); border-radius: 9999px; background: white; font-size: 0.8rem; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s; color: var(--foreground); }
+            .cat-btn:hover { border-color: var(--accent); color: var(--accent); }
+            .cat-btn.active { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
 
             /* ── Grid Header ── */
-            .grid-header {
-                max-width: 1200px;
-                margin: 0 auto;
-                padding: 0 1.5rem 1rem;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-            }
-
-            .grid-header p {
-                font-size: 0.875rem;
-                color: var(--muted);
-            }
-
-            .grid-header select {
-                padding: 0.5rem 0.875rem;
-                border: 1.5px solid var(--border);
-                border-radius: var(--radius);
-                background: white;
-                font-size: 0.875rem;
-                font-family: 'Inter', sans-serif;
-                outline: none;
-                cursor: pointer;
-                color: var(--foreground);
-            }
+            .grid-header { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 1rem; display: flex; align-items: center; justify-content: space-between; }
+            .grid-header p { font-size: 0.875rem; color: var(--muted); }
+            .grid-header select { padding: 0.5rem 0.875rem; border: 1.5px solid var(--border); border-radius: var(--radius); background: white; font-size: 0.875rem; font-family: 'Inter', sans-serif; outline: none; cursor: pointer; color: var(--foreground); }
 
             /* ── Art Grid ── */
-            .art-grid {
-                max-width: 1200px;
-                margin: 0 auto;
-                padding: 0 1.5rem 4rem;
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                gap: 1.5rem;
-            }
+            .art-grid { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 4rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+            .art-card { background: var(--card); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s; animation: fade-up 0.5s ease-out both; }
+            .art-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px -6px hsla(30, 10%, 15%, 0.15); }
+            .card-img { position: relative; aspect-ratio: 4/3; overflow: hidden; }
+            .card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+            .art-card:hover .card-img img { transform: scale(1.06); }
+            .overlay { position: absolute; inset: 0; background: linear-gradient(to top, hsla(30, 10%, 10%, 0.4), transparent 60%); opacity: 0; transition: opacity 0.3s; }
+            .art-card:hover .overlay { opacity: 1; }
+            .glass-overlay { position: absolute; inset: 0; background: hsla(36, 33%, 97%, 0.06); opacity: 0; transition: opacity 0.3s; }
+            .art-card:hover .glass-overlay { opacity: 1; }
+            .cat-badge { position: absolute; top: 10px; left: 10px; padding: 3px 10px; border-radius: 9999px; background: hsla(36, 33%, 97%, 0.9); font-size: 11px; font-weight: 600; color: var(--foreground); backdrop-filter: blur(6px); }
+            .quick-actions { position: absolute; bottom: 12px; left: 12px; right: 12px; display: flex; gap: 8px; opacity: 0; transform: translateY(8px); transition: all 0.3s; }
+            .art-card:hover .quick-actions { opacity: 1; transform: translateY(0); }
+            .view-btn { flex: 1; padding: 8px 0; border-radius: 8px; border: none; background: white; font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; color: var(--foreground); text-decoration: none; transition: background 0.2s; }
+            .view-btn:hover { background: var(--primary); color: var(--primary-foreground); }
+            .cart-btn { flex: 1; padding: 8px 0; border-radius: 8px; border: none; background: var(--primary); color: var(--primary-foreground); font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: opacity 0.2s; }
+            .cart-btn:hover { opacity: 0.85; }
+            .cart-btn.in-cart { background: var(--secondary); color: var(--foreground); cursor: default; }
+            .card-info { padding: 1rem; }
+            .card-info h3 { font-size: 1rem; font-weight: 600; color: var(--foreground); margin-bottom: 2px; }
+            .card-info .artist { font-size: 0.8rem; color: var(--muted); margin-bottom: 8px; }
+            .card-info .meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+            .card-info .price { font-size: 1rem; font-weight: 700; color: var(--foreground); }
+            .card-info .views { display: flex; align-items: center; gap: 4px; font-size: 0.78rem; color: var(--muted); }
+            .wishlist-btn { width: 100%; padding: 8px; border-radius: 8px; border: 1.5px solid var(--border); background: transparent; font-size: 12px; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--muted); transition: all 0.2s; }
+            .wishlist-btn:hover { border-color: var(--wishlist); color: var(--wishlist); }
+            .wishlist-btn.active { background: hsla(0, 75%, 58%, 0.08); border-color: var(--wishlist); color: var(--wishlist); }
 
-            .art-card {
-                background: var(--card);
-                border-radius: var(--radius);
-                overflow: hidden;
-                border: 1px solid var(--border);
-                transition: transform 0.3s, box-shadow 0.3s;
-                animation: fade-up 0.5s ease-out both;
-            }
-
-            .art-card:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 12px 32px -6px hsla(30, 10%, 15%, 0.15);
-            }
-
-            .card-img {
-                position: relative;
-                aspect-ratio: 4/3;
-                overflow: hidden;
-            }
-
-            .card-img img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-
-            .art-card:hover .card-img img {
-                transform: scale(1.06);
-            }
-
-            .overlay {
-                position: absolute;
-                inset: 0;
-                background: linear-gradient(to top, hsla(30, 10%, 10%, 0.4), transparent 60%);
-                opacity: 0;
-                transition: opacity 0.3s;
-            }
-
-            .art-card:hover .overlay {
-                opacity: 1;
-            }
-
-            .glass-overlay {
-                position: absolute;
-                inset: 0;
-                background: hsla(36, 33%, 97%, 0.06);
-                opacity: 0;
-                transition: opacity 0.3s;
-            }
-
-            .art-card:hover .glass-overlay {
-                opacity: 1;
-            }
-
-            .cat-badge {
-                position: absolute;
-                top: 10px;
-                left: 10px;
-                padding: 3px 10px;
-                border-radius: 9999px;
-                background: hsla(36, 33%, 97%, 0.9);
-                font-size: 11px;
-                font-weight: 600;
-                color: var(--foreground);
-                backdrop-filter: blur(6px);
-            }
-
-            .quick-actions {
-                position: absolute;
-                bottom: 12px;
-                left: 12px;
-                right: 12px;
-                display: flex;
-                gap: 8px;
-                opacity: 0;
-                transform: translateY(8px);
-                transition: all 0.3s;
-            }
-
-            .art-card:hover .quick-actions {
-                opacity: 1;
-                transform: translateY(0);
-            }
-
-            .view-btn {
-                flex: 1;
-                padding: 8px 0;
-                border-radius: 8px;
-                border: none;
-                background: white;
-                font-size: 12px;
-                font-weight: 600;
-                font-family: 'Inter', sans-serif;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 5px;
-                color: var(--foreground);
-                text-decoration: none;
-                transition: background 0.2s;
-            }
-
-            .view-btn:hover {
-                background: var(--primary);
-                color: var(--primary-foreground);
-            }
-
-            .cart-btn {
-                flex: 1;
-                padding: 8px 0;
-                border-radius: 8px;
-                border: none;
-                background: var(--primary);
-                color: var(--primary-foreground);
-                font-size: 12px;
-                font-weight: 600;
-                font-family: 'Inter', sans-serif;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 5px;
-                transition: opacity 0.2s;
-            }
-
-            .cart-btn:hover {
-                opacity: 0.85;
-            }
-
-            .cart-btn.in-cart {
-                background: var(--secondary);
-                color: var(--foreground);
-                cursor: default;
-            }
-
-            .card-info {
-                padding: 1rem;
-            }
-
-            .card-info h3 {
-                font-size: 1rem;
-                font-weight: 600;
-                color: var(--foreground);
-                margin-bottom: 2px;
-            }
-
-            .card-info .artist {
-                font-size: 0.8rem;
-                color: var(--muted);
-                margin-bottom: 8px;
-            }
-
-            .card-info .meta {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 10px;
-            }
-
-            .card-info .price {
-                font-size: 1rem;
-                font-weight: 700;
-                color: var(--foreground);
-            }
-
-            .card-info .views {
-                display: flex;
-                align-items: center;
-                gap: 4px;
-                font-size: 0.78rem;
-                color: var(--muted);
-            }
-
-            .wishlist-btn {
-                width: 100%;
-                padding: 8px;
-                border-radius: 8px;
-                border: 1.5px solid var(--border);
-                background: transparent;
-                font-size: 12px;
-                font-weight: 500;
-                font-family: 'Inter', sans-serif;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 6px;
-                color: var(--muted);
-                transition: all 0.2s;
-            }
-
-            .wishlist-btn:hover {
-                border-color: var(--wishlist);
-                color: var(--wishlist);
-            }
-
-            .wishlist-btn.active {
-                background: hsla(0, 75%, 58%, 0.08);
-                border-color: var(--wishlist);
-                color: var(--wishlist);
-            }
+            /* Toast notification */
+            .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--foreground); color: var(--primary-foreground); padding: 12px 24px; border-radius: 9999px; font-size: 13px; font-weight: 500; font-family: 'Inter', sans-serif; z-index: 9999; opacity: 0; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); pointer-events: none; white-space: nowrap; }
+            .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
             /* ── Loading / Error ── */
-            .loading-state {
-                text-align: center;
-                padding: 4rem 1.5rem;
-                color: var(--muted);
-            }
+            .loading-state { text-align: center; padding: 4rem 1.5rem; color: var(--muted); }
+            .loading-spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
+            @@keyframes spin { to { transform: rotate(360deg); } }
+            .error-state { text-align: center; padding: 4rem 1.5rem; color: var(--muted); }
+            .empty-state { text-align: center; padding: 4rem 1.5rem; color: var(--muted); }
+            @@keyframes fade-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
-            .loading-spinner {
-                display: inline-block;
-                width: 40px;
-                height: 40px;
-                border: 3px solid var(--border);
-                border-top-color: var(--accent);
-                border-radius: 50%;
-                animation: spin 0.8s linear infinite;
-                margin-bottom: 1rem;
-            }
-
-            @@keyframes spin {
-                to {
-                    transform: rotate(360deg);
-                }
-            }
-
-            .error-state {
-                text-align: center;
-                padding: 4rem 1.5rem;
-                color: var(--muted);
-            }
-
-            .empty-state {
-                text-align: center;
-                padding: 4rem 1.5rem;
-                color: var(--muted);
-            }
-
-            @@keyframes fade-up {
-                from {
-                    opacity: 0;
-                    transform: translateY(16px);
-                }
-
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
-            @@media(max-width:1024px) {
-                .curated-grid {
-                    grid-template-columns: repeat(2, 1fr);
-                }
-
-                .curated-grid .curated-card:nth-child(1) {
-                    grid-column: span 2;
-                    grid-row: span 1;
-                }
-
-                .curated-grid .curated-card:nth-child(4) {
-                    grid-column: span 2;
-                }
-            }
-
+            @@media(max-width:1024px) { .curated-grid { grid-template-columns: repeat(2, 1fr); } .curated-grid .curated-card:nth-child(1) { grid-column: span 2; grid-row: span 1; } .curated-grid .curated-card:nth-child(4) { grid-column: span 2; } }
             @@media(max-width:768px) {
-                .nav-links {
-                    display: none;
-                }
-
-                .curated-grid {
-                    grid-template-columns: 1fr;
-                }
-
-                .curated-grid .curated-card:nth-child(1),
-                .curated-grid .curated-card:nth-child(4) {
-                    grid-column: span 1;
-                }
-
-                .marquee-item {
-                    width: 200px;
-                    height: 130px;
-                }
+                .nav-links { display: none; }
+                .curated-grid { grid-template-columns: 1fr; }
+                .curated-grid .curated-card:nth-child(1), .curated-grid .curated-card:nth-child(4) { grid-column: span 1; }
+                .marquee-item { width: 200px; height: 130px; }
+                .hero-float-img { opacity: 0.3; }
+                .hero-float-img:nth-child(1) { width: 120px; height: 160px; }
+                .hero-float-img:nth-child(2) { width: 100px; height: 130px; }
+                .hero-float-img:nth-child(3) { width: 90px; height: 120px; }
+                .hero-float-img:nth-child(4) { width: 110px; height: 140px; }
+                .hero-float-img:nth-child(5), .hero-float-img:nth-child(6) { display: none; }
             }
     </style>
 </head>
 
 <body>
-
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="navbar-inner">
-            <a href="/Buyer/ExploreArt" class="logo">Artify</a>
-            <div class="nav-links">
-                <a href="/Buyer/ExploreArt" class="active">Explore Arts</a>
-                <a href="#">Categories</a>
-                <a href="#">Trending</a>
-            </div>
-            <div class="nav-actions">
-                <a href="/Wishlist/Index" class="icon-btn" title="Wishlist">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-                    </svg>
-                    <span class="badge zero" id="wishlistBadge">0</span>
-                </a>
-                <a href="/Cart/Index" class="icon-btn" title="Cart">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="9" cy="21" r="1" />
-                        <circle cx="20" cy="21" r="1" />
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                    </svg>
-                    <span class="badge zero" id="cartBadge">0</span>
-                </a>
-                <button class="avatar-btn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                        <circle cx="12" cy="7" r="4" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </nav>
+    @await Html.PartialAsync("_NavbarPartial")
+    <div class="toast" id="toast"></div>
 
     <!-- Hero -->
     <section class="hero">
+        <div class="hero-floating-images" id="heroFloatingImages">
+            <!-- Filled dynamically from artwork data -->
+        </div>
         <div class="hero-content">
             <div class="hero-badge">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
-                    <polygon
-                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                 <span>Handpicked Masterpieces</span>
             </div>
-            <h1>Explore <span class="accent-text">Extraordinary</span><br />Art Collections</h1>
-            <p>Discover thousands of original artworks from independent artists. Find your perfect piece to transform
-                any space.</p>
-            </div>
-        </section>
-
-        <!-- Discover & Collect Marquee -->
-        <section class="discover-section">
-            <div class="section-header">
-                <h2>Discover &amp; <span>Collect</span></h2>
-                <p>Endlessly inspiring pieces, hand-selected for you</p>
-            </div>
-            <div class="marquee-wrapper marquee-row">
-                <div class="marquee-track" id="marqueeRow1"></div>
-            </div>
-            <div class="marquee-wrapper marquee-row">
-                <div class="marquee-track marquee-track-reverse" id="marqueeRow2"></div>
-            </div>
-        </section>
-
-        <!-- Curated Collections -->
-        <section class="curated-section">
-            <div class="section-header">
-                <h2>Curated Collections</h2>
-                <p>Explore themed galleries crafted by our curators</p>
-            </div>
-            <div class="curated-grid" id="curatedGrid"></div>
-        </section>
-
-        <!-- Search + Categories -->
-        <div class="search-section">
-            <div class="search-row">
-                <div class="search-input-wrap">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8" />
-                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                    </svg>
-                    <input type="text" id="searchInput" placeholder="Search artworks or artists..." oninput="filterArt()" />
-                </div>
-                <button class="filter-btn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="4" y1="21" x2="4" y2="14" />
-                        <line x1="4" y1="10" x2="4" y2="3" />
-                        <line x1="12" y1="21" x2="12" y2="12" />
-                        <line x1="12" y1="8" x2="12" y2="3" />
-                        <line x1="20" y1="21" x2="20" y2="16" />
-                        <line x1="20" y1="12" x2="20" y2="3" />
-                    </svg>
-                    Filters
-                </button>
-            </div>
-            <div class="categories" id="categories"></div>
+            <h1>Discover &amp; Collect<br /><span class="accent-text">Extraordinary</span> Art</h1>
+            <p>Discover thousands of original artworks from independent artists. Find your perfect piece to transform any space.</p>
         </div>
+    </section>
 
-        <!-- Grid Header -->
-        <div class="grid-header">
-            <p id="artCount">Loading...</p>
-            <select onchange="sortArt(this.value)">
-                <option value="popular">Sort by: Popular</option>
-                <option value="low">Price: Low to High</option>
-                <option value="high">Price: High to Low</option>
-                <option value="new">Newest First</option>
-            </select>
+    <!-- Discover & Collect Marquee -->
+    <section class="discover-section">
+        <div class="section-header">
+            <h2>Discover &amp; <span>Collect</span></h2>
+            <p>Endlessly inspiring pieces, hand-selected for you</p>
         </div>
+        <div class="marquee-wrapper marquee-row">
+            <div class="marquee-track" id="marqueeRow1"></div>
+        </div>
+        <div class="marquee-wrapper marquee-row">
+            <div class="marquee-track marquee-track-reverse" id="marqueeRow2"></div>
+        </div>
+    </section>
 
-        <!-- Art Grid -->
-        <div class="art-grid" id="artGrid">
-            <div class="loading-state" style="grid-column:1/-1">
-                <div class="loading-spinner"></div>
-                <p>Loading artworks...</p>
+    @* <!-- Curated Collections -->
+    <section class="curated-section">
+        <div class="section-header">
+            <h2>Curated Collections</h2>
+            <p>Explore themed galleries crafted by our curators</p>
+        </div>
+        <div class="curated-grid" id="curatedGrid"></div>
+    </section> *@
+
+    <!-- Search + Categories -->
+    <div class="search-section">
+        <div class="search-row">
+            <div class="search-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="searchInput" placeholder="Search artworks or artists..." oninput="filterArt()" />
             </div>
+            <button class="filter-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+                Filters
+            </button>
         </div>
+        <div class="categories" id="categories"></div>
+    </div>
 
-        <script>
-                // ─── State ───────────────────────────────────────────────────────────
-                var artworks = [];
-                var allCategories = ['All'];
-                var activeCategory = 'All';
-                var currentSort = 'popular';
+    <!-- Grid Header -->
+    <div class="grid-header">
+        <p id="artCount">Loading...</p>
+        <select onchange="sortArt(this.value)">
+            <option value="popular">Sort by: Popular</option>
+            <option value="low">Price: Low to High</option>
+            <option value="high">Price: High to Low</option>
+            <option value="new">Newest First</option>
+        </select>
+    </div>
 
-                // ── API base URL ─────────────────────────────────────────────────────
-                var API_BASE = 'http://localhost:5183';
-                // ── Auth helpers ──────────────────────────────────────────
-                function getToken() {
-                    return localStorage.getItem('token');
+    <!-- Art Grid -->
+    <div class="art-grid" id="artGrid">
+        <div class="loading-state" style="grid-column:1/-1">
+            <div class="loading-spinner"></div>
+            <p>Loading artworks...</p>
+        </div>
+    </div>
+
+    <script>
+        // ─── State ───────────────────────────────────────────────────────────
+        var artworks = [];
+        var allCategories = ['All'];
+        var activeCategory = 'All';
+        var currentSort = 'popular';
+
+        var API_BASE = 'http://localhost:5183';
+
+        // ── Auth helpers ──────────────────────────────────────────────────────
+        function getToken() { return localStorage.getItem('token'); }
+        function isLoggedIn() { return !!getToken(); }
+        function requireLogin(returnUrl) {
+            window.location.href = '/Auth/UserLogin?returnUrl=' + encodeURIComponent(returnUrl || window.location.pathname);
+        }
+        function authFetch(url, options) {
+            options = options || {};
+            var token = getToken();
+            return fetch(url, Object.assign({}, options, {
+                headers: Object.assign({ 'Content-Type': 'application/json' },
+                    token ? { 'Authorization': 'Bearer ' + token } : {},
+                    options.headers || {})
+            }));
+        }
+
+        // ─── localStorage helpers (artworkId-based, shared across all pages) ─
+        // Cart: stored as array of artworkIds
+        function getCart() {
+            try { return JSON.parse(localStorage.getItem('artify_cart') || '[]'); } catch(e) { return []; }
+        }
+        function saveCart(arr) { localStorage.setItem('artify_cart', JSON.stringify(arr)); }
+        function isInCart(id) { return getCart().indexOf(id) !== -1; }
+        function addToCartLocal(id) {
+            var ct = getCart();
+            if (ct.indexOf(id) === -1) { ct.push(id); saveCart(ct); }
+        }
+
+        // Wishlist: stored as array of artworkIds
+        function getWishlist() {
+            try { return JSON.parse(localStorage.getItem('artify_wishlist') || '[]'); } catch(e) { return []; }
+        }
+        function saveWishlist(arr) { localStorage.setItem('artify_wishlist', JSON.stringify(arr)); }
+        function isInWishlist(id) { return getWishlist().indexOf(id) !== -1; }
+        function toggleWishlistLocal(id) {
+            var wl = getWishlist();
+            var idx = wl.indexOf(id);
+            if (idx === -1) { wl.push(id); } else { wl.splice(idx, 1); }
+            saveWishlist(wl);
+            return idx === -1; // returns true if now wishlisted
+        }
+
+        // ─── Badges ──────────────────────────────────────────────────────────
+        function updateBadges() {
+            var wSize = getWishlist().length;
+            var cSize = getCart().length;
+            var wb = document.getElementById('wishlistBadge');
+            var cb = document.getElementById('cartBadge');
+            wb.textContent = wSize; wb.className = 'badge' + (wSize === 0 ? ' zero' : '');
+            cb.textContent = cSize; cb.className = 'badge' + (cSize === 0 ? ' zero' : '');
+        }
+
+        // ─── Toast ───────────────────────────────────────────────────────────
+        var toastTimer = null;
+        function showToast(msg) {
+            var t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2200);
+        }
+
+        // ─── Toggle Wishlist ─────────────────────────────────────────────────
+        function toggleWishlist(artworkId) {
+            if (!isLoggedIn()) { requireLogin('/Buyer/ExploreArt'); return; }
+
+            var nowWishlisted = toggleWishlistLocal(artworkId);
+            updateBadges();
+            showToast(nowWishlisted ? '♥ Added to Wishlist' : 'Removed from Wishlist');
+
+            // Update this card's button in-place without full re-render
+            var btn = document.querySelector('[data-wishlist-id="' + artworkId + '"]');
+            if (btn) {
+                btn.className = 'wishlist-btn' + (nowWishlisted ? ' active' : '');
+                var svg = btn.querySelector('svg');
+                if (svg) svg.setAttribute('fill', nowWishlisted ? 'currentColor' : 'none');
+                btn.childNodes[btn.childNodes.length - 1].textContent = nowWishlisted ? ' Added to Wishlist' : ' Add to Wishlist';
+            }
+
+            // Also call backend (fire-and-forget — UI already updated above)
+            authFetch(API_BASE + '/api/wishlist/toggle', {
+                method: 'POST',
+                body: JSON.stringify({ artworkId: artworkId })
+            }).then(function(res) {
+                if (res.status === 401) { requireLogin('/Buyer/ExploreArt'); }
+            }).catch(function() {});
+        }
+
+        // ─── Add to Cart ─────────────────────────────────────────────────────
+        function addToCart(artworkId) {
+            if (!isLoggedIn()) {
+                addToCartLocal(artworkId); // save optimistically
+                requireLogin('/Buyer/ExploreArt');
+                return;
+            }
+            if (isInCart(artworkId)) return;
+
+            addToCartLocal(artworkId);
+            updateBadges();
+            showToast('🛒 Added to Cart');
+
+            // Update this card's button in-place
+            var btn = document.querySelector('[data-cart-id="' + artworkId + '"]');
+            if (btn) {
+                btn.className = 'cart-btn in-cart';
+                btn.disabled = true;
+                btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>In Cart';
+            }
+
+            // Also call backend
+            authFetch(API_BASE + '/api/cart/add', {
+                method: 'POST',
+                body: JSON.stringify({ artworkId: artworkId })
+            }).then(function(res) {
+                if (res.status === 401) { requireLogin('/Buyer/ExploreArt'); }
+            }).catch(function() {});
+        }
+
+        // ─── Image helper ────────────────────────────────────────────────────
+        function imageUrl(path) {
+            if (!path) return 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600';
+            if (path.startsWith('http')) return path;
+            return window.location.origin + path;
+        }
+
+        // ─── Categories ──────────────────────────────────────────────────────
+        function buildCategories() {
+            var cats = ['All'];
+            artworks.forEach(function(a) {
+                if (a.categoryName && cats.indexOf(a.categoryName) === -1) cats.push(a.categoryName);
+            });
+            allCategories = cats;
+            renderCategories();
+        }
+
+        function renderCategories() {
+            var html = '';
+            for (var i = 0; i < allCategories.length; i++) {
+                var c = allCategories[i];
+                html += '<button class="cat-btn ' + (c === activeCategory ? 'active' : '') + '" onclick="setCategory(\'' + c + '\')">' + c + '</button>';
+            }
+            document.getElementById('categories').innerHTML = html;
+        }
+
+        function setCategory(cat) { activeCategory = cat; renderCategories(); filterArt(); }
+
+        // ─── Filter & Sort ────────────────────────────────────────────────────
+        function getFiltered() {
+            var q = document.getElementById('searchInput').value.toLowerCase();
+            return artworks.filter(function(a) {
+                var matchCat = activeCategory === 'All' || a.categoryName === activeCategory;
+                var matchQ = a.title.toLowerCase().indexOf(q) >= 0 || a.artistName.toLowerCase().indexOf(q) >= 0;
+                return matchCat && matchQ;
+            });
+        }
+
+        function sortArt(val) { currentSort = val; filterArt(); }
+
+        function filterArt() {
+            var filtered = getFiltered();
+            if (currentSort === 'low') filtered = filtered.slice().sort(function(a,b){ return a.price - b.price; });
+            if (currentSort === 'high') filtered = filtered.slice().sort(function(a,b){ return b.price - a.price; });
+            if (currentSort === 'popular') filtered = filtered.slice().sort(function(a,b){ return b.likesCount - a.likesCount; });
+            if (currentSort === 'new') filtered = filtered.slice().sort(function(a,b){ return new Date(b.createdAt) - new Date(a.createdAt); });
+            document.getElementById('artCount').textContent = filtered.length + ' artworks found';
+            renderGrid(filtered);
+        }
+
+        // ─── Render Art Grid ──────────────────────────────────────────────────
+        function renderGrid(filtered) {
+            if (filtered.length === 0) {
+                document.getElementById('artGrid').innerHTML = '<div class="empty-state" style="grid-column:1/-1"><p>No artworks found.</p></div>';
+                return;
+            }
+
+            var html = '';
+            for (var fi = 0; fi < filtered.length; fi++) {
+                var a = filtered[fi];
+                var id = a.artworkId;
+                var isWished = isInWishlist(id);
+                var inCart = isInCart(id);
+                var imgSrc = imageUrl(a.previewPath);
+                var url = '/Buyer/ArtworkDetail/' + id;
+
+                html += '<div class="art-card" style="animation-delay:' + (fi * 0.07) + 's">'
+                    + '<div class="card-img">'
+                    + '<img src="' + imgSrc + '" alt="' + a.title + '" loading="lazy"/>'
+                    + '<div class="overlay"></div>'
+                    + '<div class="glass-overlay"></div>'
+                    + '<span class="cat-badge">' + (a.categoryName || '') + '</span>'
+                    + '<div class="quick-actions">'
+                    + '<a href="' + url + '" class="view-btn">'
+                    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View</a>'
+                    + '<button class="cart-btn ' + (inCart ? 'in-cart' : '') + '" data-cart-id="' + id + '" '
+                    + (inCart ? 'disabled' : 'onclick="addToCart(' + id + ')"') + '>'
+                    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>'
+                    + (inCart ? 'In Cart' : 'Add') + '</button>'
+                    + '</div></div>'
+                    + '<div class="card-info">'
+                    + '<h3>' + a.title + '</h3>'
+                    + '<p class="artist">by ' + a.artistName + '</p>'
+                    + '<div class="meta">'
+                    + '<span class="price">$' + Number(a.price).toLocaleString('en-US') + '</span>'
+                    + '<span class="views"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+                    + (a.likesCount || 0).toLocaleString() + '</span>'
+                    + '</div>'
+                    + '<button class="wishlist-btn ' + (isWished ? 'active' : '') + '" data-wishlist-id="' + id + '" onclick="toggleWishlist(' + id + ')">'
+                    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="' + (isWished ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'
+                    + (isWished ? ' Added to Wishlist' : ' Add to Wishlist') + '</button>'
+                    + '</div></div>';
+            }
+            document.getElementById('artGrid').innerHTML = html;
+        }
+
+        // ─── Marquee ─────────────────────────────────────────────────────────
+        function buildMarquee() {
+            var row1 = document.getElementById('marqueeRow1');
+            var row2 = document.getElementById('marqueeRow2');
+            if (!row1 || !row2) return;
+            var imgs = artworks.slice(0, 10).map(function(a) { return imageUrl(a.previewPath); });
+            if (imgs.length === 0) return;
+            var html1 = '', html2 = '';
+            for (var rep = 0; rep < 2; rep++) {
+                for (var i = 0; i < imgs.length; i++) html1 += '<div class="marquee-item"><img src="' + imgs[i] + '" alt="Gallery art" loading="lazy"/><div class="marquee-overlay"></div></div>';
+                for (var j = imgs.length - 1; j >= 0; j--) html2 += '<div class="marquee-item"><img src="' + imgs[j] + '" alt="Gallery art" loading="lazy"/><div class="marquee-overlay"></div></div>';
+            }
+            row1.innerHTML = html1;
+            row2.innerHTML = html2;
+        }
+
+        // ─── Hero Floating Images ─────────────────────────────────────────────
+        function buildHeroFloatingImages() {
+            var container = document.getElementById('heroFloatingImages');
+            if (!container) return;
+            var imgs = artworks.slice(0, 6).map(function(a) { return imageUrl(a.previewPath); });
+            if (imgs.length === 0) return;
+            var html = '';
+            for (var i = 0; i < imgs.length; i++) {
+                html += '<div class="hero-float-img"><img src="' + imgs[i] + '" alt="Art" loading="lazy"/></div>';
+            }
+            container.innerHTML = html;
+        }
+
+        // ─── Curated Grid ─────────────────────────────────────────────────────
+        function buildCurated() {
+            var grid = document.getElementById('curatedGrid');
+            if (!grid) return;
+            var seen = {}, cards = [];
+            for (var i = 0; i < artworks.length && cards.length < 5; i++) {
+                var cat = artworks[i].categoryName;
+                if (cat && !seen[cat]) {
+                    seen[cat] = true;
+                    cards.push({ image: imageUrl(artworks[i].previewPath), title: cat + ' Art', cat: cat });
                 }
+            }
+            var html = '';
+            for (var k = 0; k < cards.length; k++) {
+                var c = cards[k];
+                html += '<div class="curated-card" onclick="setCategory(\'' + c.cat + '\'); document.getElementById(\'artGrid\').scrollIntoView({behavior:\'smooth\'})">'
+                    + '<img src="' + c.image + '" alt="' + c.title + '" loading="lazy"/>'
+                    + '<div class="curated-overlay"><h3>' + c.title + '</h3><span>' + c.cat + '</span></div>'
+                    + '</div>';
+            }
+            grid.innerHTML = html;
+        }
 
-                function isLoggedIn() {
-                    return !!getToken();
-                }
+        // ─── Fetch from API ───────────────────────────────────────────────────
+        async function loadArtworks() {
+            try {
+                var res = await authFetch(API_BASE + '/api/artwork');
+                if (!res.ok) throw new Error('Server error ' + res.status);
+                var data = await res.json();
 
-                function requireLogin(returnUrl) {
-                    window.location.href = '/Auth/UserLogin?returnUrl=' + encodeURIComponent(returnUrl || window.location.pathname);
-                }
+                // Normalize API response shape (.NET may wrap in $values)
+                if (Array.isArray(data)) artworks = data;
+                else if (data && Array.isArray(data.$values)) artworks = data.$values;
+                else if (data && Array.isArray(data.items)) artworks = data.items;
+                else if (data && Array.isArray(data.data)) artworks = data.data;
+                else if (data && Array.isArray(data.artworks)) artworks = data.artworks;
+                else { console.error('Unexpected API shape:', data); artworks = []; }
 
-                function authFetch(url, options = {}) {
-                    const token = getToken();
-                    return fetch(url, {
-                        ...options,
-                        headers: {
-                            'Content-Type': 'application/json',
-                            ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
-                            ...(options.headers || {})
-                        }
-                    });
-                }
+                buildCategories();
+                filterArt();
+                buildMarquee();
+                buildHeroFloatingImages();
+                buildCurated();
+            } catch (err) {
+                console.error('Failed to load artworks:', err);
+                document.getElementById('artGrid').innerHTML =
+                    '<div class="error-state" style="grid-column:1/-1"><p>Failed to load artworks. Please try again later.</p></div>';
+            }
+        }
 
-                // ─── Session Storage helpers ─────────────────────────────────────────
-                function getWishlist() { try { return new Set(JSON.parse(sessionStorage.getItem('artify_wishlist') || '[]')); } catch (e) { return new Set(); } }
-                function getCart() { try { return new Set(JSON.parse(localStorage.getItem('artify_cart') || '[]')); } catch (e) { return new Set(); } } function saveWishlist(s) { sessionStorage.setItem('artify_wishlist', JSON.stringify(Array.from(s))); }
-                function saveCart(s) { localStorage.setItem('artify_cart', JSON.stringify(Array.from(s))); }
-                // ─── Badges ──────────────────────────────────────────────────────────
-                function updateBadges() {
-                    var wSize = getWishlist().size;
-                    var cSize = getCart().size;
-                    var wb = document.getElementById('wishlistBadge');
-                    var cb = document.getElementById('cartBadge');
-                    wb.textContent = wSize; wb.className = 'badge' + (wSize === 0 ? ' zero' : '');
-                    cb.textContent = cSize; cb.className = 'badge' + (cSize === 0 ? ' zero' : '');
-                }
-
-                // ─── Toggle actions ───────────────────────────────────────────────────
-                function toggleWishlist(artworkId) {
-                    if (!isLoggedIn()) {
-                        requireLogin('/Buyer/ExploreArt');
-                        return;
-                    }
-
-                    authFetch('http://localhost:5183/api/wishlist/toggle', {
-                        method: 'POST',
-                        body: JSON.stringify({ artworkId })
-                    }).then(res => {
-                        if (res.status === 401) { requireLogin('/Buyer/ExploreArt'); return; }
-                        return res.json();
-                    }).then(data => {
-                        // update wishlist heart icon based on data.isWishlisted
-                    });
-                }
-
-                @* function toggleCart(artworkId) {
-                    var ct = getCart();
-                    if (ct.has(artworkId)) return;
-                    ct.add(artworkId);
-                    saveCart(ct);
-                    updateBadges();
-                    renderGrid(getFiltered());
-                } *@
-                    function addToCart(artworkId) {
-                        if (!isLoggedIn()) {
-                            // Save to guest cart so it syncs after login
-                            const guest = JSON.parse(localStorage.getItem('artify_guest_cart') || '[]');
-                            if (!guest.includes(artworkId)) {
-                                guest.push(artworkId);
-                                localStorage.setItem('artify_guest_cart', JSON.stringify(guest));
-                            }
-                            requireLogin('/Buyer/ExploreArt');
-                            return;
-                        }
-
-                        authFetch('http://localhost:5183/api/cart/add', {
-                            method: 'POST',
-                            body: JSON.stringify({ artworkId })
-                        }).then(res => {
-                            if (res.status === 401) { requireLogin('/Buyer/ExploreArt'); return; }
-                            // update your cart badge
-                        });
-                    }
-
-                // ─── Image helper ─────────────────────────────────────────────────────
-                function imageUrl(path) {
-                    if (!path) return 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600';
-                    if (path.startsWith('http')) return path;
-                    return window.location.origin + path;
-                }
-
-                // ─── Categories ──────────────────────────────────────────────────────
-                function buildCategories() {
-                    var cats = ['All'];
-                    artworks.forEach(function (a) {
-                        if (a.categoryName && cats.indexOf(a.categoryName) === -1) cats.push(a.categoryName);
-                    });
-                    allCategories = cats;
-                    renderCategories();
-                }
-
-                function renderCategories() {
-                    var html = '';
-                    for (var i = 0; i < allCategories.length; i++) {
-                        var c = allCategories[i];
-                        html += '<button class="cat-btn ' + (c === activeCategory ? 'active' : '') + '" onclick="setCategory(\'' + c + '\')">' + c + '</button>';
-                    }
-                    document.getElementById('categories').innerHTML = html;
-                }
-
-                function setCategory(cat) { activeCategory = cat; renderCategories(); filterArt(); }
-
-                // ─── Filter & Sort ────────────────────────────────────────────────────
-                function getFiltered() {
-                    var q = document.getElementById('searchInput').value.toLowerCase();
-                    return artworks.filter(function (a) {
-                        var matchCat = activeCategory === 'All' || a.categoryName === activeCategory;
-                        var matchQ = a.title.toLowerCase().indexOf(q) >= 0 || a.artistName.toLowerCase().indexOf(q) >= 0;
-                        return matchCat && matchQ;
-                    });
-                }
-
-                function sortArt(val) { currentSort = val; filterArt(); }
-
-                function filterArt() {
-                    var filtered = getFiltered();
-                    if (currentSort === 'low') filtered = filtered.slice().sort(function (a, b) { return a.price - b.price; });
-                    if (currentSort === 'high') filtered = filtered.slice().sort(function (a, b) { return b.price - a.price; });
-                    if (currentSort === 'popular') filtered = filtered.slice().sort(function (a, b) { return b.likesCount - a.likesCount; });
-                    if (currentSort === 'new') filtered = filtered.slice().sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
-                    document.getElementById('artCount').textContent = filtered.length + ' artworks found';
-                    renderGrid(filtered);
-                }
-
-                // ─── Render Art Grid ──────────────────────────────────────────────────
-                function renderGrid(filtered) {
-                    var wl = getWishlist();
-                    var ct = getCart();
-
-                    if (filtered.length === 0) {
-                        document.getElementById('artGrid').innerHTML = '<div class="empty-state" style="grid-column:1/-1"><p>No artworks found.</p></div>';
-                        return;
-                    }
-
-                    var html = '';
-                    for (var fi = 0; fi < filtered.length; fi++) {
-                        var a = filtered[fi];
-                        var id = a.artworkId;
-                        var isWished = wl.has(id);
-                        var inCart = ct.has(id);
-                        var imgSrc = imageUrl(a.previewPath);
-                        var url = '/Buyer/ArtworkDetail/' + id;
-
-                        html += '<div class="art-card" style="animation-delay:' + (fi * 0.07) + 's">'
-                            + '<div class="card-img">'
-                            + '<img src="' + imgSrc + '" alt="' + a.title + '" loading="lazy"/>'
-                            + '<div class="overlay"></div>'
-                            + '<div class="glass-overlay"></div>'
-                            + '<span class="cat-badge">' + (a.categoryName || '') + '</span>'
-                            + '<div class="quick-actions">'
-                            + '<a href="' + url + '" class="view-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View</a>'
-                            + '<button class="cart-btn ' + (inCart ? 'in-cart' : '') + '" ' + (inCart ? 'disabled' : '') + ' onclick="addToCart(' + id + ')">'
-                            + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>'
-                            + (inCart ? 'In Cart' : 'Add') + '</button>'
-                            + '</div></div>'
-                            + '<div class="card-info">'
-                            + '<h3>' + a.title + '</h3>'
-                            + '<p class="artist">by ' + a.artistName + '</p>'
-                            + '<div class="meta">'
-                            + '<span class="price">&#8377;' + Number(a.price).toLocaleString('en-IN') + '</span>'
-                            + '<span class="views"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' + (a.likesCount || 0).toLocaleString() + '</span>'
-                            + '</div>'
-                            + '<button class="wishlist-btn ' + (isWished ? 'active' : '') + '" onclick="toggleWishlist(' + id + ')">'
-                            + '<svg width="14" height="14" viewBox="0 0 24 24" fill="' + (isWished ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'
-                            + (isWished ? 'Added to Wishlist' : 'Add to Wishlist') + '</button>'
-                            + '</div></div>';
-                    }
-                    document.getElementById('artGrid').innerHTML = html;
-                }
-
-                // ─── Marquee ─────────────────────────────────────────────────────────
-                function buildMarquee() {
-                    var row1 = document.getElementById('marqueeRow1');
-                    var row2 = document.getElementById('marqueeRow2');
-                    if (!row1 || !row2) return;
-
-                    var imgs = artworks.slice(0, 10).map(function (a) { return imageUrl(a.previewPath); });
-                    if (imgs.length === 0) return;
-
-                    var html1 = '', html2 = '';
-                    for (var rep = 0; rep < 2; rep++) {
-                        for (var i = 0; i < imgs.length; i++) {
-                            html1 += '<div class="marquee-item"><img src="' + imgs[i] + '" alt="Gallery art" loading="lazy"/><div class="marquee-overlay"></div></div>';
-                        }
-                        for (var j = imgs.length - 1; j >= 0; j--) {
-                            html2 += '<div class="marquee-item"><img src="' + imgs[j] + '" alt="Gallery art" loading="lazy"/><div class="marquee-overlay"></div></div>';
-                        }
-                    }
-                    row1.innerHTML = html1;
-                    row2.innerHTML = html2;
-                }
-
-                // ─── Curated Grid ─────────────────────────────────────────────────────
-                function buildCurated() {
-                    var grid = document.getElementById('curatedGrid');
-                    if (!grid) return;
-
-                    var seen = {};
-                    var cards = [];
-                    for (var i = 0; i < artworks.length && cards.length < 5; i++) {
-                        var cat = artworks[i].categoryName;
-                        if (cat && !seen[cat]) {
-                            seen[cat] = true;
-                            cards.push({ image: imageUrl(artworks[i].previewPath), title: cat + ' Art', cat: cat });
-                        }
-                    }
-
-                    var html = '';
-                    for (var k = 0; k < cards.length; k++) {
-                        var c = cards[k];
-                        html += '<div class="curated-card" onclick="setCategory(\'' + c.cat + '\'); document.getElementById(\'artGrid\').scrollIntoView({behavior:\'smooth\'})">'
-                            + '<img src="' + c.image + '" alt="' + c.title + '" loading="lazy"/>'
-                            + '<div class="curated-overlay"><h3>' + c.title + '</h3><span>' + c.cat + '</span></div>'
-                            + '</div>';
-                    }
-                    grid.innerHTML = html;
-                }
-
-                // ─── Fetch from API ───────────────────────────────────────────────────
-                async function loadArtworks() {
-                    try {
-                        var res = await authFetch(API_BASE + '/api/artwork');
-                        if (!res.ok) throw new Error('Server error ' + res.status);
-                        var data = await res.json();
-                        artworks = data;
-                        buildCategories();
-                        filterArt();
-                        buildMarquee();
-                        buildCurated();
-                    } catch (err) {
-                        console.error('Failed to load artworks:', err);
-                        document.getElementById('artGrid').innerHTML =
-                            '<div class="error-state" style="grid-column:1/-1"><p>Failed to load artworks. Please try again later.</p></div>';
-                    }
-                }
-
-                // ─── Init ─────────────────────────────────────────────────────────────
-                document.addEventListener('DOMContentLoaded', function () {
-                    if(isLoggedIn()){
-                        requireLogin('/Buyer/ExploreArt');
-                        return;
-                    }
-                    updateBadges();
-                    loadArtworks();
-                });
-        </script>
-    </body>
-
+        // ─── Init ─────────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!isLoggedIn()) { requireLogin('/Buyer/ExploreArt'); return; }
+            updateBadges();
+            loadArtworks();
+        });
+    </script>
+</body>
 </html>

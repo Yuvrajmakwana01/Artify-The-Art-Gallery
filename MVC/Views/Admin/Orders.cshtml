@@ -356,6 +356,9 @@
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 18px;
+        margin-bottom: 18px;
+        .0
+        .
     }
 
     .orders-metric {
@@ -392,16 +395,6 @@
     .orders-metric-icon.gold {
         background: #fff6de;
         color: #d7a01e;
-    }
-
-    .orders-metric-change {
-        color: #33ae61;
-        font-size: 13px;
-        font-weight: 800;
-    }
-
-    .orders-metric-change.neutral {
-        color: #8d9bb0;
     }
 
     .orders-metric-label {
@@ -472,6 +465,40 @@
             Export CSV
         </button>
     </div>
+
+    <section class="orders-metrics">
+
+        <article class="panel orders-metric">
+            <div class="orders-metric-top">
+                <div class="orders-metric-icon orange">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+            </div>
+            <p class="orders-metric-label">Total Revenue</p>
+            <p id="totalRevenueValue" class="orders-metric-value">$0.00</p>
+        </article>
+
+        <article class="panel orders-metric">
+            <div class="orders-metric-top">
+                <div class="orders-metric-icon blue">
+                    <i class="bi bi-bag-fill"></i>
+                </div>
+            </div>
+            <p class="orders-metric-label">Order Volume</p>
+            <p id="orderVolumeValue" class="orders-metric-value">0</p>
+        </article>
+
+        <article class="panel orders-metric">
+            <div class="orders-metric-top">
+                <div class="orders-metric-icon gold">
+                    <i class="bi bi-bar-chart-fill"></i>
+                </div>
+            </div>
+            <p class="orders-metric-label">Avg. Order Value</p>
+            <p id="avgOrderValueValue" class="orders-metric-value">$0.00</p>
+        </article>
+
+    </section>
 
     <section class="panel orders-filters">
         <div class="orders-filters-row">
@@ -549,50 +576,13 @@
         </div>
     </section>
 
-    <section class="orders-metrics">
-
-        <article class="panel orders-metric">
-            <div class="orders-metric-top">
-                <div class="orders-metric-icon orange">
-                    <i class="bi bi-cash-stack"></i>
-                </div>
-                <div class="orders-metric-change">+12.5%</div>
-            </div>
-            <p class="orders-metric-label">Total Revenue</p>
-            <p id="totalRevenueValue" class="orders-metric-value">$0.00</p>
-        </article>
-
-        <article class="panel orders-metric">
-            <div class="orders-metric-top">
-                <div class="orders-metric-icon blue">
-                    <i class="bi bi-bag-fill"></i>
-                </div>
-                <div class="orders-metric-change">+8.2%</div>
-            </div>
-            <p class="orders-metric-label">Order Volume</p>
-            <p id="orderVolumeValue" class="orders-metric-value">0</p>
-        </article>
-
-        <article class="panel orders-metric">
-            <div class="orders-metric-top">
-                <div class="orders-metric-icon gold">
-                    <i class="bi bi-bar-chart-fill"></i>
-                </div>
-                <div class="orders-metric-change neutral">Static vs last month</div>
-            </div>
-            <p class="orders-metric-label">Avg. Order Value</p>
-            <p id="avgOrderValueValue" class="orders-metric-value">$0.00</p>
-        </article>
-
-    </section>
-
 </section>
 
 @section Scripts {
     <script>
         const configuredBaseUrl = @Html.Raw(JsonSerializer.Serialize(apiBaseUrl));
         const API_BASE = `${(configuredBaseUrl || "http://localhost:5183").replace(/\/$/, "")}/api/AdminOrder`;
-        
+
         function checkAuth() {
             const token = localStorage.getItem("adminToken");
             const expiry = localStorage.getItem("adminExpiry");
@@ -627,17 +617,17 @@
             return Array.isArray(rawOrders)
                 ? rawOrders.map(function (order) {
                 return {
-                    id:           order.id           ?? order.Id           ?? "",
+                    id:            order.id           ?? order.Id           ?? "",
                     buyerInitials: order.buyerInitials ?? order.BuyerInitials ?? "",
-                    buyerName:    order.buyerName     ?? order.BuyerName     ?? "",
-                    buyerTone:    order.buyerTone     ?? order.BuyerTone     ?? "",
-                    artworkName:  order.artworkName   ?? order.ArtworkName   ?? "",
-                    artworkType:  order.artworkType   ?? order.ArtworkType   ?? "",
-                    artworkTone:  order.artworkTone   ?? order.ArtworkTone   ?? "",
-                    amount:       order.amount        ?? order.Amount        ?? 0,
-                    amountText:   order.amountText    ?? order.AmountText    ?? "",
-                    status:       order.status        ?? order.Status        ?? "",
-                    createdAt:    order.createdAt     ?? order.CreatedAt     ?? null
+                    buyerName:     order.buyerName     ?? order.BuyerName     ?? "",
+                    buyerTone:     order.buyerTone     ?? order.BuyerTone     ?? "",
+                    artworkName:   order.artworkName   ?? order.ArtworkName   ?? "",
+                    artworkType:   order.artworkType   ?? order.ArtworkType   ?? "",
+                    artworkTone:   order.artworkTone   ?? order.ArtworkTone   ?? "",
+                    amount:        order.amount        ?? order.Amount        ?? 0,
+                    amountText:    order.amountText    ?? order.AmountText    ?? "",
+                    status:        order.status        ?? order.Status        ?? "",
+                    createdAt:     order.createdAt     ?? order.CreatedAt     ?? null
                 };
             })
                 : [];
@@ -649,19 +639,19 @@
         let pageSize       = 5;
 
         function updateSummaryCards(data) {
-            const totalRevenue = Number(data?.totalRevenue ?? data?.TotalRevenue ?? 0);
-            const orderVolume = Number(data?.orderVolume ?? data?.OrderVolume ?? 0);
+            const totalRevenue      = Number(data?.totalRevenue      ?? data?.TotalRevenue      ?? 0);
+            const orderVolume       = Number(data?.orderVolume       ?? data?.OrderVolume       ?? 0);
             const averageOrderValue = Number(data?.averageOrderValue ?? data?.AverageOrderValue ?? 0);
 
             const usdCurrency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
             const wholeNumber = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 
-            const totalRevenueElement = document.getElementById("totalRevenueValue");
-            const orderVolumeElement = document.getElementById("orderVolumeValue");
+            const totalRevenueElement      = document.getElementById("totalRevenueValue");
+            const orderVolumeElement       = document.getElementById("orderVolumeValue");
             const averageOrderValueElement = document.getElementById("avgOrderValueValue");
 
-            if (totalRevenueElement) totalRevenueElement.textContent = usdCurrency.format(totalRevenue);
-            if (orderVolumeElement) orderVolumeElement.textContent = wholeNumber.format(orderVolume);
+            if (totalRevenueElement)      totalRevenueElement.textContent      = usdCurrency.format(totalRevenue);
+            if (orderVolumeElement)       orderVolumeElement.textContent       = wholeNumber.format(orderVolume);
             if (averageOrderValueElement) averageOrderValueElement.textContent = usdCurrency.format(averageOrderValue);
         }
 
@@ -672,9 +662,9 @@
                 headers: authHeader(),
                 dataType: "json",
                 success: function (payload) {
-                    allOrders = normalizeOrders(payload?.orders ?? payload?.Orders);
+                    allOrders      = normalizeOrders(payload?.orders ?? payload?.Orders);
                     filteredOrders = [...allOrders];
-                    currentPage = 1;
+                    currentPage    = 1;
 
                     populateCategoryFilter(payload?.categories ?? payload?.Categories ?? []);
                     updateSummaryCards(payload);
@@ -685,8 +675,6 @@
                 }
             });
         }
-
-        /* ── Helpers ─────────────────────────────────────────────────── */
 
         function escapeHtml(value) {
             return String(value ?? "")
@@ -720,8 +708,6 @@
             return diffMs >= 0 && diffMs <= days * 24 * 60 * 60 * 1000;
         }
 
-        /* ── Category filter ─────────────────────────────────────────── */
-
         function populateCategoryFilter(categories) {
             const select = document.getElementById("categoryFilter");
             if (!select) return;
@@ -733,8 +719,6 @@
                 select.appendChild(option);
             });
         }
-
-        /* ── Filtering ───────────────────────────────────────────────── */
 
         function applyFilters() {
             const timeVal     = document.getElementById("timeFilter")?.value     || "All Time";
@@ -781,8 +765,6 @@
             renderOrders();
         }
 
-        /* ── Render: pager ───────────────────────────────────────────── */
-
         function renderPager() {
             const pager = document.getElementById("ordersPager");
             if (!pager) return;
@@ -795,7 +777,6 @@
 
             pager.innerHTML = "";
 
-            // Previous button
             const prevBtn = document.createElement("button");
             prevBtn.type      = "button";
             prevBtn.innerHTML = '<i class="bi bi-chevron-left"></i>';
@@ -805,7 +786,6 @@
             });
             pager.appendChild(prevBtn);
 
-            // Page number buttons
             const visiblePages = Math.min(5, totalPages);
             const startPage    = Math.max(1, Math.min(
                 currentPage - Math.floor(visiblePages / 2),
@@ -825,7 +805,6 @@
                 pager.appendChild(btn);
             }
 
-            // Next button
             const nextBtn = document.createElement("button");
             nextBtn.type      = "button";
             nextBtn.innerHTML = '<i class="bi bi-chevron-right"></i>';
@@ -835,8 +814,6 @@
             });
             pager.appendChild(nextBtn);
         }
-
-        /* ── Render: table rows ──────────────────────────────────────── */
 
         function renderOrders() {
             const tableBody = document.getElementById("ordersTableBody");
@@ -882,8 +859,6 @@
             renderPager();
         }
 
-        /* ── CSV export ──────────────────────────────────────────────── */
-
         function exportOrdersCsv() {
             const rows = [["Order ID", "Buyer", "Artwork", "Artwork Type", "Date", "Amount"]];
 
@@ -911,8 +886,6 @@
             URL.revokeObjectURL(url);
         }
 
-        /* ── Init ────────────────────────────────────────────────────── */
-
         populateCategoryFilter([]);
         renderOrders();
 
@@ -926,4 +899,3 @@
         loadOrdersFromApi();
     </script>
 }
-

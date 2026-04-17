@@ -13,20 +13,20 @@ namespace Repository.Services
     {
         private readonly IAdminArtworkInterface _repo;
         private readonly RedisService           _redis;
-        private readonly RabbitMQProducer       _mq;
+        // private readonly RabbitMQProducer       _mq;
         private readonly EmailServices          _email;
         private readonly ILogger<AdminArtworkService> _logger;
 
         public AdminArtworkService(
             IAdminArtworkInterface       repo,
             RedisService                 redis,
-            RabbitMQProducer             mq,
+            // RabbitMQProducer             mq,
             EmailServices                email,
             ILogger<AdminArtworkService> logger)
         {
             _repo   = repo;
             _redis  = redis;
-            _mq     = mq;
+            // _mq     = mq;
             _email  = email;
             _logger = logger;
         }
@@ -66,13 +66,13 @@ namespace Repository.Services
             await _repo.ResetRejectedCountAsync(artwork.c_ArtistId);
 
             // 3. Notify artist via RabbitMQ (in-app notification)
-            _mq.SendArtworkNotification(new ArtworkNotificationMessage
-            {
-                c_ArtistId = artwork.c_ArtistId,
-                c_Title    = artwork.c_Title,
-                c_Message  = $"Your artwork '{artwork.c_Title}' has been approved and is now live!",
-                c_Type     = "APPROVED"
-            });
+            // _mq.SendArtworkNotification(new ArtworkNotificationMessage
+            // {
+            //     c_ArtistId = artwork.c_ArtistId,
+            //     c_Title    = artwork.c_Title,
+            //     c_Message  = $"Your artwork '{artwork.c_Title}' has been approved and is now live!",
+            //     c_Type     = "APPROVED"
+            // });
 
             // 4. Send approval email to artist
             await SendModerationEmailAsync(
@@ -111,13 +111,13 @@ namespace Repository.Services
                 ? " Your account has been temporarily blocked for 15 days."
                 : string.Empty;
 
-            _mq.SendArtworkNotification(new ArtworkNotificationMessage
-            {
-                c_ArtistId = artwork.c_ArtistId,
-                c_Title    = artwork.c_Title,
-                c_Message  = $"Your artwork '{artwork.c_Title}' was rejected. Reason: {adminNote}.{blockWarning}",
-                c_Type     = "REJECTED"
-            });
+            // _mq.SendArtworkNotification(new ArtworkNotificationMessage
+            // {
+            //     c_ArtistId = artwork.c_ArtistId,
+            //     c_Title    = artwork.c_Title,
+            //     c_Message  = $"Your artwork '{artwork.c_Title}' was rejected. Reason: {adminNote}.{blockWarning}",
+            //     c_Type     = "REJECTED"
+            // });
 
             // 5. Send rejection email to artist
             //    Append block warning to the admin note so the artist sees it in email too

@@ -1,278 +1,362 @@
 @{
     ViewBag.Title = "Order Detail";
-    Layout = "~/Views/Shared/_BuyerLayout.cshtml";
 }
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
     :root {
-        --canvas:        #f5f0ea;
-        --canvas-2:      #ffffff;
-        --canvas-3:      #ede7df;
-        --surface:       #faf7f3;
-        --border:        rgba(0,0,0,0.06);
-        --border-2:      rgba(0,0,0,0.10);
-        --gold:          #9a6324;
-        --gold-bright:   #c08b3f;
-        --gold-light:    #dbb978;
-        --gold-dim:      rgba(154,99,36,0.08);
-        --gold-ring:     rgba(154,99,36,0.18);
-        --text:          #1c1814;
-        --text-2:        #5e554a;
-        --text-3:        #9e9488;
-        --success:       #15803d;
-        --success-bg:    rgba(21,128,61,0.08);
-        --warning-fg:    #92400e;
-        --warning-bg:    rgba(245,158,11,0.08);
-        --destructive:   #dc2626;
-        --destructive-bg: rgba(220,38,38,0.08);
-        --radius-sm:     10px;
-        --radius-md:     16px;
-        --radius-lg:     24px;
-        --radius-xl:     36px;
-        --shadow-sm:     0 1px 3px rgba(0,0,0,0.04);
-        --shadow-md:     0 4px 16px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.03);
-        --shadow-lg:     0 12px 40px rgba(0,0,0,0.08);
-        --shadow-gold:   0 8px 32px rgba(154,99,36,0.15);
+        --ink:         #0f0e0c;
+        --ink-2:       #3d3830;
+        --ink-3:       #8a8078;
+        --parchment:   #f8f4ee;
+        --parchment-2: #ffffff;
+        --parchment-3: #ede8e0;
+        --border:      rgba(15,14,12,0.07);
+        --border-2:    rgba(15,14,12,0.13);
+        --amber:       #b5621e;
+        --amber-2:     #d4813a;
+        --amber-light: #e8b483;
+        --amber-dim:   rgba(181,98,30,0.07);
+        --amber-ring:  rgba(181,98,30,0.20);
+        --green:       #2d6a4f;
+        --green-bg:    rgba(45,106,79,0.08);
+        --orange-fg:   #92400e;
+        --orange-bg:   rgba(234,120,48,0.09);
+        --red:         #b91c1c;
+        --red-bg:      rgba(185,28,28,0.08);
+        --r-sm:  8px;
+        --r-md:  14px;
+        --r-lg:  20px;
+        --r-xl:  28px;
+        --sh-sm: 0 1px 3px rgba(0,0,0,0.05);
+        --sh-md: 0 4px 20px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);
+        --sh-lg: 0 12px 48px rgba(0,0,0,0.09);
+        --sh-amber: 0 6px 28px rgba(181,98,30,0.18);
     }
 
-    body { font-family: 'DM Sans', sans-serif; background: var(--canvas); color: var(--text); }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .detail-page {
-        max-width: 940px; margin: 0 auto; padding: 3rem 2rem 5rem;
-        opacity: 0; transform: translateY(20px);
-        animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) forwards;
-    }
-    @@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
-
-    /* ── Back Link ── */
-    .back-link {
-        display: inline-flex; align-items: center; gap: 7px;
-        color: var(--text-3); font-size: .88rem; font-weight: 500;
-        text-decoration: none; margin-bottom: 2rem;
-        transition: all 0.25s; padding: 6px 12px 6px 8px;
-        border-radius: var(--radius-sm);
-    }
-    .back-link:hover { color: var(--gold); background: var(--gold-dim); }
-    .back-link svg { flex-shrink: 0; transition: transform 0.25s; }
-    .back-link:hover svg { transform: translateX(-3px); }
-
-    /* ── Header ── */
-    .detail-header {
-        display: flex; justify-content: space-between; align-items: flex-start;
-        flex-wrap: wrap; gap: 1.25rem; margin-bottom: 2rem;
-    }
-    .detail-header-left h2 {
-        font-family: 'Playfair Display', serif;
-        font-size: 2rem; font-weight: 700; margin: 0 0 8px;
-    }
-    .detail-header-left .order-meta {
-        display: flex; align-items: center; gap: 16px;
-        font-size: .82rem; color: var(--text-3); flex-wrap: wrap; margin-top: 10px;
-    }
-    .detail-header-left .order-meta-item { display: flex; align-items: center; gap: 6px; }
-    .detail-header-right { display: flex; gap: 10px; flex-wrap: wrap; }
-
-    /* ── Buttons ── */
-    .btn {
-        display: inline-flex; align-items: center; gap: 8px;
-        padding: 11px 20px; border-radius: var(--radius-md);
-        border: none; font-size: .84rem; font-weight: 600;
-        font-family: 'DM Sans', sans-serif;
-        cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        text-decoration: none;
-    }
-    .btn-outline {
-        background: var(--canvas-2); color: var(--text);
-        border: 1.5px solid var(--border-2);
-        box-shadow: var(--shadow-sm);
-    }
-    .btn-outline:hover {
-        border-color: var(--gold-bright); background: var(--gold-dim);
-        color: var(--gold); box-shadow: var(--shadow-md);
-    }
-    .btn-primary {
-        background: linear-gradient(135deg, var(--gold-bright), var(--gold));
-        color: #fff; border: none;
-        box-shadow: var(--shadow-sm);
-    }
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-gold);
-        filter: brightness(1.05);
+    body {
+        font-family: 'Outfit', sans-serif;
+        background: var(--parchment);
+        color: var(--ink);
+        min-height: 100vh;
     }
 
-    /* ── Status Badge ── */
-    .status-badge {
+    /* ── PAGE WRAPPER ── */
+    .od-page {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 2.5rem 1.5rem 6rem;
+        opacity: 0;
+        transform: translateY(24px);
+        animation: revealUp 0.55s cubic-bezier(0.22,1,0.36,1) 0.05s forwards;
+    }
+    @@keyframes revealUp { to { opacity:1; transform:translateY(0); } }
+
+    /* ── BACK LINK ── */
+    .back-btn {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: .82rem; font-weight: 500; color: var(--ink-3);
+        text-decoration: none; padding: 6px 12px 6px 8px;
+        border-radius: var(--r-sm); transition: all .22s;
+        margin-bottom: 2rem;
+    }
+    .back-btn:hover { color: var(--amber); background: var(--amber-dim); }
+    .back-btn svg   { transition: transform .22s; }
+    .back-btn:hover svg { transform: translateX(-3px); }
+
+    /* ── HEADER ── */
+    .od-header {
+        display: flex; justify-content: space-between;
+        align-items: flex-start; flex-wrap: wrap;
+        gap: 1.25rem; margin-bottom: 1.75rem;
+    }
+    .od-header-left h1 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2.1rem; font-weight: 700; line-height: 1.15;
+        letter-spacing: -0.01em;
+    }
+    .od-meta {
+        display: flex; align-items: center; gap: 14px;
+        flex-wrap: wrap; margin-top: 10px;
+        font-size: .8rem; color: var(--ink-3);
+    }
+    .od-meta-item { display: flex; align-items: center; gap: 5px; }
+    .od-header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    /* ── STATUS BADGE ── */
+    .badge {
         display: inline-flex; align-items: center; gap: 5px;
-        padding: 4px 14px; border-radius: 100px;
-        font-size: .8rem; font-weight: 600; border: 1px solid;
+        padding: 4px 13px; border-radius: 100px;
+        font-size: .75rem; font-weight: 600; border: 1px solid;
     }
-    .status-delivered  { background: var(--success-bg); color: var(--success); border-color: rgba(21,128,61,0.15); }
-    .status-processing { background: var(--warning-bg); color: var(--warning-fg); border-color: rgba(245,158,11,0.15); }
-    .status-failed     { background: var(--destructive-bg); color: var(--destructive); border-color: rgba(220,38,38,0.15); }
+    .badge-delivered { background: var(--green-bg);  color: var(--green);    border-color: rgba(45,106,79,.15); }
+    .badge-processing{ background: var(--orange-bg); color: var(--orange-fg);border-color: rgba(234,120,48,.15); }
+    .badge-failed    { background: var(--red-bg);    color: var(--red);      border-color: rgba(185,28,28,.15); }
 
-    /* ── Section Cards ── */
-    .section-card {
-        background: var(--canvas-2);
+    /* ── BUTTONS ── */
+    .btn {
+        display: inline-flex; align-items: center; gap: 7px;
+        padding: 10px 18px; border-radius: var(--r-md);
+        font-size: .82rem; font-weight: 600;
+        font-family: 'Outfit', sans-serif;
+        cursor: pointer; border: none;
+        text-decoration: none;
+        transition: all .25s cubic-bezier(.4,0,.2,1);
+        white-space: nowrap;
+    }
+    .btn-ghost {
+        background: var(--parchment-2); color: var(--ink-2);
+        border: 1.5px solid var(--border-2);
+        box-shadow: var(--sh-sm);
+    }
+    .btn-ghost:hover {
+        border-color: var(--amber-2); color: var(--amber);
+        background: var(--amber-dim); box-shadow: var(--sh-md);
+    }
+    .btn-amber {
+        background: linear-gradient(135deg, var(--amber-2), var(--amber));
+        color: #fff; box-shadow: var(--sh-sm);
+    }
+    .btn-amber:hover { transform: translateY(-2px); box-shadow: var(--sh-amber); filter: brightness(1.06); }
+    .btn-sm { padding: 7px 13px; font-size: .76rem; border-radius: var(--r-sm); gap: 5px; }
+    .btn-disabled {
+        background: var(--parchment-3) !important;
+        color: var(--ink-3) !important;
+        border-color: var(--border) !important;
+        cursor: not-allowed !important; pointer-events: none;
+        box-shadow: none !important; transform: none !important;
+        filter: none !important; opacity: .65;
+    }
+
+    /* ── INFO BANNER ── */
+    .dl-banner {
+        display: flex; align-items: center; justify-content: space-between;
+        background: var(--amber-dim); border: 1px solid var(--amber-ring);
+        border-radius: var(--r-md); padding: 13px 18px;
+        margin-bottom: 1.25rem; gap: 12px; flex-wrap: wrap;
+    }
+    .dl-banner-text { font-size: .83rem; font-weight: 600; color: var(--amber); }
+    .dl-banner-sub  { font-size: .74rem; color: var(--ink-3); margin-top: 2px; }
+
+    /* ── CARD ── */
+    .card {
+        background: var(--parchment-2);
         border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
+        border-radius: var(--r-xl);
         padding: 1.75rem;
-        margin-bottom: 1.25rem;
-        box-shadow: var(--shadow-sm);
-        transition: box-shadow 0.3s, transform 0.3s;
+        margin-bottom: 1.1rem;
+        box-shadow: var(--sh-sm);
+        transition: box-shadow .3s, transform .3s;
     }
-    .section-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
-    .section-title {
-        font-family: 'Playfair Display', serif;
-        font-size: 1rem; font-weight: 700; color: var(--text);
-        margin: 0 0 1.25rem; display: flex; align-items: center; gap: 9px;
+    .card:hover { box-shadow: var(--sh-md); transform: translateY(-1px); }
+    .card-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.05rem; font-weight: 700;
+        display: flex; align-items: center; gap: 9px;
+        margin-bottom: 1.25rem; color: var(--ink);
     }
-    .section-title svg { color: var(--gold-bright); }
+    .card-title svg { color: var(--amber-2); flex-shrink: 0; }
 
-    /* ── Item Rows ── */
+    /* ── ITEM ROW ── */
     .item-row {
-        display: flex; align-items: center; gap: 18px;
-        padding: 16px 0; border-bottom: 1px solid var(--border);
-        transition: padding-left 0.2s;
+        display: flex; align-items: center; gap: 16px;
+        padding: 15px 0; border-bottom: 1px solid var(--border);
+        transition: padding-left .2s;
     }
-    .item-row:hover { padding-left: 6px; }
-    .item-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .item-row:hover { padding-left: 3px; }
     .item-row:first-child { padding-top: 0; }
-    .item-img {
-        width: 76px; height: 76px; border-radius: var(--radius-sm);
-        overflow: hidden; flex-shrink: 0;
-        background: var(--canvas-3); border: 1px solid var(--border);
-        box-shadow: var(--shadow-sm);
-    }
-    .item-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .item-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-3); }
-    .item-info { flex: 1; min-width: 0; }
-    .item-title {
-        font-size: .95rem; font-weight: 700; color: var(--text);
-        margin: 0 0 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .item-artist { font-size: .82rem; color: var(--text-3); }
-    .item-cat {
-        display: inline-block; margin-top: 6px;
-        padding: 3px 10px; border-radius: 100px;
-        background: var(--gold-dim); color: var(--gold);
-        font-size: .7rem; font-weight: 600; letter-spacing: 0.3px;
-    }
-    .item-price { font-size: 1rem; font-weight: 700; color: var(--text); white-space: nowrap; flex-shrink: 0; }
+    .item-row:last-child  { border-bottom: none; padding-bottom: 0; }
 
-    /* ── Summary Rows ── */
-    .summary-row {
+    .item-thumb {
+        width: 72px; height: 72px; flex-shrink: 0;
+        border-radius: var(--r-sm); overflow: hidden;
+        background: var(--parchment-3); border: 1px solid var(--border);
+        box-shadow: var(--sh-sm);
+    }
+    .item-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+    .item-thumb-ph  { width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:var(--ink-3); }
+
+    .item-info { flex:1; min-width:0; }
+    .item-name {
+        font-size: .93rem; font-weight: 600; color: var(--ink);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        margin-bottom: 2px;
+    }
+    .item-artist { font-size: .79rem; color: var(--ink-3); }
+    .item-tag {
+        display: inline-block; margin-top: 5px;
+        padding: 2px 9px; border-radius: 100px;
+        background: var(--amber-dim); color: var(--amber);
+        font-size: .68rem; font-weight: 600; letter-spacing: .3px;
+    }
+    .item-actions {
+        display: flex; flex-direction: column;
+        align-items: flex-end; gap: 5px; flex-shrink: 0;
+    }
+    .item-price { font-size: .97rem; font-weight: 700; color: var(--ink); white-space: nowrap; }
+    .dl-counter { font-size: .71rem; color: var(--ink-3); white-space: nowrap; }
+    .dl-counter.maxed { color: var(--red); font-weight: 600; }
+
+    /* ── SUMMARY ── */
+    .sum-row {
         display: flex; justify-content: space-between; align-items: center;
-        font-size: .9rem; padding: 10px 0; color: var(--text-2);
+        font-size: .88rem; padding: 10px 0; color: var(--ink-2);
+        border-bottom: 1px solid var(--border);
     }
-    .summary-row span:last-child { font-weight: 600; color: var(--text); }
-    .summary-row.total {
-        padding-top: 16px; margin-top: 8px;
-        border-top: 2px solid var(--canvas-3);
-        font-size: 1.05rem;
+    .sum-row:last-child { border-bottom: none; }
+    .sum-row span:last-child { font-weight: 600; color: var(--ink); }
+    .sum-row.total {
+        padding-top: 15px; margin-top: 4px;
+        border-top: 2px solid var(--parchment-3); border-bottom: none;
+        font-size: 1.03rem;
     }
-    .summary-row.total span { color: var(--text); font-weight: 800; }
+    .sum-row.total span { font-weight: 800; }
+    .sum-row.fee span:last-child { color: var(--amber); }
+    .sum-row.free span:last-child { color: var(--green); }
 
-    /* ── Info Grid ── */
-    .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    /* ── INFO GRID ── */
+    .info-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 18px; }
     .info-item label {
-        font-size: .65rem; font-weight: 700; color: var(--text-3);
-        text-transform: uppercase; letter-spacing: 1.5px;
-        display: block; margin-bottom: 5px;
+        display: block; font-size: .62rem; font-weight: 700;
+        color: var(--ink-3); text-transform: uppercase;
+        letter-spacing: 1.4px; margin-bottom: 4px;
     }
-    .info-item span { font-size: .92rem; color: var(--text); font-weight: 600; }
+    .info-item span { font-size: .9rem; font-weight: 600; color: var(--ink); }
 
-    /* ── Loading ── */
-    .loading-state { text-align: center; padding: 5rem 0; color: var(--text-3); }
-    .loading-spinner {
-        display: inline-block; width: 40px; height: 40px;
-        border: 3px solid var(--border-2); border-top-color: var(--gold-bright);
-        border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 18px;
+    /* ── LOADING / ERROR ── */
+    .state-center {
+        text-align: center; padding: 5rem 0; color: var(--ink-3);
+    }
+    .spinner {
+        display: inline-block; width: 38px; height: 38px;
+        border: 3px solid var(--border-2); border-top-color: var(--amber-2);
+        border-radius: 50%; animation: spin .75s linear infinite;
+        margin-bottom: 16px;
     }
     @@keyframes spin { to { transform: rotate(360deg); } }
 
-    @@media(max-width: 600px) {
-        .info-grid { grid-template-columns: 1fr; }
-        .detail-header-right { width: 100%; }
-        .btn { flex: 1; justify-content: center; }
-        .detail-page { padding: 2rem 1rem 4rem; }
-        .detail-header-left h2 { font-size: 1.5rem; }
+    /* ── PROGRESS BAR (download all) ── */
+    .dl-progress-wrap {
+        display: none; margin-bottom: 1.25rem;
+        background: var(--parchment-3); border-radius: 100px;
+        height: 5px; overflow: hidden;
+    }
+    .dl-progress-bar {
+        height: 100%; width: 0%;
+        background: linear-gradient(90deg, var(--amber-2), var(--amber-light));
+        border-radius: 100px; transition: width .4s ease;
+    }
+
+    /* ── RESPONSIVE ── */
+    @@media(max-width:600px) {
+        .info-grid { grid-template-columns:1fr; }
+        .od-header-actions { width:100%; }
+        .btn { flex:1; justify-content:center; }
+        .od-page { padding: 1.5rem 1rem 4rem; }
+        .od-header-left h1 { font-size: 1.65rem; }
+        .item-row { flex-wrap: wrap; }
+        .item-actions { flex-direction:row; align-items:center; width:100%; justify-content:space-between; }
     }
 
     @@media print {
-        .no-print, .back-link, .detail-header-right { display: none !important; }
-        body { background: white !important; }
-        .section-card { box-shadow: none !important; border: 1px solid #ddd !important; }
-        .detail-page { animation: none; opacity: 1; transform: none; }
+        .no-print, .back-btn, .od-header-actions, .dl-banner, .dl-progress-wrap { display:none !important; }
+        body  { background:#fff !important; }
+        .card { box-shadow:none !important; border:1px solid #ddd !important; }
+        .od-page { animation:none; opacity:1; transform:none; }
     }
 </style>
 
-<div class="detail-page" id="detailPage">
-    <div class="loading-state" id="loadingState">
-        <div class="loading-spinner"></div>
-        <p>Loading order details...</p>
+<div class="od-page" id="odPage">
+
+    <!-- Loading -->
+    <div class="state-center" id="stateLoading">
+        <div class="spinner"></div>
+        <p>Loading order details…</p>
     </div>
 
-    <div id="errorState" style="display:none;" class="loading-state">
-        <p id="errorMsg">Order not found.</p>
-        <a href="/Buyer/Orders" style="margin-top:16px;display:inline-block;color:var(--gold-bright);font-weight:600;">← Back to Orders</a>
+    <!-- Error -->
+    <div class="state-center" id="stateError" style="display:none;">
+        <p id="errMsg">Order not found.</p>
+        <a href="/Buyer/Orders" style="margin-top:16px;display:inline-block;color:var(--amber-2);font-weight:600;font-size:.9rem;">← Back to Orders</a>
     </div>
 
-    <div id="orderContent" style="display:none;">
+    <!-- Content -->
+    <div id="odContent" style="display:none;">
 
-        <a href="/Buyer/Orders" class="back-link no-print">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        <a href="/Buyer/Orders" class="back-btn no-print">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
             Back to Order History
         </a>
 
-        <div class="detail-header">
-            <div class="detail-header-left">
-                <h2 id="orderIdHeading">Order</h2>
-                <span id="statusBadge" class="status-badge"></span>
-                <div class="order-meta" style="margin-top:10px;">
-                    <span class="order-meta-item">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                        <span id="orderDate"></span>
+        <!-- Header -->
+        <div class="od-header">
+            <div class="od-header-left">
+                <h1 id="odHeading">Order</h1>
+                <span id="odBadge" class="badge"></span>
+                <div class="od-meta">
+                    <span class="od-meta-item">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <span id="odDate"></span>
                     </span>
-                    <span class="order-meta-item">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                        <span id="orderItemCount"></span>
+                    <span class="od-meta-item">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                        <span id="odItemCount"></span>
                     </span>
                 </div>
             </div>
-            <div class="detail-header-right no-print">
-                <button class="btn btn-outline" onclick="downloadInvoice()">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="13" y2="15"/></svg>
+            <div class="od-header-actions no-print">
+                <button class="btn btn-ghost" onclick="printInvoice()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="13" y2="15"/></svg>
                     Invoice
                 </button>
-                <button class="btn btn-primary" onclick="downloadPdf()">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    Download PDF
+                <button class="btn btn-amber" id="dlAllBtn" onclick="downloadAll()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download All
                 </button>
             </div>
         </div>
 
-        <div class="section-card">
-            <p class="section-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <!-- Download limit info -->
+        <div class="dl-banner no-print">
+            <div>
+                <div class="dl-banner-text">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    Each artwork can be downloaded up to 1 times
+                </div>
+                <div class="dl-banner-sub">Individual buttons also available per artwork below.</div>
+            </div>
+        </div>
+
+        <!-- Progress bar (shown during Download All) -->
+        <div class="dl-progress-wrap no-print" id="dlProgressWrap">
+            <div class="dl-progress-bar" id="dlProgressBar"></div>
+        </div>
+
+        <!-- Artwork items -->
+        <div class="card">
+            <p class="card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                 Artwork Items
             </p>
             <div id="itemsList"></div>
         </div>
 
-        <div class="section-card">
-            <p class="section-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        <!-- Summary -->
+        <div class="card">
+            <p class="card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
                 Order Summary
             </p>
             <div id="summaryRows"></div>
         </div>
 
-        <div class="section-card">
-            <p class="section-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <!-- Order info -->
+        <div class="card">
+            <p class="card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 Order Information
             </p>
             <div class="info-grid" id="infoGrid"></div>
@@ -282,225 +366,395 @@
 </div>
 
 <script>
-    const BUYER_ID = (function () {
-        if (typeof window.buyerId !== 'undefined') return window.buyerId;
-        const m = document.querySelector('meta[name="buyer-id"]');
-        if (m) return parseInt(m.content, 10);
-        return null;
-    })();
+(function () {
+    var PLATFORM_FEE   = 0.02;
+    var MAX_DL         = 1;
+    var _status        = {};   // artworkId → { used, left, canDownload }
+    var _order         = null;
+    var _downloading   = false;
+    var token          = localStorage.getItem('token');
+    var BASE           = 'http://localhost:5183';
 
-    function getOrderIdFromUrl() {
-        const parts = window.location.pathname.split('/');
-        const id    = parseInt(parts[parts.length - 1], 10);
+    // ── Helpers ──────────────────────────────────────────────────────────
+    function orderId() {
+        var parts = window.location.pathname.split('/');
+        var id    = parseInt(parts[parts.length - 1], 10);
         return isNaN(id) ? null : id;
     }
 
-    function imageUrl(path) {
-        if (!path) return null;
-        if (path.startsWith('http')) return path;
-        return window.location.origin + path;
-    }
-    function formatDate(iso) {
-        const d = new Date(iso);
-        return d.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
-    }
-    function formatRupee(n) {
-        return '$' + parseFloat(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-    function statusClass(s) {
-        const map = { delivered: 'status-delivered', processing: 'status-processing', failed: 'status-failed' };
-        return map[(s || '').toLowerCase()] || 'status-processing';
-    }
-    function statusIcon(s) {
-        const lower = (s || '').toLowerCase();
-        if (lower === 'delivered')
-            return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
-        if (lower === 'failed')
-            return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-        return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+    function imgUrl(p) {
+        if (!p) return null;
+        return p.startsWith('http') ? p : BASE + p;
     }
 
-    var _orderData = null;
-
-    function populatePage(data) {
-        _orderData = data;
-        const o     = data.order;
-        const items = data.items;
-
-        document.getElementById('orderIdHeading').textContent =
-            'Order ORD-' + String(o.orderId).padStart(8, '0');
-        document.title = 'Order ORD-' + String(o.orderId).padStart(8, '0');
-
-        const badge = document.getElementById('statusBadge');
-        badge.className = 'status-badge ' + statusClass(o.orderStatus);
-        badge.innerHTML = statusIcon(o.orderStatus) + ' ' + o.orderStatus;
-
-        document.getElementById('orderDate').textContent     = formatDate(o.createdAt);
-        document.getElementById('orderItemCount').textContent =
-            items.length + ' item' + (items.length === 1 ? '' : 's');
-
-        const imgHtml = (path) => {
-            const url = imageUrl(path);
-            return url
-                ? `<img src="${url}" alt="Artwork" loading="lazy"/>`
-                : `<div class="item-img-placeholder"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`;
-        };
-
-        document.getElementById('itemsList').innerHTML = items.map(it => `
-            <div class="item-row">
-                <div class="item-img">${imgHtml(it.previewPath)}</div>
-                <div class="item-info">
-                    <p class="item-title">${it.title}</p>
-                    <p class="item-artist">by ${it.artistName}</p>
-                    ${it.categoryName ? `<span class="item-cat">${it.categoryName}</span>` : ''}
-                </div>
-                <span class="item-price">${formatRupee(it.priceAtPurchase)}</span>
-            </div>`).join('');
-
-        const subtotal     = items.reduce((s, it) => s + parseFloat(it.priceAtPurchase), 0);
-        @* const platformFees = Math.round(subtotal * 0.18 * 100) / 100; *@
-        const platformFees = total - subtotal;
-        const total        = parseFloat(o.totalAmount);
-
-        document.getElementById('summaryRows').innerHTML = `
-            <div class="summary-row">
-                <span>${items.length} artwork${items.length === 1 ? '' : 's'}</span>
-                <span>${formatRupee(subtotal)}</span>
-            </div>
-            <div class="summary-row">
-                <span>Platform Fees</span>
-                <span>${formatRupee(platformFees)}</span>
-            </div>
-            <div class="summary-row total">
-                <span>Total Paid</span>
-                <span>${formatRupee(total)}</span>
-            </div>`;
-
-        document.getElementById('infoGrid').innerHTML = `
-            <div class="info-item"><label>Order ID</label><span>ORD-${String(o.orderId).padStart(8, '0')}</span></div>
-            <div class="info-item"><label>Order Date</label><span>${formatDate(o.createdAt)}</span></div>
-            <div class="info-item"><label>Status</label><span>${o.orderStatus}</span></div>
-            <div class="info-item"><label>Payment</label><span>Online Payment</span></div>
-            <div class="info-item"><label>Items</label><span>${items.length}</span></div>
-            <div class="info-item"><label>Amount Paid</label><span>${formatRupee(total)}</span></div>`;
+    function fmtDate(iso) {
+        return new Date(iso).toLocaleDateString('en-IN',
+            { year: 'numeric', month: 'long', day: 'numeric' });
     }
 
-    function downloadPdf() {
-        window.print();
+    function fmtRs(n) {
+        return '$' + (parseFloat(n) || 0).toLocaleString('en-IN',
+            { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    function downloadInvoice() {
-        if (!_orderData) return;
-        const o     = _orderData.order;
-        const items = _orderData.items;
+    function badgeClass(s) {
+        var m = { delivered: 'badge-delivered', processing: 'badge-processing', failed: 'badge-failed' };
+        return m[(s || '').toLowerCase()] || 'badge-processing';
+    }
 
-        const subtotal     = items.reduce((s, it) => s + parseFloat(it.priceAtPurchase), 0);
-        const total        = parseFloat(o.totalAmount);
-        const platformFees = total - subtotal;
-        const orderId      = 'ORD-' + String(o.orderId).padStart(8, '0');
-        const date         = formatDate(o.createdAt);
+    function badgeIcon(s) {
+        var l = (s || '').toLowerCase();
+        if (l === 'delivered')
+            return '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+        if (l === 'failed')
+            return '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+        return '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+    }
 
-        const itemRows = items.map(it => `
-            <tr>
-                <td style="padding:10px 8px;border-bottom:1px solid #eee;">${it.title}</td>
-                <td style="padding:10px 8px;border-bottom:1px solid #eee;color:#777;">${it.artistName}</td>
-                <td style="padding:10px 8px;border-bottom:1px solid #eee;text-align:right;font-weight:600;">
-                    ${formatRupee(it.priceAtPurchase)}
-                </td>
-            </tr>`).join('');
+    function authHeaders() {
+        return { 'Authorization': 'Bearer ' + token };
+    }
 
-        const html = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8"/>
-<title>Invoice – ${orderId}</title>
-<style>
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:'Segoe UI',Arial,sans-serif;color:#222;background:#fff;padding:40px;}
-    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;}
-    .brand{font-size:26px;font-weight:800;letter-spacing:-0.03em;color:#3b2a1a;}
-    .brand span{color:#c9833a;}
-    .inv-label{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:0.08em;}
-    .inv-id{font-size:22px;font-weight:700;color:#3b2a1a;margin-top:2px;}
-    .meta-row{display:flex;gap:32px;margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid #f0e8dc;}
-    .meta-item label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:3px;}
-    .meta-item span{font-size:14px;font-weight:600;color:#3b2a1a;}
-    table{width:100%;border-collapse:collapse;margin-bottom:24px;}
-    thead tr{background:#fdf6ec;}
-    thead th{padding:10px 8px;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:#888;font-weight:600;}
-    thead th:last-child{text-align:right;}
-    .total-section{margin-left:auto;width:260px;}
-    .total-row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;color:#555;}
-    .total-row.grand{border-top:2px solid #f0e8dc;margin-top:6px;padding-top:10px;font-size:16px;font-weight:700;color:#3b2a1a;}
-    .footer{margin-top:48px;padding-top:20px;border-top:1px solid #f0e8dc;text-align:center;font-size:12px;color:#aaa;}
-    .status-pill{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600;
-        background:${o.orderStatus.toLowerCase()==='delivered'?'rgba(34,139,34,0.1)':o.orderStatus.toLowerCase()==='failed'?'rgba(180,0,0,0.1)':'rgba(200,140,0,0.1)'};
-        color:${o.orderStatus.toLowerCase()==='delivered'?'#1a7a2e':o.orderStatus.toLowerCase()==='failed'?'#b40000':'#7a5500'};}
-</style>
-</head>
-<body>
-<div class="header">
-    <div><div class="brand">Arti<span>fy</span></div><div style="font-size:13px;color:#888;margin-top:4px;">The Art Gallery</div></div>
-    <div style="text-align:right;"><div class="inv-label">Invoice</div><div class="inv-id">${orderId}</div></div>
-</div>
-<div class="meta-row">
-    <div class="meta-item"><label>Date</label><span>${date}</span></div>
-    <div class="meta-item"><label>Status</label><span><span class="status-pill">${o.orderStatus}</span></span></div>
-    <div class="meta-item"><label>Items</label><span>${items.length}</span></div>
-</div>
-<table>
-    <thead>
-        <tr><th>Artwork</th><th>Artist</th><th style="text-align:right;">Price</th></tr>
-    </thead>
-    <tbody>${itemRows}</tbody>
-</table>
-<div class="total-section">
-    <div class="total-row"><span>Subtotal</span><span>${formatRupee(subtotal)}</span></div>
-    <div class="total-row"><span>Platform Fees</span><span>${formatRupee(platformFees)}</span></div>
-    <div class="total-row grand"><span>Total Paid</span><span>${formatRupee(total)}</span></div>
-</div>
-<div class="footer">
-    Thank you for your purchase! For queries contact support@artify.com
-    <br/>This is a computer-generated invoice and does not require a signature.
-</div>
-</body>
-</html>`;
-
-        const win = window.open('', '_blank');
-        if (win) {
-            win.document.write(html);
-            win.document.close();
-            setTimeout(() => win.print(), 600);
+    // ── Fetch status for one artwork ──────────────────────────────────────
+    async function fetchStatus(artworkId) {
+        try {
+            var res  = await fetch(BASE + '/api/DownloadApi/status/' + artworkId,
+                                   { headers: authHeaders() });
+            if (!res.ok) return { used: 0, left: MAX_DL, canDownload: true };
+            var d = await res.json();
+            return {
+                used:        d.downloadCount  || 0,
+                left:        d.downloadsLeft  || 0,
+                canDownload: d.canDownload    !== false
+            };
+        } catch {
+            return { used: 0, left: MAX_DL, canDownload: true };
         }
     }
 
-    async function loadOrderDetail() {
-        const orderId = getOrderIdFromUrl();
-        if (!orderId) {
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('errorMsg').textContent = 'Invalid order ID.';
-            document.getElementById('errorState').style.display = '';
+    // ── Refresh status from server and update UI ──────────────────────────
+    async function refreshStatus(artworkId) {
+        _status[artworkId] = await fetchStatus(artworkId);
+        updateItemUI(artworkId);
+    }
+
+    // ── Update one item's button + counter in the DOM ─────────────────────
+    function updateItemUI(artworkId) {
+        var s       = _status[artworkId] || { used: 0, left: MAX_DL, canDownload: true };
+        var btn     = document.getElementById('dlBtn-' + artworkId);
+        var counter = document.getElementById('dlCnt-' + artworkId);
+        if (!btn || !counter) return;
+
+        if (!s.canDownload || s.left <= 0) {
+            btn.className = 'btn btn-ghost btn-sm btn-disabled no-print';
+            btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> Limit Reached';
+            counter.textContent = MAX_DL + '/' + MAX_DL + ' used';
+            counter.className   = 'dl-counter maxed';
+        } else {
+            btn.className = 'btn btn-ghost btn-sm no-print';
+            btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download';
+            counter.textContent = s.used + '/' + MAX_DL + ' used';
+            counter.className   = 'dl-counter';
+        }
+    }
+
+    // ── Core download function for ONE artwork ────────────────────────────
+    // Returns true on success, false on failure/limit
+    async function doDownload(artworkId, oid, title, showSpinner) {
+        var s = _status[artworkId] || { used: 0, left: MAX_DL, canDownload: true };
+        if (!s.canDownload || s.left <= 0) return false;
+
+        var btn = document.getElementById('dlBtn-' + artworkId);
+
+        // Temporarily show spinner on the individual button
+        if (btn && showSpinner) {
+            btn.classList.add('btn-disabled');
+            btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> …';
+        }
+
+        try {
+            var res = await fetch(
+                BASE + '/api/DownloadApi/' + artworkId + '?orderId=' + oid,
+                { headers: authHeaders() }
+            );
+
+            if (res.status === 400) {
+                var err = await res.json().catch(() => ({}));
+                if (err.limitReached) {
+                    // Sync local state so UI reflects reality
+                    _status[artworkId] = { used: MAX_DL, left: 0, canDownload: false };
+                    updateItemUI(artworkId);
+                    return false;
+                }
+                alert(err.message || 'Download failed.');
+                await refreshStatus(artworkId);
+                return false;
+            }
+
+            if (!res.ok) {
+                throw new Error('HTTP ' + res.status);
+            }
+
+            // Update local counter from response headers
+            var used = parseInt(res.headers.get('X-Downloads-Used')      || '0', 10);
+            var left = parseInt(res.headers.get('X-Downloads-Remaining') || '0', 10);
+            _status[artworkId] = { used: used, left: left, canDownload: left > 0 };
+
+            // Trigger file download
+            var blob  = await res.blob();
+            var url   = window.URL.createObjectURL(blob);
+            var a     = document.createElement('a');
+            var mime  = blob.type || '';
+            var ext   = mime.includes('png') ? '.png'
+                      : mime.includes('gif') ? '.gif'
+                      : mime.includes('webp') ? '.webp'
+                      : '.jpg';
+            a.href     = url;
+            a.download = (title || 'artwork') + ext;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+            return true;
+
+        } catch (ex) {
+            console.error('Download error:', ex);
+            alert('Error downloading artwork. Please try again.');
+            await refreshStatus(artworkId);
+            return false;
+        } finally {
+            updateItemUI(artworkId);
+        }
+    }
+
+    // ── Public: individual download button ────────────────────────────────
+    window.downloadOne = async function (artworkId, oid, title) {
+        await doDownload(artworkId, oid, title, true);
+    };
+
+    // ── Public: Download All button ───────────────────────────────────────
+    window.downloadAll = async function () {
+        if (!_order || _downloading) return;
+        _downloading = true;
+
+        var o     = _order.order;
+        var items = _order.items;
+
+        // Only include items that still have downloads left
+        var eligible = items.filter(function (it) {
+            var s = _status[it.artworkId] || { canDownload: true, left: MAX_DL };
+            return s.canDownload && s.left > 0;
+        });
+
+        if (eligible.length === 0) {
+            alert('All artworks have reached their download limit.');
+            _downloading = false;
+            return;
+        }
+
+        // Disable the Download All button
+        var allBtn = document.getElementById('dlAllBtn');
+        if (allBtn) {
+            allBtn.classList.add('btn-disabled');
+            allBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Downloading…';
+        }
+
+        // Show progress bar
+        var wrap = document.getElementById('dlProgressWrap');
+        var bar  = document.getElementById('dlProgressBar');
+        if (wrap) wrap.style.display = 'block';
+
+        var done = 0;
+        for (var i = 0; i < eligible.length; i++) {
+            var it = eligible[i];
+            await doDownload(it.artworkId, o.orderId, it.title, false);
+            done++;
+            if (bar) bar.style.width = Math.round((done / eligible.length) * 100) + '%';
+            // Small gap between downloads so browser doesn't block them
+            if (i < eligible.length - 1) {
+                await new Promise(function (r) { setTimeout(r, 400); });
+            }
+        }
+
+        // Reset Download All button
+        if (allBtn) {
+            allBtn.classList.remove('btn-disabled');
+            allBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download All';
+        }
+
+        // Hide progress bar after a moment
+        setTimeout(function () {
+            if (wrap) wrap.style.display = 'none';
+            if (bar)  bar.style.width = '0%';
+        }, 1200);
+
+        _downloading = false;
+    };
+
+    // ── Build DOM ─────────────────────────────────────────────────────────
+    async function renderPage(data) {
+        _order = data;
+        var o     = data.order;
+        var items = data.items;
+
+        var oidStr = 'ORD-' + String(o.orderId).padStart(8, '0');
+        document.getElementById('odHeading').textContent = oidStr;
+        document.title = oidStr;
+
+        var badge = document.getElementById('odBadge');
+        badge.className = 'badge ' + badgeClass(o.orderStatus);
+        badge.innerHTML = badgeIcon(o.orderStatus) + ' ' + o.orderStatus;
+
+        document.getElementById('odDate').textContent      = fmtDate(o.createdAt);
+        document.getElementById('odItemCount').textContent =
+            items.length + ' item' + (items.length === 1 ? '' : 's');
+
+        // Items
+        var thumbHtml = function (path) {
+            var url = imgUrl(path);
+            return url
+                ? '<img src="' + url + '" alt="" loading="lazy"/>'
+                : '<div class="item-thumb-ph"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';
+        };
+
+        document.getElementById('itemsList').innerHTML = items.map(function (it) {
+            return '<div class="item-row">' +
+                '<div class="item-thumb">' + thumbHtml(it.previewPath) + '</div>' +
+                '<div class="item-info">' +
+                    '<p class="item-name">' + it.title + '</p>' +
+                    '<p class="item-artist">by ' + it.artistName + '</p>' +
+                    (it.categoryName ? '<span class="item-tag">' + it.categoryName + '</span>' : '') +
+                '</div>' +
+                '<div class="item-actions">' +
+                    '<span class="item-price">' + fmtRs(it.priceAtPurchase) + '</span>' +
+                    '<button id="dlBtn-' + it.artworkId + '" ' +
+                        'class="btn btn-ghost btn-sm no-print" ' +
+                        'onclick="downloadOne(' + it.artworkId + ',' + o.orderId + ',\'' + (it.title || '').replace(/'/g, "\\'") + '\')">' +
+                        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download' +
+                    '</button>' +
+                    '<span id="dlCnt-' + it.artworkId + '" class="dl-counter no-print">Loading…</span>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+
+        // Fetch all statuses in parallel then update UI
+        await Promise.all(items.map(async function (it) {
+            _status[it.artworkId] = await fetchStatus(it.artworkId);
+            updateItemUI(it.artworkId);
+        }));
+
+        // Summary
+        var total    = parseFloat(o.totalAmount) || 0;
+        var subtotal = items.reduce(function (s, it) { return s + parseFloat(it.priceAtPurchase || 0); }, 0);
+        var fee      = Math.round(subtotal * PLATFORM_FEE * 100) / 100;
+var grand = subtotal + fee;
+        document.getElementById('summaryRows').innerHTML =
+            '<div class="sum-row"><span>' + items.length + ' artwork' + (items.length === 1 ? '' : 's') + '</span><span>' + fmtRs(subtotal) + '</span></div>' +
+            @* '<div class="sum-row free"><span>Shipping</span><span>Free</span></div>' + *@
+            '<div class="sum-row fee"><span>Platform Fees (2%)</span><span>' + fmtRs(fee) + '</span></div>' +
+            '<div class="sum-row total"><span>Total Paid</span><span>' + fmtRs(grand) + '</span></div>';
+
+        document.getElementById('infoGrid').innerHTML =
+            '<div class="info-item"><label>Order ID</label><span>' + oidStr + '</span></div>' +
+            '<div class="info-item"><label>Order Date</label><span>' + fmtDate(o.createdAt) + '</span></div>' +
+            '<div class="info-item"><label>Status</label><span>' + o.orderStatus + '</span></div>' +
+            '<div class="info-item"><label>Payment</label><span>Online Payment</span></div>' +
+            '<div class="info-item"><label>Items</label><span>' + items.length + '</span></div>' +
+            '<div class="info-item"><label>Amount Paid</label><span>' + fmtRs(grand) + '</span></div>';
+    }
+
+    // ── Invoice ───────────────────────────────────────────────────────────
+    window.printInvoice = function () {
+        if (!_order) return;
+        var o     = _order.order;
+        var items = _order.items;
+
+        var total    = parseFloat(o.totalAmount) || 0;
+        var subtotal = items.reduce(function (s, it) { return s + parseFloat(it.priceAtPurchase || 0); }, 0);
+        var fee      = Math.round(subtotal * PLATFORM_FEE * 100) / 100;
+var grand = subtotal + fee;        var oidStr   = 'ORD-' + String(o.orderId).padStart(8, '0');
+
+        var statusColor = o.orderStatus.toLowerCase() === 'delivered' ? '#1a7a2e'
+            : o.orderStatus.toLowerCase() === 'failed' ? '#b40000' : '#7a5500';
+        var statusBg = o.orderStatus.toLowerCase() === 'delivered' ? 'rgba(34,139,34,.10)'
+            : o.orderStatus.toLowerCase() === 'failed' ? 'rgba(180,0,0,.10)' : 'rgba(200,140,0,.10)';
+
+        var rows = items.map(function (it) {
+            return '<tr><td style="padding:10px 8px;border-bottom:1px solid #eee;">' + it.title + '</td>' +
+                   '<td style="padding:10px 8px;border-bottom:1px solid #eee;color:#777;">' + it.artistName + '</td>' +
+                   '<td style="padding:10px 8px;border-bottom:1px solid #eee;text-align:right;font-weight:600;">' + fmtRs(it.priceAtPurchase) + '</td></tr>';
+        }).join('');
+
+        var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Invoice – ' + oidStr + '</title>' +
+            '<style>*{margin:0;padding:0;box-sizing:border-box;}' +
+            'body{font-family:\'Segoe UI\',Arial,sans-serif;color:#222;background:#fff;padding:40px;}' +
+            '.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;}' +
+            '.brand{font-size:26px;font-weight:800;color:#3b2a1a;letter-spacing:-.03em;}' +
+            '.brand span{color:#c9833a;}' +
+            '.meta{display:flex;gap:32px;margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid #f0e8dc;}' +
+            '.mi label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:3px;}' +
+            '.mi span{font-size:14px;font-weight:600;color:#3b2a1a;}' +
+            'table{width:100%;border-collapse:collapse;margin-bottom:24px;}' +
+            'thead tr{background:#fdf6ec;}' +
+            'thead th{padding:10px 8px;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#888;font-weight:600;}' +
+            'thead th:last-child{text-align:right;}' +
+            '.tot{margin-left:auto;width:280px;}' +
+            '.tr{display:flex;justify-content:space-between;padding:7px 0;font-size:14px;color:#555;border-bottom:1px solid #f0e8dc;}' +
+            '.tr:last-child{border-bottom:none;}' +
+            '.tr.grand{padding-top:12px;font-size:16px;font-weight:700;color:#3b2a1a;}' +
+            '.tr.fee{color:#9a6324;}' +
+            '.pill{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600;background:' + statusBg + ';color:' + statusColor + ';}' +
+            '.foot{margin-top:48px;padding-top:20px;border-top:1px solid #f0e8dc;text-align:center;font-size:12px;color:#aaa;}' +
+            '</style></head><body>' +
+            '<div class="hdr"><div><div class="brand">Arti<span>fy</span></div><div style="font-size:13px;color:#888;margin-top:4px;">The Art Gallery</div></div>' +
+            '<div style="text-align:right;"><div style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.08em;">Invoice</div><div style="font-size:22px;font-weight:700;color:#3b2a1a;">' + oidStr + '</div></div></div>' +
+            '<div class="meta">' +
+            '<div class="mi"><label>Date</label><span>' + fmtDate(o.createdAt) + '</span></div>' +
+            '<div class="mi"><label>Status</label><span><span class="pill">' + o.orderStatus + '</span></span></div>' +
+            '<div class="mi"><label>Items</label><span>' + items.length + '</span></div></div>' +
+            '<table><thead><tr><th>Artwork</th><th>Artist</th><th style="text-align:right;">Price</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+            '<div class="tot">' +
+            '<div class="tr"><span>Subtotal</span><span>' + fmtRs(subtotal) + '</span></div>' +
+            @* '<div class="tr"><span>Shipping</span><span style="color:#15803d;">Free</span></div>' + *@
+            '<div class="tr fee"><span>Platform Fees (2%)</span><span>' + fmtRs(fee) + '</span></div>' +
+            '<div class="tr grand"><span>Total Paid</span><span>' + fmtRs(grand) + '</span></div>' +
+            '</div>' +
+            '<div class="foot">Thank you for your purchase! For queries contact support@artify.com<br/>Computer-generated invoice — no signature required.</div>' +
+            '</body></html>';
+
+        var win = window.open('', '_blank');
+        if (win) { win.document.write(html); win.document.close(); setTimeout(function () { win.print(); }, 600); }
+    };
+
+    // ── Init ──────────────────────────────────────────────────────────────
+    async function init() {
+        var oid = orderId();
+        if (!oid) {
+            document.getElementById('stateLoading').style.display = 'none';
+            document.getElementById('errMsg').textContent = 'Invalid order ID.';
+            document.getElementById('stateError').style.display  = '';
             return;
         }
 
         try {
-            const res = await fetch(`http://localhost:5183/api/BuyerOrder/GetOrderDetail/${orderId}`, {
-                headers: {
-                    "Authorization": "Bearer " + localStorage.getItem("token");
-                }
+            var res = await fetch(BASE + '/api/BuyerOrder/GetOrderDetail/' + oid, {
+                headers: authHeaders()
             });
             if (!res.ok) throw new Error(res.status === 404 ? 'Order not found.' : 'Server error ' + res.status);
 
-            const data = await res.json();
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('orderContent').style.display = '';
-            populatePage(data);
-        } catch (err) {
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('errorMsg').textContent        = err.message || 'Failed to load order.';
-            document.getElementById('errorState').style.display   = '';
+            var data = await res.json();
+            document.getElementById('stateLoading').style.display = 'none';
+            document.getElementById('odContent').style.display    = '';
+            await renderPage(data);
+
+        } catch (ex) {
+            document.getElementById('stateLoading').style.display = 'none';
+            document.getElementById('errMsg').textContent         = ex.message || 'Failed to load order.';
+            document.getElementById('stateError').style.display   = '';
         }
     }
 
-    loadOrderDetail();
+    init();
+})();
 </script>

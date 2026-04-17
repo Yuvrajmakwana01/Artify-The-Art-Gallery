@@ -1,6 +1,5 @@
 @{
     ViewBag.Title = "Order History";
-    Layout = "~/Views/Shared/_BuyerLayout.cshtml";
 }
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -94,6 +93,8 @@
         transform: translateY(-3px);
     }
     .order-card-inner { display: flex; align-items: stretch; }
+
+    /* Preview thumbnail column */
     .order-card-preview {
         width: 100px; display: none; align-items: center; justify-content: center;
         background: linear-gradient(135deg, rgba(154,99,36,0.06), rgba(219,185,120,0.08));
@@ -117,6 +118,7 @@
     .order-id-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
     .order-id { font-size: 1rem; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
 
+    /* Status badges */
     .status-badge {
         display: inline-flex; align-items: center; gap: 5px;
         padding: 3px 12px; border-radius: 100px;
@@ -138,10 +140,12 @@
     .order-total {
         font-family: 'DM Sans', sans-serif;
         font-size: 1.15rem; font-weight: 700; color: var(--text);
+        white-space: nowrap;
     }
     .order-chevron {
         color: var(--text-3);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        flex-shrink: 0;
     }
     .order-card:hover .order-chevron { transform: translateX(5px); color: var(--gold); }
 
@@ -154,6 +158,15 @@
     }
     @@keyframes spin { to { transform: rotate(360deg); } }
 
+    /* Back link */
+    .back-link {
+        display: inline-flex; align-items: center; gap: 8px;
+        font-size: .85rem; font-weight: 600; color: var(--gold);
+        text-decoration: none; transition: all .25s ease;
+    }
+    .back-link:hover { transform: translateX(-4px); color: var(--gold); }
+
+    /* Empty state */
     .empty-state { text-align: center; padding: 5rem 0; }
     .empty-state svg { color: var(--text-3); opacity: 0.4; margin-bottom: 18px; }
     .empty-text { font-size: 1.1rem; font-weight: 500; color: var(--text-3); }
@@ -162,6 +175,8 @@
     @@media (max-width: 640px) {
         .orders-page { padding: 2rem 1rem 4rem; }
         .orders-header h2 { font-size: 1.8rem; }
+        .order-card-content { padding: 16px; gap: 10px; }
+        .order-card-right { gap: 8px; }
     }
 </style>
 
@@ -169,7 +184,16 @@
 
     <div class="orders-header">
         <div>
-            <h2>Order History</h2>
+            <a href="@Url.Action("Profile","Buyer")" class="back-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Back to Profile
+            </a>
+            <h2 style="margin-top:10px;">Order History</h2>
             <p>Track and manage your artwork purchases</p>
         </div>
         <div class="orders-stats">
@@ -201,70 +225,128 @@
 </div>
 
 <script>
-    // ✅ FIX 1: safer buyerId
-    const TOKEN = localStorage.getItem("token");
+    // ── CHANGED: consistent 2% platform fee ──
+    var PLATFORM_FEE_RATE = 0.02;
 
-    if (!TOKEN) {
-        window.location.href = "/Auth/Login";
-    }
+    var TOKEN = localStorage.getItem("token");
+    if (!TOKEN) { window.location.href = "/Auth/Login"; }
 
-    function formatRupee(n) {
-        return '₹' + (parseFloat(n) || 0).toLocaleString('en-IN', {
+    function formatAmount(n) {
+        return '$' + (parseFloat(n) || 0).toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
     }
 
+    // ── CHANGED: status badge helper ──
+    function statusBadge(status) {
+        var s   = (status || 'Processing').toLowerCase();
+        var cls = s === 'delivered'  ? 'status-delivered'
+                : s === 'failed'     ? 'status-failed'
+                :                      'status-processing';
+        var dot = s === 'delivered'
+            ? '<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'
+            : s === 'failed'
+            ? '<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+            : '<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+        return '<span class="status-badge ' + cls + '">' + dot + ' ' + (status || 'Processing') + '</span>';
+    }
+
+    // ── CHANGED: buildCard now uses all the CSS already defined ──
     function buildCard(order) {
-        const img = order.firstPreviewPath
-            ? `<img src="${order.firstPreviewPath}" />`
+        var oidStr   = 'ORD-' + String(order.orderId).padStart(8, '0');
+        var date     = new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        var itemCount= (order.itemCount || 1) + ' item' + ((order.itemCount || 1) === 1 ? '' : 's');
+
+        // ── CHANGED: grand total = totalAmount stored in DB (already includes fee from payment page) ──
+        var grand    = formatAmount(order.totalAmount);
+
+        // Thumbnail
+        var thumb = order.firstPreviewPath
+            ? '<img src="' + order.firstPreviewPath + '" loading="lazy" />'
+            : '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
+
+        // Artwork title preview (truncated)
+        var titlePreview = order.previewTitles
+            ? '<p class="order-preview-text">' + order.previewTitles + '</p>'
             : '';
 
-        return `
-        <a href="/Buyer/OrderDetail/${order.orderId}" class="order-card">
-            <div class="order-card-content">
-                <div>
-                    <b>ORD-${order.orderId}</b><br/>
-                    ${order.previewTitles || ''}
-                </div>
-                <div>${formatRupee(order.totalAmount)}</div>
-            </div>
-        </a>`;
+        return '<a href="/Buyer/OrderDetail/' + order.orderId + '" class="order-card">' +
+            '<div class="order-card-inner">' +
+
+                // Left thumbnail column (hidden on mobile via CSS)
+                '<div class="order-card-preview">' +
+                    '<div class="preview-icon">' + thumb + '</div>' +
+                '</div>' +
+
+                // Main content
+                '<div class="order-card-content">' +
+                    '<div class="order-card-info">' +
+                        '<div class="order-id-row">' +
+                            '<span class="order-id">' + oidStr + '</span>' +
+                            statusBadge(order.orderStatus) +
+                        '</div>' +
+                        titlePreview +
+                        '<div class="order-meta">' +
+                            '<span class="order-meta-item">' +
+                                '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+                                date +
+                            '</span>' +
+                            '<span class="order-meta-item">' +
+                                '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>' +
+                                itemCount +
+                            '</span>' +
+                        '</div>' +
+                    '</div>' +
+
+                    // Right: total + chevron
+                    '<div class="order-card-right">' +
+                        '<span class="order-total">' + grand + '</span>' +
+                        '<svg class="order-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>' +
+                    '</div>' +
+                '</div>' +
+
+            '</div>' +
+        '</a>';
     }
 
     async function loadOrders() {
         try {
-            const res = await fetch(`http://localhost:5183/api/BuyerOrder/GetOrders`, {
-            method: "GET",
-            headers: {
-                "Authorization": "Bearer " + TOKEN ;
-            }
-        });
-            const json = await res.json();
+            var res = await fetch('http://localhost:5183/api/BuyerOrder/GetOrders', {
+                method: 'GET',
+                headers: { 'Authorization': 'Bearer ' + TOKEN }
+            });
 
-            // ✅ FIX 2: handle API format
-            const orders = json.data || json;
+            if (!res.ok) throw new Error('HTTP ' + res.status);
 
-            if (!orders.length) {
+            var json   = await res.json();
+            var orders = json.data || json;
+
+            // Normalize to array
+            if (orders && orders.$values) orders = orders.$values;
+            if (!Array.isArray(orders))   orders = [];
+
+            if (orders.length === 0) {
                 document.getElementById('ordersContent').innerHTML = '';
                 document.getElementById('emptyState').style.display = 'block';
+                document.getElementById('statTotal').textContent = '0';
+                document.getElementById('statSpent').textContent = '$0.00';
                 return;
             }
 
-            // ✅ FIX 3: safe total
-            const total = orders.reduce((sum, o) =>
-                sum + (parseFloat(o.totalAmount) || 0), 0);
+            // ── CHANGED: sum totalAmount (already grand total stored by payment) ──
+            var totalSpent = orders.reduce(function (sum, o) {
+                return sum + (parseFloat(o.totalAmount) || 0);
+            }, 0);
 
             document.getElementById('statTotal').textContent = orders.length;
-            document.getElementById('statSpent').textContent = formatRupee(total);
-
-            document.getElementById('ordersContent').innerHTML =
-                orders.map(buildCard).join('');
+            document.getElementById('statSpent').textContent = formatAmount(totalSpent);
+            document.getElementById('ordersContent').innerHTML = orders.map(buildCard).join('');
 
         } catch (e) {
-            console.error(e);
+            console.error('loadOrders error:', e);
             document.getElementById('ordersContent').innerHTML =
-                `<p style="text-align:center;color:red;">Failed to load orders</p>`;
+                '<p style="text-align:center;color:#dc2626;padding:3rem 0;">Failed to load orders. Please try again.</p>';
         }
     }
 

@@ -1,6 +1,5 @@
-﻿
-@{
-    ViewData["Title"] = "The Luminous Canvas";
+﻿@{
+    ViewData["Title"] = "Join the Studio";
     Layout = null;
 }
 
@@ -9,223 +8,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Join the Canvas — Artify</title>
+    <title>Join the Studio — Artify</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.common.min.css" rel="stylesheet" />
     <link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.bootstrap-v4.min.css" rel="stylesheet" />
 
     <style>
-        :root {
-            --beige: #f5f2eb;
-            --charcoal: #1a1a1a;
-            --gold: #af9462;
-            --form-bg: rgba(255, 255, 255, 0.85);
+        :root { 
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --accent-sage: #7d8c7d;
+            --text-main: #2c2c2c;
+            --soft-border: #e2e8f0;
+            --input-focus: #af9462;
         }
 
-        body, html {
-            margin: 0; padding: 0; height: 100%;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #000; overflow: hidden;
+        body, html { 
+            margin: 0; padding: 0; height: 100%; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #f8f9fa; 
+            color: var(--text-main);
         }
 
-        /* ── FULL BACKGROUND MARQUEE ── */
-        .canvas-background {
-            position: fixed; inset: 0;
-            display: flex; gap: 20px; padding: 20px;
-            z-index: 1;
+        /* ── LIGHT MASONRY BACKGROUND ── */
+        .bg-canvas { 
+            position: fixed; inset: 0; display: flex; gap: 15px; padding: 15px; z-index: 1; opacity: 0.4; pointer-events: none;
+        }
+        .column { display: flex; flex-direction: column; gap: 15px; flex: 1; }
+        .scroll-up { animation: slideUp 80s linear infinite; }
+        .scroll-down { animation: slideDown 80s linear infinite; }
+        .art-item img { width: 100%; border-radius: 12px; filter: sepia(20%); }
+
+        @@keyframes slideUp { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+        @@keyframes slideDown { from { transform: translateY(-50%); } to { transform: translateY(0); } }
+
+        /* ── CENTERED FORM ── */
+        .main-wrapper { 
+            position: relative; z-index: 10; height: 100vh; display: flex; 
+            align-items: center; justify-content: center; overflow-y: auto; padding: 40px 0;
         }
 
-        .marquee-column {
-            display: flex; flex-direction: column; gap: 25px;
-            flex: 1;
+        .studio-card { 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(20px); 
+            width: 100%; max-width: 520px; 
+            padding: 50px; border-radius: 24px; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+            border: 1px solid white;
         }
 
-        .col-slow { animation: scrollDown 70s linear infinite; }
-        .col-fast { animation: scrollUp 50s linear infinite; }
-        .col-mid { animation: scrollDown 60s linear infinite; }
+        .header-section { text-align: center; margin-bottom: 35px; }
+        .header-section h1 { font-family: 'Cormorant Garamond', serif; font-size: 2.4rem; margin: 0; font-weight: 600; }
+        .tagline { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 4px; color: var(--accent-sage); font-weight: 700; }
 
-        .art-card {
-            width: 100%; position: relative;
-            border-radius: 8px; overflow: hidden;
-            cursor: crosshair;
-            filter: grayscale(100%) brightness(0.4) contrast(1.2);
-            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-            transform: scale(1);
+        /* ── KENDO OVERRIDES ── */
+        .k-textbox, .k-numerictextbox { 
+            width: 100% !important; border-radius: 8px !important; 
+            margin-bottom: 15px; border: 1px solid var(--soft-border) !important;
+            padding: 12px 15px !important; font-size: 0.9rem !important;
+            transition: all 0.3s !important; background: white !important;
+        }
+        .k-state-focused { border-color: var(--input-focus) !important; box-shadow: 0 0 0 3px rgba(175, 148, 98, 0.1) !important; }
+
+        /* ── PROFILE UPLOAD ── */
+        .upload-box { 
+            display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; 
+        }
+        .preview-circle { 
+            width: 90px; height: 90px; border-radius: 50%; object-fit: cover;
+            border: 3px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 10px;
         }
 
-        .art-card:hover {
-            filter: grayscale(0%) brightness(1) contrast(1);
-            transform: scale(1.08);
-            z-index: 50;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        /* ── GENDER PILLS ── */
+        .gender-container { display: flex; gap: 10px; margin-top: 5px; }
+        .gender-option { flex: 1; position: relative; }
+        .gender-option input { position: absolute; opacity: 0; }
+        .gender-option label { 
+            display: block; padding: 10px; text-align: center; background: white;
+            border: 1px solid var(--soft-border); border-radius: 8px; font-size: 0.8rem;
+            cursor: pointer; transition: 0.2s; font-weight: 500;
+        }
+        .gender-option input:checked + label { 
+            background: var(--text-main); color: white; border-color: var(--text-main); 
         }
 
-        .art-card img { width: 100%; height: auto; display: block; }
+        .btn-submit { 
+            background: var(--text-main) !important; color: white !important; 
+            width: 100% !important; padding: 16px !important; border-radius: 8px !important;
+            border: none !important; font-weight: 600; margin-top: 20px;
+            letter-spacing: 1px; transition: 0.3s; cursor: pointer;
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
 
-        @@keyframes scrollUp { from { transform: translateY(0); } to { transform: translateY(-50%); } }
-        @@keyframes scrollDown { from { transform: translateY(-50%); } to { transform: translateY(0); } }
-
-        /* ── REGISTRATION SUITE ── */
-        .ui-layer {
-            position: relative; z-index: 100;
-            height: 100vh; width: 100vw;
-            display: flex; align-items: center; justify-content: center;
-            pointer-events: none;
-        }
-
-        .floating-form {
-            background: var(--form-bg);
-            backdrop-filter: blur(15px);
-            padding: 40px 50px; width: 100%; max-width: 480px;
-            border-radius: 4px; border: 1px solid rgba(255,255,255,0.4);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.2);
-            pointer-events: auto;
-        }
-
-        .premium-label {
-            font-size: 0.65rem; text-transform: uppercase;
-            letter-spacing: 3px; font-weight: 700; color: var(--gold);
-            @* text-align: center; *@
-            margin-bottom: 8px; display: block;
-        }
-
-        h1 { font-family: 'Bodoni Moda', serif; font-size: 2rem; margin: 0 0 20px 0; color: #2D2424; }
-
-        .k-textbox {
-            width: 100% !important; border-radius: 0 !important;
-            border: none !important; border-bottom: 1px solid #d1d1d1 !important;
-            background: transparent !important; padding: 12px 0 !important;
-            font-size: 0.95rem !important; margin-bottom: 15px;
-        }
-        .k-textbox:focus { border-bottom-color: var(--gold) !important; }
-
-        .gender-group {
-            display: flex; gap: 10px; margin-bottom: 20px;
-        }
-        .gender-pill { flex: 1; position: relative; }
-        .gender-pill input { display: none; }
-        .gender-pill label {
-            display: block; padding: 10px; text-align: center; border: 1px solid #ddd;
-            font-size: 0.75rem; cursor: pointer; transition: 0.3s; font-weight: 600;
-        }
-        .gender-pill input:checked + label {
-            background: #181C14; color: white; border-color: var(--charcoal);
-        }
-
-        .btn-register {
-            @* background: var(--charcoal) !important;  *@
-            background: linear-gradient(45deg, #181C14, #021526) !important;
-            color: white !important;
-            width: 100% !important; padding: 18px !important; border: none !important;
-            font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
-            cursor: pointer; transition: 0.3s; margin-top: 10px;
-        }
-        .btn-register:hover { background: var(--gold) !important; letter-spacing: 3px; }
-
-        .login-link {
-            display: block; text-align: center; margin-top: 25px;
-            font-size: 0.8rem; color: #666; text-decoration: none;
-            transition: 0.3s;
-        }
-        .login-link:hover { color: var(--charcoal); }
-
-        .k-invalid-msg {
-            display: block !important; margin-top: -12px !important; margin-bottom: 12px !important;
-            font-size: 0.75rem !important; color: #ef4444 !important;
-        }
-        .k-callout { display: none !important; }
-        .k-textbox.k-invalid { border-bottom-color: #ef4444 !important; }
-
-        .profile-upload-area {
-            display: flex; align-items: center; gap: 15px; margin-bottom: 20px;
-            background: rgba(0,0,0,0.03); padding: 10px; border-radius: 4px;
-        }
-        .profile-preview {
-            width: 55px; height: 55px; border-radius: 50%; object-fit: cover;
-            border: 2px solid var(--gold); background: #eeeeeee0;
-        }
-
-        .custom-file-label {
-            color: var(--charcoal); font-size: 0.75rem; font-weight: 600;
-            cursor: pointer; transition: 0.3s;
-        }
+        .k-invalid-msg { color: #d9534f !important; font-size: 0.75rem !important; margin: -10px 0 10px 5px; display: block; }
     </style>
 </head>
 <body>
 
-    <div class="canvas-background">
-        <div class="marquee-column col-slow">
-            <div class="art-card"><img src="https://art.pixilart.com/1f9b037cb7caa4d.gif"></div>
-            <div class="art-card"><img src="https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=500"></div>
-            <div class="art-card"><img src="https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=500"></div>
-            <div class="art-card"><img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=500"></div>
-            <div class="art-card"><img src="https://images.unsplash.com/photo-1593072188319-5006e116315e?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"></div>
-
-           
+    <div class="bg-canvas">
+        <div class="column scroll-up">
+            <div class="art-item"><img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400"></div>
+            <div class="art-item"><img src="https://images.unsplash.com/photo-1549490349-8643362247b5?w=400"></div>
         </div>
-        <div class="marquee-column col-fast">
-            <div class="art-card"><img src="https://images.unsplash.com/photo-1576132710321-70529d201d4a?w=500"></div>
-            <div class="art-card"><img src="https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=500"></div>
-            <div class="art-card"><img src="https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?w=500"></div>
-            
+        <div class="column scroll-down">
+            <div class="art-item"><img src="https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=400"></div>
+            <div class="art-item"><img src="https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=400"></div>
         </div>
-        <div class="marquee-column col-mid">
-            <div class="art-card"><img src="https://images.unsplash.com/photo-1549490349-8643362247b5?w=500"></div>
-            <div class="art-card"><img src="https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?w=500"></div>
-            <div class="art-card"><img src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=500"></div>
-            
-            @* <div class="art-card"><img src="https://images.unsplash.com/photo-1593073862407-a3ce22748763?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"></div> *@
-
+        <div class="column scroll-up">
+            <div class="art-item"><img src="https://images.unsplash.com/photo-1576132710321-70529d201d4a?w=400"></div>
+            <div class="art-item"><img src="https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=400"></div>
         </div>
     </div>
 
-    <div class="ui-layer">
-        <div class="floating-form animate__animated animate__fadeInUp">
-            <span class="premium-label">Access Studio</span>
-            <h1>Join Artify</h1>
+    <div class="main-wrapper">
+        <div class="studio-card animate__animated animate__fadeIn">
+            <div class="header-section">
+                <span class="tagline">Artist Registration</span>
+                <h1>Create Your Studio</h1>
+            </div>
 
             <form id="regForm">
-                <div class="profile-upload-area">
-                    <img id="imgPreview" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="profile-preview" />
-                    <div>
-                        <span class="premium-label" style="margin-bottom:2px">Profile Photo</span>
-                        <input type="file" id="fProfile" name="ProfileFile" style="display:none" accept="image/*" />
-                        <label for="fProfile" class="custom-file-label"><i class="bi bi-camera me-1"></i> Change Image</label>
+                <div class="upload-box">
+                    <img id="imgPreview" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="preview-circle" />
+                    <input type="file" id="fProfile" name="ProfilePicture" style="display:none" accept="image/*" />
+                    <label for="fProfile" style="cursor:pointer; font-size:0.75rem; color:var(--accent-sage); font-weight:600">
+                        <i class="bi bi-plus-circle me-1"></i> Upload Portrait
+                    </label>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <input id="txtFullName" name="c_Full_Name" required validationMessage="Enter full name" placeholder="Full Name" />
+                    </div>
+                    <div class="col-md-6">
+                        <input id="txtUserName" name="c_UserName" required validationMessage="Choose a handle" placeholder="Username" />
                     </div>
                 </div>
-                <input id="txtFullName" name="c_Full_Name" required validationMessage="Name is required" placeholder="Full Name" />
-                <input id="txtUserName" name="c_UserName" required validationMessage="Choose a handle" placeholder="Username" />
-                <input id="txtEmail" name="c_Email" type="email" required data-email-msg="Invalid email" placeholder="Email" />
-                <input id="txtMobile" name="c_Mobile" required validationMessage="Mobile required" placeholder="Mobile Number" />
 
-                <input id="txtPass" name="c_Password" type="password" required validationMessage="Password required" placeholder="Create Password" />
-                <div id="pwHint" style="font-size: 0.65rem; color: #888; margin-top: -10px; margin-bottom: 15px;">
-                    Uppercase, Number, Special required.
-                </div>
+                <input id="txtEmail" name="c_Email" type="email" required data-email-msg="Invalid email address" placeholder="Email Address" />
+                
+                <input id="txtMobile" name="c_Mobile" required validationMessage="Enter mobile number" placeholder="Mobile Number" />
 
-                <span class="premium-label mb-4">Identity</span>
-                <div class="gender-group">
-                    <div class="gender-pill">
+                <input id="txtPass" name="c_Password" type="password" required 
+                       data-passwordComplexity-msg="Need 8+ chars, 1 number & 1 symbol" placeholder="Security Password" />
+
+                <label class="tagline" style="margin-top:10px; display:block">Gender</label>
+                <div class="gender-container">
+                    <div class="gender-option">
                         <input type="radio" id="m" name="c_Gender" value="Male" checked>
-                        <label for="m">MALE</label>
+                        <label for="m">Male</label>
                     </div>
-                    <div class="gender-pill">
+                    <div class="gender-option">
                         <input type="radio" id="f" name="c_Gender" value="Female">
-                        <label for="f">FEMALE</label>
-                    </div>
-                    <div class="gender-pill">
-                        <input type="radio" id="o" name="c_Gender" value="Other">
-                        <label for="o">OTHER</label>
+                        <label for="f">Female</label>
                     </div>
                 </div>
 
-                <button type="button" id="btnGo" class="btn-register">Initialize Profile</button>
+                <button type="button" id="btnGo" class="btn-submit">Initialize Account</button>
             </form>
 
-            <a href="/Artist/Login" class="login-link">Already a member? Sign in here</a>
+            <div style="text-align:center; margin-top:25px; font-size:0.85rem">
+                <span style="color:#94a3b8">Already have an account?</span> 
+                <a href="/Artist/Login" style="color:var(--text-main); font-weight:700; text-decoration:none; margin-left:5px">Sign In</a>
+            </div>
         </div>
     </div>
 
@@ -235,6 +182,7 @@
 
     <script>
         $(document).ready(function () {
+            // Initialize Kendo Inputs
             $("#txtFullName, #txtUserName, #txtEmail, #txtPass, #txtMobile").kendoTextBox();
             
             // Image Preview
@@ -245,56 +193,63 @@
                     reader.readAsDataURL(this.files[0]);
                 }
             });
-            
-            const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@@$!%*?&])[A-Za-z\d@@$!%*?&]{6,}$/;
-            const phoneRegex = /^[0-9]{10,12}$/;
 
+            // Validator with Password Complexity
             var validator = $("#regForm").kendoValidator({
                 rules: {
-                    passwordComplexity: function(input) {
-                        if (input.is("[name='c_Password']") && input.val() !== "") {
-                            return passRegex.test(input.val());
+                    passwordComplexity: function (input) {
+                        if (input.is("[name=c_Password]")) {
+                            var val = input.val();
+                            // 8 chars, 1 number, 1 special char
+                            return /^(?=.*[0-9])(?=.*[!@@#$%^&*])[a-zA-Z0-9!@@#$%^&*]{8,}$/.test(val);
                         }
                         return true;
                     },
-                    mobileFormat: function(input) {
-                        if (input.is("[name='c_Mobile']") && input.val() !== "") {
-                            return phoneRegex.test(input.val());
+                    mobileLength: function(input) {
+                        if (input.is("[name=c_Mobile]")) {
+                            return input.val().length >= 10;
                         }
                         return true;
                     }
                 },
                 messages: {
-                    passwordComplexity: "Weak password",
-                    mobileFormat: "Enter valid 10-12 digits"
+                    passwordComplexity: "8+ chars, 1 number, 1 symbol required",
+                    mobileLength: "Enter a valid 10-digit number"
                 }
             }).data("kendoValidator");
 
+            // Submit Logic
             $("#btnGo").click(function () {
                 if (validator.validate()) {
-                    const btn = $(this);
-                    kendo.ui.progress($(".floating-form"), true);
-                    btn.prop("disabled", true).text("Connecting...");
+                    var formData = new FormData($("#regForm")[0]);
+                    kendo.ui.progress($(".studio-card"), true);
 
                     $.ajax({
                         url: 'http://localhost:5183/api/ArtistApi/Register',
                         type: 'POST',
-                        data: new FormData($("#regForm")[0]),
-                        contentType: false, processData: false,
+                        data: formData,
+                        contentType: false, 
+                        processData: false,
                         success: function (res) {
-                            kendo.ui.progress($(".floating-form"), false);
+                            kendo.ui.progress($(".studio-card"), false);
                             if (res.success) {
-                                Swal.fire({ icon: 'success', title: 'Welcome', text: 'Identity confirmed.' })
-                                .then(() => window.location.href = "/Artist/Login");
-                            } else {
-                                btn.prop("disabled", false).text("Initialize Profile");
-                                Swal.fire('Error', res.message, 'error');
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Welcome to the Studio',
+                                    text: res.message,
+                                    confirmButtonColor: '#2c2c2c'
+                                }).then(() => window.location.href = "/Artist/Login");
                             }
                         },
-                        error: function () {
-                            kendo.ui.progress($(".floating-form"), false);
-                            btn.prop("disabled", false).text("Initialize Profile");
-                            Swal.fire('Error', 'Connection failed', 'warning');
+                        error: function (xhr) {
+                            kendo.ui.progress($(".studio-card"), false);
+                            let msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : "Registration failed";
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Registration Denied',
+                                text: msg,
+                                confirmButtonColor: '#2c2c2c'
+                            });
                         }
                     });
                 }
@@ -303,5 +258,3 @@
     </script>
 </body>
 </html>
-
-

@@ -670,150 +670,139 @@
     </div><!-- /content-cols -->
 </div><!-- /profile-page -->
 
-
 @section Scripts {
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        $(document).ready(function () {
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/authHelper.js"></script>
+<script>
+$(document).ready(function () {
+    var userData = AuthHelper.getUser();
 
-            /* ── Auth check ── */
-            const userData = JSON.parse(localStorage.getItem("userData"));
+    if (!userData || !userData.c_User_Id) {
+        window.location.href = "/Artist/Login";
+        return;
+    }
 
-            if (!userData || !userData.c_User_Id) {
-                window.location.href = "/Artist/Login";
-                return;
+    var artistId = userData.c_User_Id;
+    var BASE = AuthHelper.API_BASE;
+
+    function checkEmpty(value, fallback) {
+        fallback = fallback || "Not Provided";
+        if (!value || value === "" || value === "null" || value === undefined) {
+            return '<span class="info-value empty">' + fallback + '</span>';
+        }
+        return value;
+    }
+
+    function renderStars(rating) {
+        var full = Math.round(rating);
+        var html = '';
+        for (var i = 1; i <= 5; i++) {
+            html += i <= full
+                ? '<i class="bi bi-star-fill"></i>'
+                : '<i class="bi bi-star empty"></i>';
+        }
+        return html;
+    }
+
+    $.ajax({
+        url: BASE + "/profile/" + artistId,
+        type: "GET",
+        success: function (data) {
+            console.log("Profile data:", data);
+
+            var name = data.artistName || userData.c_Full_Name || "Artist";
+            $("#sideName").text(name);
+            $("#sideUsername").text("@@" + (userData.c_UserName || "username"));
+
+            if (data.isVerified) {
+                $("#verifiedBadge").html('<span class="verified-badge"><i class="bi bi-patch-check-fill"></i> Verified</span>');
+            } else {
+                $("#verifiedBadge").html('<span class="standard-badge"><i class="bi bi-person-check"></i> Standard</span>');
             }
 
-            const artistId = userData.c_User_Id;
-
-            /* ── Helper: empty check ── */
-            function checkEmpty(value, fallback) {
-                fallback = fallback || "Not Provided";
-                if (!value || value === "" || value === "null" || value === undefined) {
-                    return '<span class="info-value empty">' + fallback + '</span>';
-                }
-                return value;
+            var isActive = data.isActive !== false;
+            if (!isActive) {
+                $("#statusDot").addClass("inactive");
+                $("#statusLabel").text("Inactive");
             }
 
-            /* ── Helper: render stars ── */
-            function renderStars(rating) {
-                const full = Math.round(rating);
-                let html = '';
-                for (let i = 1; i <= 5; i++) {
-                    html += i <= full
-                        ? '<i class="bi bi-star-fill"></i>'
-                        : '<i class="bi bi-star empty"></i>';
-                }
-                return html;
+            $("#displayFullName").html(checkEmpty(data.artistName || userData.c_Full_Name));
+            $("#displayEmail").html(checkEmpty(data.artistEmail || userData.c_Email));
+            $("#displayStatus").html(
+                isActive
+                    ? '<span style="color:var(--verified);font-weight:500;"><i class="bi bi-check-circle-fill me-1"></i>Active Artist</span>'
+                    : '<span style="color:var(--inactive);font-weight:500;"><i class="bi bi-x-circle-fill me-1"></i>Inactive</span>'
+            );
+
+            var rating = data.ratingAvg || 0;
+            $("#displayRating").html(rating.toFixed(1) + '<span class="unit"> / 5</span>');
+            $("#starRow").html(renderStars(rating));
+
+            $("#statVerified").html(
+                data.isVerified
+                    ? '<span style="color:var(--verified);font-size:1.2rem;"><i class="bi bi-patch-check-fill"></i></span>'
+                    : '<span style="color:var(--text-3);font-size:1.2rem;"><i class="bi bi-person-check"></i></span>'
+            );
+            $("#statStatus").html(
+                isActive
+                    ? '<span style="color:var(--verified);">Active</span>'
+                    : '<span style="color:var(--inactive);">Inactive</span>'
+            );
+
+            var bio = data.biography;
+            var bioEl = $("#displayBio");
+            if (bio && bio !== "" && bio !== "null") {
+                bioEl.removeClass("empty-bio").text(bio);
+            } else {
+                bioEl.addClass("empty-bio").text("This artist hasn't written a biography yet.");
             }
 
-            /* ── Fetch profile ── */
-            $.get("http://localhost:5183/api/ArtistApi/profile/" + artistId, function (data) {
-                console.log("Fetched Data:", data);
+            if (data.coverImage) {
+                var imgSrc = data.coverImage.startsWith("http") ? data.coverImage : "/Artist_Images/" + data.coverImage;
+                $("#profileImg").attr("src", imgSrc);
+            } else if (userData.c_Profile_Image) {
+                $("#profileImg").attr("src", "/Artist_Images/" + userData.c_Profile_Image);
+            }
 
-                /* -- Name & handle -- */
-                const name = data.artistName || userData.c_Full_Name || "Artist";
-                $("#sideName").text(name);
-                $("#sideUsername").text("@@" + (userData.c_UserName || "username"));
+            if (data.urls && data.urls.length > 0) {
+                var validUrls = data.urls.filter(function (u) { return u; });
+                if (validUrls.length > 0) {
+                    var linksHtml = validUrls.map(function (url) {
+                        var href = url.startsWith("http") ? url : "https://" + url;
+                        var icon = "bi-link-45deg";
+                        if (/instagram/i.test(url)) icon = "bi-instagram";
+                        else if (/twitter|x\.com/i.test(url)) icon = "bi-twitter-x";
+                        else if (/behance/i.test(url)) icon = "bi-behance";
+                        else if (/dribbble/i.test(url)) icon = "bi-dribbble";
+                        else if (/youtube/i.test(url)) icon = "bi-youtube";
+                        else if (/linkedin/i.test(url)) icon = "bi-linkedin";
+                        else if (/github/i.test(url)) icon = "bi-github";
 
-                /* -- Verified badge -- */
-                if (data.isVerified) {
-                    $("#verifiedBadge").html(
-                        '<span class="verified-badge"><i class="bi bi-patch-check-fill"></i> Verified</span>'
-                    );
-                } else {
-                    $("#verifiedBadge").html(
-                        '<span class="standard-badge"><i class="bi bi-person-check"></i> Standard</span>'
-                    );
+                        var displayUrl = url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+                        return '<a href="' + href + '" target="_blank" class="link-pill">'
+                            + '<span class="link-icon"><i class="bi ' + icon + '"></i></span>'
+                            + '<span class="link-url">' + displayUrl + '</span>'
+                            + '<i class="bi bi-arrow-up-right link-arrow"></i>'
+                            + '</a>';
+                    }).join("");
+                    $("#displayUrls").html(linksHtml);
+                    $("#statLinks").text(validUrls.length);
                 }
-
-                /* -- Cover status dot -- */
-                const isActive = data.isActive !== false;
-                if (!isActive) {
-                    $("#statusDot").addClass("inactive");
-                    $("#statusLabel").text("Inactive");
-                }
-
-                /* -- Identity panel -- */
-                $("#displayFullName").html(checkEmpty(data.artistName || userData.c_Full_Name));
-                $("#displayEmail").html(checkEmpty(data.artistEmail || userData.c_Email));
-                $("#displayStatus").html(
-                    isActive
-                        ? '<span style="color:var(--verified);font-weight:500;"><i class="bi bi-check-circle-fill me-1"></i>Active Artist</span>'
-                        : '<span style="color:var(--inactive);font-weight:500;"><i class="bi bi-x-circle-fill me-1"></i>Inactive</span>'
-                );
-
-                /* -- Stats strip -- */
-                const rating = data.ratingAvg || 0;
-                $("#displayRating").html(rating.toFixed(1) + '<span class="unit"> / 5</span>');
-                $("#starRow").html(renderStars(rating));
-
-                $("#statVerified").html(
-                    data.isVerified
-                        ? '<span style="color:var(--verified);font-size:1.2rem;"><i class="bi bi-patch-check-fill"></i></span>'
-                        : '<span style="color:var(--text-3);font-size:1.2rem;"><i class="bi bi-person-check"></i></span>'
-                );
-                $("#statStatus").html(
-                    isActive
-                        ? '<span style="color:var(--verified);">Active</span>'
-                        : '<span style="color:var(--inactive);">Inactive</span>'
-                );
-
-                /* -- Biography -- */
-                const bio = data.biography;
-                const bioEl = $("#displayBio");
-                if (bio && bio !== "" && bio !== "null") {
-                    bioEl.removeClass("empty-bio").text(bio);
-                } else {
-                    bioEl.addClass("empty-bio").text("This artist hasn't written a biography yet.");
-                }
-
-                /* -- Profile image -- */
-                if (data.coverImage) {
-                    let imgSrc = data.coverImage.startsWith("http")
-                        ? data.coverImage
-                        : "/Artist_Images/" + data.coverImage;
-                    $("#profileImg").attr("src", imgSrc);
-                } else if (userData.c_Profile_Image) {
-                    $("#profileImg").attr("src", "/Artist_Images/" + userData.c_Profile_Image);
-                }
-
-                /* -- Social links -- */
-                if (data.urls && data.urls.length > 0) {
-                    const validUrls = data.urls.filter(function (u) { return u; });
-                    if (validUrls.length > 0) {
-                        const linksHtml = validUrls.map(function (url) {
-                            const href = url.startsWith("http") ? url : "https://" + url;
-                            let icon = "bi-link-45deg";
-                            if (/instagram/i.test(url))       icon = "bi-instagram";
-                            else if (/twitter|x\.com/i.test(url)) icon = "bi-twitter-x";
-                            else if (/behance/i.test(url))    icon = "bi-behance";
-                            else if (/dribbble/i.test(url))   icon = "bi-dribbble";
-                            else if (/youtube/i.test(url))    icon = "bi-youtube";
-                            else if (/linkedin/i.test(url))   icon = "bi-linkedin";
-                            else if (/github/i.test(url))     icon = "bi-github";
-
-                            const displayUrl = url.replace(/^https?:\/\//, "").replace(/\/$/, "");
-                            return '<a href="' + href + '" target="_blank" class="link-pill">'
-                                + '<span class="link-icon"><i class="bi ' + icon + '"></i></span>'
-                                + '<span class="link-url">' + displayUrl + '</span>'
-                                + '<i class="bi bi-arrow-up-right link-arrow"></i>'
-                                + '</a>';
-                        }).join("");
-                        $("#displayUrls").html(linksHtml);
-                        $("#statLinks").text(validUrls.length);
-                    }
-                }
-
-            }).fail(function () {
+            }
+        },
+        error: function (xhr) {
+            console.error("Profile error:", xhr.status);
+            if (xhr.status !== 401) {
                 Swal.fire({
                     icon: "error",
                     title: "Could not load profile",
-                    text: "Please try refreshing the page.",
+                    text: "Please refresh the page.",
                     confirmButtonColor: "#a0692a"
                 });
-            });
-        });
-    </script>
+            }
+        }
+    });
+});
+</script>
 }

@@ -6,13 +6,24 @@
 
 <style>
     /* ── Auth page wrapper ── */
-    .auth-page {
+    @* .auth-page {
         position: relative;
         min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
         overflow: hidden;
+    } *@
+
+    .auth-page {
+        position: relative;
+        /* Changed from 100vh to auto with vertical padding to reduce large top/bottom gaps */
+        min-height: 100vh; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        padding: 40px 0; /* Adds a small fixed gap at top and bottom */
     }
 
     /* Background image with slow pan */
@@ -24,6 +35,8 @@
         object-fit: cover;
         animation: bgPan 25s ease-in-out infinite;
     }
+
+
 
     /* Dark overlay */
     .auth-bg-overlay {
@@ -38,17 +51,26 @@
     }
 
     /* Card wrapper */
-    .auth-wrapper {
+    @* .auth-wrapper {
         position: relative;
         z-index: 10;
         width: 100%;
         max-width: 520px;
         margin: 24px 16px;
         animation: scaleIn 0.4s ease-out;
+    } *@
+
+    .auth-wrapper {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        max-width: 480px; /* Reduced from 520px to make the form narrower */
+        margin: 0 auto;   /* Center horizontally */
+        animation: scaleIn 0.4s ease-out;
     }
 
     /* Glass card */
-    .glass-card {
+    @* .glass-card {
         background: hsl(35 30% 92% / 0.88);
         backdrop-filter: blur(24px);
         -webkit-backdrop-filter: blur(24px);
@@ -58,6 +80,18 @@
         box-shadow:
             0 8px 32px -8px hsl(25 20% 10% / 0.40),
             inset 0 1px 0 hsl(35 30% 97% / 0.18);
+    } *@
+
+    .glass-card {
+        background: hsl(35 30% 92% / 0.88);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid hsl(30 15% 82% / 0.35);
+        border-radius: 1.25rem;
+        /* Reduced padding from 2rem to 1.5rem to pull content closer to edges */
+        padding: 1.5rem 1.75rem 1.25rem; 
+        box-shadow: 0 8px 32px -8px hsl(25 20% 10% / 0.40),
+                    inset 0 1px 0 hsl(35 30% 97% / 0.18);
     }
 
     /* Logo float */
@@ -334,6 +368,161 @@
         border-radius: 0.6rem !important;
     }
 
+    body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Reduce 2rem to a smaller value, e.g., 0.5rem */
+    padding: 0.5rem 1rem; 
+}
+
+     /* Background  */
+    .netflix-bg-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #000;
+    z-index: -1;
+    perspective: 1000px;
+    }
+    .background-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Har image ki width set karega */
+    gap: 0;
+    overflow: hidden;
+    background-color: #151515; /* Base color black rakhein */
+}
+.background-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Isse images stretch nahi hongi */
+    opacity: 0.1; /* Images ko thoda light rakhein taaki form focus me rahe */
+}
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0,0,0,0) 20%, rgba(0,0,0,0.8) 90%);
+    z-index: 0;
+}
+
+    /* Moving Grid */
+   .art-mosaic-grid {
+    display: grid;
+    /* Density badhane ke liye dynamic columns */
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
+    gap: 0;
+    
+    /* Screen coverage ke liye size badhayein */
+    width: 200%; 
+    height: 200%;
+    position: absolute;
+    top: -50%;
+    left: -50%;
+     
+    opacity: 0.5;
+    z-index: 1
+
+    /* 3D Tilted Effect */
+    transform: rotateX(25deg) rotateZ(-15deg) skewX(-5deg); 
+    
+    @* transition: opacity 1.5s ease-in-out; *@
+
+    /* Browser style continuous moving animation: duration, linear, infinite */
+    animation: background-browse-up 60s linear infinite;
+
+     
+}
+
+    .art-tile {
+    width: 100%;
+    height: 300px; /* Thodi dense grid */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+   margin: -0.5px;
+    padding: 0;
+
+    border-radius: 0;
+     box-shadow: none;
+     border: none;
+
+    /* Zoom animation hamesha chalti rahegi */
+    animation: browse-zoom 20s infinite ease-in-out;
+    animation-delay: calc(var(--tile-index) * 0.2s);
+
+    /* Browsing effect ke liye smooth transition */
+    transition: transform 0.5s ease;
+    @* display: block;  *@
+}
+
+    /* Gradual Dark Shadow (Netflix Overlay) */
+    .netflix-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top),
+                    radial-gradient(circle, transparent 20%, #000 100%);
+        z-index: 1;
+    }
+    .art-mosaic-grid.grid-reveal {
+    opacity: 0.6 !important; 
+    /* Reveal state mein transform ko animation ke sath match rakhein */
+    transform: rotateX(25deg) rotateZ(-15deg) skewX(-5deg) scale(1);
+}
+
+    /* Glass Card for Register Form */
+    .auth-container {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        justify-content: flex-end; /* Card ko right side rakhne ke liye */
+        align-items: center;
+        min-height: 100vh;
+        padding-right: 10%; /* Image 3 jaisa look */
+    }
+    .grid-reveal {
+        opacity: 0.6 !important; /* Visible and store background */
+    }
+    .art-tile {
+    margin: -0.5px;
+    outline: 1px solid transparent; /* Anti-aliasing lines fix karne ke liye */
+}
+    
+    @@keyframes background-zoom {
+
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); } /* Zoom in */
+    }
+
+    @@keyframes background-browse-up {
+    0% {
+        /* Start position: Thoda upar */
+        transform: rotateX(25deg) rotateZ(-15deg) skewX(-10deg) translateY(0%);
+    }
+    100% {
+        /* End position: Thoda niche move ho jaye 'translateY' badhakar */
+        transform: rotateX(25deg) rotateZ(-15deg) skewX(-10deg) translateY(20%);
+    }
+}
+@@keyframes browse-pan {
+    0% { transform: rotateX(25deg) rotateZ(-15deg) skewX(-5deg) translateY(0%); }
+    100% { transform: rotateX(25deg) rotateZ(-15deg) skewX(-5deg) translateY(20%); }
+}
+
     /* ── Animations ── */
     @@keyframes float {
         0%, 100% { transform: translateY(0px); }
@@ -355,10 +544,15 @@
 </style>
 
 <div class="auth-page">
-    <img class="auth-bg-img"
-         src="https://images.unsplash.com/photo-1578926375605-eaf7559b1458?w=1920&q=80"
+    @* <img class="auth-bg-img"
+         src="https://images.unsplashr5om/photo-1578926375605-eaf7559b1458?w=1920&q=80"
          alt="Art gallery background" />
-    <div class="auth-bg-overlay"></div>
+    <div class="auth-bg-overlay"></div> *@
+
+      <div class="netflix-bg-wrapper">
+            <div class="art-mosaic-grid" id="artGrid"></div>
+            <div class="netflix-overlay"></div>
+        </div>
 
     <div class="auth-wrapper">
         <div class="glass-card">
@@ -526,6 +720,102 @@
 @section Scripts {
 <script>
 $(function () {
+
+     // 1. Base URL and Constants
+    var API_BASE = 'http://localhost:5183';
+    var CACHE_KEY = 'unsplash_art_images';
+    var CACHE_TIME_KEY = 'unsplash_last_fetch';
+    var ONE_HOUR = 3600000;
+
+    // 2. Render Images Function (Fix: Added fragment definition)
+    async function renderImages(images) {
+        console.log("Starting to render images...", images.length);
+        const grid = document.getElementById('artGrid');
+        if (!grid) {
+            console.error("artGrid element not found!");
+            return;
+        }
+
+        grid.innerHTML = '';
+        const fragment = document.createDocumentFragment(); // FIXED: Was missing before
+
+        const imageLoadPromises = images.map((item, index) => {
+            return new Promise((resolve) => {
+                const tile = document.createElement('div');
+                tile.className = 'art-tile';
+                tile.style.setProperty('--tile-index', index);
+
+                // Handle both Unsplash object and direct string URLs
+                const url = item.urls ? item.urls.regular : (typeof item === 'string' ? item : '');
+                
+                if (!url) {
+                    resolve();
+                    return;
+                }
+
+                const img = new Image();
+                img.src = url;
+                img.onload = () => {
+                    tile.style.backgroundImage = `url('${url}')`;
+                    fragment.appendChild(tile);
+                    resolve();
+                };
+                img.onerror = () => {
+                    console.warn("Failed to load image:", url);
+                    resolve();
+                };
+            });
+        });
+
+        await Promise.all(imageLoadPromises);
+        grid.appendChild(fragment);
+        
+        // Final reveal
+        setTimeout(() => {
+            grid.style.opacity = '1';
+            grid.classList.add('grid-reveal');
+            console.log("Grid revealed successfully");
+        }, 100);
+    }
+
+    // 3. Load Logic (Fix: Proper error handling and logging)
+    async function loadMosaicBackground() {
+        console.log("Initializing Mosaic Background...");
+        const cachedData = localStorage.getItem(CACHE_KEY);
+        const lastFetch = localStorage.getItem(CACHE_TIME_KEY);
+        const now = Date.now();
+
+        if (cachedData && lastFetch && (now - lastFetch < ONE_HOUR)) {
+            console.log("Loading from LocalStorage...");
+            await renderImages(JSON.parse(cachedData));
+            return;
+        }
+
+        try {
+            console.log("Fetching from API:", API_BASE + '/api/ImageApi/art-background');
+            const response = await fetch(API_BASE + '/api/ImageApi/art-background?count=100');
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log("API Success:", data);
+                localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+                localStorage.setItem(CACHE_TIME_KEY, now.toString());
+                await renderImages(data);
+            } else {
+                throw new Error("API Response not OK: " + response.status);
+            }
+        } catch (error) {
+            console.error("Critical Error during fetch:", error);
+            if (cachedData) {
+                console.log("Falling back to old cache...");
+                await renderImages(JSON.parse(cachedData));
+            }
+        }
+    }
+
+    // 4. Start the process
+    loadMosaicBackground();
+
 
     // ════════════════════════════════════════════════
     // 1. KENDO NOTIFICATION
