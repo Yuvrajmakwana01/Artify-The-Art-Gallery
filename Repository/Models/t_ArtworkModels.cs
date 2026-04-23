@@ -57,16 +57,7 @@ namespace Repository.Models
     }
 
     // ─────────────────────────────────────────────
-    //  RabbitMQ notification message
     // ─────────────────────────────────────────────
-    public class ArtworkNotificationMessage
-    {
-        public int c_ArtistId { get; set; }
-        public string c_Title { get; set; } = string.Empty;
-        public string c_Message { get; set; } = string.Empty;
-        public string c_Type { get; set; } = string.Empty;  // APPROVED | REJECTED
-    }
-
     // ─────────────────────────────────────────────
     //  Paginated API response wrapper
     // ─────────────────────────────────────────────

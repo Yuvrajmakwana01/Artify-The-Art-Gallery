@@ -27,6 +27,7 @@ public class t_OrderDetail
 public class t_OrderItemDetail
 {
     public int     ArtworkId      { get; set; }
+    public int     ArtistId       { get; set; }
     public string  Title          { get; set; } = string.Empty;
     public string  ArtistName     { get; set; } = string.Empty;
     public decimal Price          { get; set; }

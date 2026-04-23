@@ -37,10 +37,21 @@ namespace Repository.Implementations
         {
             await EnsureOpenAsync();
 
+            const string normalizedStatusSql = "COALESCE(NULLIF(BTRIM(a.c_approval_status), ''), 'Pending')";
             bool hasStatus = !string.IsNullOrWhiteSpace(status)
                              && !status.Equals("All", StringComparison.OrdinalIgnoreCase);
 
-            string whereClause = hasStatus ? "WHERE a.c_approval_status = @status" : string.Empty;
+            string whereClause = hasStatus ? $"WHERE {normalizedStatusSql} = @status" : string.Empty;
+            string orderClause = hasStatus
+                ? "ORDER BY a.c_created_at DESC"
+                : $@"
+            ORDER BY CASE {normalizedStatusSql}
+                        WHEN 'Pending'  THEN 0
+                        WHEN 'Approved' THEN 1
+                        WHEN 'Rejected' THEN 2
+                        ELSE 3
+                     END,
+                     a.c_created_at DESC";
 
             // COUNT for pagination total
             string countSql = $@"
@@ -67,7 +78,7 @@ namespace Repository.Implementations
                 a.c_description,
                 a.c_price,
                 a.c_preview_path,
-                a.c_approval_status,
+                {normalizedStatusSql} AS c_approval_status,
                 a.c_admin_note,
                 a.c_created_at,
                 a.c_likes_count
@@ -75,7 +86,7 @@ namespace Repository.Implementations
             JOIN   t_artist_profile ap ON ap.c_artist_id  = a.c_artist_id
             JOIN   t_category        c  ON c.c_category_id = a.c_category_id
             {whereClause}
-            ORDER  BY a.c_created_at DESC
+            {orderClause}
             LIMIT  @pageSize
             OFFSET @offset";
 
@@ -118,7 +129,7 @@ namespace Repository.Implementations
                 a.c_description,
                 a.c_price,
                 a.c_preview_path,
-                a.c_approval_status,
+                COALESCE(NULLIF(BTRIM(a.c_approval_status), ''), 'Pending') AS c_approval_status,
                 a.c_admin_note,
                 a.c_created_at,
                 a.c_likes_count

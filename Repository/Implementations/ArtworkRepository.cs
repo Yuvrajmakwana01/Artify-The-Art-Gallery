@@ -20,8 +20,8 @@ namespace Repository.Implementations
         public async Task<int> UploadArtwork(t_Artwork art)
         {
             string sql = @"INSERT INTO t_artwork 
-                   (c_artist_id, c_category_id, c_title, c_description, c_price, c_preview_path, c_original_path) 
-                   VALUES (@aid, @cid, @title, @desc, @price, @prev, @orig)";
+                   (c_artist_id, c_category_id, c_title, c_description, c_price, c_preview_path, c_original_path, c_approval_status) 
+                   VALUES (@aid, @cid, @title, @desc, @price, @prev, @orig, @status)";
 
             try
             {
@@ -37,6 +37,7 @@ namespace Repository.Implementations
                     cmd.Parameters.AddWithValue("@price", art.c_price);
                     cmd.Parameters.AddWithValue("@prev", art.c_preview_path ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@orig", art.c_original_path ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@status", "Pending");
 
                     return await cmd.ExecuteNonQueryAsync();
                 }
@@ -143,7 +144,8 @@ namespace Repository.Implementations
         {
             var list = new List<t_Artwork>();
             string sql = @"SELECT c_artwork_id, c_artist_id, c_category_id, c_title, c_description, 
-                                  c_price, c_preview_path, c_original_path, c_approval_status, 
+                                  c_price, c_preview_path, c_original_path,
+                                  COALESCE(NULLIF(BTRIM(c_approval_status), ''), 'Pending') AS c_approval_status, 
                                   c_admin_note, c_likes_count, c_sell_count
                            FROM t_artwork 
                            WHERE c_artist_id = @aid 
@@ -221,7 +223,8 @@ namespace Repository.Implementations
         public async Task<t_Artwork> GetById(int id)
         {
             string sql = @"SELECT c_artwork_id, c_artist_id, c_category_id, c_title, c_description, 
-                                  c_price, c_preview_path, c_original_path, c_approval_status, 
+                                  c_price, c_preview_path, c_original_path,
+                                  COALESCE(NULLIF(BTRIM(c_approval_status), ''), 'Pending') AS c_approval_status, 
                                   c_admin_note, c_likes_count, c_sell_count
                            FROM t_artwork 
                            WHERE c_artwork_id = @id";

@@ -146,7 +146,7 @@
 <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    var ADMIN_API_BASE = "http://localhost:5183/api/AdminUser";
+    var ADMIN_API_PATH = "/api/AdminUser";
     var users = [];
 
     var table, userModal, deleteModal;
@@ -208,8 +208,7 @@
 
     async function loadUsersFromApi(){
         var query = $.param({ search: currentSearch || "" });
-        var rows = await $.ajax({
-            url: ADMIN_API_BASE + "/users?" + query,
+        var rows = await window.adminApiRequest(ADMIN_API_PATH + "/users?" + query, {
             method: "GET",
             headers: authHeader()   // ✅ ADD THIS
         });
@@ -263,7 +262,16 @@
         refreshStats();
         refreshGrid();
     }
-    function scheduleFilters(){ if (debounceId) clearTimeout(debounceId); debounceId = setTimeout(async function(){ await applyFilters(); }, 120); }
+    function scheduleFilters(){
+        if (debounceId) clearTimeout(debounceId);
+        debounceId = setTimeout(async function(){
+            try {
+                await applyFilters();
+            } catch (err) {
+                showErrorAlert("Load Failed", getErrorMessage(err, "Failed to load users."));
+            }
+        }, 120);
+    }
 
     function showSuccessAlert(title, text){
         if (window.Swal) {
@@ -291,6 +299,10 @@
         alert(text);
     }
 
+    function getErrorMessage(err, fallback){
+        return (err && err.responseText) ? err.responseText : fallback;
+    }
+
     function openAddDialog(){
         editId = null;
         $("#fldName").val(""); $("#fldEmail").val(""); $("#fldRole").val("Buyer");
@@ -316,34 +328,37 @@
         if(!ok) return;
 
         var role = $("#fldRole").val();
-        if(editId !== null){
-            var i = users.findIndex(function(x){ return x.id === editId; });
-            if (i === -1) return;
-            await $.ajax({
-                url: ADMIN_API_BASE + "/users/" + editId,
-                method: "PUT", headers: authHeader(),
-                contentType: "application/json",
-                data: JSON.stringify({
-                    fullName: name,
-                    email: email,
-                    username: users[i].username || ("user" + editId),
-                    gender: users[i].gender || "Unknown",
-                    mobile: users[i].mobile,
-                    profileImage: users[i].profileImage
-                })
-            });
-        } else {
-            showSuccessAlert("Not Allowed", "Admin cannot add user directly.");
-            return;
-        }
+        try {
+            if(editId !== null){
+                var i = users.findIndex(function(x){ return x.id === editId; });
+                if (i === -1) return;
+                await window.adminApiRequest(ADMIN_API_PATH + "/users/" + editId, {
+                    method: "PUT", headers: authHeader(),
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        fullName: name,
+                        email: email,
+                        username: users[i].username || ("user" + editId),
+                        gender: users[i].gender || "Unknown",
+                        mobile: users[i].mobile,
+                        profileImage: users[i].profileImage
+                    })
+                });
+            } else {
+                showSuccessAlert("Not Allowed", "Admin cannot add user directly.");
+                return;
+            }
 
-        userModal.hide();
-        await applyFilters();
+            userModal.hide();
+            await applyFilters();
 
-        if (isEdit) {
-            showSuccessAlert("User Updated", "User has been updated successfully.");
-        } else {
-            showSuccessAlert("User Added", "New user has been added successfully.");
+            if (isEdit) {
+                showSuccessAlert("User Updated", "User has been updated successfully.");
+            } else {
+                showSuccessAlert("User Added", "New user has been added successfully.");
+            }
+        } catch (err) {
+            showErrorAlert("Save Failed", getErrorMessage(err, "Unable to save user."));
         }
     }
 
@@ -352,14 +367,13 @@
         try {
             var deletedUser = users.find(function(u){ return u.id === deleteId; });
             var deletedName = deletedUser ? deletedUser.name : "User";
-            await $.ajax({ url: ADMIN_API_BASE + "/users/" + deleteId, method: "DELETE", headers: authHeader() });
+            await window.adminApiRequest(ADMIN_API_PATH + "/users/" + deleteId, { method: "DELETE", headers: authHeader() });
             deleteId = null;
             deleteModal.hide();
             await applyFilters();
             showSuccessAlert("User Deleted", deletedName + " has been deleted successfully.");
         } catch (err) {
-            var msg = (err && err.responseText) ? err.responseText : "Unable to delete user. Please try again.";
-            showErrorAlert("Delete Failed", msg);
+            showErrorAlert("Delete Failed", getErrorMessage(err, "Unable to delete user. Please try again."));
         }
     }
 
@@ -396,7 +410,11 @@
             dom: "rt"
         });
 
-        await applyFilters();
+        try {
+            await applyFilters();
+        } catch (err) {
+            showErrorAlert("Load Failed", getErrorMessage(err, "Failed to load users."));
+        }
 
         $("#searchInput").on("input keyup paste", function(){ scheduleFilters(); });
         $("#btnSaveUser").on("click", async function(){ await handleSave(); });

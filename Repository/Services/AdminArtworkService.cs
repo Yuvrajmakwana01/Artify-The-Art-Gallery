@@ -13,20 +13,20 @@ namespace Repository.Services
     {
         private readonly IAdminArtworkInterface _repo;
         private readonly RedisService           _redis;
-        // private readonly RabbitMQProducer       _mq;
+        private readonly RabbitService          _rabbit;
         private readonly EmailServices          _email;
         private readonly ILogger<AdminArtworkService> _logger;
 
         public AdminArtworkService(
             IAdminArtworkInterface       repo,
             RedisService                 redis,
-            // RabbitMQProducer             mq,
+            RabbitService                rabbit,
             EmailServices                email,
             ILogger<AdminArtworkService> logger)
         {
             _repo   = repo;
             _redis  = redis;
-            // _mq     = mq;
+            _rabbit = rabbit;
             _email  = email;
             _logger = logger;
         }
@@ -38,6 +38,13 @@ namespace Repository.Services
         public async Task<PagedResult<ArtworkModel>> GetArtworksAsync(
             string? status, int page, int pageSize)
         {
+            // Tiny 1-item requests are only used to fetch tab counts in the admin UI.
+            // Skipping Redis here avoids noisy cache keys like *_1_1.
+            if (pageSize <= 1)
+            {
+                return await _repo.GetArtworksAsync(status, page, pageSize);
+            }
+
             string cacheKey = RedisService.ArtworkCacheKey(status ?? "all", page, pageSize);
 
             var cached = await _redis.GetAsync<PagedResult<ArtworkModel>>(cacheKey);
@@ -54,37 +61,34 @@ namespace Repository.Services
         //  APPROVE
         // ─────────────────────────────────────────────────────────────────
 
-        public async Task ApproveArtworkAsync(int artworkId, string? adminNote)
+         public async Task ApproveArtworkAsync(int artworkId, string? adminNote)
         {
             var artwork = await _repo.GetArtworkByIdAsync(artworkId)
                 ?? throw new KeyNotFoundException($"Artwork {artworkId} not found.");
 
-            // 1. Update DB status
-            await _repo.UpdateArtworkStatusAsync(artworkId, "Approved", adminNote ?? string.Empty);
+            try
+            {
+                await _repo.UpdateArtworkStatusAsync(artworkId, "Approved", adminNote ?? string.Empty);
+                await _repo.ResetRejectedCountAsync(artwork.c_ArtistId);
 
-            // 2. Reset artist rejection counter
-            await _repo.ResetRejectedCountAsync(artwork.c_ArtistId);
+                await PublishArtworkNotificationAsync(
+                    artwork,
+                    "approved",
+                    $"Your artwork '{artwork.c_Title}' has been approved and is now live!");
 
-            // 3. Notify artist via RabbitMQ (in-app notification)
-            // _mq.SendArtworkNotification(new ArtworkNotificationMessage
-            // {
-            //     c_ArtistId = artwork.c_ArtistId,
-            //     c_Title    = artwork.c_Title,
-            //     c_Message  = $"Your artwork '{artwork.c_Title}' has been approved and is now live!",
-            //     c_Type     = "APPROVED"
-            // });
-
-            // 4. Send approval email to artist
-            await SendModerationEmailAsync(
-                artistId:    artwork.c_ArtistId,
-                artistName:  artwork.c_ArtistName,
-                artworkTitle: artwork.c_Title,
-                categoryName: artwork.c_CategoryName,
-                isApproved:  true,
-                adminNote:   adminNote ?? string.Empty);
-
-            // 5. Bust Redis cache
-            await _redis.ClearAdminArtworkCacheAsync();
+                await SendModerationEmailAsync(
+                    artistId:     artwork.c_ArtistId,
+                    artistName:   artwork.c_ArtistName,
+                    artworkTitle: artwork.c_Title,
+                    categoryName: artwork.c_CategoryName,
+                    isApproved:   true,
+                    adminNote:    adminNote ?? string.Empty);
+            }
+            finally
+            {
+                // ✅ Cache hamesha clear hoga — chahe upar kuch fail ho
+                await _redis.ClearAdminArtworkCacheAsync();
+            }
         }
 
         // ─────────────────────────────────────────────────────────────────
@@ -92,50 +96,49 @@ namespace Repository.Services
         // ─────────────────────────────────────────────────────────────────
 
         public async Task RejectArtworkAsync(int artworkId, string adminNote)
-        {
-            var artwork = await _repo.GetArtworkByIdAsync(artworkId)
-                ?? throw new KeyNotFoundException($"Artwork {artworkId} not found.");
+{
+    var artwork = await _repo.GetArtworkByIdAsync(artworkId)
+        ?? throw new KeyNotFoundException($"Artwork {artworkId} not found.");
 
-            // 1. Update DB status
-            await _repo.UpdateArtworkStatusAsync(artworkId, "Rejected", adminNote);
+    try
+    {
+        await _repo.UpdateArtworkStatusAsync(artworkId, "Rejected", adminNote);
 
-            // 2. Increment rejection count
-            int rejectCount = await _repo.IncrementRejectedCountAsync(artwork.c_ArtistId);
+        int rejectCount = await _repo.IncrementRejectedCountAsync(artwork.c_ArtistId);
 
-            // 3. Block artist if over threshold (>3 rejections)
-            if (rejectCount > 3)
-                await _repo.BlockArtistAsync(artwork.c_ArtistId);
+        // ✅ >= 3 use karo agar 3rd rejection pe block karna ho
+        bool shouldBlock = rejectCount >= 3;
 
-            // 4. Build RabbitMQ notification message
-            string blockWarning = rejectCount > 3
-                ? " Your account has been temporarily blocked for 15 days."
-                : string.Empty;
+        if (shouldBlock)
+            await _repo.BlockArtistAsync(artwork.c_ArtistId);
 
-            // _mq.SendArtworkNotification(new ArtworkNotificationMessage
-            // {
-            //     c_ArtistId = artwork.c_ArtistId,
-            //     c_Title    = artwork.c_Title,
-            //     c_Message  = $"Your artwork '{artwork.c_Title}' was rejected. Reason: {adminNote}.{blockWarning}",
-            //     c_Type     = "REJECTED"
-            // });
+        string blockWarning = shouldBlock
+            ? " Your account has been temporarily blocked for 15 days."
+            : string.Empty;
 
-            // 5. Send rejection email to artist
-            //    Append block warning to the admin note so the artist sees it in email too
-            string fullNote = rejectCount > 3
-                ? $"{adminNote}\n\n⚠️ Your account has been temporarily blocked for 15 days due to multiple rejections."
-                : adminNote;
+        await PublishArtworkNotificationAsync(
+            artwork,
+            "rejected",
+            $"Your artwork '{artwork.c_Title}' was rejected. Reason: {adminNote}.{blockWarning}");
 
-            await SendModerationEmailAsync(
-                artistId:    artwork.c_ArtistId,
-                artistName:  artwork.c_ArtistName,
-                artworkTitle: artwork.c_Title,
-                categoryName: artwork.c_CategoryName,
-                isApproved:  false,
-                adminNote:   fullNote);
+        string fullNote = shouldBlock
+            ? $"{adminNote}\n\n⚠️ Your account has been temporarily blocked for 15 days due to multiple rejections."
+            : adminNote;
 
-            // 6. Bust Redis cache
-            await _redis.ClearAdminArtworkCacheAsync();
-        }
+        await SendModerationEmailAsync(
+            artistId:     artwork.c_ArtistId,
+            artistName:   artwork.c_ArtistName,
+            artworkTitle: artwork.c_Title,
+            categoryName: artwork.c_CategoryName,
+            isApproved:   false,
+            adminNote:    fullNote);
+    }
+    finally
+    {
+        // ✅ Cache hamesha clear hoga
+        await _redis.ClearAdminArtworkCacheAsync();
+    }
+}
 
         // ─────────────────────────────────────────────────────────────────
         //  PRIVATE — fetch artist email + send moderation email
@@ -182,6 +185,30 @@ namespace Repository.Services
                 _logger.LogError(ex,
                     "Failed to send moderation email to artist {ArtistId} for artwork '{Title}'.",
                     artistId, artworkTitle);
+            }
+        }
+
+        private async Task PublishArtworkNotificationAsync(
+            ArtworkModel artwork,
+            string status,
+            string message)
+        {
+            try
+            {
+                await _rabbit.PublishArtworkModerationNotificationAsync(
+                    artistId: artwork.c_ArtistId,
+                    artworkTitle: artwork.c_Title,
+                    message: message,
+                    status: status);
+            }
+            catch (Exception ex)
+            {
+                // Notification failures should not roll back moderation decisions.
+                _logger.LogError(
+                    ex,
+                    "Failed to publish {Status} notification for artwork {ArtworkId}.",
+                    status,
+                    artwork.c_ArtworkId);
             }
         }
     }

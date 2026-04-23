@@ -35,8 +35,7 @@ public class AdminArtistRepository : IAdminArtistInterface
                 COALESCE(ap.c_created_at, u.c_created_at) AS created_at,
                 CASE
                     WHEN COALESCE(ap.c_is_active, FALSE) = TRUE THEN 'Active'
-                    WHEN COALESCE(ap.c_rejected_count, 0) > 0 THEN 'Inactive'
-                    ELSE 'Under Review'
+                    ELSE 'Inactive'
                 END AS status
             FROM t_artist_profile ap
             LEFT JOIN t_user u ON u.c_user_id = ap.c_artist_id
@@ -49,8 +48,7 @@ public class AdminArtistRepository : IAdminArtistInterface
                 AND (
                     @status IS NULL OR @status = '' OR
                     (@status = 'Active' AND COALESCE(ap.c_is_active, FALSE) = TRUE) OR
-                    (@status = 'Inactive' AND COALESCE(ap.c_is_active, FALSE) = FALSE AND COALESCE(ap.c_rejected_count, 0) > 0) OR
-                    (@status = 'Under Review' AND COALESCE(ap.c_is_active, FALSE) = FALSE AND COALESCE(ap.c_rejected_count, 0) = 0)
+                    (@status = 'Inactive' AND COALESCE(ap.c_is_active, FALSE) = FALSE)
                 )
             GROUP BY
                 ap.c_artist_id, ap.c_artist_name, ap.c_artist_email, ap.c_biography,
@@ -92,8 +90,8 @@ public class AdminArtistRepository : IAdminArtistInterface
             SELECT
                 COUNT(*)::int AS total_artists,
                 COUNT(*) FILTER (WHERE COALESCE(c_is_active, FALSE) = TRUE)::int AS active,
-                COUNT(*) FILTER (WHERE COALESCE(c_is_active, FALSE) = FALSE AND COALESCE(c_rejected_count, 0) > 0)::int AS inactive,
-                COUNT(*) FILTER (WHERE COALESCE(c_is_active, FALSE) = FALSE AND COALESCE(c_rejected_count, 0) = 0)::int AS under_review,
+                COUNT(*) FILTER (WHERE COALESCE(c_is_active, FALSE) = FALSE)::int AS inactive,
+                0::int AS under_review,
                 COALESCE((
                     SELECT SUM(oi.c_price_at_purchase)
                     FROM t_order_item oi

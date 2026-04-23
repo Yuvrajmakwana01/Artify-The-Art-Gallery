@@ -432,6 +432,7 @@ using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Repository.Interfaces;
 using Repository.Models;
+using Repository.Services;
 
 namespace API.Controllers;
 
@@ -442,16 +443,25 @@ public class ArtistApiController : ControllerBase
     private readonly IArtistInterface  _repo;
     private readonly IArtworkInterface _artworkRepo;
     private readonly IConfiguration    _config;
+    private readonly RedisService      _redis;
+    private readonly RabbitService            _rabbit;
+    private readonly ILogger<ArtistApiController> _logger;
     private readonly Cloudinary        _cloudinary;
 
     public ArtistApiController(
         IArtistInterface  repo,
         IArtworkInterface artworkRepo,
-        IConfiguration    config)
+        IConfiguration    config,
+        RedisService      redis,
+        RabbitService rabbit,           
+        ILogger<ArtistApiController> logger)
     {
         _repo        = repo;
         _artworkRepo = artworkRepo;
         _config      = config;
+        _redis       = redis;
+        _rabbit      = rabbit;
+        _logger      = logger;
 
         var cloudName = config["CloudinarySettings:CloudName"]
             ?? throw new InvalidOperationException("Cloudinary CloudName missing.");
@@ -478,9 +488,26 @@ public class ArtistApiController : ControllerBase
         }
 
         var rows = await _repo.Register(user);
-        return rows > 0
-            ? Ok(new  { success = true,  message = "Registered! Awaiting admin approval." })
-            : BadRequest(new { success = false, message = "Email already registered." });
+        if (rows > 0)
+        {
+            // Notify admin — fire-and-forget, registration must not fail if Rabbit is down
+            try
+            {
+                await _rabbit.PublishRegisterNotificationAsync(
+                    userId:   rows,          // 0 until DB assigns it; sufficient for admin display
+                    userName: user.c_UserName,
+                    role:     "Artist");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Failed to publish artist-registration notification for {Email}.", user.c_Email);
+            }
+ 
+            return Ok(new { success = true, message = "Registered! Awaiting admin approval." });
+        }
+ 
+        return BadRequest(new { success = false, message = "Email already registered." });
     }
 
     // ── LOGIN ─────────────────────────────────────────────────
@@ -631,6 +658,65 @@ public class ArtistApiController : ControllerBase
     }
 
     // ── GET BY ARTIST (backward compat, IDOR-protected) ───────
+    // Notifications for the signed-in artist, backed by Redis.
+    [Authorize]
+    [HttpGet("notifications")]
+    public async Task<IActionResult> GetNotifications([FromQuery] int take = 20)
+    {
+        var artistId = GetArtistIdFromToken();
+        if (artistId == 0) return Unauthorized(new { message = "Invalid token." });
+
+        if (take < 1) take = 1;
+        if (take > 50) take = 50;
+
+        var recipientId = artistId.ToString();
+        var data = await _redis.GetNotificationsAsync("artist", recipientId, take);
+        var unreadCount = await _redis.GetNotificationCountAsync("artist", recipientId);
+
+        return Ok(new
+        {
+            success = true,
+            unreadCount,
+            data
+        });
+    }
+
+    [Authorize]
+    [HttpPost("notifications/read")]
+    public async Task<IActionResult> MarkNotificationsRead()
+    {
+        var artistId = GetArtistIdFromToken();
+        if (artistId == 0) return Unauthorized(new { message = "Invalid token." });
+
+        await _redis.ClearNotificationsAsync("artist", artistId.ToString());
+        return Ok(new { success = true });
+    }
+
+    [Authorize]
+    [HttpPost("notifications/{notificationId}/read")]
+    public async Task<IActionResult> MarkNotificationRead([FromRoute] string notificationId)
+    {
+        var artistId = GetArtistIdFromToken();
+        if (artistId == 0) return Unauthorized(new { message = "Invalid token." });
+
+        if (string.IsNullOrWhiteSpace(notificationId))
+            return BadRequest(new { success = false, message = "Notification id is required." });
+
+        var recipientId = artistId.ToString();
+        var removed = await _redis.MarkAsReadAsync("artist", recipientId, notificationId);
+
+        if (!removed)
+            return NotFound(new { success = false, message = "Notification not found." });
+
+        var unreadCount = await _redis.GetNotificationCountAsync("artist", recipientId);
+
+        return Ok(new
+        {
+            success = true,
+            unreadCount
+        });
+    }
+
     [Authorize]
     [HttpGet("GetByArtist/{id}")]
     public async Task<IActionResult> GetByArtist(int id)
