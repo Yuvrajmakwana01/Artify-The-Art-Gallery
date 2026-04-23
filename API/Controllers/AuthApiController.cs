@@ -27,14 +27,24 @@ namespace API.Controllers
         private readonly IConfiguration _config;
         private readonly EmailServices _emailService;
         private readonly RedisService _redis;
+        private readonly RabbitService _rabbit;
+        private readonly ILogger<AuthApiController> _logger;
         // private readonly IWebHostEnvironment _env;
 
-        public AuthApiController(IAuthInterface auth, IConfiguration config, EmailServices emailService, RedisService redis)
+        public AuthApiController(
+            IAuthInterface auth,
+            IConfiguration config,
+            EmailServices emailService,
+            RedisService redis,
+            RabbitService rabbit,
+            ILogger<AuthApiController> logger)
         {
             _auth = auth;
             _config = config;
             _emailService = emailService;
-             _redis = redis;
+            _redis = redis;
+            _rabbit = rabbit;
+            _logger = logger;
         }
 
         [HttpPost("UserGoogleLogin")]
@@ -68,6 +78,21 @@ namespace API.Controllers
             if (result > 0)
             {
                 var registeredUser = await _auth.GetUserByEmail(model.c_Email);
+                if (registeredUser == null)
+                    return StatusCode(500, "Registered user could not be loaded");
+
+                try
+                {
+                    await _rabbit.PublishRegisterNotificationAsync(
+                        registeredUser.c_UserId,
+                        registeredUser.c_UserName,
+                        "User");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to publish user register notification for {Email}.", model.c_Email);
+                }
+
                 var token = GenerateJwtToken(registeredUser);
                 return Ok(new { token = token, message = "Registration & Login Successful" });
             }
@@ -131,6 +156,19 @@ namespace API.Controllers
 
                 // 3. Email send karein
                 await _emailService.SendEmailAsync(model.c_Email, "Welcome to Artify!", body, logoPath);
+
+                try
+                {
+                    var registeredUser = await _auth.GetUserByEmail(model.c_Email);
+                    await _rabbit.PublishRegisterNotificationAsync(
+                        registeredUser?.c_UserId ?? 0,
+                        registeredUser?.c_UserName ?? model.c_UserName,
+                        "User");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to publish user register notification for {Email}.", model.c_Email);
+                }
 
                 return Ok(new { message = "Registration successful" });
             }

@@ -69,6 +69,7 @@ public class OrderRepository : IOrderInterface
         await using var itemCmd = new NpgsqlCommand(@"
             SELECT
                 oi.c_artwork_id,
+                aw.c_artist_id,
                 aw.c_title,
                 ap.c_artist_name,
                 oi.c_price_at_purchase,
@@ -83,7 +84,7 @@ public class OrderRepository : IOrderInterface
                 AND dl.c_buyer_id = @buyerId
             WHERE oi.c_order_id = @orderId
             GROUP BY
-                oi.c_artwork_id, aw.c_title, ap.c_artist_name,
+                oi.c_artwork_id, aw.c_artist_id, aw.c_title, ap.c_artist_name,
                 oi.c_price_at_purchase, aw.c_preview_path, aw.c_original_path", conn);
 
         itemCmd.Parameters.Add("@orderId", NpgsqlDbType.Integer).Value = orderId;
@@ -93,16 +94,17 @@ public class OrderRepository : IOrderInterface
 
         while (await ir.ReadAsync())
         {
-            int count = Convert.ToInt32(ir.GetInt64(6));
+            int count = Convert.ToInt32(ir.GetInt64(7));
 
             detail.Items.Add(new t_OrderItemDetail
             {
                 ArtworkId     = ir.GetInt32(0),
-                Title         = ir.GetString(1),
-                ArtistName    = ir.IsDBNull(2) ? "Unknown" : ir.GetString(2),
-                Price         = ir.GetDecimal(3),
-                PreviewPath   = ir.IsDBNull(4) ? null : ir.GetString(4),
-                OriginalPath  = ir.IsDBNull(5) ? null : ir.GetString(5),
+                ArtistId      = ir.GetInt32(1),
+                Title         = ir.GetString(2),
+                ArtistName    = ir.IsDBNull(3) ? "Unknown" : ir.GetString(3),
+                Price         = ir.GetDecimal(4),
+                PreviewPath   = ir.IsDBNull(5) ? null : ir.GetString(5),
+                OriginalPath  = ir.IsDBNull(6) ? null : ir.GetString(6),
                 DownloadCount = count,
                 DownloadsLeft = Math.Max(0, MAX_DOWNLOADS - count),
                 CanDownload   = count < MAX_DOWNLOADS

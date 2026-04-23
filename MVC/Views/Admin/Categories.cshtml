@@ -504,7 +504,7 @@
 <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    var ADMIN_API_BASE = "http://localhost:5183/api/AdminCategoryApi";
+    var ADMIN_API_PATH = "/api/AdminCategoryApi";
     var categories = [];
 
     var editId = null;
@@ -582,8 +582,7 @@
 
     async function loadCategoriesFromApi() {
         var query = $.param({ search: currentSearch || "", status: currentStatus || "" });
-        var rows = await $.ajax({
-            url: ADMIN_API_BASE + "/categories?" + query,
+        var rows = await window.adminApiRequest(ADMIN_API_PATH + "/categories?" + query, {
             method: "GET",
             headers: authHeader()   // 🔥 THIS IS REQUIRED
         });
@@ -653,7 +652,11 @@
     function scheduleFilters() {
         if (filterDebounceId) clearTimeout(filterDebounceId);
         filterDebounceId = setTimeout(async function () {
-            await applyFilters();
+            try {
+                await applyFilters();
+            } catch (err) {
+                showErrorAlert("Load Failed", getErrorMessage(err, "Failed to load categories."));
+            }
         }, 120);
     }
 
@@ -681,6 +684,25 @@
             return;
         }
         alert(text);
+    }
+    
+    function getApiErrorMessage(err, fallbackMessage) {
+        if (!err) return fallbackMessage;
+        if (err.responseJSON && err.responseJSON.message) return err.responseJSON.message;
+
+        if (err.responseText) {
+            try {
+                var parsed = JSON.parse(err.responseText);
+                if (parsed && parsed.message) return parsed.message;
+            } catch (_) { }
+            return err.responseText;
+        }
+
+        return fallbackMessage;
+    }
+
+    function getErrorMessage(err, fallback) {
+        return (err && err.responseText) ? err.responseText : fallback;
     }
 
     function openAddDialog() {
@@ -732,9 +754,9 @@
                 isActive: status === "Active"
             };
             if (editId !== null) {
-                await $.ajax({ url: ADMIN_API_BASE + "/categories/" + editId, method: "PUT",headers: authHeader(), contentType: "application/json", data: JSON.stringify(payload) });
+                await window.adminApiRequest(ADMIN_API_PATH + "/categories/" + editId, { method: "PUT",headers: authHeader(), contentType: "application/json", data: JSON.stringify(payload) });
             } else {
-                await $.ajax({ url: ADMIN_API_BASE + "/categories", method: "POST",headers: authHeader(), contentType: "application/json", data: JSON.stringify(payload) });
+                await window.adminApiRequest(ADMIN_API_PATH + "/categories", { method: "POST",headers: authHeader(), contentType: "application/json", data: JSON.stringify(payload) });
             }
 
             categoryModal.hide();
@@ -746,7 +768,7 @@
                 showSuccessAlert("Category Added", "New category has been added successfully.");
             }
         } catch (err) {
-            var msg = (err && err.responseText) ? err.responseText : "Unable to save category. Check API server and try again.";
+            var msg = getApiErrorMessage(err, "Unable to save category. Check API server and try again.");
             showErrorAlert("Save Failed", msg);
         }
     }
@@ -772,14 +794,13 @@
         try {
             var deletedCat = categories.find(function (c) { return c.id === deleteId; });
             var deletedName = deletedCat ? deletedCat.name : "Category";
-            await $.ajax({ url: ADMIN_API_BASE + "/categories/" + deleteId, method: "DELETE", headers: authHeader() });
+            await window.adminApiRequest(ADMIN_API_PATH + "/categories/" + deleteId, { method: "DELETE", headers: authHeader() });
             deleteId = null;
             deleteModal.hide();
             await applyFilters();
             showSuccessAlert("Category Deleted", deletedName + " has been deleted successfully.");
         } catch (err) {
-            var msg = (err && err.responseText) ? err.responseText : "Unable to delete category.";
-            showErrorAlert("Delete Failed", msg);
+            showErrorAlert("Delete Failed", getErrorMessage(err, "Unable to delete category."));
         }
     }
 
@@ -850,12 +871,17 @@
         try {
             await applyFilters();
         } catch (err) {
-            var msg = (err && err.responseText) ? err.responseText : "Failed to load categories. Verify API is running on https://localhost:7077.";
-            showErrorAlert("Load Failed", msg);
+            showErrorAlert("Load Failed", getErrorMessage(err, "Failed to load categories."));
         }
 
         $("#searchInput").on("input keyup paste", function () { scheduleFilters(); });
-        $("#statusFilter").on("change", async function () { await applyFilters(); });
+        $("#statusFilter").on("change", async function () {
+            try {
+                await applyFilters();
+            } catch (err) {
+                showErrorAlert("Load Failed", getErrorMessage(err, "Failed to load categories."));
+            }
+        });
         $("#btnSaveCategory").on("click", async function () { await handleSave(); });
         $("#btnConfirmDelete").on("click", async function () { await confirmDelete(); });
     });

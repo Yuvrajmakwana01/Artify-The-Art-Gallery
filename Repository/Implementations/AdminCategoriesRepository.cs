@@ -7,6 +7,7 @@ namespace Repository.Implementations;
 
 public class AdminCategoriesRepository : IAdmincategoiresInteface
 {
+    private const string DuplicateCategoryMessage = "Category already exists. Please use a different category name.";
     private readonly NpgsqlConnection _connection;
     private bool _categorySchemaEnsured;
 
@@ -153,10 +154,17 @@ public class AdminCategoriesRepository : IAdmincategoiresInteface
         return null;
     }
 
+
     public async Task<int> AddCategoryAsync(AdminCategoryUpsertRequest request)
     {
         await EnsureOpenAsync();
         await EnsureCategorySchemaAsync();
+        var normalizedName = request.CategoryName.Trim();
+        if (await CategoryNameExistsAsync(normalizedName))
+        {
+            throw new InvalidOperationException(DuplicateCategoryMessage);
+        }
+
         var status = ResolveCategoryStatus(request);
 
         await using var cmd = new NpgsqlCommand(@"
@@ -165,7 +173,7 @@ public class AdminCategoriesRepository : IAdmincategoiresInteface
             RETURNING c_category_id;", _connection);
 
         cmd.Parameters.AddWithValue("icon", string.IsNullOrWhiteSpace(request.CategoryIcon) ? "🎨" : request.CategoryIcon.Trim());
-        cmd.Parameters.AddWithValue("name", request.CategoryName.Trim());
+        cmd.Parameters.AddWithValue("name", normalizedName);
         cmd.Parameters.AddWithValue("description", (object?)request.CategoryDescription ?? DBNull.Value);
         cmd.Parameters.AddWithValue("status", status);
 
@@ -177,6 +185,12 @@ public class AdminCategoriesRepository : IAdmincategoiresInteface
     {
         await EnsureOpenAsync();
         await EnsureCategorySchemaAsync();
+        var normalizedName = request.CategoryName.Trim();
+        if (await CategoryNameExistsAsync(normalizedName, categoryId))
+        {
+            throw new InvalidOperationException(DuplicateCategoryMessage);
+        }
+
         var status = ResolveCategoryStatus(request);
 
         await using var cmd = new NpgsqlCommand(@"
@@ -188,7 +202,7 @@ public class AdminCategoriesRepository : IAdmincategoiresInteface
             WHERE c_category_id = @categoryId;", _connection);
 
         cmd.Parameters.AddWithValue("icon", string.IsNullOrWhiteSpace(request.CategoryIcon) ? "🎨" : request.CategoryIcon.Trim());
-        cmd.Parameters.AddWithValue("name", request.CategoryName.Trim());
+        cmd.Parameters.AddWithValue("name", normalizedName);
         cmd.Parameters.AddWithValue("description", (object?)request.CategoryDescription ?? DBNull.Value);
         cmd.Parameters.AddWithValue("status", status);
         cmd.Parameters.AddWithValue("categoryId", categoryId);
@@ -215,6 +229,24 @@ public class AdminCategoriesRepository : IAdmincategoiresInteface
         {
             await _connection.OpenAsync();
         }
+    }
+
+    private async Task<bool> CategoryNameExistsAsync(string categoryName, int? excludeCategoryId = null)
+    {
+        await using var cmd = new NpgsqlCommand(@"
+            SELECT 1
+            FROM t_category
+            WHERE LOWER(TRIM(c_category_name)) = LOWER(TRIM(@name))
+              AND (@excludeCategoryId IS NULL OR c_category_id <> @excludeCategoryId)
+            LIMIT 1;", _connection);
+
+        cmd.Parameters.AddWithValue("name", categoryName);
+        cmd.Parameters.Add("excludeCategoryId", NpgsqlDbType.Integer).Value = excludeCategoryId.HasValue
+            ? excludeCategoryId.Value
+            : DBNull.Value;
+
+        var result = await cmd.ExecuteScalarAsync();
+        return result != null;
     }
 
     private static string ResolveCategoryStatus(AdminCategoryUpsertRequest request)

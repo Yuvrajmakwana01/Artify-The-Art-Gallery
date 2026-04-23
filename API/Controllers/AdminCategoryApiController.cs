@@ -51,9 +51,16 @@ namespace API.Controllers
             if (string.IsNullOrWhiteSpace(request.CategoryName))
                 return BadRequest("Category name is required.");
 
-            var id = await _categoryRepository.AddCategoryAsync(request);
-            var item = await _categoryRepository.GetCategoryByIdAsync(id);
-            return CreatedAtAction(nameof(GetCategoryById), new { id }, item);
+            try
+            {
+                var id = await _categoryRepository.AddCategoryAsync(request);
+                var item = await _categoryRepository.GetCategoryByIdAsync(id);
+                return CreatedAtAction(nameof(GetCategoryById), new { id }, item);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
         }
 
         [HttpPut("categories/{id:int}")]
@@ -62,8 +69,15 @@ namespace API.Controllers
             if (string.IsNullOrWhiteSpace(request.CategoryName))
                 return BadRequest("Category name is required.");
 
-            var ok = await _categoryRepository.UpdateCategoryAsync(id, request);
-            return ok ? Ok(new { message = "Category updated successfully." }) : NotFound();
+            try
+            {
+                var ok = await _categoryRepository.UpdateCategoryAsync(id, request);
+                return ok ? Ok(new { message = "Category updated successfully." }) : NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
         }
 
         [HttpDelete("categories/{id:int}")]

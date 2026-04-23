@@ -18,6 +18,7 @@ public class PaymentApiController : ControllerBase
     private readonly IOrderInterface _orderRepo;
     private readonly InvoiceService _invoiceService;
     private readonly EmailServices _emailService;
+    private readonly RabbitService _rabbit;
     private readonly ILogger<PaymentApiController> _logger;
     private readonly IWebHostEnvironment _env;
 
@@ -28,6 +29,7 @@ public class PaymentApiController : ControllerBase
         IOrderInterface orderRepo,
         InvoiceService invoiceService,
         EmailServices emailService,
+        RabbitService rabbit,
         ILogger<PaymentApiController> logger)
     {
         _paypalService = paypalService;
@@ -35,7 +37,7 @@ public class PaymentApiController : ControllerBase
         _orderRepo = orderRepo;
         _invoiceService = invoiceService;
         _emailService = emailService;
-        // _env = env;
+        _rabbit = rabbit;
         _logger = logger;
     }
 
@@ -78,18 +80,27 @@ public class PaymentApiController : ControllerBase
             int buyerId = GetBuyerIdFromContext();
             int orderId = await _paymentRepo.ProcessFullPaymentAsync(buyerId, model);
             Console.WriteLine(orderId);
+
             if (orderId > 0)
             {
+                t_OrderDetail? orderDetail = null;
 
-
-                // ✅ DIRECT EMAIL FLOW (NO Task.Run)
                 try
                 {
-                    var orderDetail = await _orderRepo.GetOrderDetailAsync(orderId, buyerId);
-                    Console.WriteLine("Buyer Email: " + orderDetail.BuyerEmail);
+                    orderDetail = await _orderRepo.GetOrderDetailAsync(orderId, buyerId);
+                }
+                catch (Exception orderDetailEx)
+                {
+                    _logger.LogError(orderDetailEx, "Failed to load order details for Order {OrderId}", orderId);
+                }
 
+                await PublishPaymentNotificationsAsync(buyerId, orderId, model, orderDetail);
+
+                try
+                {
                     if (orderDetail != null)
                     {
+                        Console.WriteLine("Buyer Email: " + orderDetail.BuyerEmail);
                         _logger.LogInformation("Preparing email for Order {OrderId}", orderId);
 
                         // Generate PDF
@@ -106,8 +117,13 @@ public class PaymentApiController : ControllerBase
                                    .Replace("{ArtistName}", orderDetail.Items.FirstOrDefault()?.ArtistName ?? "Artist")
                                    .Replace("{Amount}", orderDetail.TotalAmount.ToString("N2"));
 
-                        // ✅ Correct logo path
-                        string logoPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "mvc", "wwwroot", "images", "Logo.jpeg"));
+                        string logoPath = Path.GetFullPath(Path.Combine(
+                            Directory.GetCurrentDirectory(),
+                            "..",
+                            "mvc",
+                            "wwwroot",
+                            "images",
+                            "Logo.jpeg"));
 
                         _logger.LogInformation("Sending email to {Email}", orderDetail.BuyerEmail);
 
@@ -118,8 +134,7 @@ public class PaymentApiController : ControllerBase
                             body,
                             logoPath,
                             pdf,
-                            $"Invoice_{orderId}.pdf"
-                        );
+                            $"Invoice_{orderId}.pdf");
 
                         _logger.LogInformation("Email sent successfully for Order {OrderId}", orderId);
                     }
@@ -152,8 +167,8 @@ public class PaymentApiController : ControllerBase
 
     private int GetBuyerIdFromContext()
     {
-        var claimValue = User.FindFirst("user_id")?.Value 
-                    ?? User.FindFirst("sub")?.Value;
+        var claimValue = User.FindFirst("user_id")?.Value
+            ?? User.FindFirst("sub")?.Value;
 
         if (claimValue == null)
             throw new UnauthorizedAccessException("User not authenticated");
@@ -164,9 +179,99 @@ public class PaymentApiController : ControllerBase
         return buyerId;
     }
 
-    private Task PublishArtistNotificationAsync(int orderId, List<t_CartItem> cart)
+    private async Task PublishPaymentNotificationsAsync(
+        int buyerId,
+        int orderId,
+        t_PaymentVerify model,
+        t_OrderDetail? orderDetail)
     {
-        _logger.LogInformation("Artist notification placeholder executed for order {OrderId} with {Count} items", orderId, cart.Count);
-        return Task.CompletedTask;
+        var totalAmount = orderDetail?.TotalAmount ?? model.Cart.Sum(x => x.Price);
+        var currency = string.IsNullOrWhiteSpace(model.Currency) ? "USD" : model.Currency;
+
+        try
+        {
+            await _rabbit.PublishPaymentNotificationAsync(
+                buyerId,
+                orderId,
+                totalAmount,
+                currency);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to publish buyer payment notification for Order {OrderId}", orderId);
+        }
+
+        if (orderDetail == null)
+            return;
+
+        try
+        {
+            var artworkCount = orderDetail.Items.Count > 0 ? orderDetail.Items.Count : model.Cart.Count;
+
+            await _rabbit.PublishAdminPaymentNotificationAsync(
+                orderId: orderId,
+                buyerId: buyerId,
+                buyerName: orderDetail.BuyerName,
+                amount: totalAmount,
+                currency: currency,
+                artworkCount: artworkCount);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to publish admin payment notification for Order {OrderId}", orderId);
+        }
+
+        var artistOrders = orderDetail.Items
+            .Where(item => item.ArtistId > 0)
+            .GroupBy(item => item.ArtistId);
+
+        foreach (var artistOrder in artistOrders)
+        {
+            var artistItems = artistOrder.ToList();
+            var artistTotal = artistItems.Sum(item => item.Price);
+            var artworkSummary = BuildArtworkSummary(artistItems);
+
+            try
+            {
+                await _rabbit.PublishArtistPaymentNotificationAsync(
+                    artistId: artistOrder.Key,
+                    orderId: orderId,
+                    amount: artistTotal,
+                    currency: currency,
+                    artworkCount: artistItems.Count,
+                    artworkSummary: artworkSummary);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to publish artist payment notification for Order {OrderId} and Artist {ArtistId}",
+                    orderId,
+                    artistOrder.Key);
+            }
+        }
+    }
+
+    private static string BuildArtworkSummary(IReadOnlyList<t_OrderItemDetail> items)
+    {
+        if (items.Count == 0)
+            return "New order received";
+
+        if (items.Count == 1)
+            return items[0].Title;
+
+        var titles = items
+            .Select(item => item.Title)
+            .Where(title => !string.IsNullOrWhiteSpace(title))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(2)
+            .ToList();
+
+        if (titles.Count == 0)
+            return "New order received";
+
+        return items.Count > titles.Count
+            ? $"{string.Join(", ", titles)} +{items.Count - titles.Count} more"
+            : string.Join(", ", titles);
     }
 }

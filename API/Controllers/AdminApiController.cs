@@ -3,8 +3,7 @@ using Repository;
 using Npgsql;
 using Repository.Interfaces;
 using Repository.Models;
-using Repository.Interfaces;
-using Repository.Models;
+using Repository.Services;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -18,19 +17,24 @@ namespace API.Controllers;
 [Authorize(Roles = "Admin")]
 public class AdminApiController : ControllerBase
 {
-
-    private readonly IAdminInterface _adminRepo;
-
-    private readonly IAuthInterface _repo;
-    private readonly IConfiguration _config;
+    private readonly IAdminInterface             _adminRepo;
+    private readonly IAuthInterface              _repo;
+    private readonly IConfiguration              _config;
+    private readonly RedisService                _redis;
     private readonly ILogger<AdminApiController> _logger;
 
-    public AdminApiController(IAuthInterface repo, IConfiguration config, IAdminInterface adminRepo, ILogger<AdminApiController> logger)
+    public AdminApiController(
+        IAuthInterface              repo,
+        IConfiguration              config,
+        IAdminInterface             adminRepo,
+        RedisService                redis,
+        ILogger<AdminApiController> logger)
     {
-        _repo = repo;
-        _config = config;
+        _repo      = repo;
+        _config    = config;
         _adminRepo = adminRepo;
-        _logger = logger; 
+        _redis     = redis;
+        _logger    = logger;
     }
     // 1. Dashboard Summary
     [HttpGet("dashboard")]
@@ -207,6 +211,59 @@ public class AdminApiController : ControllerBase
                 data.c_Email
             }
         });
-    } 
-}
+    }
 
+    // ══════════════════════════════════════════════════════════════
+    //  ADMIN NOTIFICATION ENDPOINTS
+    //  These read from Redis where RabbitService consumer deposited
+    //  all messages sent to the "admin_notifications" queue.
+    //  Redis key: notifications:admin:all
+    // ══════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Returns the latest admin notifications (default: 20).
+    /// Also returns the current unread badge count.
+    /// </summary>
+    [HttpGet("notifications")]
+    public async Task<IActionResult> GetAdminNotifications([FromQuery] int take = 20)
+    {
+        if (take < 1)  take = 1;
+        if (take > 50) take = 50;
+
+        var data        = await _redis.GetNotificationsAsync("admin", "all", take);
+        var unreadCount = await _redis.GetNotificationCountAsync("admin", "all");
+
+        return Ok(new { success = true, unreadCount, data });
+    }
+
+    /// <summary>
+    /// Marks ALL admin notifications as read (clears list + resets badge).
+    /// Called when the admin clicks "Mark all read".
+    /// </summary>
+    [HttpPost("notifications/read")]
+    public async Task<IActionResult> MarkAllAdminNotificationsRead()
+    {
+        await _redis.ClearNotificationsAsync("admin", "all");
+        return Ok(new { success = true });
+    }
+
+    /// <summary>
+    /// Marks a single notification as read by its ID.
+    /// Decrements the unread badge count by 1.
+    /// </summary>
+    [HttpPost("notifications/{notificationId}/read")]
+    public async Task<IActionResult> MarkAdminNotificationRead(
+        [FromRoute] string notificationId)
+    {
+        if (string.IsNullOrWhiteSpace(notificationId))
+            return BadRequest(new { success = false, message = "Notification id is required." });
+
+        var removed = await _redis.MarkAsReadAsync("admin", "all", notificationId);
+
+        if (!removed)
+            return NotFound(new { success = false, message = "Notification not found." });
+
+        var unreadCount = await _redis.GetNotificationCountAsync("admin", "all");
+        return Ok(new { success = true, unreadCount });
+    }
+}

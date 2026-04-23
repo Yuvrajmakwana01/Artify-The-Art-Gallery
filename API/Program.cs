@@ -280,7 +280,8 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
         throw new Exception("Redis connection string missing");
     return ConnectionMultiplexer.Connect(redisConnection);
 });
-builder.Services.AddScoped<RedisService>();
+builder.Services.AddSingleton<RedisService>();
+builder.Services.AddSingleton<RabbitService>();
 
 // =========================
 // Swagger
@@ -442,6 +443,9 @@ builder.Services.AddAuthorization();
 // Build App
 // =========================
 var app = builder.Build();
+var rabbitService = app.Services.GetRequiredService<RabbitService>();
+
+_ = rabbitService.RunConsumerLoopAsync(app.Lifetime.ApplicationStopping);
 
 // =========================
 // Middleware Pipeline
