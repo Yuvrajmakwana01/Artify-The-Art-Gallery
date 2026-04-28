@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Artwork Moderation</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { margin:0; padding:0; background:#f0f0f0; font-family:'Inter',Arial,sans-serif; }
+    .wrapper { width:100%; background:#f0f0f0; padding:40px 0; }
+    .container { max-width:600px; margin:0 auto; background:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.08); }
+    .header { background:linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%); padding:36px 40px; text-align:center; }
+    .header img { height:48px; }
+    .header h1 { color:#ffffff; font-size:22px; font-weight:700; margin:16px 0 0; letter-spacing:0.5px; }
+    .status-badge { display:inline-block; margin:28px auto 0; padding:10px 28px; border-radius:50px; font-size:14px; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
+    .badge-approved { background:#d1fae5; color:#065f46; }
+    .badge-rejected { background:#fee2e2; color:#991b1b; }
+    .body { padding:36px 40px; }
+    .greeting { font-size:18px; font-weight:600; color:#1a1a2e; margin:0 0 12px; }
+    .message { font-size:15px; color:#4b5563; line-height:1.7; margin:0 0 28px; }
+    .artwork-card { background:#f8fafc; border:1px solid #e5e7eb; border-radius:12px; padding:20px 24px; margin-bottom:28px; }
+    .artwork-card .label { font-size:11px; font-weight:600; color:#9ca3af; text-transform:uppercase; letter-spacing:0.8px; margin:0 0 4px; }
+    .artwork-card .value { font-size:16px; font-weight:600; color:#111827; margin:0 0 16px; }
+    .artwork-card .value:last-child { margin-bottom:0; }
+    .note-box { border-left:4px solid #e91e8c; background:#fce7f3; border-radius:0 8px 8px 0; padding:16px 20px; margin-bottom:28px; }
+    .note-box .note-label { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#e91e8c; margin:0 0 6px; }
+    .note-box .note-text { font-size:14px; color:#374151; line-height:1.6; margin:0; }
+    .cta { text-align:center; margin:8px 0 32px; }
+    .cta a { display:inline-block; background:linear-gradient(135deg,#e91e8c,#c2185b); color:#fff; text-decoration:none; padding:14px 36px; border-radius:50px; font-size:15px; font-weight:600; letter-spacing:0.3px; }
+    .divider { height:1px; background:#e5e7eb; margin:0 0 24px; }
+    .footer { background:#f8fafc; padding:24px 40px; text-align:center; }
+    .footer p { font-size:13px; color:#9ca3af; margin:4px 0; line-height:1.6; }
+    .footer a { color:#e91e8c; text-decoration:none; }
+    .footer .brand { font-weight:700; color:#1a1a2e; font-size:14px; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+
+      <!-- HEADER -->
+      <div class="header">
+        <img src="{{Logo}}" alt="Artify Logo" />
+        <h1>Artwork Moderation Update</h1>
+        <div class="status-badge {{BadgeClass}}">{{StatusLabel}}</div>
+      </div>
+
+      <!-- BODY -->
+      <div class="body">
+        <p class="greeting">Hello, {{ArtistName}} 👋</p>
+        <p class="message">{{IntroMessage}}</p>
+
+        <!-- Artwork Details Card -->
+        <div class="artwork-card">
+          <p class="label">Artwork Title</p>
+          <p class="value">{{ArtworkTitle}}</p>
+          <p class="label">Category</p>
+          <p class="value">{{CategoryName}}</p>
+          <p class="label">Reviewed On</p>
+          <p class="value">{{ReviewedOn}}</p>
+        </div>
+
+        <!-- Admin Note -->
+        <div class="note-box">
+          <p class="note-label">{{NoteLabel}}</p>
+          <p class="note-text">{{AdminNote}}</p>
+        </div>
+
+        <p class="message">{{OutroMessage}}</p>
+
+        <!-- CTA Button -->
+        <div class="cta">
+          <a href="{{DashboardUrl}}">Go to My Gallery</a>
+        </div>
+
+        <div class="divider"></div>
+        <p class="message" style="font-size:13px;color:#9ca3af;margin:0;">
+          If you have any questions, feel free to reach out to our support team.
+        </p>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="footer">
+        <p class="brand">Artify — The Art Gallery</p>
+        <p>© {{Year}} Artify. All rights reserved.</p>
+        <p><a href="{{DashboardUrl}}">Visit Artify</a> &nbsp;·&nbsp; <a href="mailto:support@artify.com">Contact Support</a></p>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

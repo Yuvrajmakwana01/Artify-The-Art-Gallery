@@ -1,0 +1,304 @@
+﻿@{
+    ViewData["Title"] = "The Luminous Canvas";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join the Atelier — Artify</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.common.min.css" rel="stylesheet" />
+    <link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.bootstrap-v4.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --beige: #f5f2eb;
+            --charcoal: #1a1a1a;
+            --gold: #af9462;
+            --form-bg: rgba(255, 255, 255, 0.85);
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #000; overflow: hidden;
+        }
+
+        /* ── FULL BACKGROUND MARQUEE ── */
+        .canvas-background {
+            position: fixed; inset: 0;
+            display: flex; gap: 15px; padding: 15px;
+            z-index: 1;
+        }
+
+        .marquee-column {
+            display: flex; flex-direction: column; gap: 15px;
+            flex: 1;
+        }
+
+        .col-slow { animation: scrollDown 80s linear infinite; }
+        .col-fast { animation: scrollUp 60s linear infinite; }
+        .col-mid { animation: scrollDown 70s linear infinite; }
+
+        .art-card {
+            width: 100%; position: relative;
+            border-radius: 8px; overflow: hidden;
+            cursor: crosshair;
+            filter: grayscale(100%) brightness(0.4) contrast(1.2);
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            transform: scale(1);
+        }
+
+        .art-card:hover {
+            filter: grayscale(0%) brightness(1) contrast(1);
+            transform: scale(1.08);
+            z-index: 50;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .art-card img { width: 100%; height: auto; display: block; }
+
+        @@keyframes scrollUp { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+        @@keyframes scrollDown { from { transform: translateY(-50%); } to { transform: translateY(0); } }
+
+        /* ── REGISTRATION SUITE ── */
+        .ui-layer {
+            position: relative; z-index: 100;
+            height: 100vh; width: 100vw;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: none;
+        }
+
+        .floating-form {
+            background: var(--form-bg);
+            backdrop-filter: blur(15px);
+            padding: 40px 50px; width: 100%; max-width: 480px;
+            border-radius: 4px; border: 1px solid rgba(255,255,255,0.4);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.2);
+            pointer-events: auto;
+        }
+
+        .premium-label {
+            font-size: 0.65rem; text-transform: uppercase;
+            letter-spacing: 3px; font-weight: 700; color: var(--gold);
+            margin-bottom: 8px; display: block;
+        }
+
+        h1 { font-family: 'Bodoni Moda', serif; font-size: 2.2rem; margin: 0 0 25px 0; color: var(--charcoal); }
+
+        .k-textbox {
+            width: 100% !important; border-radius: 0 !important;
+            border: none !important; border-bottom: 1px solid #d1d1d1 !important;
+            background: transparent !important; padding: 12px 0 !important;
+            font-size: 0.95rem !important; margin-bottom: 15px;
+        }
+        .k-textbox:focus { border-bottom-color: var(--gold) !important; }
+
+        /* Gender Selector Styles */
+        .gender-group {
+            display: flex; gap: 10px; margin-bottom: 20px;
+        }
+        .gender-pill { flex: 1; position: relative; }
+        .gender-pill input { display: none; }
+        .gender-pill label {
+            display: block; padding: 10px; text-align: center; border: 1px solid #ddd;
+            font-size: 0.75rem; cursor: pointer; transition: 0.3s; font-weight: 600;
+        }
+        .gender-pill input:checked + label {
+            background: var(--charcoal); color: white; border-color: var(--charcoal);
+        }
+
+        .btn-register {
+            background: var(--charcoal) !important; color: white !important;
+            width: 100% !important; padding: 18px !important; border: none !important;
+            font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
+            cursor: pointer; transition: 0.3s; margin-top: 10px;
+        }
+        .btn-register:hover { background: var(--gold) !important; letter-spacing: 3px; }
+
+        .login-link {
+            display: block; text-align: center; margin-top: 25px;
+            font-size: 0.8rem; color: #666; text-decoration: none;
+            transition: 0.3s;
+        }
+        .login-link:hover { color: var(--charcoal); }
+
+        .k-invalid-msg {
+            display: block !important; margin-top: -12px !important; margin-bottom: 12px !important;
+            font-size: 0.75rem !important; color: #ef4444 !important;
+        }
+        .k-callout { display: none !important; }
+        .k-textbox.k-invalid { border-bottom-color: #ef4444 !important; }
+
+        .profile-upload-area {
+            display: flex; align-items: center; gap: 15px; margin-bottom: 20px;
+            background: rgba(0,0,0,0.03); padding: 10px; border-radius: 4px;
+        }
+        .profile-preview {
+            width: 55px; height: 55px; border-radius: 50%; object-fit: cover;
+            border: 2px solid var(--gold); background: #eee;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="canvas-background">
+        <div class="marquee-column col-slow">
+            <div class="art-card"><img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=500"></div>
+            <div class="art-card"><img src="https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=500"></div>
+            <div class="art-card"><img src="https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=500"></div>
+            <div class="art-card"><img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=500"></div>
+        </div>
+        <div class="marquee-column col-fast">
+            <div class="art-card"><img src="https://images.unsplash.com/photo-1576132710321-70529d201d4a?w=500"></div>
+            <div class="art-card"><img src="https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=500"></div>
+            <div class="art-card"><img src="https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?w=500"></div>
+        </div>
+        <div class="marquee-column col-mid">
+            <div class="art-card"><img src="https://images.unsplash.com/photo-1549490349-8643362247b5?w=500"></div>
+            <div class="art-card"><img src="https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?w=500"></div>
+            <div class="art-card"><img src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=500"></div>
+        </div>
+    </div>
+
+    <div class="ui-layer">
+        <div class="floating-form animate__animated animate__fadeInUp">
+            <span class="premium-label">Access Terminal</span>
+            <h1>Join Artify</h1>
+
+            <form id="regForm">
+                <div class="profile-upload-area">
+                    <img id="imgPreview" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="profile-preview" />
+                    <div>
+                        <span class="premium-label" style="margin-bottom:2px">Profile Photo</span>
+                        <input type="file" id="fProfile" name="ProfileFile" style="display:none" accept="image/*" />
+                        <label for="fProfile" class="custom-file-label"><i class="bi bi-camera me-1"></i> Change Image</label>
+                    </div>
+                </div>
+                <input id="txtFullName" name="c_Full_Name" required validationMessage="Name is required" />
+                <input id="txtUserName" name="c_UserName" required validationMessage="Choose a handle"  />
+                <input id="txtEmail" name="c_Email" type="email" required data-email-msg="Invalid email" />
+                <input id="txtMobile" name="c_Mobile" required validationMessage="Mobile required"  />
+
+                <input id="txtPass" name="c_Password" type="password" required validationMessage="Password required"  />
+                <div id="pwHint" style="font-size: 0.65rem; color: #888; margin-top: -10px; margin-bottom: 15px;">
+                   Requires Uppercase, Number, Special required.
+                </div>
+
+                <span class="premium-label mb-4">Identity</span>
+                <div class="gender-group">
+                    <div class="gender-pill">
+                        <input type="radio" id="m" name="c_Gender" value="Male" checked>
+                        <label for="m">MALE</label>
+                    </div>
+                    <div class="gender-pill">
+                        <input type="radio" id="f" name="c_Gender" value="Female">
+                        <label for="f">FEMALE</label>
+                    </div>
+                    <div class="gender-pill">
+                        <input type="radio" id="o" name="c_Gender" value="Other">
+                        <label for="o">OTHER</label>
+                    </div>
+                </div>
+
+                <button type="button" id="btnGo" class="btn-register">Initialize Profile</button>
+            </form>
+
+            <a href="/Artist/Login" class="login-link">Already a member? Sign in here</a>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Initialize Widgets
+            $("#txtFullName").kendoTextBox({ placeholder: "e.g. Leonardo Vinci" });
+            $("#txtUserName").kendoTextBox({ placeholder: "artist_handle" });
+            $("#txtEmail").kendoTextBox({ placeholder: "email@studio.com" });
+            $("#txtMobile").kendoTextBox({ placeholder: "+1 000 000 0000" });
+            $("#txtPass").kendoTextBox({ placeholder: "••••••••" });
+
+            
+
+            $("#fProfile").change(function(){
+            if (this.files && this.files[0]) {
+                let reader = new FileReader();
+                reader.onload = e => $('#imgPreview').attr('src', e.target.result);
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+
+            const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@@$!%*?&])[A-Za-z\d@@$!%*?&]{6,}$/;
+
+            var validator = $("#regForm").kendoValidator({
+                validateOnBlur: true,
+                rules: {
+                    passwordFormat: function(input) {
+                        if (input.is("[name='c_Password']")) {
+                            return passRegex.test(input.val());
+                        }
+                        return true;
+                    }
+                },
+                messages: {
+                    passwordFormat: "Security criteria not met."
+                }
+            }).data("kendoValidator");
+
+            // Password strength feedback
+            $("#txtPass").on("input", function() {
+                if(passRegex.test($(this).val())) {
+                    $("#pwHint").addClass("valid").html("<i class='bi bi-check-circle-fill me-1'></i> Password Secure");
+                } else {
+                    $("#pwHint").removeClass("valid").html("<i class='bi bi-info-circle me-1'></i> Requires uppercase, number, and special char.");
+                }
+            });
+
+            $("#btnGo").click(function () {
+                if (validator.validate()) {
+                    kendo.ui.progress($(".auth-card"), true);
+                    const btn = $(this);
+                    const originalText = btn.text();
+                    btn.prop("disabled", true).text("Establishing Connection...");
+
+                    $.ajax({
+                        url: 'http://localhost:5183/api/ArtistApi/Register',
+                        type: 'POST',
+                        data: new FormData($("#artistForm")[0]),
+                        contentType: false,
+                        processData: false,
+                        success: function (res) {
+                            kendo.ui.progress($(".auth-card"), false);
+                            if (res.success) {
+                                Swal.fire({ 
+                                    icon: 'success', 
+                                    title: 'Welcome to the collective', 
+                                    text: 'Your studio is being prepared.', 
+                                    confirmButtonColor: '#0f172a' 
+                                }).then(() => window.location.href = "/Artist/Login");
+                            } else {
+                                btn.prop("disabled", false).text(originalText);
+                                Swal.fire('Error', res.message, 'error');
+                            }
+                        },
+                        error: function () {
+                            kendo.ui.progress($(".auth-card"), false);
+                            btn.prop("disabled", false).text(originalText);
+                            Swal.fire('Connection Error', 'Please check your server status.', 'warning');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

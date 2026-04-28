@@ -9,352 +9,204 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin")]
 public class AdminApiController : ControllerBase
 {
-    private readonly IAdmincategoiresInteface _categoryRepository;
-    private readonly IAdminUsersInterface _userRepository;
-    private readonly IAdminArtistInterface _artistRepository;
 
-    public AdminApiController(
-        IAdmincategoiresInteface categoryRepository,
-        IAdminUsersInterface userRepository,
-        IAdminArtistInterface artistRepository)
+    private readonly IAdminInterface _adminRepo;
+
+    private readonly IAuthInterface _repo;
+    private readonly IConfiguration _config;
+    private readonly ILogger<AdminApiController> _logger;
+
+    public AdminApiController(IAuthInterface repo, IConfiguration config, IAdminInterface adminRepo, ILogger<AdminApiController> logger)
     {
-        _categoryRepository = categoryRepository;
-        _userRepository = userRepository;
-        _artistRepository = artistRepository;
+        _repo = repo;
+        _config = config;
+        _adminRepo = adminRepo;
+        _logger = logger; 
     }
-
-    [HttpGet("categories")]
-    public async Task<IActionResult> GetCategories([FromQuery] string? search, [FromQuery] string? status)
-    {
-        var data = await _categoryRepository.GetCategoriesAsync(search, status);
-        return Ok(data);
-    }
-
-    [HttpGet("categories/stats")]
-    public async Task<IActionResult> GetCategoryStats()
-    {
-        var data = await _categoryRepository.GetCategoryStatsAsync();
-        return Ok(data);
-    }
-
-    [HttpGet("categories/{id:int}")]
-    public async Task<IActionResult> GetCategoryById(int id)
-    {
-        var data = await _categoryRepository.GetCategoryByIdAsync(id);
-        return data is null ? NotFound() : Ok(data);
-    }
-
-    [HttpPost("categories")]
-    public async Task<IActionResult> AddCategory([FromBody] AdminCategoryUpsertRequest request)
-    {
-        if (string.IsNullOrWhiteSpace(request.CategoryName))
-            return BadRequest("Category name is required.");
-
-        var id = await _categoryRepository.AddCategoryAsync(request);
-        var item = await _categoryRepository.GetCategoryByIdAsync(id);
-        return CreatedAtAction(nameof(GetCategoryById), new { id }, item);
-    }
-
-    [HttpPut("categories/{id:int}")]
-    public async Task<IActionResult> UpdateCategory(int id, [FromBody] AdminCategoryUpsertRequest request)
-    {
-        if (string.IsNullOrWhiteSpace(request.CategoryName))
-            return BadRequest("Category name is required.");
-
-        var ok = await _categoryRepository.UpdateCategoryAsync(id, request);
-        return ok ? Ok(new { message = "Category updated successfully." }) : NotFound();
-    }
-
-    [HttpDelete("categories/{id:int}")]
-    public async Task<IActionResult> DeleteCategory(int id)
+    // 1. Dashboard Summary
+    [HttpGet("dashboard")]
+    public async Task<IActionResult> GetDashboard()
     {
         try
         {
-            var ok = await _categoryRepository.DeleteCategoryAsync(id);
-            return ok ? Ok(new { message = "Category deleted successfully." }) : NotFound();
+            var data = await _adminRepo.GetAllDashboardInfo();
+            return Ok(data);
         }
-        catch (PostgresException ex) when (ex.SqlState == "23503")
+        catch (Exception ex)
         {
-            return Conflict("Cannot delete this category because artworks are linked to it.");
+            return StatusCode(500, ex.Message);
         }
     }
-
-    [HttpGet("users")]
-    public async Task<IActionResult> GetUsers([FromQuery] string? search)
-    {
-        var data = await _userRepository.GetUsersAsync(search);
-        return Ok(data);
-    }
-
-    [HttpGet("users/stats")]
-    public async Task<IActionResult> GetUserStats()
-    {
-        var data = await _userRepository.GetUserStatsAsync();
-        return Ok(data);
-    }
-
-    [HttpGet("users/{id:int}")]
-    public async Task<IActionResult> GetUserById(int id)
-    {
-        var data = await _userRepository.GetUserByIdAsync(id);
-        return data is null ? NotFound() : Ok(data);
-    }
-
-    [HttpPut("users/{id:int}")]
-    public async Task<IActionResult> UpdateUser(int id, [FromBody] AdminUserUpdateRequest request)
-    {
-        private readonly IAdminInterface _adminRepo;
-
-        public AdminApiController(IAdminInterface adminRepo)
-        {
-            _adminRepo = adminRepo;
-        }
-
-        // 1. Dashboard Summary
-        [HttpGet("dashboard")]
-        public async Task<IActionResult> GetDashboard()
-        {
-            try
-            {
-                var data = await _adminRepo.GetAllDashboardInfo();
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-        // 2. Revenue (WEEKLY / MONTHLY / YEARLY)
-        [HttpGet("revenue")]
-        public async Task<IActionResult> GetRevenue([FromQuery] string type)
-        {
-            try
-            {
-                var data = await _adminRepo.GetRevenue(type);
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-         // 3. Users Count (WEEKLY / MONTHLY / YEARLY)
-        [HttpGet("users-count")]
-        public async Task<IActionResult> GetUsersCount([FromQuery] string type)
-        {
-            try
-            {
-                var data = await _adminRepo.GetUsersCount(type);
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-
-        // 4. Total Users & Artists
-        [HttpGet("total-count")]
-        public async Task<IActionResult> GetTotalUsersCount()
-        {
-            try
-            {
-                var data = await _adminRepo.GetTotalUsersCount();
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-        // 5. Top Selling Category
-        [HttpGet("top-category")]
-        public async Task<IActionResult> GetTopSellingCategory()
-        {
-            try
-            {
-                var data = await _adminRepo.TopSellingCategory();
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-
-        // 6. Top Performing Artists
-        [HttpGet("top-artists")]
-        public async Task<IActionResult> GetTopArtists()
-        {
-            try
-            {
-                var data = await _adminRepo.TopPerformingArtist();
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-
-        // 7. Recent Activities
-        [HttpGet("recent-activity")]
-        public async Task<IActionResult> GetRecentActivity()
-        {
-            try
-            {
-                var data = await _adminRepo.RecentActivity();
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-   
-   
-        if (string.IsNullOrWhiteSpace(request.FullName) || string.IsNullOrWhiteSpace(request.Email)
-            || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Gender))
-        {
-            return BadRequest("FullName, Email, Username and Gender are required.");
-        }
-
-        var ok = await _userRepository.UpdateUserAsync(id, request);
-        return ok ? Ok(new { message = "User updated successfully." }) : NotFound();
-    }
-
-    [HttpDelete("users/{id:int}")]
-    public async Task<IActionResult> DeleteUser(int id)
+    // 2. Revenue (WEEKLY / MONTHLY / YEARLY)
+    [HttpGet("revenue")]
+    public async Task<IActionResult> GetRevenue([FromQuery] string type)
     {
         try
         {
-            var ok = await _userRepository.DeleteUserAsync(id);
-            return ok ? Ok(new { message = "User deleted successfully." }) : NotFound();
+            var data = await _adminRepo.GetRevenue(type);
+            return Ok(data);
         }
-        catch (PostgresException ex) when (ex.SqlState == "23503")
+        catch (Exception ex)
         {
-            return Conflict("Cannot delete this user because related records exist.");
+            return StatusCode(500, ex.Message);
         }
     }
-
-    [HttpGet("artists")]
-    public async Task<IActionResult> GetArtists([FromQuery] string? search, [FromQuery] string? status)
-    {
-        var data = await _artistRepository.GetArtistsAsync(search, status);
-        return Ok(data);
-    }
-
-    [HttpGet("artists/stats")]
-    public async Task<IActionResult> GetArtistStats()
-    {
-        var data = await _artistRepository.GetArtistStatsAsync();
-        return Ok(data);
-    }
-
-    [HttpGet("artists/{id:int}")]
-    public async Task<IActionResult> GetArtistById(int id)
-    {
-        var data = await _artistRepository.GetArtistByIdAsync(id);
-        return data is null ? NotFound() : Ok(data);
-    }
-
-    [HttpPost("artists")]
-    public async Task<IActionResult> AddArtist([FromBody] AdminArtistUpsertRequest request)
-    {
-        if (string.IsNullOrWhiteSpace(request.ArtistName) || string.IsNullOrWhiteSpace(request.ArtistEmail))
-            return BadRequest("ArtistName and ArtistEmail are required.");
-
-        var id = await _artistRepository.AddArtistAsync(request);
-        var item = await _artistRepository.GetArtistByIdAsync(id);
-        return CreatedAtAction(nameof(GetArtistById), new { id }, item);
-    }
-
-    [HttpPut("artists/{id:int}")]
-    public async Task<IActionResult> UpdateArtist(int id, [FromBody] AdminArtistUpsertRequest request)
-    {
-        if (string.IsNullOrWhiteSpace(request.ArtistName) || string.IsNullOrWhiteSpace(request.ArtistEmail))
-            return BadRequest("ArtistName and ArtistEmail are required.");
-
-        var ok = await _artistRepository.UpdateArtistAsync(id, request);
-        return ok ? Ok(new { message = "Artist updated successfully." }) : NotFound();
-    }
-
-    [HttpDelete("artists/{id:int}")]
-    public async Task<IActionResult> DeleteArtist(int id)
+    // 3. Users Count (WEEKLY / MONTHLY / YEARLY)
+    [HttpGet("users-count")]
+    public async Task<IActionResult> GetUsersCount([FromQuery] string type)
     {
         try
         {
-            var ok = await _artistRepository.DeleteArtistAsync(id);
-            return ok ? Ok(new { message = "Artist deleted successfully." }) : NotFound();
+            var data = await _adminRepo.GetUsersCount(type);
+            return Ok(data);
         }
-        catch (PostgresException ex) when (ex.SqlState == "23503")
+        catch (Exception ex)
         {
-            return Conflict("Cannot delete this artist because related records exist.");
-        private readonly IAuthInterface _repo;
-        private readonly IConfiguration _config;
-
-        public AdminApiController(IAuthInterface repo, IConfiguration config)
-        {
-            _repo = repo;
-            _config = config;
+            return StatusCode(500, ex.Message);
         }
+    }
 
-        // POST api/AdminApi/login
-        // Called by the admin Login.cshtml AJAX request.
-        // Returns a JWT on success — the MVC layer stores it in Session.
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromForm] vm_AdminLogin admin)
+    // 4. Total Users & Artists
+    [HttpGet("total-count")]
+    public async Task<IActionResult> GetTotalUsersCount()
+    {
+        try
         {
-            if (!ModelState.IsValid)
-                return BadRequest(new { success = false, message = "Invalid input." });
+            var data = await _adminRepo.GetTotalUsersCount();
+            return Ok(data);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+    // 5. Top Selling Category
+    [HttpGet("top-category")]
+    public async Task<IActionResult> GetTopSellingCategory()
+    {
+        try
+        {
+            var data = await _adminRepo.TopSellingCategory();
+            return Ok(data);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
 
-            var data = await _repo.AdminLogin(admin);
+    // 6. Top Performing Artists
+    [HttpGet("top-artists")]
+    public async Task<IActionResult> GetTopArtists()
+    {
+        try
+        {
+            var data = await _adminRepo.TopPerformingArtist();
+            return Ok(data);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
 
-            if (data == null)
-                return Ok(new { success = false, message = "Invalid email or password." });
+    // 7. Recent Activities
+    [HttpGet("recent-activity")]
+    public async Task<IActionResult> GetRecentActivity()
+    {
+        try
+        {
+            var data = await _adminRepo.RecentActivity();
+            return Ok(data);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
 
-            // ── Build JWT ────────────────────────────────────────────────────
-            var jwtKey = _config["Jwt:Key"];
-            var jwtIssuer = _config["Jwt:Issuer"];
-            var jwtAudience = _config["Jwt:Audience"];
+    // POST api/AdminApi/login
+    // Called by the admin Login.cshtml AJAX request.
+    // Returns a JWT on success — the MVC layer stores it in Session.
+    [AllowAnonymous]
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromForm] vm_AdminLogin admin)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(x => x.Value.Errors.Count > 0)
+                .ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                );
 
-            if (string.IsNullOrWhiteSpace(jwtKey) || string.IsNullOrWhiteSpace(jwtIssuer) || string.IsNullOrWhiteSpace(jwtAudience))
-                return StatusCode(500, new { success = false, message = "JWT configuration missing." });
-
-            var claims = new[]
+            return BadRequest(new
             {
-                new Claim("AdminId",   data.c_AdminId.ToString()),
-                new Claim("AdminName", data.c_AdminName),
-                new Claim("Email",     data.c_Email)
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
-            var token = new JwtSecurityToken(
-                issuer: jwtIssuer,
-                audience: jwtAudience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(8),
-                signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
-            );
-
-            return Ok(new
-            {
-                success = true,
-                token = new JwtSecurityTokenHandler().WriteToken(token),
-                Admin = new
-                {
-                    data.c_AdminId,
-                    data.c_AdminName,
-                    data.c_Email
-                }
+                success = false,
+                message = "Validation failed",
+                errors = errors
             });
         }
-    }
+
+        var data = await _repo.AdminLogin(admin);
+
+        if (data == null)
+        {
+            _logger.LogWarning($"Failed admin login attempt: {admin.c_Email}");
+            return Unauthorized(new
+            {
+                success = false,
+                message = "Invalid credentials"
+            });
+        }
+        _logger.LogInformation($"Admin logged in successfully: {admin.c_Email}");
+
+        // ── Build JWT ────────────────────────────────────────────────────
+        var jwtKey = _config["Jwt:Key"];
+        var jwtIssuer = _config["Jwt:Issuer"];
+        var jwtAudience = _config["Jwt:Audience"];
+
+        if (string.IsNullOrWhiteSpace(jwtKey) || string.IsNullOrWhiteSpace(jwtIssuer) || string.IsNullOrWhiteSpace(jwtAudience))
+            return StatusCode(500, new { success = false, message = "JWT configuration missing." });
+
+        var claims = new[]
+        {
+            new Claim("AdminId", data.c_AdminId.ToString()),
+            new Claim("AdminName", data.c_AdminName),
+            new Claim("Email", data.c_Email),
+            new Claim(ClaimTypes.Role, "Admin")
+        };
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+        var token = new JwtSecurityToken(
+            issuer: jwtIssuer,
+            audience: jwtAudience,
+            claims: claims,
+            expires: DateTime.UtcNow.AddHours(8),
+            signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
+        );
+
+        return Ok(new
+        {
+            success = true,
+            token = new JwtSecurityTokenHandler().WriteToken(token),
+            Admin = new
+            {
+                data.c_AdminId,
+                data.c_AdminName,
+                data.c_Email
+            }
+        });
+    } 
 }
+

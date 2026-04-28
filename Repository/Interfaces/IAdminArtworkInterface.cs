@@ -16,6 +16,12 @@ namespace Repository.Interfaces
             int page,
             int pageSize);
 
+        /// <summary>
+        /// Returns the artist's email address from t_artist_profile.
+        /// Used to send moderation emails on approve / reject.
+        /// </summary>
+        Task<string?> GetArtistEmailAsync(int artistId);
+
         // ── Status mutations ───────────────────────────────────────────────
         Task UpdateArtworkStatusAsync(int artworkId, string status, string adminNote);
 

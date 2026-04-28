@@ -7,1320 +7,567 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>@ViewData["Title"]</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,300;1,600&family=Plus+Jakarta+Sans:wght@200;300;400;500;600&display=swap" rel="stylesheet"/>
+<title>ArtSpace – Where Art Meets Infinite Possibility</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/themes/7.2.1/default/default-main.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Jost:wght@300;400;500;600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet"/>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2024.3.1015/js/kendo.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;overflow-x:hidden}
-
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS — WARM BEIGE LIGHT PALETTE
+═══════════════════════════════════════════ */
 :root{
-  --cream:#faf7f2;
-  --warm:#f2ebe0;
-  --warm2:#e8ddd0;
-  --ink:#1c1711;
-  --ink2:#3d3328;
-  --muted:#8a7d6e;
-  --border:#e0d6c8;
-  --border2:#cfc3b2;
-  --gold:#b8761a;
-  --gold2:#d4943a;
-  --gold3:#f0c060;
-  --gold-light:#fef3dc;
-  --coral:#c2442a;
-  --teal:#1a6b6b;
-  --shadow:rgba(28,23,17,0.08);
-  --shadow2:rgba(28,23,17,0.15);
-  --shadow3:rgba(28,23,17,0.25);
+  --cream:     #faf6f0;
+  --cream-2:   #f3ede3;
+  --cream-3:   #e8dfd2;
+  --parchment: #ede4d6;
+  --warm-tan:  #c9b49a;
+  --sienna:    #a0522d;
+  --sienna-2:  #884320;
+  --sienna-lt: #f5e9df;
+  --rust:      #c1440e;
+  --gold:      #b5860d;
+  --gold-lt:   #f9edc0;
+  --ink:       #2c1a0e;
+  --ink-2:     #4a3322;
+  --ink-3:     #7a5c44;
+  --muted:     #a08070;
+  --border:    rgba(160,120,80,.18);
+  --border-2:  rgba(160,120,80,.3);
+  --shadow:    rgba(120,80,40,.12);
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body:    'Jost', sans-serif;
+  --font-mono:    'Courier Prime', 'Courier New', monospace;
 }
 
-body{
-  background:var(--cream);
-  color:var(--ink);
-  font-family:'Plus Jakarta Sans',sans-serif;
-  font-weight:300;
-  overflow-x:hidden;
-  cursor:none;
-}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--cream);color:var(--ink);overflow-x:hidden;cursor:none}
 
-/* ── Custom cursor ── */
-#cursor{
-  position:fixed;width:10px;height:10px;
-  background:var(--gold);border-radius:50%;
-  pointer-events:none;z-index:9999;
-  transform:translate(-50%,-50%);
-  transition:transform 0.12s,background 0.2s;
-}
-#cursor-ring{
-  position:fixed;width:38px;height:38px;
-  border:1.5px solid rgba(184,118,26,0.5);
-  border-radius:50%;pointer-events:none;z-index:9998;
-  transform:translate(-50%,-50%);
-  transition:width 0.3s,height 0.3s,border-color 0.3s;
-}
+/* ── Custom Cursor ── */
+.cursor-dot,.cursor-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%)}
+.cursor-dot{width:6px;height:6px;background:var(--sienna);border-radius:50%}
+.cursor-ring{width:32px;height:32px;border:1.5px solid rgba(160,82,45,.4);border-radius:50%;transition:width .2s,height .2s,border-color .2s}
+.cursor-ring.grow{width:56px;height:56px;border-color:var(--sienna)}
 
-/* ── NAV ── */
-nav{
-  position:fixed;top:0;left:0;right:0;z-index:200;
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--cream-2)}
+::-webkit-scrollbar-thumb{background:var(--warm-tan);border-radius:4px}
+
+/* ════════════════ NAVBAR ════════════════ */
+.navbar{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
   display:flex;align-items:center;justify-content:space-between;
-  padding:1.2rem 4vw;
-  transition:all 0.4s;
-}
-nav.scrolled{
-  background:rgba(250,247,242,0.92);
-  backdrop-filter:blur(20px);
+  padding:18px 60px;
+  background:rgba(250,246,240,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border-bottom:1px solid var(--border);
-  box-shadow:0 4px 30px var(--shadow);
+  transition:padding .3s,box-shadow .3s;
+  animation:fadeDown .6s ease both;
 }
-.nav-logo{
-  font-family:'Cormorant Garamond',serif;
-  font-size:1.9rem;font-weight:700;
-  color:var(--ink);text-decoration:none;
-  letter-spacing:-0.5px;
-}
-.nav-logo em{color:var(--gold);font-style:normal}
-.nav-links{display:flex;align-items:center;gap:2.5rem}
-.nav-links a{
-  font-size:0.8rem;font-weight:400;
-  color:var(--muted);text-decoration:none;
-  letter-spacing:0.05em;text-transform:uppercase;
-  transition:color 0.2s;position:relative;
-}
-.nav-links a::after{
-  content:'';position:absolute;bottom:-4px;left:0;right:0;
-  height:1px;background:var(--gold);transform:scaleX(0);
-  transition:transform 0.25s;transform-origin:left;
-}
-.nav-links a:hover{color:var(--ink)}
-.nav-links a:hover::after{transform:scaleX(1)}
-.btn-nav{
-  padding:0.55rem 1.4rem;border-radius:5px;
-  font-family:'Plus Jakarta Sans',sans-serif;
-  font-size:0.8rem;font-weight:400;
-  text-decoration:none;transition:all 0.2s;
-  letter-spacing:0.03em;
-}
-.btn-nav-ghost{
-  border:1px solid var(--border2);color:var(--ink);background:transparent;
-}
-.btn-nav-ghost:hover{border-color:var(--gold);color:var(--gold)}
-.btn-nav-solid{
-  background:var(--ink);color:var(--cream);border:1px solid var(--ink);
-}
-.btn-nav-solid:hover{background:var(--gold);border-color:var(--gold)}
+.navbar.scrolled{padding:12px 60px;box-shadow:0 4px 30px var(--shadow)}
+.nav-logo{display:flex;align-items:center;gap:11px;font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--ink);text-decoration:none;letter-spacing:.01em}
+.nav-logo-icon{width:38px;height:38px;background:var(--sienna);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.nav-logo-icon svg{width:20px;height:20px;fill:white}
+.nav-logo .acc{color:var(--sienna)}
+.nav-links{display:flex;align-items:center;gap:36px;list-style:none;margin:0;padding:0}
+.nav-links a{font-size:14px;font-weight:500;color:var(--ink-3);text-decoration:none;letter-spacing:.03em;transition:color .2s;position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1.5px;background:var(--sienna);transform:scaleX(0);transition:transform .25s;transform-origin:left}
+.nav-links a:hover{color:var(--sienna)}.nav-links a:hover::after{transform:scaleX(1)}
+.nav-cta{display:flex;align-items:center;gap:10px}
 
-/* ── HERO ── */
-.hero{
-  min-height:100vh;
-  display:flex;align-items:center;justify-content:center;
-  position:relative;overflow:hidden;
-  padding:7rem 4vw 4rem;
-}
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 22px;border-radius:10px;font-size:14px;font-weight:600;font-family:var(--font-body);cursor:pointer;transition:all .22s;border:none;text-decoration:none;line-height:1}
+.btn-ghost{background:transparent;color:var(--ink-3);border:1px solid var(--border-2)}
+.btn-ghost:hover{border-color:var(--sienna);color:var(--sienna)}
+.btn-primary{background:var(--sienna);color:white;box-shadow:0 4px 18px rgba(160,82,45,.25)}
+.btn-primary:hover{background:var(--sienna-2);box-shadow:0 6px 28px rgba(160,82,45,.38);transform:translateY(-1px);color:white}
+.btn-lg{padding:14px 32px;font-size:15px;border-radius:12px}
+.btn-outline{background:transparent;color:var(--ink);border:1.5px solid var(--border-2)}
+.btn-outline:hover{border-color:var(--sienna);color:var(--sienna)}
 
-/* SVG mesh background */
-.hero-mesh{
-  position:absolute;inset:0;z-index:0;pointer-events:none;
-  overflow:hidden;
-}
+/* ════════════════ HERO ════════════════ */
+.hero{min-height:100vh;display:flex;align-items:center;padding:120px 60px 80px;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 70% 55% at 72% 50%, rgba(160,82,45,.09) 0%, transparent 60%),
+    radial-gradient(ellipse 45% 45% at 20% 75%, rgba(181,134,13,.07) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 35% at 85% 15%, rgba(180,140,90,.08) 0%, transparent 50%),
+    var(--cream)}
+.grid-dots{position:absolute;inset:0;z-index:0;background-image:radial-gradient(circle,rgba(160,120,80,.1) 1px,transparent 1px);background-size:32px 32px}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.22;pointer-events:none;animation:float 8s ease-in-out infinite}
+.orb-1{width:420px;height:420px;background:var(--sienna);top:-80px;right:8%;animation-delay:0s}
+.orb-2{width:260px;height:260px;background:#c97d4e;bottom:0;right:28%;animation-delay:-3s}
+.orb-3{width:200px;height:200px;background:var(--gold);top:40%;left:4%;animation-delay:-5s}
 
-/* 3D Floating art cards */
-.float-cards{
-  position:absolute;inset:0;z-index:1;
-  perspective:1000px;pointer-events:none;
-}
-.fcard{
-  position:absolute;
-  border-radius:14px;
-  border:1px solid var(--border);
-  box-shadow:0 20px 60px var(--shadow2),0 4px 16px var(--shadow);
-  overflow:hidden;
-  transform-style:preserve-3d;
-  animation:floatCard 8s ease-in-out infinite;
-  background:white;
-}
-.fcard-img{
-  width:100%;height:100%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:3.5rem;
-  position:relative;
-}
-.fcard-label{
-  position:absolute;bottom:0;left:0;right:0;
-  padding:0.6rem 0.8rem;
-  background:rgba(250,247,242,0.95);
-  backdrop-filter:blur(6px);
-  border-top:1px solid var(--border);
-}
-.fcard-label-title{font-size:0.72rem;font-weight:500;color:var(--ink);margin-bottom:1px}
-.fcard-label-price{font-size:0.68rem;color:var(--gold);font-weight:500}
+.hero-content{position:relative;z-index:1;max-width:600px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--sienna-lt);border:1px solid rgba(160,82,45,.25);color:var(--sienna);font-size:12px;font-weight:600;letter-spacing:.08em;padding:6px 14px;border-radius:100px;margin-bottom:28px;animation:fadeUp .6s .2s ease both}
+.hero-badge-dot{width:6px;height:6px;background:var(--sienna);border-radius:50%;animation:pulseDot 2s infinite}
+.hero-title{font-family:var(--font-display);font-size:clamp(44px,5.5vw,74px);font-weight:700;line-height:1.05;color:var(--ink);margin-bottom:24px;animation:fadeUp .6s .35s ease both}
+.hero-title .accent{color:transparent;background:linear-gradient(135deg,var(--sienna),var(--gold));-webkit-background-clip:text;background-clip:text}
+.hero-sub{font-size:17px;color:var(--ink-3);line-height:1.65;max-width:480px;margin-bottom:40px;animation:fadeUp .6s .5s ease both}
+.hero-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;animation:fadeUp .6s .65s ease both}
+.hero-hstats{display:flex;align-items:center;gap:32px;margin-top:52px;animation:fadeUp .6s .8s ease both}
+.hstat-val{font-family:var(--font-mono);font-size:24px;font-weight:700;color:var(--ink)}
+.hstat-lbl{font-size:12px;color:var(--muted);margin-top:2px}
+.hstat-div{width:1px;height:36px;background:var(--border-2)}
 
-.fcard:nth-child(1){
-  width:160px;top:15%;left:5%;
-  animation-delay:-1s;animation-duration:7s;
-}
-.fcard:nth-child(2){
-  width:140px;top:55%;left:2%;
-  animation-delay:-3s;animation-duration:9s;
-}
-.fcard:nth-child(3){
-  width:170px;top:10%;right:6%;
-  animation-delay:-2s;animation-duration:8s;
-}
-.fcard:nth-child(4){
-  width:150px;top:60%;right:3%;
-  animation-delay:-4s;animation-duration:7.5s;
-}
-.fcard:nth-child(5){
-  width:130px;top:78%;left:20%;
-  animation-delay:-5s;animation-duration:10s;
-}
-.fcard:nth-child(6){
-  width:145px;top:75%;right:20%;
-  animation-delay:-2.5s;animation-duration:8.5s;
-}
+/* Hero Visual */
+.hero-visual{position:absolute;right:5%;top:50%;transform:translateY(-50%);width:44%;max-width:580px;z-index:1;animation:heroReveal .9s .4s ease both}
+.hero-card-stack{position:relative;height:480px}
+.hero-art-card{position:absolute;border-radius:20px;overflow:hidden;border:1px solid var(--border-2);box-shadow:0 30px 70px rgba(120,70,30,.18);transition:transform .3s ease}
+.hero-art-card:hover{transform:translateY(-10px) !important}
+.hac-1{width:255px;height:300px;top:0;left:0;z-index:3;transform:rotate(-4deg)}
+.hac-2{width:235px;height:275px;top:60px;left:175px;z-index:2;transform:rotate(3deg)}
+.hac-3{width:215px;height:255px;top:175px;left:75px;z-index:4;transform:rotate(-1deg)}
+.art-card-inner{width:100%;height:100%;display:flex;flex-direction:column}
+.art-card-img{flex:1;position:relative;overflow:hidden}
+.art-card-info{padding:12px 14px;background:var(--cream);border-top:1px solid var(--border)}
+.art-card-name{font-size:13px;font-weight:700;color:var(--ink)}
+.art-card-price{font-family:var(--font-mono);font-size:12px;color:var(--sienna);margin-top:2px}
+.hero-live-badge{position:absolute;bottom:20px;right:-24px;background:var(--cream);border:1px solid var(--border-2);border-radius:12px;padding:12px 18px;z-index:10;box-shadow:0 16px 36px rgba(120,70,30,.15);animation:badgeFloat 3s ease-in-out infinite}
+.hlb-top{font-size:11px;color:var(--muted);margin-bottom:4px}
+.hlb-val{font-family:var(--font-mono);font-size:20px;font-weight:700;color:#2e7d32}
+.hlb-dot{display:inline-block;width:7px;height:7px;background:#43a047;border-radius:50%;margin-right:5px;animation:pulseDot 1.5s infinite;vertical-align:middle}
 
-@@keyframes floatCard{
-  0%,100%{transform:translateY(0) rotateX(2deg) rotateY(-2deg)}
-  25%{transform:translateY(-16px) rotateX(-1deg) rotateY(3deg)}
-  50%{transform:translateY(-8px) rotateX(3deg) rotateY(-1deg)}
-  75%{transform:translateY(-20px) rotateX(-2deg) rotateY(2deg)}
-}
+/* ════════════════ STATS BAR ════════════════ */
+.stats-bar{background:var(--parchment);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:52px 60px;position:relative;overflow:hidden}
+.stats-bar::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(160,82,45,.05),transparent);animation:shimmer 4s linear infinite}
+.stat-item{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 20px;border-right:1px solid var(--border-2)}
+.stat-item:last-child{border-right:none}
+.stat-icon{font-size:24px;color:var(--sienna);margin-bottom:10px}
+.stat-val{font-family:var(--font-mono);font-size:36px;font-weight:700;color:var(--ink);line-height:1}
+.stat-lbl{font-size:13px;color:var(--muted);margin-top:6px}
 
-/* Hero content */
-.hero-content{
-  position:relative;z-index:10;
-  text-align:center;
-  max-width:800px;
-}
-.hero-pill{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:0.4rem 1.1rem;
-  background:var(--gold-light);
-  border:1px solid rgba(184,118,26,0.25);
-  border-radius:20px;
-  font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;
-  color:var(--gold);font-weight:500;
-  margin-bottom:2rem;
-  animation:fadeUp 0.8s ease 0.2s both;
-}
-.hero-pill-dot{
-  width:6px;height:6px;border-radius:50%;
-  background:var(--gold);
-  animation:pulse2 2s ease-in-out infinite;
-}
-@@keyframes pulse2{0%,100%{transform:scale(1)}50%{transform:scale(1.5)}}
+/* ════════════════ SECTIONS COMMON ════════════════ */
+section{padding:100px 60px}
+.section-label{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sienna);margin-bottom:16px}
+.section-label::before{content:'';display:block;width:20px;height:1.5px;background:var(--sienna)}
+.section-title{font-family:var(--font-display);font-size:clamp(32px,4vw,52px);font-weight:700;line-height:1.1;margin-bottom:16px;color:var(--ink)}
+.section-sub{font-size:16px;color:var(--ink-3);line-height:1.6;max-width:540px;margin-bottom:56px}
 
-.hero h1{
-  font-family:'Cormorant Garamond',serif;
-  font-size:clamp(3.5rem,9vw,8.5rem);
-  font-weight:700;line-height:0.9;
-  letter-spacing:-2px;
-  animation:fadeUp 0.9s ease 0.35s both;
-  color:var(--ink);
-}
-.hero h1 .h1-italic{
-  display:block;
-  font-style:italic;font-weight:300;
-  color:var(--gold);
-}
-.hero h1 .h1-outline{
-  display:block;
-  color:transparent;
-  -webkit-text-stroke:1.5px var(--ink2);
-}
+/* ════════════════ CATEGORIES ════════════════ */
+.categories-section{background:var(--cream)}
+.categories-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.cat-card{background:white;border:1px solid var(--border);border-radius:16px;padding:24px 26px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all .25s;text-decoration:none;position:relative;overflow:hidden}
+.cat-card:hover{border-color:var(--warm-tan);transform:translateY(-3px);box-shadow:0 16px 40px rgba(120,80,40,.1)}
+.cat-icon-wrap{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.cat-info{flex:1}
+.cat-name{font-size:15px;font-weight:600;margin-bottom:3px;color:var(--ink)}
+.cat-count{font-size:12px;color:var(--muted)}
+.cat-arrow{color:var(--muted);font-size:16px;transition:transform .2s}
+.cat-card:hover .cat-arrow{transform:translateX(4px);color:var(--sienna)}
 
-.hero-desc{
-  font-size:1rem;font-weight:300;
-  color:var(--muted);line-height:1.85;
-  max-width:480px;margin:2rem auto 3rem;
-  animation:fadeUp 0.9s ease 0.5s both;
-}
-.hero-btns{
-  display:flex;align-items:center;justify-content:center;
-  gap:14px;flex-wrap:wrap;
-  animation:fadeUp 0.9s ease 0.65s both;
-}
-.btn-primary{
-  padding:0.9rem 2.6rem;
-  background:var(--ink);color:var(--cream);
-  border:none;border-radius:6px;
-  font-family:'Plus Jakarta Sans',sans-serif;
-  font-size:0.9rem;font-weight:500;
-  cursor:pointer;text-decoration:none;
-  letter-spacing:0.03em;
-  transition:all 0.25s;
-  box-shadow:0 8px 24px var(--shadow2);
-  position:relative;overflow:hidden;
-}
-.btn-primary::before{
-  content:'';position:absolute;
-  inset:0;background:var(--gold);
-  transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.22,1,0.36,1);
-}
-.btn-primary:hover::before{transform:translateY(0)}
-.btn-primary span{position:relative;z-index:1}
-.btn-primary:hover{box-shadow:0 12px 32px rgba(184,118,26,0.35)}
+/* ════════════════ ARTWORKS ════════════════ */
+.artworks-section{background:var(--cream-2)}
+.artworks-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:36px;flex-wrap:wrap}
+.filter-btn{background:transparent;border:1px solid var(--border-2);color:var(--ink-3);border-radius:8px;padding:8px 18px;font-size:13px;font-weight:500;font-family:var(--font-body);cursor:pointer;transition:all .2s}
+.filter-btn:hover,.filter-btn.active{background:var(--sienna);border-color:var(--sienna);color:white}
+.artworks-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.aw-card{background:white;border:1px solid var(--border);border-radius:18px;overflow:hidden;transition:transform .25s,box-shadow .25s,border-color .25s;cursor:pointer}
+.aw-card:hover{transform:translateY(-6px);box-shadow:0 24px 50px rgba(120,80,40,.14);border-color:var(--warm-tan)}
+.aw-img{height:220px;position:relative;overflow:hidden}
+.aw-img svg{position:absolute;inset:0;width:100%;height:100%}
+.aw-badge{position:absolute;top:14px;left:14px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:4px 10px;border-radius:20px;z-index:2}
+.badge-hot{background:#d84315;color:white}
+.badge-new{background:#2e7d32;color:white}
+.badge-exclusive{background:#0277bd;color:white}
+.badge-trending{background:var(--gold);color:white}
+.badge-featured{background:var(--sienna);color:white}
+.aw-overlay{position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(44,26,14,.65) 0%,transparent 60%);opacity:0;transition:opacity .25s;display:flex;align-items:flex-end;justify-content:center;padding-bottom:18px}
+.aw-card:hover .aw-overlay{opacity:1}
+.aw-buy-btn{background:white;color:var(--ink);border:none;border-radius:8px;padding:9px 22px;font-size:13px;font-weight:700;font-family:var(--font-body);cursor:pointer;transform:translateY(10px);transition:transform .25s}
+.aw-card:hover .aw-buy-btn{transform:translateY(0)}
+.aw-body{padding:18px 20px}
+.aw-category{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--sienna);margin-bottom:6px}
+.aw-title{font-size:17px;font-weight:700;margin-bottom:3px;color:var(--ink);font-family:var(--font-display)}
+.aw-artist{font-size:13px;color:var(--muted);margin-bottom:14px}
+.aw-footer{display:flex;align-items:center;justify-content:space-between}
+.aw-price{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--sienna)}
+.aw-meta{display:flex;gap:12px}
+.aw-meta-item{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted)}
 
-.btn-ghost{
-  padding:0.9rem 2.2rem;
-  background:transparent;
-  border:1.5px solid var(--border2);
-  border-radius:6px;
-  color:var(--ink);font-size:0.9rem;font-weight:400;
-  cursor:pointer;text-decoration:none;
-  letter-spacing:0.03em;
-  transition:all 0.25s;
-}
-.btn-ghost:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-light)}
+/* ════════════════ HOW IT WORKS ════════════════ */
+.how-section{background:var(--cream)}
+.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.how-card{background:white;border:1px solid var(--border);border-radius:18px;padding:32px 26px;position:relative;transition:all .25s;box-shadow:0 2px 12px rgba(120,80,40,.06)}
+.how-card:hover{border-color:rgba(160,82,45,.35);transform:translateY(-4px);box-shadow:0 18px 40px rgba(120,80,40,.12)}
+.how-num{font-family:var(--font-mono);font-size:52px;font-weight:700;color:rgba(160,82,45,.12);line-height:1;margin-bottom:20px}
+.how-icon-wrap{width:50px;height:50px;background:var(--sienna-lt);border:1px solid rgba(160,82,45,.2);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--sienna);margin-bottom:18px}
+.how-title{font-size:17px;font-weight:700;margin-bottom:10px;color:var(--ink)}
+.how-desc{font-size:13px;color:var(--ink-3);line-height:1.6}
+.how-connector{position:absolute;top:70px;right:-30px;width:60px;height:2px;background:linear-gradient(90deg,var(--sienna),transparent);z-index:2}
 
-/* Scroll indicator */
-.hero-scroll{
-  position:absolute;bottom:2.5rem;left:50%;
-  transform:translateX(-50%);
-  display:flex;flex-direction:column;align-items:center;gap:8px;
-  font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;
-  color:var(--muted);
-  animation:fadeUp 1s ease 1s both;
-}
-.scroll-mouse{
-  width:22px;height:34px;
-  border:1.5px solid var(--border2);
-  border-radius:11px;
-  position:relative;display:flex;
-  justify-content:center;padding-top:5px;
-}
-.scroll-mouse::after{
-  content:'';width:3px;height:6px;
-  background:var(--gold);border-radius:2px;
-  animation:scrollBob 2s ease-in-out infinite;
-}
-@@keyframes scrollBob{0%,100%{transform:translateY(0);opacity:1}50%{transform:translateY(8px);opacity:0.3}}
+/* ════════════════ CTA ════════════════ */
+.cta-section{background:var(--cream);display:flex;align-items:center;justify-content:center;text-align:center;flex-direction:column;position:relative;overflow:hidden;padding-bottom: 120px;}
+.cta-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 100% at 50% 50%,rgba(160,82,45,.07) 0%,transparent 60%)}
+.cta-inner-box{position:relative;z-index:1;background:linear-gradient(135deg,#fffaf4,#f5ead8);border:1.5px solid var(--border-2);border-radius:28px;padding:80px 80px;max-width:760px;box-shadow:0 30px 80px rgba(120,70,30,.1)}
+.cta-title{font-family:var(--font-display);font-size:clamp(36px,5vw,62px);font-weight:700;line-height:1.05;margin-bottom:18px;color:var(--ink)}
+.cta-title .accent{color:var(--sienna)}
+.cta-sub{font-size:17px;color:var(--ink-3);margin-bottom:38px;line-height:1.6}
+.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
 
-/* ── MARQUEE ── */
-.marquee-section{
-  border-top:1px solid var(--border);
-  border-bottom:1px solid var(--border);
-  background:white;padding:0.9rem 0;
-  overflow:hidden;
-}
-.marquee-track{
-  display:flex;gap:0;width:max-content;
-  animation:marquee 22s linear infinite;
-}
-@@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.m-item{
-  display:flex;align-items:center;gap:10px;
-  padding:0 2rem;
-  font-size:0.78rem;letter-spacing:0.07em;text-transform:uppercase;
-  color:var(--muted);white-space:nowrap;
-  border-right:1px solid var(--border);
-}
-.m-gem{color:var(--gold);font-size:0.6rem}
-
-/* ── SECTION BASE ── */
-section{position:relative;padding:7rem 6vw}
-.section-eyebrow{
-  font-size:0.7rem;letter-spacing:0.14em;text-transform:uppercase;
-  color:var(--gold);font-weight:500;
-  display:flex;align-items:center;gap:10px;margin-bottom:1.2rem;
-}
-.section-eyebrow::before{content:'';width:28px;height:1.5px;background:var(--gold)}
-.section-title{
-  font-family:'Cormorant Garamond',serif;
-  font-size:clamp(2.2rem,4.5vw,4rem);
-  font-weight:700;line-height:1.05;
-  letter-spacing:-1px;color:var(--ink);
-  margin-bottom:1rem;
-}
-.section-title em{font-style:italic;font-weight:300;color:var(--gold)}
-
-/* ── STATS ── */
-.stats-row{
-  display:grid;grid-template-columns:repeat(4,1fr);
-  background:var(--ink);
-}
-.sstat{
-  padding:3.5rem 2.5rem;text-align:center;
-  border-right:1px solid rgba(255,255,255,0.07);
-  position:relative;overflow:hidden;
-}
-.sstat::before{
-  content:'';position:absolute;
-  top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,var(--gold),var(--gold3));
-  transform:scaleX(0);transition:transform 0.4s;
-}
-.sstat:hover::before{transform:scaleX(1)}
-.sstat-num{
-  font-family:'Cormorant Garamond',serif;
-  font-size:3.5rem;font-weight:700;
-  color:var(--gold3);line-height:1;
-  margin-bottom:0.5rem;
-}
-.sstat-lbl{font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.4)}
-
-/* ── HOW IT WORKS ── */
-.how-section{background:var(--warm)}
-.how-steps{
-  display:grid;grid-template-columns:repeat(3,1fr);
-  gap:0;margin-top:4rem;
-  border:1px solid var(--border);border-radius:16px;
-  overflow:hidden;
-  box-shadow:0 20px 60px var(--shadow);
-}
-.how-step{
-  padding:3rem 2.5rem;background:white;
-  border-right:1px solid var(--border);
-  position:relative;overflow:hidden;
-  transition:transform 0.35s,box-shadow 0.35s;
-}
-.how-step:last-child{border-right:none}
-.how-step::after{
-  content:'';position:absolute;
-  inset:0;
-  background:linear-gradient(135deg,var(--gold-light),transparent);
-  opacity:0;transition:opacity 0.35s;
-}
-.how-step:hover{transform:translateY(-4px);box-shadow:0 24px 60px var(--shadow2)}
-.how-step:hover::after{opacity:1}
-.step-num{
-  font-family:'Cormorant Garamond',serif;
-  font-size:5rem;font-weight:700;
-  color:rgba(184,118,26,0.1);
-  line-height:1;margin-bottom:1.5rem;
-  transition:color 0.3s;
-}
-.how-step:hover .step-num{color:rgba(184,118,26,0.2)}
-.step-icon{
-  width:52px;height:52px;border-radius:12px;
-  background:var(--gold-light);
-  border:1px solid rgba(184,118,26,0.2);
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:1.5rem;
-  transition:background 0.3s,transform 0.3s;
-  position:relative;z-index:1;
-}
-.how-step:hover .step-icon{background:var(--gold);transform:rotate(6deg) scale(1.05)}
-.step-icon svg{width:22px;height:22px;transition:stroke 0.3s}
-.how-step:hover .step-icon svg{stroke:white}
-.step-title{font-size:1.1rem;font-weight:600;color:var(--ink);margin-bottom:0.75rem;position:relative;z-index:1}
-.step-desc{font-size:0.85rem;line-height:1.8;color:var(--muted);position:relative;z-index:1}
-
-/* ── GALLERY ── */
-.gallery-section{background:var(--cream)}
-.gallery-grid{
-  display:grid;
-  grid-template-columns:repeat(12,1fr);
-  grid-template-rows:auto auto;
-  gap:16px;margin-top:4rem;
-}
-.gcard{
-  border-radius:12px;overflow:hidden;
-  position:relative;
-  box-shadow:0 8px 30px var(--shadow);
-  cursor:pointer;
-  transform-style:preserve-3d;
-  transition:transform 0.5s cubic-bezier(0.23,1,0.32,1),box-shadow 0.5s;
-}
-.gcard:hover{
-  transform:translateY(-10px) rotateX(3deg) scale(1.02);
-  box-shadow:0 30px 70px var(--shadow3);
-}
-.gcard:nth-child(1){grid-column:span 5;grid-row:span 2}
-.gcard:nth-child(2){grid-column:span 4}
-.gcard:nth-child(3){grid-column:span 3}
-.gcard:nth-child(4){grid-column:span 3}
-.gcard:nth-child(5){grid-column:span 4}
-.gcard-art{
-  width:100%;padding-bottom:100%;position:relative;
-  overflow:hidden;
-}
-.gcard:nth-child(1) .gcard-art{padding-bottom:130%}
-.gcard-art-inner{
-  position:absolute;inset:0;
-  display:flex;align-items:center;justify-content:center;
-  font-size:4rem;
-  transition:transform 0.6s cubic-bezier(0.23,1,0.32,1);
-}
-.gcard:hover .gcard-art-inner{transform:scale(1.08)}
-.gcard-info{
-  padding:1rem 1.1rem;
-  background:white;
-  border-top:1px solid var(--border);
-  display:flex;justify-content:space-between;align-items:center;
-}
-.gcard-title{font-size:0.82rem;font-weight:500;color:var(--ink)}
-.gcard-sub{font-size:0.7rem;color:var(--muted);margin-top:2px}
-.gcard-price{
-  font-size:0.82rem;font-weight:600;
-  color:var(--gold);white-space:nowrap;
-}
-.gcard-badge{
-  position:absolute;top:12px;left:12px;z-index:2;
-  background:rgba(250,247,242,0.92);
-  backdrop-filter:blur(6px);
-  border:1px solid var(--border);
-  border-radius:4px;
-  padding:3px 10px;
-  font-size:0.65rem;font-weight:500;
-  letter-spacing:0.06em;text-transform:uppercase;
-  color:var(--gold);
-}
-.gcard-like{
-  position:absolute;top:12px;right:12px;z-index:2;
-  width:32px;height:32px;border-radius:50%;
-  background:rgba(250,247,242,0.9);
-  backdrop-filter:blur(6px);
-  border:1px solid var(--border);
-  display:flex;align-items:center;justify-content:center;
-  font-size:0.9rem;
-  transition:transform 0.2s,background 0.2s;
-}
-.gcard:hover .gcard-like{transform:scale(1.15);background:white}
-
-/* Art bg colors */
-.ab1{background:linear-gradient(145deg,#1a0533,#6b0f8a,#c840e8)}
-.ab2{background:linear-gradient(145deg,#051a33,#0f4b8a,#2196F3)}
-.ab3{background:linear-gradient(145deg,#1a3305,#3d8a0f,#76c840)}
-.ab4{background:linear-gradient(145deg,#331a05,#8a4a0f,#F59340)}
-.ab5{background:linear-gradient(145deg,#1a0505,#8a0f0f,#E53935)}
-
-/* ── ROLES ── */
-.roles-section{background:white}
-.roles-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);
-  gap:20px;margin-top:4rem;
-}
-.rcard{
-  padding:2.5rem 2.2rem;
-  border:1px solid var(--border);
-  border-radius:14px;background:var(--cream);
-  position:relative;overflow:hidden;
-  transition:all 0.4s cubic-bezier(0.23,1,0.32,1);
-  transform-style:preserve-3d;
-}
-.rcard:hover{
-  transform:translateY(-8px) rotateX(3deg);
-  border-color:var(--gold2);
-  box-shadow:0 24px 60px var(--shadow2);
-  background:white;
-}
-.rcard-shine{
-  position:absolute;inset:0;
-  background:radial-gradient(circle at var(--rx,50%) var(--ry,50%),rgba(184,118,26,0.07),transparent 65%);
-  pointer-events:none;
-  opacity:0;transition:opacity 0.3s;
-}
-.rcard:hover .rcard-shine{opacity:1}
-.rcard-icon{
-  width:56px;height:56px;border-radius:14px;
-  background:var(--gold-light);
-  border:1px solid rgba(184,118,26,0.2);
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:1.4rem;
-  transition:transform 0.3s,background 0.3s;
-}
-.rcard:hover .rcard-icon{background:var(--gold);transform:rotate(-6deg) scale(1.1)}
-.rcard-icon svg{width:26px;height:26px;transition:stroke 0.3s}
-.rcard:hover .rcard-icon svg{stroke:white}
-.rcard-title{
-  font-family:'Cormorant Garamond',serif;
-  font-size:1.7rem;font-weight:700;color:var(--ink);
-  margin-bottom:0.7rem;
-}
-.rcard-desc{font-size:0.83rem;color:var(--muted);line-height:1.8;margin-bottom:1.5rem}
-.rcard-list{list-style:none;display:flex;flex-direction:column;gap:8px}
-.rcard-list li{
-  display:flex;align-items:center;gap:10px;
-  font-size:0.8rem;color:var(--muted);
-}
-.rcard-list li::before{
-  content:'';width:5px;height:5px;
-  border-radius:50%;background:var(--gold);flex-shrink:0;
-}
-.rcard-cta{
-  display:inline-block;margin-top:1.5rem;
-  font-size:0.8rem;font-weight:500;
-  color:var(--gold);text-decoration:none;
-  letter-spacing:0.03em;
-  border-bottom:1px solid rgba(184,118,26,0.3);
-  padding-bottom:2px;transition:border-color 0.2s;
-}
-.rcard-cta:hover{border-color:var(--gold)}
-
-/* ── TESTIMONIALS ── */
-.testi-section{background:var(--warm);overflow:hidden}
-.testi-track-wrap{position:relative;margin-top:4rem;overflow:hidden}
-.testi-track{
-  display:flex;gap:20px;width:max-content;
-  animation:testiScroll 30s linear infinite;
-}
-.testi-track:hover{animation-play-state:paused}
-@@keyframes testiScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.tcard{
-  width:340px;flex-shrink:0;
-  padding:2rem 2.2rem;
-  background:white;
-  border:1px solid var(--border);
-  border-radius:14px;
-  box-shadow:0 6px 24px var(--shadow);
-}
-.tcard-stars{
-  display:flex;gap:3px;margin-bottom:1rem;color:var(--gold3);font-size:0.9rem;
-}
-.tcard-text{
-  font-size:0.88rem;line-height:1.8;color:var(--ink2);
-  margin-bottom:1.4rem;font-style:italic;
-}
-.tcard-author{display:flex;align-items:center;gap:12px}
-.tcard-avatar{
-  width:38px;height:38px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:0.8rem;font-weight:600;color:white;
-  flex-shrink:0;
-}
-.tcard-name{font-size:0.82rem;font-weight:500;color:var(--ink)}
-.tcard-role{font-size:0.72rem;color:var(--muted)}
-
-/* ── TECH / PROCESS ── */
-.process-section{background:var(--ink);color:white}
-.process-section .section-title{color:white}
-.process-section .section-eyebrow{color:var(--gold3)}
-.process-section .section-eyebrow::before{background:var(--gold3)}
-
-.process-cards{
-  display:grid;grid-template-columns:repeat(4,1fr);
-  gap:1px;background:rgba(255,255,255,0.07);
-  border:1px solid rgba(255,255,255,0.07);
-  border-radius:14px;overflow:hidden;
-  margin-top:4rem;
-}
-.pcard{
-  padding:2.5rem 2rem;background:var(--ink);
-  position:relative;overflow:hidden;
-  transition:background 0.3s;
-}
-.pcard::before{
-  content:'';position:absolute;
-  top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,var(--gold),var(--gold3));
-  transform:scaleX(0);transform-origin:left;
-  transition:transform 0.4s;
-}
-.pcard:hover::before{transform:scaleX(1)}
-.pcard:hover{background:#231e19}
-.pcard-icon{
-  width:48px;height:48px;border-radius:10px;
-  background:rgba(184,118,26,0.12);border:1px solid rgba(184,118,26,0.2);
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:1.4rem;
-  transition:background 0.3s;
-}
-.pcard:hover .pcard-icon{background:rgba(184,118,26,0.25)}
-.pcard-icon svg{width:22px;height:22px}
-.pcard-title{font-size:0.95rem;font-weight:500;color:white;margin-bottom:0.6rem}
-.pcard-desc{font-size:0.8rem;line-height:1.8;color:rgba(255,255,255,0.4)}
-
-/* ── 3D SHOWCASE STRIP ── */
-.showcase-strip{
-  background:var(--cream);
-  padding:5rem 0;overflow:hidden;
-}
-.strip-label{
-  text-align:center;padding:0 4vw;
-  font-family:'Cormorant Garamond',serif;
-  font-size:clamp(1.5rem,3vw,2.5rem);
-  font-weight:700;color:var(--ink);
-  margin-bottom:3rem;letter-spacing:-0.5px;
-}
-.strip-label em{font-style:italic;color:var(--gold)}
-.strip-track{
-  display:flex;gap:20px;width:max-content;
-  animation:stripScroll 25s linear infinite;
-  padding:1rem 0 2rem;
-}
-.strip-track:hover{animation-play-state:paused}
-@@keyframes stripScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.scard{
-  width:220px;flex-shrink:0;border-radius:12px;
-  overflow:hidden;
-  border:1px solid var(--border);
-  background:white;
-  box-shadow:0 8px 28px var(--shadow);
-  transform-style:preserve-3d;
-  transition:transform 0.4s,box-shadow 0.4s;
-  cursor:pointer;
-}
-.scard:hover{
-  transform:translateY(-12px) rotateY(5deg) rotateX(3deg);
-  box-shadow:0 28px 60px var(--shadow3);
-}
-.scard-art{
-  height:200px;display:flex;align-items:center;
-  justify-content:center;font-size:3.5rem;
-  position:relative;overflow:hidden;
-}
-.scard-info{padding:1rem;border-top:1px solid var(--border)}
-.scard-name{font-size:0.8rem;font-weight:500;color:var(--ink)}
-.scard-price{font-size:0.75rem;color:var(--gold);font-weight:500;margin-top:2px}
-
-/* ── CTA ── */
-.cta-section{
-  background:var(--ink);
-  padding:9rem 6vw;text-align:center;
-  position:relative;overflow:hidden;
-}
-.cta-bg-art{
-  position:absolute;inset:0;pointer-events:none;z-index:0;
-  opacity:0.04;
-}
-.cta-section h2{
-  font-family:'Cormorant Garamond',serif;
-  font-size:clamp(3rem,7vw,6.5rem);
-  font-weight:700;line-height:0.92;
-  letter-spacing:-2px;color:white;
-  margin-bottom:1.5rem;position:relative;z-index:1;
-}
-.cta-section h2 em{
-  font-style:italic;font-weight:300;
-  color:var(--gold3);
-}
-.cta-section p{
-  font-size:1rem;color:rgba(255,255,255,0.45);
-  max-width:450px;margin:0 auto 3rem;
-  line-height:1.8;position:relative;z-index:1;
-}
-.cta-btns{
-  display:flex;align-items:center;justify-content:center;
-  gap:16px;flex-wrap:wrap;position:relative;z-index:1;
-}
-.cta-btn-primary{
-  padding:1rem 2.8rem;background:var(--gold);color:white;
-  border:none;border-radius:6px;
-  font-family:'Plus Jakarta Sans',sans-serif;
-  font-size:0.95rem;font-weight:500;cursor:pointer;text-decoration:none;
-  transition:all 0.25s;box-shadow:0 8px 24px rgba(184,118,26,0.4);
-}
-.cta-btn-primary:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 14px 36px rgba(184,118,26,0.5)}
-.cta-btn-ghost{
-  padding:1rem 2.4rem;
-  background:transparent;color:rgba(255,255,255,0.7);
-  border:1.5px solid rgba(255,255,255,0.2);
-  border-radius:6px;font-size:0.95rem;font-weight:400;
-  cursor:pointer;text-decoration:none;transition:all 0.25s;
-}
-.cta-btn-ghost:hover{border-color:var(--gold3);color:var(--gold3)}
-
-/* ── FOOTER ── */
-footer{
-  background:var(--ink);
-  border-top:1px solid rgba(255,255,255,0.07);
-  padding:2.5rem 6vw;
-  display:flex;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;gap:1.5rem;
-}
-.footer-logo{
-  font-family:'Cormorant Garamond',serif;
-  font-size:1.6rem;font-weight:700;
-  color:white;text-decoration:none;
-}
-.footer-logo em{color:var(--gold);font-style:normal}
-.footer-links{display:flex;gap:2rem}
-.footer-links a{
-  font-size:0.78rem;color:rgba(255,255,255,0.35);
-  text-decoration:none;transition:color 0.2s;
-}
-.footer-links a:hover{color:white}
-.footer-copy{font-size:0.72rem;color:rgba(255,255,255,0.25)}
-
-/* ── Animations ── */
-@@keyframes fadeUp{
-  from{opacity:0;transform:translateY(24px)}
-  to  {opacity:1;transform:translateY(0)}
-}
-.reveal{
-  opacity:0;transform:translateY(32px);
-  transition:opacity 0.75s cubic-bezier(0.22,1,0.36,1),transform 0.75s cubic-bezier(0.22,1,0.36,1);
-}
+/* ════════════════ REVEAL ════════════════ */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .65s ease,transform .65s ease}
 .reveal.visible{opacity:1;transform:translateY(0)}
-.reveal-delay-1{transition-delay:0.1s}
-.reveal-delay-2{transition-delay:0.2s}
-.reveal-delay-3{transition-delay:0.3s}
+.rd1{transition-delay:.1s}.rd2{transition-delay:.2s}.rd3{transition-delay:.3s}.rd4{transition-delay:.4s}.rd5{transition-delay:.5s}
 
+/* ════════════════ KEYFRAMES ════════════════ */
+@@keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+@@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@@keyframes heroReveal{from{opacity:0;transform:translateY(-50%) translateX(40px)}to{opacity:1;transform:translateY(-50%) translateX(0)}}
+@@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
+@@keyframes badgeFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@@keyframes pulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+@@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+/* ════════════════ RESPONSIVE ════════════════ */
 @@media(max-width:1100px){
-  .stats-row,.how-steps,.roles-grid,.process-cards{grid-template-columns:1fr 1fr}
-  .gallery-grid{grid-template-columns:repeat(6,1fr)}
-  .gcard:nth-child(1){grid-column:span 6}
-  .gcard:nth-child(2),.gcard:nth-child(3){grid-column:span 3}
-  .gcard:nth-child(4),.gcard:nth-child(5){grid-column:span 3}
+  .hero-visual{display:none}
+  .hero-content{max-width:100%}
 }
-@@media(max-width:768px){
-  nav{padding:1rem 1.5rem}
+@@media(max-width:900px){
+  .navbar{padding:14px 24px}
   .nav-links{display:none}
-  section{padding:4.5rem 5vw}
-  .stats-row,.how-steps,.roles-grid,.process-cards{grid-template-columns:1fr}
-  .gallery-grid{grid-template-columns:1fr 1fr}
-  .gcard:nth-child(1){grid-column:span 2;grid-row:span 1}
-  .fcard:nth-child(n+3){display:none}
+  section{padding:70px 24px}
+  .stats-bar{padding:40px 24px}
+  .categories-grid{grid-template-columns:1fr 1fr}
+  .artworks-grid{grid-template-columns:1fr 1fr}
+  .how-grid{grid-template-columns:1fr 1fr}
+  .hero{padding:100px 24px 60px}
+}
+@@media(max-width:600px){
+  .categories-grid{grid-template-columns:1fr}
+  .artworks-grid{grid-template-columns:1fr}
+  .how-grid{grid-template-columns:1fr}
+  .cta-inner-box{padding:44px 28px}
 }
 </style>
 </head>
 <body>
 
-<div id="cursor"></div>
-<div id="cursor-ring"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
 
-<!-- NAV -->
-<nav id="navbar">
-  <a href="#" class="nav-logo">Artify<em>.</em></a>
-  <div class="nav-links">
-    <a href="#how">Process</a>
-    <a href="/Artist/Gallery">Gallery</a>
-    <a href="#roles">For you</a>
-    <a href="#about">About</a>
-  </div>
-  <div style="display:flex;gap:10px;align-items:center">
-    
-    <a href="javascript:void(0)" onclick="logoutArtist()" class="btn-nav btn-nav-ghost">
-      <span class="k-icon k-i-logout"></span> Logout
-    </a>
-  
+<nav class="navbar" id="navbar">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+    </div>
+    Art<span class="acc">Space</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#artworks">Explore</a></li>
+    <li><a href="#categories">Categories</a></li>
+    <li><a href="#how">How It Works</a></li>
+  </ul>
+  <div class="nav-cta">
+         <a asp-action="Register" asp-controller="Artist" class="btn btn-primary btn-lg"><span class="k-icon k-i-user"></span> Create Account</a>
+      <a asp-action="Login" asp-controller="Artist" class="btn btn-outline btn-lg"><span class="k-icon k-i-grid-layout"></span> Sign In</a>
+
   </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
-  <!-- Geometric SVG mesh bg -->
-  <div class="hero-mesh">
-    <svg width="100%" height="100%" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <radialGradient id="rg1" cx="30%" cy="40%" r="50%">
-          <stop offset="0%" stop-color="#fef3dc" stop-opacity="0.8"/>
-          <stop offset="100%" stop-color="#faf7f2" stop-opacity="0"/>
-        </radialGradient>
-        <radialGradient id="rg2" cx="75%" cy="65%" r="45%">
-          <stop offset="0%" stop-color="#f2ebe0" stop-opacity="0.9"/>
-          <stop offset="100%" stop-color="#faf7f2" stop-opacity="0"/>
-        </radialGradient>
-      </defs>
-      <rect width="1400" height="900" fill="#faf7f2"/>
-      <rect width="1400" height="900" fill="url(#rg1)"/>
-      <rect width="1400" height="900" fill="url(#rg2)"/>
-      <!-- Grid lines -->
-      <g stroke="#e0d6c8" stroke-width="0.5" opacity="0.6">
-        <line x1="0" y1="150" x2="1400" y2="150"/>
-        <line x1="0" y1="300" x2="1400" y2="300"/>
-        <line x1="0" y1="450" x2="1400" y2="450"/>
-        <line x1="0" y1="600" x2="1400" y2="600"/>
-        <line x1="0" y1="750" x2="1400" y2="750"/>
-        <line x1="200" y1="0" x2="200" y2="900"/>
-        <line x1="400" y1="0" x2="400" y2="900"/>
-        <line x1="600" y1="0" x2="600" y2="900"/>
-        <line x1="800" y1="0" x2="800" y2="900"/>
-        <line x1="1000" y1="0" x2="1000" y2="900"/>
-        <line x1="1200" y1="0" x2="1200" y2="900"/>
-      </g>
-      <!-- Decorative circles -->
-      <circle cx="120" cy="120" r="80" fill="none" stroke="#cfc3b2" stroke-width="0.5" opacity="0.5"/>
-      <circle cx="120" cy="120" r="50" fill="none" stroke="#b8761a" stroke-width="0.5" opacity="0.3"/>
-      <circle cx="1280" cy="780" r="100" fill="none" stroke="#cfc3b2" stroke-width="0.5" opacity="0.5"/>
-      <circle cx="1280" cy="780" r="65" fill="none" stroke="#b8761a" stroke-width="0.5" opacity="0.25"/>
-      <!-- Corner accent lines -->
-      <line x1="0" y1="0" x2="300" y2="300" stroke="#b8761a" stroke-width="0.5" opacity="0.12"/>
-      <line x1="1400" y1="900" x2="1100" y2="600" stroke="#b8761a" stroke-width="0.5" opacity="0.12"/>
-    </svg>
-  </div>
+  <div class="hero-bg"></div>
+  <div class="grid-dots"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
 
-  <!-- Floating art cards -->
-  <div class="float-cards">
-    <div class="fcard" style="height:200px">
-      <div class="fcard-img ab1">🌌</div>
-      <div class="fcard-label"><div class="fcard-label-title">Cosmic Reverie</div><div class="fcard-label-price">₹4,200</div></div>
-    </div>
-    <div class="fcard" style="height:185px">
-      <div class="fcard-img ab3">🌿</div>
-      <div class="fcard-label"><div class="fcard-label-title">Forest Mind</div><div class="fcard-label-price">₹1,950</div></div>
-    </div>
-    <div class="fcard" style="height:210px">
-      <div class="fcard-img ab2">🌊</div>
-      <div class="fcard-label"><div class="fcard-label-title">Deep Current</div><div class="fcard-label-price">₹2,800</div></div>
-    </div>
-    <div class="fcard" style="height:190px">
-      <div class="fcard-img ab4">✨</div>
-      <div class="fcard-label"><div class="fcard-label-title">Gold Silence</div><div class="fcard-label-price">₹5,100</div></div>
-    </div>
-    <div class="fcard" style="height:175px">
-      <div class="fcard-img ab5">🔥</div>
-      <div class="fcard-label"><div class="fcard-label-title">Ember Soul</div><div class="fcard-label-price">₹3,600</div></div>
-    </div>
-    <div class="fcard" style="height:195px">
-      <div class="fcard-img" style="background:linear-gradient(145deg,#1a1a33,#4a3d8a,#9b59b6)">💎</div>
-      <div class="fcard-label"><div class="fcard-label-title">Crystal Dream</div><div class="fcard-label-price">₹6,500</div></div>
-    </div>
-  </div>
-
-  <!-- Hero text -->
   <div class="hero-content">
-    <div class="hero-pill">
-      <span class="hero-pill-dot"></span>
-      Digital art marketplace — Open to all
+    <div class="hero-badge"><div class="hero-badge-dot"></div>The World's Premier Art Marketplace</div>
+    <h1 class="hero-title">Where Art Meets<br/><span class="accent">Infinite Possibility</span></h1>
+    <p class="hero-sub">Join 48,000+ artists selling digital, physical and NFT artwork to collectors worldwide. Set your price. Keep 85% of every sale.</p>
+    <div class="hero-actions">
+      <a href="#artworks" class="btn btn-primary btn-lg"><span class="k-icon k-i-image"></span> Explore Artworks</a>
+  
     </div>
-    <h1>
-      The home of<br>
-      <span class="h1-italic">digital art</span>
-      <span class="h1-outline">& creativity</span>
-    </h1>
-    <p class="hero-desc">
-      Discover extraordinary digital art from creators worldwide.
-      Buy, sell, and build your collection — on a platform
-      designed for the future of creative commerce.
-    </p>
-    <div class="hero-btns">
-      <a href="/auth/register?role=buyer" class="btn-primary">
-        <span>Explore gallery</span>
-      </a>
-      <a href="/auth/register?role=artist" class="btn-ghost">Sell your art →</a>
+    <div class="hero-hstats">
+      <div><div class="hstat-val">48K+</div><div class="hstat-lbl">Artists</div></div>
+      <div class="hstat-div"></div>
+      <div><div class="hstat-val">$12M+</div><div class="hstat-lbl">Paid Out</div></div>
+      <div class="hstat-div"></div>
+      <div><div class="hstat-val">190+</div><div class="hstat-lbl">Countries</div></div>
     </div>
   </div>
 
-  <div class="hero-scroll">
-    <div class="scroll-mouse"></div>
-    Scroll
+  <div class="hero-visual">
+    <div class="hero-card-stack">
+      <div class="hero-art-card hac-1">
+        <div class="art-card-inner">
+          <div class="art-card-img" style="background:linear-gradient(135deg,#e8794a,#c1440e);">
+            <svg viewBox="0 0 255 260" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
+              <polygon points="0,260 255,0 255,260" fill="rgba(0,0,0,.15)"/>
+              <line x1="0" y1="80" x2="255" y2="180" stroke="#fde68a" stroke-width="3" opacity=".6"/>
+              <circle cx="127" cy="130" r="60" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="art-card-info"><div class="art-card-name">Neon Dreams #42</div><div class="art-card-price">$850</div></div>
+        </div>
+      </div>
+      <div class="hero-art-card hac-2">
+        <div class="art-card-inner">
+          <div class="art-card-img" style="background:linear-gradient(135deg,#b5860d,#8a5e00);">
+            <svg viewBox="0 0 235 240" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
+              <path d="M0 120 Q58 30 117 120 T235 120" stroke="#fde68a" stroke-width="3" fill="none"/>
+              <path d="M0 155 Q58 65 117 155 T235 155" stroke="rgba(255,255,255,.3)" stroke-width="2" fill="none"/>
+              <circle cx="117" cy="120" r="35" fill="rgba(255,255,255,.08)"/>
+            </svg>
+          </div>
+          <div class="art-card-info"><div class="art-card-name">Golden Vortex</div><div class="art-card-price">$420</div></div>
+        </div>
+      </div>
+      <div class="hero-art-card hac-3">
+        <div class="art-card-inner">
+          <div class="art-card-img" style="background:linear-gradient(135deg,#4a3322,#7a5c44);">
+            <svg viewBox="0 0 215 220" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
+              <rect x="55" y="28" width="105" height="160" rx="4" fill="rgba(200,170,120,.12)" stroke="rgba(200,170,120,.4)" stroke-width="1.5"/>
+              <rect x="75" y="48" width="65" height="65" rx="4" fill="rgba(200,170,120,.18)"/>
+              <line x1="65" y1="130" x2="150" y2="130" stroke="rgba(200,170,120,.4)" stroke-width="1"/>
+              <line x1="65" y1="148" x2="130" y2="148" stroke="rgba(200,170,120,.3)" stroke-width="1"/>
+            </svg>
+          </div>
+          <div class="art-card-info"><div class="art-card-name">Silent Space</div><div class="art-card-price">$1,100</div></div>
+        </div>
+      </div>
+      <div class="hero-live-badge">
+        <div class="hlb-top"><span class="hlb-dot"></span>Live Earnings Today</div>
+        <div class="hlb-val">$3,840</div>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- MARQUEE -->
-<div class="marquee-section">
-  <div class="marquee-track" id="mtrack">
-    <span class="m-item"><span class="m-gem">◆</span>Digital Painting</span>
-    <span class="m-item"><span class="m-gem">◆</span>Illustration</span>
-    <span class="m-item"><span class="m-gem">◆</span>3D Art</span>
-    <span class="m-item"><span class="m-gem">◆</span>Photography</span>
-    <span class="m-item"><span class="m-gem">◆</span>Abstract Art</span>
-    <span class="m-item"><span class="m-gem">◆</span>Pixel Art</span>
-    <span class="m-item"><span class="m-gem">◆</span>Concept Art</span>
-    <span class="m-item"><span class="m-gem">◆</span>Generative Art</span>
-    <span class="m-item"><span class="m-gem">◆</span>Digital Painting</span>
-    <span class="m-item"><span class="m-gem">◆</span>Illustration</span>
-    <span class="m-item"><span class="m-gem">◆</span>3D Art</span>
-    <span class="m-item"><span class="m-gem">◆</span>Photography</span>
-    <span class="m-item"><span class="m-gem">◆</span>Abstract Art</span>
-    <span class="m-item"><span class="m-gem">◆</span>Pixel Art</span>
-    <span class="m-item"><span class="m-gem">◆</span>Concept Art</span>
-    <span class="m-item"><span class="m-gem">◆</span>Generative Art</span>
+<div class="stats-bar">
+  <div class="row g-0">
+    <div class="col-3">
+      <div class="stat-item reveal">
+        <span class="k-icon k-i-user stat-icon"></span>
+        <div class="stat-val">48K+</div>
+        <div class="stat-lbl">Artists Worldwide</div>
+      </div>
+    </div>
+    <div class="col-3">
+      <div class="stat-item reveal rd1">
+        <span class="k-icon k-i-image stat-icon"></span>
+        <div class="stat-val">320K+</div>
+        <div class="stat-lbl">Artworks Sold</div>
+      </div>
+    </div>
+    <div class="col-3">
+      <div class="stat-item reveal rd2">
+        <span class="k-icon k-i-dollar stat-icon"></span>
+        <div class="stat-val">$12M+</div>
+        <div class="stat-lbl">Total Earnings Paid</div>
+      </div>
+    </div>
+    <div class="col-3">
+      <div class="stat-item reveal rd3">
+        <span class="k-icon k-i-globe-outline stat-icon"></span>
+        <div class="stat-val">190+</div>
+        <div class="stat-lbl">Countries Reached</div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- STATS -->
-<div class="stats-row reveal">
-  <div class="sstat">
-    <div class="sstat-num" data-target="12400">0</div>
-    <div class="sstat-lbl">Artworks listed</div>
+<section id="categories" class="categories-section">
+  <div class="section-label">Browse by Category</div>
+  <div class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-5">
+    <h2 class="section-title mb-0">Discover<br/>Art Form</h2>
+    <a href="#" class="btn btn-outline">View All Categories</a>
   </div>
-  <div class="sstat">
-    <div class="sstat-num" data-target="3800">0</div>
-    <div class="sstat-lbl">Artists worldwide</div>
-  </div>
-  <div class="sstat">
-    <div class="sstat-num" data-target="28000">0</div>
-    <div class="sstat-lbl">Happy collectors</div>
-  </div>
-  <div class="sstat">
-    <div class="sstat-num" data-target="95">0</div>
-    <div class="sstat-lbl">% artist payout</div>
-  </div>
-</div>
+  <div class="categories-grid" id="categoriesGrid"></div>
+</section>
 
-<!-- HOW IT WORKS -->
+<section id="artworks" class="artworks-section">
+  <div class="section-label">Featured Artworks</div>
+  <div class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-4">
+    <h2 class="section-title mb-0">Artwork<br/>Showcase</h2>
+    <a href="#" class="btn btn-outline">Browse All</a>
+  </div>
+  <div class="artworks-toolbar">
+    <button class="filter-btn active" onclick="filterAW(this,'all')">All Works</button>
+    <button class="filter-btn" onclick="filterAW(this,'Digital Collectible')">Digital</button>
+    <button class="filter-btn" onclick="filterAW(this,'NFT')">NFT</button>
+    <button class="filter-btn" onclick="filterAW(this,'Canvas Print')">Canvas</button>
+    <button class="filter-btn" onclick="filterAW(this,'Photography')">Photography</button>
+  </div>
+  <div class="artworks-grid" id="artworksGrid"></div>
+</section>
+
 <section id="how" class="how-section">
-  <div class="section-eyebrow reveal">Process</div>
-  <div class="section-title reveal">How <em>Artify</em> works<br/>for you</div>
-  <div class="how-steps reveal">
-    <div class="how-step">
-      <div class="step-num">01</div>
-      <div class="step-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#b8761a" stroke-width="1.8" stroke-linecap="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-        </svg>
-      </div>
-      <div class="step-title">Create your profile</div>
-      <div class="step-desc">Sign up in seconds as a buyer or artist. Personalize your space, set preferences, and join a thriving creative community.</div>
-    </div>
-    <div class="how-step">
-      <div class="step-num">02</div>
-      <div class="step-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#b8761a" stroke-width="1.8" stroke-linecap="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-        </svg>
-      </div>
-      <div class="step-title">Upload or discover</div>
-      <div class="step-desc">Artists upload high-res work with custom pricing. Buyers browse curated collections filtered by style, category, and price range.</div>
-    </div>
-    <div class="how-step">
-      <div class="step-num">03</div>
-      <div class="step-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#b8761a" stroke-width="1.8" stroke-linecap="round">
-          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-        </svg>
-      </div>
-      <div class="step-title">Buy, sell, and earn</div>
-      <div class="step-desc">Secure Razorpay checkout for buyers. Artists earn directly — instant download delivered, payout requested anytime.</div>
-    </div>
+  <div class="text-center mb-5">
+    <div class="section-label" style="justify-content:center">Simple Process</div>
+    <h2 class="section-title">Start Earning in<br/><span style="color:var(--sienna)">4 Easy Steps</span></h2>
   </div>
-</section>
-
-<!-- GALLERY -->
-<section id="gallery" class="gallery-section">
-  <div class="section-eyebrow reveal">Featured works</div>
-  <div class="section-title reveal">A glimpse of what<br/><em>awaits inside</em></div>
-  <div class="gallery-grid reveal">
-    <div class="gcard">
-      <div class="gcard-art ab1"><div class="gcard-art-inner">🌌</div></div>
-      <div class="gcard-badge">Featured</div>
-      <div class="gcard-like">♡</div>
-      <div class="gcard-info">
-        <div><div class="gcard-title">Cosmic Reverie</div><div class="gcard-sub">by @@starlens</div></div>
-        <div class="gcard-price">₹4,200</div>
-      </div>
-    </div>
-    <div class="gcard">
-      <div class="gcard-art ab2"><div class="gcard-art-inner">🌊</div></div>
-      <div class="gcard-like">♡</div>
-      <div class="gcard-info">
-        <div><div class="gcard-title">Deep Current</div><div class="gcard-sub">by @@wavecraft</div></div>
-        <div class="gcard-price">₹2,800</div>
-      </div>
-    </div>
-    <div class="gcard">
-      <div class="gcard-art ab3"><div class="gcard-art-inner">🌿</div></div>
-      <div class="gcard-badge">New</div>
-      <div class="gcard-like">♡</div>
-      <div class="gcard-info">
-        <div><div class="gcard-title">Forest Mind</div><div class="gcard-sub">by @@natura.ai</div></div>
-        <div class="gcard-price">₹1,950</div>
-      </div>
-    </div>
-    <div class="gcard">
-      <div class="gcard-art ab4"><div class="gcard-art-inner">✨</div></div>
-      <div class="gcard-like">♡</div>
-      <div class="gcard-info">
-        <div><div class="gcard-title">Gold Silence</div><div class="gcard-sub">by @@aurum.v</div></div>
-        <div class="gcard-price">₹5,100</div>
-      </div>
-    </div>
-    <div class="gcard">
-      <div class="gcard-art ab5"><div class="gcard-art-inner">🔥</div></div>
-      <div class="gcard-like">♡</div>
-      <div class="gcard-info">
-        <div><div class="gcard-title">Ember Soul</div><div class="gcard-sub">by @@pyroform</div></div>
-        <div class="gcard-price">₹3,600</div>
-      </div>
-    </div>
-  </div>
-  <div style="text-align:center;margin-top:3rem">
-    <a href="/artworks" class="btn-ghost">View full gallery →</a>
-  </div>
-</section>
-
-<!-- SCROLLING SHOWCASE STRIP -->
-<div class="showcase-strip">
-  <div class="strip-label">More <em>extraordinary</em> works</div>
-  <div class="strip-track">
-    <div class="scard"><div class="scard-art ab1">🌌</div><div class="scard-info"><div class="scard-name">Nebula Dreams</div><div class="scard-price">₹3,800</div></div></div>
-    <div class="scard"><div class="scard-art ab2">💧</div><div class="scard-info"><div class="scard-name">Blue Hour</div><div class="scard-price">₹2,200</div></div></div>
-    <div class="scard"><div class="scard-art ab3">🍃</div><div class="scard-info"><div class="scard-name">Canopy Light</div><div class="scard-price">₹1,600</div></div></div>
-    <div class="scard"><div class="scard-art ab4">🌅</div><div class="scard-info"><div class="scard-name">Dawn Palette</div><div class="scard-price">₹4,500</div></div></div>
-    <div class="scard"><div class="scard-art ab5">🔮</div><div class="scard-info"><div class="scard-name">Void Bloom</div><div class="scard-price">₹7,200</div></div></div>
-    <div class="scard"><div class="scard-art" style="background:linear-gradient(145deg,#1a1a33,#4a3d8a,#9b59b6)">💎</div><div class="scard-info"><div class="scard-name">Crystal Veil</div><div class="scard-price">₹5,900</div></div></div>
-    <div class="scard"><div class="scard-art" style="background:linear-gradient(145deg,#0d1a33,#1a3d5a,#16a085)">🏔</div><div class="scard-info"><div class="scard-name">Peak Solitude</div><div class="scard-price">₹3,100</div></div></div>
-    <div class="scard"><div class="scard-art" style="background:linear-gradient(145deg,#1a0d0d,#5a1a3d,#c0392b)">🌸</div><div class="scard-info"><div class="scard-name">Blossom Fracture</div><div class="scard-price">₹2,700</div></div></div>
-    <!-- duplicate for seamless loop -->
-    <div class="scard"><div class="scard-art ab1">🌌</div><div class="scard-info"><div class="scard-name">Nebula Dreams</div><div class="scard-price">₹3,800</div></div></div>
-    <div class="scard"><div class="scard-art ab2">💧</div><div class="scard-info"><div class="scard-name">Blue Hour</div><div class="scard-price">₹2,200</div></div></div>
-    <div class="scard"><div class="scard-art ab3">🍃</div><div class="scard-info"><div class="scard-name">Canopy Light</div><div class="scard-price">₹1,600</div></div></div>
-    <div class="scard"><div class="scard-art ab4">🌅</div><div class="scard-info"><div class="scard-name">Dawn Palette</div><div class="scard-price">₹4,500</div></div></div>
-    <div class="scard"><div class="scard-art ab5">🔮</div><div class="scard-info"><div class="scard-name">Void Bloom</div><div class="scard-price">₹7,200</div></div></div>
-    <div class="scard"><div class="scard-art" style="background:linear-gradient(145deg,#1a1a33,#4a3d8a,#9b59b6)">💎</div><div class="scard-info"><div class="scard-name">Crystal Veil</div><div class="scard-price">₹5,900</div></div></div>
-    <div class="scard"><div class="scard-art" style="background:linear-gradient(145deg,#0d1a33,#1a3d5a,#16a085)">🏔</div><div class="scard-info"><div class="scard-name">Peak Solitude</div><div class="scard-price">₹3,100</div></div></div>
-    <div class="scard"><div class="scard-art" style="background:linear-gradient(145deg,#1a0d0d,#5a1a3d,#c0392b)">🌸</div><div class="scard-info"><div class="scard-name">Blossom Fracture</div><div class="scard-price">₹2,700</div></div></div>
-  </div>
-</div>
-
-<!-- ROLES -->
-<section id="roles" class="roles-section">
-  <div class="section-eyebrow reveal">Who it's for</div>
-  <div class="section-title reveal">Built for every<br/><em>creative journey</em></div>
-  <div class="roles-grid">
-    <div class="rcard reveal" onmousemove="shineCard(event,this)">
-      <div class="rcard-shine"></div>
-      <div class="rcard-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#b8761a" stroke-width="1.8" stroke-linecap="round">
-          <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-        </svg>
-      </div>
-      <div class="rcard-title">Artists</div>
-      <div class="rcard-desc">Your studio, your rules. Upload, price, and sell digital art to a global audience — with zero friction.</div>
-      <ul class="rcard-list">
-        <li>Upload unlimited artworks</li>
-        <li>Set your own prices &amp; editions</li>
-        <li>Real-time earnings dashboard</li>
-        <li>Payout requests anytime</li>
-        <li>Analytics — views, sales, revenue</li>
-      </ul>
-      <a href="/auth/register?role=artist" class="rcard-cta">Start selling →</a>
-    </div>
-    <div class="rcard reveal reveal-delay-1" onmousemove="shineCard(event,this)">
-      <div class="rcard-shine"></div>
-      <div class="rcard-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#b8761a" stroke-width="1.8" stroke-linecap="round">
-          <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
-        </svg>
-      </div>
-      <div class="rcard-title">Collectors</div>
-      <div class="rcard-desc">Find art that moves you. From emerging indie artists to established digital creators — all in one place.</div>
-      <ul class="rcard-list">
-        <li>Browse thousands of artworks</li>
-        <li>Filter by category &amp; price range</li>
-        <li>Secure Razorpay checkout</li>
-        <li>Instant high-res download</li>
-        <li>Full order &amp; download history</li>
-      </ul>
-      <a href="/auth/register?role=buyer" class="rcard-cta">Start collecting →</a>
-    </div>
-    <div class="rcard reveal reveal-delay-2" onmousemove="shineCard(event,this)">
-      <div class="rcard-shine"></div>
-      <div class="rcard-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#b8761a" stroke-width="1.8" stroke-linecap="round">
-          <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-        </svg>
-      </div>
-      <div class="rcard-title">Admins</div>
-      <div class="rcard-desc">Full platform oversight. Manage users, curate content, set commission rates, and drive platform growth.</div>
-      <ul class="rcard-list">
-        <li>Artwork approval workflow</li>
-        <li>User &amp; role management</li>
-        <li>Commission configuration</li>
-        <li>Revenue &amp; analytics reports</li>
-        <li>System logs &amp; monitoring</li>
-      </ul>
-      <a href="/auth/login" class="rcard-cta">Admin portal →</a>
-    </div>
-  </div>
-</section>
-
-<!-- TECH / FEATURES -->
-<section class="process-section">
-  <div class="section-eyebrow">Built with</div>
-  <div class="section-title">Enterprise-grade<br/><em>technology</em></div>
-  <div class="process-cards reveal">
-    <div class="pcard">
-      <div class="pcard-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#d4943a" stroke-width="1.8" stroke-linecap="round" width="22" height="22">
-          <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-      </div>
-      <div class="pcard-title">JWT Authentication</div>
-      <div class="pcard-desc">Role-based access control with BCrypt password hashing and secure token validation.</div>
-    </div>
-    <div class="pcard">
-      <div class="pcard-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#d4943a" stroke-width="1.8" stroke-linecap="round" width="22" height="22">
-          <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-        </svg>
-      </div>
-      <div class="pcard-title">PostgreSQL + EF Core</div>
-      <div class="pcard-desc">Relational schema with foreign keys, soft deletes, and full-text search indexing.</div>
-    </div>
-    <div class="pcard">
-      <div class="pcard-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#d4943a" stroke-width="1.8" stroke-linecap="round" width="22" height="22">
-          <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-        </svg>
-      </div>
-      <div class="pcard-title">Razorpay Payments</div>
-      <div class="pcard-desc">Secure transaction flow with payment verification, receipts, and failure handling.</div>
-    </div>
-    <div class="pcard">
-      <div class="pcard-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#d4943a" stroke-width="1.8" stroke-linecap="round" width="22" height="22">
-          <path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/>
-        </svg>
-      </div>
-      <div class="pcard-title">Clean Architecture</div>
-      <div class="pcard-desc">Controller → Service → Repository layers with Redis caching and Serilog logging.</div>
-    </div>
-  </div>
-</section>
-
-<!-- TESTIMONIALS -->
-<section class="testi-section" id="about">
-  <div class="section-eyebrow reveal">Community</div>
-  <div class="section-title reveal">Loved by <em>artists<br/>&amp; collectors</em> alike</div>
-  <div class="testi-track-wrap reveal">
-    <div class="testi-track">
-      <div class="tcard">
-        <div class="tcard-stars">★★★★★</div>
-        <div class="tcard-text">"Artify changed how I sell my work. The dashboard is intuitive and payouts are instant. Best platform I've used."</div>
-        <div class="tcard-author">
-          <div class="tcard-avatar" style="background:#b8761a">PR</div>
-          <div><div class="tcard-name">Priya R.</div><div class="tcard-role">Digital artist</div></div>
-        </div>
-      </div>
-      <div class="tcard">
-        <div class="tcard-stars">★★★★★</div>
-        <div class="tcard-text">"The curation is unmatched. I've built an incredible collection in just a few months. Checkout is seamless."</div>
-        <div class="tcard-author">
-          <div class="tcard-avatar" style="background:#1a6b6b">AM</div>
-          <div><div class="tcard-name">Arjun M.</div><div class="tcard-role">Art collector</div></div>
-        </div>
-      </div>
-      <div class="tcard">
-        <div class="tcard-stars">★★★★★</div>
-        <div class="tcard-text">"I was skeptical at first, but the upload process is so smooth and my artwork got approved within 24 hours."</div>
-        <div class="tcard-author">
-          <div class="tcard-avatar" style="background:#c2442a">SK</div>
-          <div><div class="tcard-name">Sofia K.</div><div class="tcard-role">Illustrator</div></div>
-        </div>
-      </div>
-      <div class="tcard">
-        <div class="tcard-stars">★★★★★</div>
-        <div class="tcard-text">"The analytics dashboard gives me deep insight into what my audience loves. Revenue tracking is crystal clear."</div>
-        <div class="tcard-author">
-          <div class="tcard-avatar" style="background:#3d3328">RV</div>
-          <div><div class="tcard-name">Rohan V.</div><div class="tcard-role">3D artist</div></div>
-        </div>
-      </div>
-      <div class="tcard">
-        <div class="tcard-stars">★★★★★</div>
-        <div class="tcard-text">"Found my all-time favorite piece here. The download quality was stunning — worth every rupee."</div>
-        <div class="tcard-author">
-          <div class="tcard-avatar" style="background:#1a3305">NA</div>
-          <div><div class="tcard-name">Neha A.</div><div class="tcard-role">Interior designer</div></div>
-        </div>
-      </div>
-      <!-- duplicates for seamless scroll -->
-      <div class="tcard">
-        <div class="tcard-stars">★★★★★</div>
-        <div class="tcard-text">"Artify changed how I sell my work. The dashboard is intuitive and payouts are instant. Best platform I've used."</div>
-        <div class="tcard-author">
-          <div class="tcard-avatar" style="background:#b8761a">PR</div>
-          <div><div class="tcard-name">Priya R.</div><div class="tcard-role">Digital artist</div></div>
-        </div>
-      </div>
-      <div class="tcard">
-        <div class="tcard-stars">★★★★★</div>
-        <div class="tcard-text">"The curation is unmatched. I've built an incredible collection in just a few months. Checkout is seamless."</div>
-        <div class="tcard-author">
-          <div class="tcard-avatar" style="background:#1a6b6b">AM</div>
-          <div><div class="tcard-name">Arjun M.</div><div class="tcard-role">Art collector</div></div>
-        </div>
-      </div>
-      <div class="tcard">
-        <div class="tcard-stars">★★★★★</div>
-        <div class="tcard-text">"I was skeptical at first, but the upload process is so smooth and my artwork got approved within 24 hours."</div>
-        <div class="tcard-author">
-          <div class="tcard-avatar" style="background:#c2442a">SK</div>
-          <div><div class="tcard-name">Sofia K.</div><div class="tcard-role">Illustrator</div></div>
-        </div>
-      </div>
-      <div class="tcard">
-        <div class="tcard-stars">★★★★★</div>
-        <div class="tcard-text">"The analytics dashboard gives me deep insight into what my audience loves. Revenue tracking is crystal clear."</div>
-        <div class="tcard-author">
-          <div class="tcard-avatar" style="background:#3d3328">RV</div>
-          <div><div class="tcard-name">Rohan V.</div><div class="tcard-role">3D artist</div></div>
-        </div>
-      </div>
-      <div class="tcard">
-        <div class="tcard-stars">★★★★★</div>
-        <div class="tcard-text">"Found my all-time favorite piece here. The download quality was stunning — worth every rupee."</div>
-        <div class="tcard-author">
-          <div class="tcard-avatar" style="background:#1a3305">NA</div>
-          <div><div class="tcard-name">Neha A.</div><div class="tcard-role">Interior designer</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <div class="how-grid" id="howGrid"></div>
 </section>
 
 <!-- CTA -->
 <section class="cta-section">
-  <div class="cta-bg-art">
-    <svg width="100%" height="100%" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="200" cy="300" r="200" fill="white"/>
-      <circle cx="1000" cy="300" r="150" fill="white"/>
-      <circle cx="600" cy="100" r="100" fill="white"/>
-      <circle cx="600" cy="500" r="120" fill="white"/>
-    </svg>
-  </div>
-  <h2>Ready to start<br/><em>your story?</em></h2>
-  <p>Join thousands of artists and collectors building the future of digital creative commerce.</p>
-  <div class="cta-btns">
-    <a href="/auth/register?role=artist" class="cta-btn-primary">Start as an artist</a>
-    <a href="/auth/register?role=buyer" class="cta-btn-ghost">Browse as buyer →</a>
+  <div class="cta-bg"></div>
+  <div class="cta-inner-box reveal">
+    <h2 class="cta-title">Your Art Deserves<br/>a <span class="accent">Global Stage</span></h2>
+    <p class="cta-sub">Join thousands of artists already earning on ArtSpace. Free to start, no monthly fees, no hidden charges.</p>
+    <div class="cta-btns">
+      <a asp-action="Register" asp-controller="Artist" class="btn btn-primary btn-lg"><span class="k-icon k-i-user"></span> Create Account</a>
+      <a asp-action="Login" asp-controller="Artist" class="btn btn-outline btn-lg"><span class="k-icon k-i-grid-layout"></span> Sign In</a>
+    </div>
   </div>
 </section>
 
-<!-- FOOTER -->
-<footer>
-  <a href="#" class="footer-logo">Artify<em>.</em></a>
-  <div class="footer-links">
-    <a href="#">About</a>
-    <a href="#">Blog</a>
-    <a href="#">Terms</a>
-    <a href="#">Privacy</a>
-    <a href="#">Support</a>
-  </div>
-  <div class="footer-copy">© 2025 Artify. All rights reserved.</div>
-</footer>
-
 <script>
-/* Custom cursor */
-const cur=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
-let mx=0,my=0,rx=0,ry=0;
-document.addEventListener('mousemove',e=>{
-  mx=e.clientX;my=e.clientY;
-  cur.style.left=mx+'px';cur.style.top=my+'px';
-});
-(function ar(){rx+=(mx-rx)*0.1;ry+=(my-ry)*0.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(ar)})();
-document.querySelectorAll('a,button,.gcard,.rcard,.scard').forEach(el=>{
-  el.addEventListener('mouseenter',()=>{cur.style.transform='translate(-50%,-50%) scale(2.5)';ring.style.width='56px';ring.style.height='56px'});
-  el.addEventListener('mouseleave',()=>{cur.style.transform='translate(-50%,-50%) scale(1)';ring.style.width='38px';ring.style.height='38px'});
-});
+$(function(){
 
-/* Navbar */
-window.addEventListener('scroll',()=>document.getElementById('navbar').classList.toggle('scrolled',scrollY>50));
-
-/* Scroll reveal */
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target)}}),{threshold:0.1});
-document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
-
-/* Count-up */
-function countUp(el,target){
-  const sfx=target>=1000?'+':'';
-  let v=0,step=target/70;
-  const t=setInterval(()=>{v=Math.min(v+step,target);el.textContent=Math.floor(v).toLocaleString()+sfx;if(v>=target)clearInterval(t)},18);
-}
-const sio=new IntersectionObserver(es=>es.forEach(e=>{
-  if(e.isIntersecting){e.target.querySelectorAll('[data-target]').forEach(el=>countUp(el,+el.dataset.target));sio.unobserve(e.target)}
-}),{threshold:0.3});
-document.querySelectorAll('.stats-row').forEach(el=>sio.observe(el));
-
-/* Card shine effect */
-function shineCard(e,card){
-  const r=card.getBoundingClientRect();
-  card.style.setProperty('--rx',((e.clientX-r.left)/r.width*100)+'%');
-  card.style.setProperty('--ry',((e.clientY-r.top)/r.height*100)+'%');
-}
-
-/* Hero parallax on floating cards */
-document.addEventListener('mousemove',e=>{
-  const cx=window.innerWidth/2,cy=window.innerHeight/2;
-  const dx=(e.clientX-cx)/cx,dy=(e.clientY-cy)/cy;
-  document.querySelectorAll('.fcard').forEach((c,i)=>{
-    const d=(i%2===0?1:-1)*(i*3+8);
-    c.style.transform=`translateY(${dy*d}px) translateX(${dx*d*0.5}px)`;
+  /* ── Custom Cursor ── */
+  var dot = document.getElementById('cursorDot');
+  var ring = document.getElementById('cursorRing');
+  var cx=0,cy=0,rx=0,ry=0;
+  document.addEventListener('mousemove',function(e){cx=e.clientX;cy=e.clientY;dot.style.left=cx+'px';dot.style.top=cy+'px';});
+  (function animRing(){rx+=(cx-rx)*.1;ry+=(cy-ry)*.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);})();
+  document.querySelectorAll('a,button,.cat-card,.aw-card,.how-card').forEach(function(el){
+    el.addEventListener('mouseenter',function(){ring.classList.add('grow');});
+    el.addEventListener('mouseleave',function(){ring.classList.remove('grow');});
   });
+
+  /* ── Scroll Reveal ── */
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){if(e.isIntersecting) e.target.classList.add('visible');});
+  },{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el);});
+
+  /* ── Navbar shrink ── */
+  $(window).on('scroll',function(){
+    if($(this).scrollTop()>60) $('#navbar').addClass('scrolled');
+    else $('#navbar').removeClass('scrolled');
+  });
+
+  /* ══════════ DATA ══════════ */
+  var categories = [
+    {name:'Digital Art',   icon:'k-i-image',        count:'12,400', color:'#a0522d', bg:'rgba(160,82,45,.12)'},
+    {name:'Photography',   icon:'k-i-camera',        count:'8,320',  color:'#0277bd', bg:'rgba(2,119,189,.1)'},
+    {name:'NFT & Crypto',  icon:'k-i-dollar',        count:'5,910',  color:'#b5860d', bg:'rgba(181,134,13,.12)'},
+    {name:'Sculpture',     icon:'k-i-star-outline',  count:'3,240',  color:'#c1440e', bg:'rgba(193,68,14,.1)'},
+    {name:'Canvas & Oil',  icon:'k-i-brush',         count:'6,780',  color:'#2e7d32', bg:'rgba(46,125,50,.1)'},
+    {name:'Illustration',  icon:'k-i-pencil',        count:'9,100',  color:'#6a1b9a', bg:'rgba(106,27,154,.1)'},
+  ];
+
+  var artworks = [
+    {title:'Neon Dreams #42',  artist:'Zara Kline',   category:'Digital Collectible', price:'$850',   badge:'Hot',       from:'#e8794a',to:'#c1440e',accent:'#fde68a',likes:284,views:1820},
+    {title:'Golden Vortex',    artist:'Kenji Mori',   category:'Canvas Print',        price:'$420',   badge:'New',       from:'#b5860d',to:'#8a5e00',accent:'#fde68a',likes:156,views:940},
+    {title:'Silent Space',     artist:'Mia Fontaine', category:'NFT',                 price:'$1,100', badge:'Exclusive', from:'#4a3322',to:'#7a5c44',accent:'#c9b49a',likes:392,views:3100},
+    {title:'Static Motion',    artist:'Leo Santos',   category:'Sculpture (Physical)',price:'$2,400', badge:'Trending',  from:'#c1440e',to:'#a0522d',accent:'#fde68a',likes:517,views:4200},
+    {title:'Amber Threshold',  artist:'Priya Anand',  category:'Oil on Canvas',       price:'$3,200', badge:'Featured',  from:'#a0522d',to:'#6b3318',accent:'#e8dfd2',likes:621,views:5800},
+    {title:'Echo Chamber',     artist:'Raj Solis',    category:'Photography',         price:'$640',   badge:'New',       from:'#2e7d32',to:'#1b5e20',accent:'#c8e6c9',likes:198,views:1430},
+  ];
+
+  var steps = [
+    {num:'01',icon:'k-i-user',         title:'Create Profile',  desc:'Set up your artist profile with your portfolio, bio, and payout details in minutes.'},
+    {num:'02',icon:'k-i-upload',       title:'Upload Your Art', desc:'Upload digital files, add physical artwork listings, or mint NFTs directly on the platform.'},
+    {num:'03',icon:'k-i-dollar',       title:'Set Your Price',  desc:'Price your work in any currency. We handle conversions, taxes, and cross-border payments.'},
+    {num:'04',icon:'k-i-check-circle', title:'Get Paid Fast',   desc:'Earnings hit your account within 48 hours. Keep 85% — the best commission rate in the industry.'},
+  ];
+
+  /* ── Categories ── */
+  var catHtml = categories.map(function(c,i){
+    return '<a class="cat-card reveal rd'+(i%5+1)+'" href="#" style="--hoverBg:'+c.bg+'">' +
+      '<div class="cat-icon-wrap" style="background:'+c.bg+'"><span class="k-icon '+c.icon+'" style="color:'+c.color+'"></span></div>' +
+      '<div class="cat-info"><div class="cat-name">'+c.name+'</div><div class="cat-count">'+c.count+' artworks</div></div>' +
+      '<span class="k-icon k-i-arrow-chevron-right cat-arrow"></span>' +
+    '</a>';
+  }).join('');
+  $('#categoriesGrid').html(catHtml);
+  document.querySelectorAll('.cat-card').forEach(function(el){obs.observe(el);});
+
+  /* ── Artworks ── */
+  var allAW = artworks;
+  function badgeCls(b){ return {Hot:'badge-hot',New:'badge-new',Exclusive:'badge-exclusive',Trending:'badge-trending',Featured:'badge-featured'}[b]||'badge-new'; }
+  function artSVG(f,t,a,id){
+    return '<svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">' +
+      '<defs><linearGradient id="g'+id+'" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="'+f+'"/><stop offset="100%" stop-color="'+t+'"/></linearGradient></defs>' +
+      '<rect width="400" height="220" fill="url(#g'+id+')"/>' +
+      '<polygon points="0,220 400,0 400,220" fill="'+t+'" opacity=".25"/>' +
+      '<circle cx="200" cy="110" r="70" fill="none" stroke="'+a+'" stroke-width="1.5" opacity=".4"/>' +
+      '<line x1="0" y1="110" x2="400" y2="110" stroke="'+a+'" stroke-width="1" opacity=".2"/>' +
+      '<line x1="200" y1="0" x2="200" y2="220" stroke="'+a+'" stroke-width="1" opacity=".2"/>' +
+    '</svg>';
+  }
+  function renderAW(data){
+    var html = data.map(function(d,i){
+      return '<div class="aw-card">' +
+        '<div class="aw-img">'+artSVG(d.from,d.to,d.accent,i)+
+          '<span class="aw-badge '+badgeCls(d.badge)+'">'+d.badge+'</span>' +
+          '<div class="aw-overlay"></button></div>' +
+        '</div>' +
+        '<div class="aw-body">' +
+          '<div class="aw-category">'+d.category+'</div>' +
+          '<div class="aw-title">'+d.title+'</div>' +
+          '<div class="aw-artist">by '+d.artist+'</div>' +
+          '<div class="aw-footer">' +
+            '<div class="aw-price">'+d.price+'</div>' +
+            '<div class="aw-meta">' +
+              '<div class="aw-meta-item"><span class="k-icon k-i-heart"></span>'+d.likes+'</div>' +
+              '<div class="aw-meta-item"><span class="k-icon k-i-eye"></span>'+d.views+'</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    $('#artworksGrid').html(html);
+    document.querySelectorAll('#artworksGrid .aw-card').forEach(function(el,i){
+      el.classList.add('reveal','rd'+(i%5+1));obs.observe(el);
+    });
+  }
+  renderAW(allAW);
+  window.filterAW = function(btn,cat){
+    $('.filter-btn').removeClass('active');$(btn).addClass('active');
+    renderAW(cat==='all'?allAW:allAW.filter(function(a){return a.category===cat;}));
+  };
+
+  /* ── How It Works ── */
+  var howHtml = steps.map(function(s,i){
+    return '<div class="how-card reveal rd'+(i+1)+'">' +
+      '<div class="how-num">'+s.num+'</div>' +
+      '<div class="how-icon-wrap"><span class="k-icon '+s.icon+'"></span></div>' +
+      '<div class="how-title">'+s.title+'</div>' +
+      '<div class="how-desc">'+s.desc+'</div>' +
+      (i<3?'<div class="how-connector"></div>':'') +
+    '</div>';
+  }).join('');
+  $('#howGrid').html(howHtml);
+  document.querySelectorAll('.how-card').forEach(function(el){obs.observe(el);});
+
+  /* ── Counter animation ── */
+  var counted = false;
+  var statsObs = new IntersectionObserver(function(entries){
+    if(entries[0].isIntersecting && !counted){
+      counted = true;
+      var targets = [{val:'48000',suf:'K+'},{val:'320000',suf:'K+'},{val:'12',suf:'M+',pre:'$'},{val:'190',suf:'+'}];
+      document.querySelectorAll('.stat-val').forEach(function(el,i){
+        var t = targets[i]; if(!t) return;
+        var num = parseInt(t.val); var start=0; var step=num/1800*16;
+        var iv = setInterval(function(){
+          start+=step;
+          if(start>=num){start=num;clearInterval(iv);}
+          var n = Math.floor(start);
+          if(t.pre) el.textContent = t.pre + n + t.suf;
+          else el.textContent = n.toLocaleString().replace(/,000$/,'K').replace(/,000,000$/,'M') + t.suf;
+        },16);
+      });
+    }
+  },{threshold:0.3});
+  var sb = document.querySelector('.stats-bar');
+  if(sb) statsObs.observe(sb);
+
 });
 </script>
 </body>
-</html>
+</html> 

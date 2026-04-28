@@ -146,13 +146,43 @@
 <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    var ADMIN_API_BASE = "http://localhost:5183/api/AdminApi";
+    var ADMIN_API_BASE = "http://localhost:5183/api/AdminUser";
     var users = [];
 
     var table, userModal, deleteModal;
     var editId = null, deleteId = null;
     var currentSearch = "";
     var debounceId = null;
+    
+    function checkAuth() {
+        const token = localStorage.getItem("adminToken");
+        const expiry = localStorage.getItem("adminExpiry");
+
+        if (!token || !expiry) {
+            window.location.href = "/Admin/Login";
+            return false;
+        }
+
+        if (Date.now() > expiry * 1000) {
+            localStorage.removeItem("adminToken");
+            localStorage.removeItem("adminExpiry");
+
+            window.location.href = "/Admin/Login";
+            return false;
+        }
+
+        return true;
+    }
+
+    function authHeader() {
+        if (!checkAuth()) return {};
+
+        const token = localStorage.getItem("adminToken");
+
+        return {
+            "Authorization": "Bearer " + token
+        };
+    }
 
     function escapeHtml(v){ return $("<div>").text(v == null ? "" : v).html(); }
     function nextId(){ return Math.max.apply(Math, users.map(function(a){ return a.id; })) + 1; }
@@ -178,7 +208,11 @@
 
     async function loadUsersFromApi(){
         var query = $.param({ search: currentSearch || "" });
-        var rows = await $.getJSON(ADMIN_API_BASE + "/users?" + query);
+        var rows = await $.ajax({
+            url: ADMIN_API_BASE + "/users?" + query,
+            method: "GET",
+            headers: authHeader()   // ✅ ADD THIS
+        });
         users = (rows || []).map(function(r){
             var name = r.fullName || "";
             var parts = name.split(" ").filter(Boolean);
@@ -287,7 +321,7 @@
             if (i === -1) return;
             await $.ajax({
                 url: ADMIN_API_BASE + "/users/" + editId,
-                method: "PUT",
+                method: "PUT", headers: authHeader(),
                 contentType: "application/json",
                 data: JSON.stringify({
                     fullName: name,
@@ -318,7 +352,7 @@
         try {
             var deletedUser = users.find(function(u){ return u.id === deleteId; });
             var deletedName = deletedUser ? deletedUser.name : "User";
-            await $.ajax({ url: ADMIN_API_BASE + "/users/" + deleteId, method: "DELETE" });
+            await $.ajax({ url: ADMIN_API_BASE + "/users/" + deleteId, method: "DELETE", headers: authHeader() });
             deleteId = null;
             deleteModal.hide();
             await applyFilters();
@@ -330,6 +364,8 @@
     }
 
     $(document).ready(async function(){
+    
+        if (!checkAuth()) return;
         userModal = new bootstrap.Modal(document.getElementById("userModal"));
         deleteModal = new bootstrap.Modal(document.getElementById("deleteModal"));
 

@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using StackExchange.Redis;
 using System.Text.Json;
+using StackExchange.Redis;
 
 namespace Repository.Services
 {
@@ -14,10 +10,11 @@ namespace Repository.Services
 
         private const string Prefix = "admin_artworks_";
 
-        public RedisService(IDatabase db, IConnectionMultiplexer mux)
+        // ✅ FIXED CONSTRUCTOR
+        public RedisService(IConnectionMultiplexer mux)
         {
-            _db = db;
             _mux = mux;
+            _db = _mux.GetDatabase(); // ✅ correct way
         }
 
         // 🔹 GET DATA
@@ -52,10 +49,12 @@ namespace Repository.Services
         // 🔥 CLEAR ALL ADMIN ARTWORK CACHE
         public async Task ClearAdminArtworkCacheAsync()
         {
-            var servers = _mux.GetServers();
+            var endpoints = _mux.GetEndPoints();
 
-            foreach (var server in servers)
+            foreach (var endpoint in endpoints)
             {
+                var server = _mux.GetServer(endpoint);
+
                 await foreach (var key in server.KeysAsync(pattern: $"{Prefix}*"))
                 {
                     await _db.KeyDeleteAsync(key);
@@ -68,5 +67,50 @@ namespace Repository.Services
         {
             return $"{Prefix}{status.ToLower()}_{page}_{pageSize}";
         }
-    }
+
+
+            //redis service for user forgot password otp
+            // 🔹 SET OTP
+            public async Task SetOtpAsync(string email, string otp)
+            {
+                var key = $"otp:{email.ToLower().Trim()}";
+                await _db.StringSetAsync(key, otp, TimeSpan.FromMinutes(5));
+            }
+            public async Task SetOtpVerifiedAsync(string email)
+{
+    // Yahan ToLower() aur Trim() zaroor lagayein
+    var key = $"otp_verified:{email.ToLower().Trim()}"; 
+    await _db.StringSetAsync(key, "true", TimeSpan.FromMinutes(10));
+}
+
+           // 🔹 CHECK VERIFIED FLAG
+public async Task<bool> IsOtpVerifiedAsync(string email)
+{
+    // Yahan bhi ToLower() aur Trim() lagayein
+    var key = $"otp_verified:{email.ToLower().Trim()}";
+    var val = await _db.StringGetAsync(key);
+    return val == "true";
+}
+
+            // 🔹 GET OTP
+            public async Task<string?> GetOtpAsync(string email)
+            {
+                var key = $"otp:{email.ToLower().Trim()}";
+                return await _db.StringGetAsync(key);
+            }
+
+            // 🔹 DELETE OTP
+            public async Task DeleteOtpAsync(string email)
+            {
+                var key = $"otp:{email.ToLower().Trim()}";
+                await _db.KeyDeleteAsync(key);
+            }
+            
+            // 🔹 DELETE VERIFIED FLAG (Cleanup ke waqt kaam aayega)
+            public async Task DeleteVerifiedFlagAsync(string email)
+            {
+                var key = $"otp_verified:{email.ToLower().Trim()}";
+                await _db.KeyDeleteAsync(key);
+            }
+        }
 }

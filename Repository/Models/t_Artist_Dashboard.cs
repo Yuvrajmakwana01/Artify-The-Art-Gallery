@@ -32,6 +32,6 @@ namespace Repository.Models
 
         public int c_TotalSellCount {get; set;}
 
-
+        public decimal c_TotalEarning {get; set;}
     }
 }

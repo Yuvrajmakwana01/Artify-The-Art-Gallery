@@ -1,0 +1,408 @@
+@model Repository.Models.t_VerifyOtp
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Verify OTP";
+    @* var email = Request.Query["email"].ToString(); *@
+    
+    var displayEmail = Model?.c_Email ?? Context.Request.Query["email"].ToString();
+}
+
+<style>
+    .auth-page {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    .auth-bg-img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        animation: bgPan 25s ease-in-out infinite;
+    }
+    .auth-bg-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg,
+            hsl(25 20% 8% / 0.70) 0%,
+            hsl(25 20% 8% / 0.50) 50%,
+            hsl(25 20% 8% / 0.75) 100%);
+    }
+    .auth-wrapper {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        max-width: 440px;
+        margin: 24px 16px;
+        animation: scaleIn 0.4s ease-out;
+    }
+    .glass-card {
+        background: hsl(35 30% 92% / 0.88);
+        backdrop-filter: blur(24px);
+        border: 1px solid hsl(30 15% 82% / 0.35);
+        border-radius: 1.25rem;
+        padding: 2rem;
+        box-shadow: 0 8px 32px -8px hsl(25 20% 10% / 0.40),
+                    inset 0 1px 0 hsl(35 30% 97% / 0.18);
+    }
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: hsl(22, 50%, 38%);
+        font-size: 0.82rem;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        padding: 0;
+        margin-bottom: 1rem;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .btn-back:hover { color: hsl(28, 60%, 45%); }
+    .auth-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: hsl(25, 30%, 10%);
+        text-align: center;
+        margin: 0;
+    }
+    .auth-subtitle {
+        font-size: 0.8rem;
+        color: hsl(25, 15%, 35%);
+        text-align: center;
+        margin: 0.25rem 0 0;
+    }
+    /* OTP boxes */
+    .otp-row {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin: 1.2rem 0 0.5rem;
+    }
+    .otp-box {
+        width: 46px;
+        height: 52px;
+        text-align: center;
+        font-size: 1.3rem;
+        font-weight: 700;
+        font-family: 'Inter', sans-serif;
+        border: 1.5px solid hsl(30, 15%, 75%);
+        border-radius: 0.6rem;
+        background: hsl(32, 18%, 88%);
+        color: hsl(25, 30%, 10%);
+        transition: border-color 0.2s, box-shadow 0.2s;
+        outline: none;
+    }
+    .otp-box:focus {
+        border-color: hsl(28, 60%, 45%);
+        box-shadow: 0 0 0 3px hsl(28 60% 45% / 0.15);
+    }
+    .otp-error {
+        font-size: 0.72rem;
+        color: hsl(0, 65%, 48%);
+        text-align: center;
+        display: block;
+        margin-top: 0.3rem;
+        min-height: 1rem;
+    }
+    .btn-gold {
+        display: block;
+        width: 100%;
+        height: 42px;
+        background: linear-gradient(135deg, hsl(28,60%,45%), hsl(18,70%,38%));
+        color: hsl(35, 30%, 97%);
+        font-family: 'Inter', sans-serif;
+        font-size: 0.875rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 0.65rem;
+        cursor: pointer;
+        margin-top: 1rem;
+        transition: filter 0.25s, box-shadow 0.25s;
+        box-shadow: 0 4px 14px hsl(28 60% 45% / 0.32);
+    }
+    .btn-gold:hover:not(:disabled) {
+        filter: brightness(1.08);
+        box-shadow: 0 6px 20px hsl(28 60% 45% / 0.42);
+    }
+    .btn-gold:disabled { opacity: 0.55; cursor: not-allowed; }
+    .resend-row {
+        text-align: center;
+        font-size: 0.78rem;
+        color: hsl(25, 15%, 40%);
+        margin-top: 1rem;
+    }
+    .resend-row a {
+        color: hsl(22, 50%, 38%);
+        font-weight: 600;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        cursor: pointer;
+    }
+    .resend-row a:hover { color: hsl(28, 60%, 45%); }
+    @@keyframes bgPan {
+        0%   { transform: scale(1.15) translate(0%, 0%); }
+        25%  { transform: scale(1.20) translate(-2%, -1%); }
+        50%  { transform: scale(1.15) translate(-1%, 1%); }
+        75%  { transform: scale(1.20) translate(1%, -1%); }
+        100% { transform: scale(1.15) translate(0%, 0%); }
+    }
+    @@keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.96); }
+        to   { opacity: 1; transform: scale(1); }
+    }
+</style>
+
+<div class="auth-page">
+    <img class="auth-bg-img"
+         src="https://images.unsplash.com/photo-1578926375605-eaf7559b1458?w=1920&q=80"
+         alt="Art gallery" />
+    <div class="auth-bg-overlay"></div>
+
+    <div class="auth-wrapper">
+        <div class="glass-card">
+
+            <a href="/Auth/UserForgotPassword" class="btn-back">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
+                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back
+            </a>
+
+            <!-- Envelope icon -->
+            <div style="width:52px;height:52px;border-radius:50%;
+                        background:hsl(28 60% 45%/0.15);
+                        display:flex;align-items:center;justify-content:center;margin:0 auto 0.75rem">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
+                     fill="none" viewBox="0 0 24 24" stroke="hsl(28,60%,45%)" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8
+                             M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5
+                             a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+            </div>
+
+            <h1 class="auth-title">Enter OTP</h1>
+            <p class="auth-subtitle">
+                6-digit OTP sent to
+                <strong style="color:hsl(25,30%,10%)">@displayEmail</strong>
+            </p>
+
+            <!-- Kendo Notification -->
+            <span id="kNotify"></span>
+
+            <!-- Hidden email for submit -->
+            <input type="hidden" id="hiddenEmail" value="@displayEmail" />
+
+            <!-- 6 OTP boxes -->
+            <div class="otp-row">
+                <input class="otp-box" id="otp0" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
+                <input class="otp-box" id="otp1" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
+                <input class="otp-box" id="otp2" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
+                <input class="otp-box" id="otp3" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
+                <input class="otp-box" id="otp4" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
+                <input class="otp-box" id="otp5" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
+            </div>
+            <span class="otp-error" id="otpError"></span>
+        
+            <button class="btn-gold" id="verifyBtn">Verify OTP</button>
+
+             <div id="timerContainer" style="text-align:center; margin-top:0.5rem; font-family:'Inter',sans-serif; font-weight:600; color:hsl(28, 60%, 45%); font-size:0.9rem;">
+                Expires in: <span id="timerDisplay">02:00</span>
+            </div>
+
+            <p class="resend-row">
+                Didn't receive it? 
+                <span id="resendWrapper" style="display:none;">
+                    <a id="resendLink">Resend OTP</a>
+                </span>
+                <span id="waitText">Please wait...</span>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+$(function () {
+
+    // Kendo Notification
+    var notify = $("#kNotify").kendoNotification({
+        position: { pinned: true, top: 20, right: 20 },
+        autoHideAfter: 3500,
+        stacking: "down"
+    }).data("kendoNotification");
+
+    var boxes = $(".otp-box");
+
+    var timeLeft = 120; // 2 minutes in seconds
+    var timerId = setInterval(countdown, 1000);
+
+    function startTimer() {
+        timeLeft = 120;
+        $("#resendWrapper").hide();
+        $("#waitText").show();
+        $("#verifyBtn").prop("disabled", false).text("Verify OTP");
+        
+        clearInterval(timerId); // Purana timer clear karein
+        timerId = setInterval(countdown, 1000);
+    }
+
+    function countdown() {
+        if (timeLeft <= 0) {
+            clearInterval(timerId);
+            $("#timerDisplay").html("00:00");
+            $("#timerContainer").css("color", "red").html("OTP Expired!");
+            
+            // UI changes on expiry
+            $("#resendWrapper").show();
+            $("#waitText").hide();
+            $("#verifyBtn").prop("disabled", true).text("OTP Expired");
+        } else {
+            var minutes = Math.floor(timeLeft / 60);
+            var seconds = timeLeft % 60;
+            $("#timerDisplay").html(
+                (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds
+            );
+            timeLeft--;
+        }
+    }
+    // Timer shuru karein page load par
+    startTimer();
+
+    // Auto advance — next box pe focus
+    boxes.on("input", function () {
+        this.value = this.value.replace(/\D/g, "");
+        var idx = boxes.index(this);
+        if (this.value && idx < 5)
+            boxes.eq(idx + 1).focus();
+    });
+
+    // Backspace — previous box pe
+    boxes.on("keydown", function (e) {
+        var idx = boxes.index(this);
+        if (e.key === "Backspace" && !this.value && idx > 0)
+            boxes.eq(idx - 1).focus();
+    });
+
+    // Paste — 6 digit paste support
+    boxes.on("paste", function (e) {
+        e.preventDefault();
+        var text = (e.originalEvent.clipboardData || window.clipboardData)
+                    .getData("text").replace(/\D/g, "").slice(0, 6);
+        $.each(text.split(""), function (i, ch) {
+            if (boxes[i]) boxes[i].value = ch;
+        });
+        boxes.eq(Math.min(text.length, 5)).focus();
+    });
+
+    // Get assembled OTP
+    function getOtp() {
+        return boxes.map(function () { return this.value; }).get().join("");
+    }
+
+    // Verify button click
+    $("#verifyBtn").on("click", function () {
+
+        if (timeLeft <= 0) {
+            Swal.fire({ icon: "warning", title: "Expired", text: "Please resend OTP." });
+            return;
+        }
+
+        var otp   = getOtp();
+        var email = $("#hiddenEmail").val();
+        $("#otpError").text("");
+
+        if (otp.length < 6) {
+            $("#otpError").text("Please enter all 6 digits");
+            return;
+        }
+
+        var btn = $(this);
+        btn.prop("disabled", true).text("Verifying...");
+
+        $.ajax({
+            url:  "http://localhost:5183/api/AuthApi/UserVerifyOtp/",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ c_Email: email, c_Otp: otp }),
+            success: function (res) {
+                btn.prop("disabled", false).text("Verify OTP");
+                Swal.fire({
+                    icon: "success",
+                    title: "OTP Verified!",
+                    text: "Now set your new password.",
+                    confirmButtonColor: "hsl(28,60%,45%)",
+                    confirmButtonText: "Continue"
+                }).then(function () {
+                    // Reset password page pe redirect
+                    window.location.href = "/Auth/UserResetPassword?email="
+                        + encodeURIComponent(email)
+                        + "&otp=" + encodeURIComponent(otp);
+                });
+            },
+            error: function (err) {
+                btn.prop("disabled", false).text("Verify OTP");
+                var msg = "Invalid or expired OTP.";
+                if (err.responseJSON && err.responseJSON.message)
+                    msg = err.responseJSON.message;
+                Swal.fire({
+                    icon: "error",
+                    title: "Verification Failed",
+                    text: msg,
+                    confirmButtonColor: "hsl(28,60%,45%)"
+                });
+                // Boxes clear karo
+                boxes.val("").first().focus();
+            }
+        });
+    });
+
+    // Resend OTP
+    $("#resendLink").on("click", function () {
+        var email = $("#hiddenEmail").val().trim().toLowerCase();
+        notify.show({ message: "Sending new OTP..." }, "info");
+
+        $.ajax({
+            url:  "http://localhost:5183/api/AuthApi/UserForgotPassword/", 
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ c_Email: email.trim().toLowerCase()}),
+            success: function () {
+                Swal.fire({
+                    icon: "success",
+                    title: "OTP Resent!",
+                    text: "Please check your email.",
+                    confirmButtonColor: "hsl(28,60%,45%)"
+                });
+                boxes.val("").first().focus();
+                $("#timerContainer").css("color", "hsl(28, 60%, 45%)").html('Expires in: <span id="timerDisplay">02:00</span>');
+                startTimer(); // Timer restart karein
+            },
+            error: function () {
+                Swal.fire({
+                    icon: "error",
+                    title: "Failed",
+                    text: "Could not resend OTP.",
+                    confirmButtonColor: "hsl(28,60%,45%)"
+                });
+            }
+        });
+    });
+
+    // First box pe focus
+    boxes.first().focus();
+});
+</script>
+}

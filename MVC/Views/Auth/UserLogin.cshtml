@@ -379,9 +379,9 @@
 
                 <!-- Forgot Password -->
                 <div class="forgot-row">
-                    <button type="button" class="forgot-link" id="openForgotBtn" , Url.Action("UserForgotPassword", "Auth")>
+                    <a asp-action="UserForgotPassword" asp-controller="Auth" class="forgot-link" id="openForgotBtn">
                         Forgot Password?
-                    </button>
+                    </a>
                 </div>
 
                 <!-- reCAPTCHA v2 Checkbox
@@ -615,19 +615,19 @@ $(function () {
                 btn.prop("disabled", false).text("Sign In");
 
                 // Fail counter reset
-                sessionStorage.removeItem("loginFails");
-                sessionStorage.removeItem("lockoutUntil");
+                @* sessionStorage.removeItem("loginFails");
+                sessionStorage.removeItem("lockoutUntil"); *@
 
-                @* // JWT token localStorage mein store karo
+                // JWT token localStorage mein store karo
                 if (res.token) {
-                    localStorage.setItem("artify_token", res.token);
-                    localStorage.setItem("artify_user",  JSON.stringify(res.user));
-                } *@
+                    localStorage.setItem("token", res.token);
+                    localStorage.setItem("user",  JSON.stringify(res.user));
+                }
 
                 showSuccess(res.message || "Login successful!");
 
                 setTimeout(function () {
-                    window.location.href = "/Home/Landingpage";
+                    window.location.href = "/Buyer/ExploreArt";  // Redirect to buyer dashboard after login
                 }, 1200);
             },
             error: function (err) {

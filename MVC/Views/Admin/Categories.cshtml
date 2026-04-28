@@ -504,7 +504,7 @@
 <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    var ADMIN_API_BASE = "http://localhost:5183/api/AdminApi";
+    var ADMIN_API_BASE = "http://localhost:5183/api/AdminCategoryApi";
     var categories = [];
 
     var editId = null;
@@ -515,6 +515,36 @@
     var currentSearch = "";
     var currentStatus = "";
     var filterDebounceId = null;
+    
+    function checkAuth() {
+        const token = localStorage.getItem("adminToken");
+        const expiry = localStorage.getItem("adminExpiry");
+
+        if (!token || !expiry) {
+            window.location.href = "/Admin/Login";
+            return false;
+        }
+
+        if (Date.now() > expiry * 1000) {
+            localStorage.removeItem("adminToken");
+            localStorage.removeItem("adminExpiry");
+
+            window.location.href = "/Admin/Login";
+            return false;
+        }
+
+        return true;
+    }
+
+    function authHeader() {
+        if (!checkAuth()) return {};
+
+        const token = localStorage.getItem("adminToken");
+
+        return {
+            "Authorization": "Bearer " + token
+        };
+    }
 
     function escapeHtml(value) {
         return $("<div>").text(value == null ? "" : value).html();
@@ -552,7 +582,12 @@
 
     async function loadCategoriesFromApi() {
         var query = $.param({ search: currentSearch || "", status: currentStatus || "" });
-        var rows = await $.getJSON(ADMIN_API_BASE + "/categories?" + query);
+        var rows = await $.ajax({
+            url: ADMIN_API_BASE + "/categories?" + query,
+            method: "GET",
+            headers: authHeader()   // 🔥 THIS IS REQUIRED
+        });
+
         categories = (rows || []).map(function (r) {
             var name = r.categoryName || "";
             return {
@@ -697,9 +732,9 @@
                 isActive: status === "Active"
             };
             if (editId !== null) {
-                await $.ajax({ url: ADMIN_API_BASE + "/categories/" + editId, method: "PUT", contentType: "application/json", data: JSON.stringify(payload) });
+                await $.ajax({ url: ADMIN_API_BASE + "/categories/" + editId, method: "PUT",headers: authHeader(), contentType: "application/json", data: JSON.stringify(payload) });
             } else {
-                await $.ajax({ url: ADMIN_API_BASE + "/categories", method: "POST", contentType: "application/json", data: JSON.stringify(payload) });
+                await $.ajax({ url: ADMIN_API_BASE + "/categories", method: "POST",headers: authHeader(), contentType: "application/json", data: JSON.stringify(payload) });
             }
 
             categoryModal.hide();
@@ -737,7 +772,7 @@
         try {
             var deletedCat = categories.find(function (c) { return c.id === deleteId; });
             var deletedName = deletedCat ? deletedCat.name : "Category";
-            await $.ajax({ url: ADMIN_API_BASE + "/categories/" + deleteId, method: "DELETE" });
+            await $.ajax({ url: ADMIN_API_BASE + "/categories/" + deleteId, method: "DELETE", headers: authHeader() });
             deleteId = null;
             deleteModal.hide();
             await applyFilters();
@@ -749,6 +784,8 @@
     }
 
     $(document).ready(async function () {
+    
+        if (!checkAuth()) return;
         categoryModal = new bootstrap.Modal(document.getElementById("categoryModal"));
         deleteModal = new bootstrap.Modal(document.getElementById("deleteModal"));
 

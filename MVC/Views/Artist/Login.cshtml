@@ -299,7 +299,7 @@
                                 // JavaScript usually converts C# PascalCase to camelCase in JSON
                                 localStorage.setItem("userData", JSON.stringify(res.userData));
                                 Swal.fire({ icon: 'success', title: 'Welcome!', showConfirmButton: false, timer: 1200 })
-                                    .then(() => window.location.href = "/Artist/Upload");
+                                    .then(() => window.location.href = "/Artist/DashBoard");
                             } else {
                                 btn.prop("disabled", false).text("SIGN IN");
                                 Swal.fire('Error', res.message || 'Login failed', 'error');

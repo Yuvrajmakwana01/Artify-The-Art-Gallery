@@ -1,0 +1,375 @@
+@{
+    Layout = "_Layout";
+     ViewData["Title"] = "About Us - Artify";
+}
+
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+<style>
+:root{
+    --gold:#b8761a;
+    --gold-light:#f0c060;
+    --bg:#f9f7f3;
+    --white:#ffffff;
+    --border:#ece6dc;
+    --text-main:#1c1711;
+    --text-muted:#6b5d4a;
+}
+
+body{
+    font-family:'DM Sans',sans-serif;
+    background:var(--bg);
+    color:var(--text-main);
+    overflow-x:hidden;
+}
+
+/* HERO */
+.about-hero{
+    background:linear-gradient(135deg,#fff,#f5efe6);
+    padding:120px 24px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+    border-radius:32px 32px 32px 4px;
+}
+
+.hero-content{
+    position:relative;
+    z-index:2;
+    animation:fadeUp 1s ease forwards;
+}
+
+@@keyframes fadeUp{
+    from{opacity:0;transform:translateY(30px);}
+    to{opacity:1;transform:translateY(0);}
+}
+
+.about-hero h1{
+    font-family:'Playfair Display',serif;
+    font-size:clamp(2.8rem,6vw,4.5rem);
+    line-height:1.1;
+    margin-bottom:20px;
+}
+
+.about-hero h1 span{
+    color:var(--gold);
+}
+
+/* subtle shapes */
+.shape{
+    position:absolute;
+    background:rgba(184,118,26,0.08);
+    border-radius:50%;
+    filter:blur(60px);
+    animation:float 10s infinite ease-in-out;
+}
+
+.shape-1{width:280px;height:280px;top:-80px;left:-40px;}
+.shape-2{width:200px;height:200px;bottom:-40px;right:-20px;}
+
+@@keyframes float{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-15px);}
+}
+
+/* BUTTON */
+.btn-sp-white{
+    background:linear-gradient(135deg,var(--gold),var(--gold-light));
+    color:#fff;
+    padding:16px 36px;
+    border-radius:50px;
+    font-weight:700;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    transition:.3s;
+    box-shadow:0 8px 20px rgba(184,118,26,.2);
+}
+
+.btn-sp-white:hover{
+    transform:scale(1.05);
+    box-shadow:0 12px 30px rgba(184,118,26,.3);
+}
+
+/* SECTION */
+.section{
+    max-width:1200px;
+    margin:auto;
+    padding:100px 24px;
+}
+
+.section-label{
+    color:var(--gold);
+    font-weight:700;
+    letter-spacing:.15em;
+    font-size:.75rem;
+    text-transform:uppercase;
+}
+
+.section-title{
+    font-family:'Playfair Display',serif;
+    font-size:2.5rem;
+    margin-bottom:30px;
+}
+
+/* CARDS */
+.bg-light-card{
+    background:var(--white);
+    border:1px solid var(--border);
+    box-shadow:0 10px 25px rgba(0,0,0,.04);
+}
+
+/* TEAM */
+.team-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    gap:30px;
+    margin-top:50px;
+}
+
+.team-card{
+    background:var(--white);
+    border-radius:24px;
+    padding:30px;
+    text-align:center;
+    border:1px solid var(--border);
+    transition:.4s;
+}
+
+.team-card:hover{
+    transform:translateY(-10px);
+    border-color:var(--gold);
+    box-shadow:0 20px 40px rgba(0,0,0,.08);
+}
+
+.team-card img{
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    object-fit:cover;
+    margin-bottom:15px;
+    border:2px solid var(--border);
+}
+
+.member-name{
+    font-weight:600;
+    margin-bottom:4px;
+}
+
+.member-role{
+    color:var(--gold);
+    font-size:.75rem;
+}
+
+/* CTA */
+.bgmy{
+    background:linear-gradient(135deg,#fff,#f3ede3);
+    border-radius:30px;
+    box-shadow:0 15px 40px rgba(0,0,0,.06);
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.2rem 4vw;
+  transition:all 0.4s;
+}
+nav.scrolled{
+  background:rgba(250,247,242,0.92);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 4px 30px var(--shadow);
+}
+.nav-logo{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.9rem;font-weight:700;
+  color:var(--ink);text-decoration:none;
+  letter-spacing:-0.5px;
+}
+.nav-logo em{color:var(--gold);font-style:normal}
+.nav-links{display:flex;align-items:center;gap:2.5rem}
+.nav-links a{
+  font-size:0.8rem;font-weight:400;
+  color:var(--muted);text-decoration:none;
+  letter-spacing:0.05em;text-transform:uppercase;
+  transition:color 0.2s;position:relative;
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-4px;left:0;right:0;
+  height:1px;background:var(--gold);transform:scaleX(0);
+  transition:transform 0.25s;transform-origin:left;
+}
+.nav-links a:hover{color:var(--ink)}
+.nav-links a:hover::after{transform:scaleX(1)}
+.btn-nav{
+  padding:0.55rem 1.4rem;border-radius:5px;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:0.8rem;font-weight:400;
+  text-decoration:none;transition:all 0.2s;
+  letter-spacing:0.03em;
+}
+.btn-nav-ghost{
+  border:1px solid var(--border2);color:var(--ink);background:transparent;
+}
+.btn-nav-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-nav-solid{
+  background:var(--ink);color:var(--cream);border:1px solid var(--ink);
+}
+.btn-nav-solid:hover{background:var(--gold);border-color:var(--gold)}
+
+</style>
+
+<nav id="navbar">
+  <a href="#" class="nav-logo">Artify<em>.</em></a>
+  <div class="nav-links">
+    <a asp-action="Landingpage" asp-controller="Home">Home</a>
+    @* <a asp-action="ExploreArt" asp-controller="Buyer">Gallery</a> *@
+    <a asp-action="Index" asp-controller="Artist">Artist</a>
+    <a asp-action="AboutUs" asp-controller="Home">About</a>
+    
+  </div>
+  <div style="display:flex;gap:10px;align-items:center">
+    <a asp-action="UserLogin" asp-controller="Auth" class="btn-nav btn-nav-ghost">
+      <span class="k-icon k-i-logout"></span> Login/Sign Up
+    </a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="about-hero">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+
+    <div class="hero-content">
+        <span class="badge bg-white text-dark rounded-pill px-3 py-2 mb-4 fw-bold shadow-sm">
+            THE ARTIFY COLLECTIVE
+        </span>
+
+        <h1>Crafting the Future of<br><span>Digital Art</span></h1>
+
+        <p>
+            Artify empowers artists to showcase, sell, and scale their creativity globally —
+            while giving collectors access to extraordinary digital works.
+        </p>
+
+        <div class="mt-5">
+            <a href="/auth/register?role=artist" class="btn-sp-white">
+                <i class="bi bi-brush"></i> Start Creating
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION -->
+<div class="section">
+    <div class="row align-items-center g-5">
+        <div class="col-lg-6" data-aos="fade-right">
+            <span class="section-label">Our Vision</span>
+            <h2 class="section-title">Built for Creators First</h2>
+
+            <p class="text-muted">
+                Artify is designed to give artists full ownership — from pricing to audience reach —
+                while ensuring seamless discovery for collectors worldwide.
+            </p>
+
+            <p class="text-muted">
+                With real-time analytics, secure payments, and a premium interface,
+                we bring creativity and commerce together beautifully.
+            </p>
+        </div>
+
+        <div class="col-lg-6" data-aos="fade-left">
+            <div class="row g-3">
+                <div class="col-6">
+                    <div class="p-4 bg-light-card rounded-4 text-center">
+                        <h3 class="fw-bold text-warning mb-1">50+</h3>
+                        <small class="text-muted">Countries</small>
+                    </div>
+                </div>
+
+                <div class="col-6">
+                    <div class="p-4 bg-light-card rounded-4 text-center">
+                        <h3 class="fw-bold text-warning mb-1">95%</h3>
+                        <small class="text-muted">Artist Earnings</small>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="p-4 bg-light-card rounded-4 d-flex gap-3">
+                        <i class="bi bi-bar-chart text-warning h2"></i>
+                        <div>
+                            <h6 class="fw-bold">Smart Analytics</h6>
+                            <small class="text-muted">Track views, sales & growth</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TEAM -->
+<div class="section" style="padding-top:0;">
+    <span class="section-label">The Creators</span>
+    <h2 class="section-title">Meet the Team</h2>
+
+    <div class="team-grid">
+        @{
+            var members = new[] {
+                new { Name = "Ankit Chhuhhar", Role = "Mentor", Img = "Ankit_Sir.jpeg" },
+                new { Name = "Deep Pokiya", Role = "Architect", Img = "Deep_Sir.jpeg" },
+                new { Name = "Meet Patel", Role = "Backend", Img = "Meet_Sir.jpeg" },
+                new { Name = "Priyanshu Singh", Role = "Frontend", Img = "Priyanshu.jpeg" },
+                new { Name = "Nishi Shah", Role = "Design Lead", Img = "Nishi_Ma'am.jpeg" },
+                new { Name = "Disha Patel", Role = "UI/UX", Img = "Disha.jpeg" },
+                new { Name = "Shruti Dabhi", Role = "Testing", Img = "Shruti.jpeg" },
+                new { Name = "Vaidushi Oza", Role = "QA", Img = "Vaidushi.jpeg" },
+                new { Name = "Brijesh Shah", Role = "Support", Img = "Brijesh.jpeg" },
+                new { Name = "Bhavik Patel", Role = "DevOps", Img = "Bhavik.jpeg" },
+                new { Name = "Yuvraj Makwana", Role = "Data", Img = "Yuvraj.jpeg" },
+                new { Name = "Vineet Pal", Role = "Full Stack", Img = "Vineet.jpeg" }
+            };
+
+            foreach (var m in members)
+            {
+                <div class="team-card" data-aos="fade-up">
+                    <img src="~/TeamMembersPic/@m.Img" asp-append-version="true" alt="@m.Name">
+                    <div class="member-name">@m.Name</div>
+                    <div class="member-role">@m.Role</div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<!-- CTA -->
+<div class="container mb-5">
+    <div class="bgmy text-center p-5">
+        <h2 class="fw-bold mb-3">Ready to showcase your art?</h2>
+        <p class="text-muted mb-4">
+            Join Artify and turn your creativity into a global experience.
+        </p>
+
+        <a href="/auth/UserLogin"
+           class="btn btn-warning btn-lg rounded-pill px-5 fw-bold">
+            Get Started
+        </a>
+    </div>
+</div>
+
+@section Scripts{
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+$(document).ready(function(){
+    AOS.init({
+        duration:800,
+        once:true
+    });
+});
+</script>
+}

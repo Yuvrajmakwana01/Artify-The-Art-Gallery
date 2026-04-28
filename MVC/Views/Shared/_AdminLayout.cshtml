@@ -4,10 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Artify Admin</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="~/css/adminsite.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/kendo/kendo.default-v2.min.css" />
 </head>
+
 <body>
 
     <!-- SIDEBAR -->
@@ -18,175 +21,147 @@
             <div class="sidebar-logo">
                 <i class="bi bi-layers-fill"></i>
             </div>
-    <link rel="stylesheet" href="~/lib/kendo/kendo.default-v2.min.css" />
-</head>
-<body>
-
-    <!-- ── SIDEBAR ────────────────────────────────────────────────────────── -->
-    <nav id="sidebar">
-
-        <div class="sidebar-brand">
-            <div class="sidebar-logo"><i class="bi bi-layers-fill"></i></div>
             <div class="sidebar-brand-text">
                 <span class="sidebar-brand-name">Artify</span>
                 <span class="sidebar-brand-tag">Admin Dashboard</span>
             </div>
         </div>
 
-        <!-- Main Nav -->
-        <span class="nav-section-label">Main</span>
-        <ul class="nav flex-column sidebar-nav">
-            <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")"
-                   asp-controller="Admin" asp-action="Index">
-                   asp-controller="Dashboard" asp-action="Index">
-                    <i class="bi bi-speedometer2"></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Artists" ? "active" : "")"
-                   asp-controller="Artists" asp-action="Index">
-                <a class="nav-link @((ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Artists") ? "active" : "")"
-                   asp-controller="Admin" asp-action="Artists">
-                    <i class="bi bi-person"></i>
-                    <span>Artists</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @((ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Users") ? "active" : "")"
-                   asp-controller="Admin" asp-action="Users">
-                    <i class="bi bi-people"></i>
-                    <span>Users</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Artworks" ? "active" : "")"
-                   asp-controller="Artworks" asp-action="Index">
-                    <i class="bi bi-image"></i>
-                    <span>Artworks</span>
-                    <i class="bi bi-speedometer2"></i><span>Dashboard</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Artists" ? "active" : "")"
-                   asp-controller="Artists" asp-action="Index">
-                    <i class="bi bi-person"></i><span>Artists</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminArtworkModerationMvc" ? "active" : "")"
-                   asp-controller="AdminArtworkModerationMvc" asp-action="Index">
-                    <i class="bi bi-image"></i><span>Artworks</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Sales" ? "active" : "")"
-                   asp-controller="Admin" asp-action="PaymentDetails">
-                    <i class="bi bi-cart"></i>
-                    <span>Payment Details</span>
-                   asp-controller="Sales" asp-action="Index">
-                    <i class="bi bi-cart"></i>
-                    <span>Sales</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @((ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Categories") ? "active" : "")"
-                   asp-controller="Admin" asp-action="Categories">
-                    <i class="bi bi-tags"></i>
-                    <span>Categories</span>
-                    <i class="bi bi-cart"></i><span>Sales</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Analytics" ? "active" : "")"
-                   asp-controller="Analytics" asp-action="Index">
-                    <i class="bi bi-bar-chart"></i>
-                    <span>Analytics</span>
-                    <i class="bi bi-bar-chart"></i><span>Analytics</span>
-                </a>
-            </li>
-        </ul>
+        <!-- FLEX WRAPPER -->
+        <div class="sidebar-content d-flex flex-column h-100">
 
-        <!-- Account Nav -->
-        <span class="nav-section-label">Account</span>
-        <ul class="nav flex-column sidebar-nav">
-            <li class="nav-item">
-                <a class="nav-link" asp-controller="Account" asp-action="Logout">
-                    <i class="bi bi-box-arrow-in-left"></i>
-                    <span>Logout</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" asp-controller="Account" asp-action="Setting">
-                    <i class="bi bi-gear"></i>
-                    <span>Setting</span>
-        <span class="nav-section-label">Account</span>
-        <ul class="nav flex-column sidebar-nav">
-            <li class="nav-item">
-                <a class="nav-link" asp-controller="Account" asp-action="Setting">
-                    <i class="bi bi-gear"></i><span>Settings</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                {{!-- Logout: clears localStorage then redirects --}}
-                <a class="nav-link" href="#" id="logoutBtn">
-                    <i class="bi bi-box-arrow-right"></i><span>Logout</span>
-                </a>
-            </li>
-        </ul>
+            <!-- MAIN NAV -->
+            <div>
+                <span class="nav-section-label">Main</span>
+                <ul class="nav flex-column sidebar-nav">
 
-        <!-- User Footer -->
-        <div class="sidebar-user">
-            <div class="sidebar-avatar">AA</div>
-            <div class="sidebar-user-info">
-                <span class="sidebar-user-name">Admin</span>
-                <span class="sidebar-user-role">Super admin</span>
-        <!-- Admin name + initials filled by JS from localStorage -->
-        <div class="sidebar-user">
-            <div class="sidebar-avatar" id="sidebarInitials">--</div>
-            <div class="sidebar-user-info">
-                <span class="sidebar-user-name" id="sidebarName">Admin</span>
-                <span class="sidebar-user-role">Super Admin</span>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
+                               asp-controller="Admin" asp-action="Index">
+                            <i class="bi bi-speedometer2"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Artists" ? "active" : "")"
+                               asp-controller="Admin" asp-action="Artists">
+                            <i class="bi bi-person"></i>
+                            <span>Artists</span>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Artworks" ? "active" : "")"
+                               asp-controller="Admin" asp-action="Artworks">
+                            <i class="bi bi-bar-chart"></i>
+                            <span>Artworks</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Users" ? "active" : "")"
+                               asp-controller="Admin" asp-action="Users">
+                            <i class="bi bi-people"></i>
+                            <span>Users</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Categories" ? "active" : "")"
+                               asp-controller="Admin" asp-action="Categories">
+                            <i class="bi bi-tags"></i>
+                            <span>Categories</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Payouts" ? "active" : "")"
+                               asp-controller="Admin" asp-action="Payouts">
+                            <i class="bi bi-cash-stack"></i>
+                            <span>Payout Details</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Orders" ? "active" : "")"
+                               asp-controller="Admin" asp-action="Orders">
+                            <i class="bi bi-cart"></i>
+                            <span>Orders Details</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "SalesSummary" ? "active" : "")"
+                               asp-controller="Admin" asp-action="SalesSummary">
+                            <i class="bi bi-bar-chart"></i>
+                            <span>Sales / Analytics</span>
+                        </a>
+                    </li>
+
+                </ul>
             </div>
+
+            <!-- ACCOUNT NAV (BOTTOM) -->
+            <div class="mt-auto">
+                <span class="nav-section-label">Account</span>
+                <ul class="nav flex-column sidebar-nav">
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0)" onclick="logout()">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span>Logout</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Account" asp-action="Setting">
+                            <i class="bi bi-gear"></i>
+                            <span>Setting</span>
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+
         </div>
 
     </nav>
 
-    <!-- WRAPPER: topbar + content -->
+
+    <!-- MAIN WRAPPER -->
     <div class="main-wrapper">
 
         <!-- TOPBAR -->
-    <!-- ── MAIN WRAPPER ───────────────────────────────────────────────────── -->
-    <div class="main-wrapper">
-
         <header class="topbar">
-            <div class="topbar-search">
-                <i class="bi bi-search"></i>
-                <input type="text" placeholder="Search anything..." />
+
+            <!-- LEFT: PAGE TITLE -->
+            <div class="topbar-left">
             </div>
+
+            <!-- RIGHT: ACTIONS -->
             <div class="topbar-actions">
+
+                <!-- Notification -->
                 <div class="icon-btn position-relative">
                     <i class="bi bi-bell"></i>
                     <span class="notif-dot"></span>
                 </div>
-                <div class="icon-btn">
-                    <i class="bi bi-gear"></i>
+
+                <!-- Divider -->
+                <div class="topbar-divider"></div>
+
+                <!-- Profile -->
+                <div class="topbar-profile">
+                    <div class="topbar-avatar">AA</div>
                 </div>
-                <div class="topbar-avatar">AA</div>
+
             </div>
+
         </header>
+
 
         <!-- PAGE CONTENT -->
-                    <i class="bi bi-person-circle"></i>
-                </div>
-                <a class="icon-btn" href="#" id="topbarLogoutBtn" title="Logout">
-                    <i class="bi bi-box-arrow-right"></i>
-                </a>
-                <div class="topbar-avatar" id="topbarInitials">--</div>
-            </div>
-        </header>
-
         <main class="content-area">
             @RenderBody()
         </main>
@@ -196,57 +171,53 @@
             <div class="container-fluid">
                 &copy; 2026 - Artify
             </div>
-        <footer class="site-footer">
-            <div class="container-fluid">&copy; 2026 - Artify Admin</div>
         </footer>
 
     </div>
 
+
+    <!-- SCRIPTS -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-
-</body>
-</html>
-
-    <script>
-        // ── Auth guard — checking localStorage ───
-        var adminToken = localStorage.getItem("adminToken");
-        if (!adminToken) {
-            window.location.href = "/Admin/Login";
-        }
-
-        // ── Populate admin name and initials from localStorage ─────────────────
-        var adminData = JSON.parse(localStorage.getItem("adminData") || "{}");
-        var adminName = adminData.c_AdminName || "Admin";
-        var words = adminName.trim().split(" ");
-        var initials = words.map(function (w) { return w[0]; }).join("").toUpperCase().slice(0, 2);
-
-        document.getElementById("sidebarName").textContent = adminName;
-        document.getElementById("sidebarInitials").textContent = initials;
-        document.getElementById("topbarInitials").textContent = initials;
-
-        // ── Logout — clears localStorage then goes to /Admin/Logout ───────────
-        // /Admin/Logout also calls Session.Clear() on the server side
-        function doLogout() {
-            localStorage.removeItem("adminToken");
-            localStorage.removeItem("adminData");
-            window.location.href = "/Admin/Logout";
-        }
-
-        document.getElementById("logoutBtn").addEventListener("click", function (e) {
-            e.preventDefault();
-            if (confirm("Are you sure you want to logout?")) doLogout();
-        });
-
-        document.getElementById("topbarLogoutBtn").addEventListener("click", function (e) {
-            e.preventDefault();
-            if (confirm("Are you sure you want to logout?")) doLogout();
-        });
-    </script>
     <script src="~/lib/kendo/kendo.all.min.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 
+    <script>
+            function logout() {
+                localStorage.removeItem("adminToken");
+                localStorage.removeItem("adminExpiry");   
+                localStorage.removeItem("adminData");
+
+                window.location.href = "/Home/Landingpage";
+            }
+    </script>
+    <script>
+            (function () {
+                const token = localStorage.getItem("adminToken");
+                const expiry = localStorage.getItem("adminExpiry");
+
+                // ❌ No token or expiry
+                if (!token || !expiry) {
+                    localStorage.clear();
+                    window.location.href = "/Admin/Login";
+                    return;
+                }
+
+                // ❌ Expired token
+                if (Date.now() > expiry * 1000) {
+                    localStorage.clear();
+                    window.location.href = "/Admin/Login";
+                    return;
+                }
+
+                // ❌ Invalid token format
+                if (!token.includes(".")) {
+                    localStorage.clear();
+                    window.location.href = "/Admin/Login";
+                }
+            })();
+    </script>
 </body>
+
 </html>

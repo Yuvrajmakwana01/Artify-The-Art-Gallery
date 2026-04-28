@@ -27,4 +27,11 @@ namespace Repository.Models
         [Compare("c_NewPassword", ErrorMessage = "Passwords do not match")]
         public string c_ConfirmPassword { get; set; }
     }
+
+    public class t_VerifyOtp
+{
+    public string c_Email { get; set; }
+    public string c_Otp { get; set; }
+    public DateTime Expiry { get; set; }
+}
 }

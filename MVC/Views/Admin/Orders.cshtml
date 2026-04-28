@@ -1,0 +1,929 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@using System.Text.Json
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Orders & Transactions";
+
+    var apiBaseUrl = (Configuration["ApiSettings:BaseUrl"] ?? string.Empty).TrimEnd('/');
+}
+
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    body,
+    #sidebar,
+    .topbar,
+    .content-area,
+    .orders-shell,
+    .orders-shell * {
+        font-family: 'Inter', 'Segoe UI', sans-serif !important;
+    }
+
+    .orders-shell {
+        padding: 20px 22px 26px;
+    }
+
+    .orders-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 18px;
+    }
+
+    .orders-title {
+        margin: 0;
+        color: #1d2942;
+        font-size: 19px;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+
+    .orders-subtitle {
+        margin: 8px 0 0;
+        color: #8d9bb0;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .page-btn {
+        height: 34px;
+        padding: 0 14px;
+        border: 1px solid #e6ebf2;
+        border-radius: 12px;
+        background: #fff;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+    }
+
+    .panel {
+        border: 1px solid #edf1f6;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 18px 44px rgba(148, 163, 184, 0.10);
+    }
+
+    .orders-filters {
+        padding: 16px 18px;
+        margin-bottom: 18px;
+    }
+
+    .orders-filters-row {
+        display: grid;
+        grid-template-columns: auto 140px 170px 170px 1fr auto;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .orders-filter-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #7c8ba4;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .orders-filter-chip {
+        position: relative;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        padding: 0 14px;
+        border: 1px solid #e7ecf3;
+        border-radius: 14px;
+        background: #fff;
+    }
+
+    .orders-filter-chip.highlight {
+        border-color: #ffd9bf;
+        background: #fff3ea;
+    }
+
+    .orders-filter-chip select {
+        width: 100%;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: #5f7088;
+        font-size: 13px;
+        font-weight: 800;
+        appearance: none;
+        padding-right: 18px;
+    }
+
+    .orders-filter-chip.highlight select {
+        color: #5f7088;
+    }
+
+    .orders-filter-chip select option {
+        color: #1d2942;
+    }
+
+    .orders-filter-chip i {
+        position: absolute;
+        right: 14px;
+        color: #7f8ea5;
+        font-size: 12px;
+        pointer-events: none;
+    }
+
+    .orders-filter-reset-wrap {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .orders-filter-reset {
+        width: 40px;
+        justify-content: center;
+        padding: 0;
+        color: #8d9bb0;
+    }
+
+    .orders-table-panel {
+        overflow: hidden;
+        margin-bottom: 18px;
+    }
+
+    .orders-table-wrap {
+        overflow-x: auto;
+    }
+
+    .orders-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 900px;
+    }
+
+    .orders-table thead th {
+        padding: 16px 18px 14px;
+        background: #f8fafc;
+        text-align: left;
+        color: #7f8ea5;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .orders-table tbody td {
+        padding: 16px 18px;
+        border-bottom: 1px solid #f1f4f8;
+        vertical-align: middle;
+        color: #2d3952;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .orders-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .orders-empty {
+        padding: 28px 18px 34px;
+        color: #94a3b8;
+        font-size: 13px;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    .orders-footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 16px;
+        padding: 16px 18px 18px;
+        border-top: 1px solid #f1f4f8;
+        color: #97a3b8;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .order-id {
+        color: #24324b;
+        font-size: 15px;
+        font-weight: 800;
+        line-height: 1.3;
+    }
+
+    .buyer-wrap,
+    .artwork-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .buyer-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #f17b1f;
+        background: linear-gradient(135deg, #ffe0ce 0%, #ffbe97 100%);
+        font-size: 12px;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    .buyer-avatar.cool {
+        color: #7486a7;
+        background: linear-gradient(135deg, #edf3ff 0%, #dae6ff 100%);
+    }
+
+    .stack-strong {
+        color: #2d3952;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .stack-soft {
+        margin-top: 4px;
+        color: #9aa7b8;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    .artwork-thumb {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        position: relative;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .artwork-thumb.peach {
+        background: linear-gradient(160deg, #f9dcc2 0%, #ecbf95 100%);
+    }
+
+    .artwork-thumb.sand {
+        background: linear-gradient(160deg, #f5dfca 0%, #e4b27e 100%);
+    }
+
+    .artwork-thumb.landscape {
+        background: linear-gradient(160deg, #82aec8 0%, #a4d1bb 52%, #e7c274 100%);
+    }
+
+    .artwork-thumb.night {
+        background: linear-gradient(160deg, #2b2f3b 0%, #65513f 100%);
+    }
+
+    .artwork-thumb.gold {
+        background: linear-gradient(160deg, #ffe38b 0%, #ffc94a 100%);
+    }
+
+    .artwork-thumb::before,
+    .artwork-thumb::after {
+        content: "";
+        position: absolute;
+    }
+
+    .artwork-thumb::before {
+        left: -2px;
+        bottom: 6px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.38);
+    }
+
+    .artwork-thumb::after {
+        right: 6px;
+        bottom: 4px;
+        width: 7px;
+        height: 18px;
+        border-radius: 4px;
+        background: rgba(55, 43, 35, 0.24);
+    }
+
+    .order-date {
+        color: #7d8ba2;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .order-amount {
+        color: #1d2942;
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .orders-pager {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .orders-pager button {
+        min-width: 30px;
+        height: 30px;
+        padding: 0 8px;
+        border: 0;
+        border-radius: 10px;
+        background: transparent;
+        color: #8c99ae;
+        font-size: 13px;
+        font-weight: 800;
+        transition: background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .orders-pager button:hover:not(:disabled):not(.active) {
+        background: #f5f7fb;
+        color: #52637c;
+    }
+
+    .orders-pager button.active {
+        background: linear-gradient(135deg, #ff8b3d 0%, #f55a00 100%);
+        color: #fff;
+        box-shadow: 0 10px 24px rgba(245, 90, 0, 0.24);
+    }
+
+    .orders-pager button:disabled {
+        opacity: 0.4;
+    }
+
+    .orders-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .orders-metric {
+        padding: 18px;
+    }
+
+    .orders-metric-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .orders-metric-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        font-size: 15px;
+    }
+
+    .orders-metric-icon.orange {
+        background: #fff0e4;
+        color: #f0821c;
+    }
+
+    .orders-metric-icon.blue {
+        background: #e9f0ff;
+        color: #5883f3;
+    }
+
+    .orders-metric-icon.gold {
+        background: #fff6de;
+        color: #d7a01e;
+    }
+
+    .orders-metric-change {
+        color: #33ae61;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .orders-metric-change.neutral {
+        color: #8d9bb0;
+    }
+
+    .orders-metric-label {
+        margin: 0 0 6px;
+        color: #8d9bb0;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .orders-metric-value {
+        margin: 0;
+        color: #1d2942;
+        font-size: 20px;
+        font-weight: 800;
+        line-height: 1.15;
+    }
+
+    @@media (max-width: 1200px) {
+        .orders-filters-row,
+        .orders-metrics {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .orders-filter-label,
+        .orders-filter-reset-wrap {
+            grid-column: span 2;
+        }
+    }
+
+    @@media (max-width: 900px) {
+        .orders-header,
+        .orders-footer {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .orders-footer {
+            align-items: flex-end;
+        }
+
+        .orders-filters-row,
+        .orders-metrics {
+            grid-template-columns: 1fr;
+        }
+
+        .orders-filter-label,
+        .orders-filter-reset-wrap {
+            grid-column: auto;
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .orders-shell {
+            padding: 16px;
+        }
+    }
+</style>
+
+<section class="orders-shell">
+
+    <div class="orders-header">
+        <div class="orders-header-main">
+            <h1 class="orders-title">Orders &amp; Transactions</h1>
+            <p class="orders-subtitle">Manage and track all artwork sales, payouts, and customer histories.</p>
+        </div>
+        <button type="button" id="exportOrders" class="page-btn">
+            <i class="bi bi-download"></i>
+            Export CSV
+        </button>
+    </div>
+
+    <section class="panel orders-filters">
+        <div class="orders-filters-row">
+
+            <div class="orders-filter-label">
+                <i class="bi bi-funnel-fill"></i>
+                <span>Filters:</span>
+            </div>
+
+            <div class="orders-filter-chip highlight">
+                <select id="timeFilter">
+                    <option>All Time</option>
+                    <option>This Week</option>
+                    <option>Recent</option>
+                </select>
+                <i class="bi bi-chevron-down"></i>
+            </div>
+
+            <div class="orders-filter-chip">
+                <select id="statusFilter">
+                    <option value="">Status: Any</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Refunded">Refunded</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+                <i class="bi bi-chevron-down"></i>
+            </div>
+
+            <div class="orders-filter-chip">
+                <select id="priceFilter">
+                    <option value="">Price Range</option>
+                    <option value="0-1000">Below $1,000</option>
+                    <option value="1000-2000">$1,000 - $2,000</option>
+                    <option value="2000+">Above $2,000</option>
+                </select>
+                <i class="bi bi-wallet2"></i>
+            </div>
+
+            <div class="orders-filter-chip">
+                <select id="categoryFilter">
+                    <option value="">Category</option>
+                </select>
+                <i class="bi bi-suit-club-fill"></i>
+            </div>
+
+            <div class="orders-filter-reset-wrap">
+                <button type="button" id="resetFilters" class="page-btn orders-filter-reset" aria-label="Reset filters">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="panel orders-table-panel">
+        <div class="orders-table-wrap">
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Buyer</th>
+                        <th>Artwork</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="orders-footer">
+            <div id="ordersPager" class="orders-pager"></div>
+        </div>
+    </section>
+
+    <section class="orders-metrics">
+
+        <article class="panel orders-metric">
+            <div class="orders-metric-top">
+                <div class="orders-metric-icon orange">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+                <div class="orders-metric-change">+12.5%</div>
+            </div>
+            <p class="orders-metric-label">Total Revenue</p>
+            <p id="totalRevenueValue" class="orders-metric-value">$0.00</p>
+        </article>
+
+        <article class="panel orders-metric">
+            <div class="orders-metric-top">
+                <div class="orders-metric-icon blue">
+                    <i class="bi bi-bag-fill"></i>
+                </div>
+                <div class="orders-metric-change">+8.2%</div>
+            </div>
+            <p class="orders-metric-label">Order Volume</p>
+            <p id="orderVolumeValue" class="orders-metric-value">0</p>
+        </article>
+
+        <article class="panel orders-metric">
+            <div class="orders-metric-top">
+                <div class="orders-metric-icon gold">
+                    <i class="bi bi-bar-chart-fill"></i>
+                </div>
+                <div class="orders-metric-change neutral">Static vs last month</div>
+            </div>
+            <p class="orders-metric-label">Avg. Order Value</p>
+            <p id="avgOrderValueValue" class="orders-metric-value">$0.00</p>
+        </article>
+
+    </section>
+
+</section>
+
+@section Scripts {
+    <script>
+        const configuredBaseUrl = @Html.Raw(JsonSerializer.Serialize(apiBaseUrl));
+        const API_BASE = `${(configuredBaseUrl || "http://localhost:5183").replace(/\/$/, "")}/api/AdminOrder`;
+        
+        function checkAuth() {
+            const token = localStorage.getItem("adminToken");
+            const expiry = localStorage.getItem("adminExpiry");
+
+            if (!token || !expiry) {
+                window.location.href = "/Admin/Login";
+                return false;
+            }
+
+            if (Date.now() > expiry * 1000) {
+                localStorage.removeItem("adminToken");
+                localStorage.removeItem("adminExpiry");
+
+                window.location.href = "/Admin/Login";
+                return false;
+            }
+
+            return true;
+        }
+
+        function authHeader() {
+            if (!checkAuth()) return {};
+
+            const token = localStorage.getItem("adminToken");
+
+            return {
+                "Authorization": "Bearer " + token
+            };
+        }
+
+        function normalizeOrders(rawOrders) {
+            return Array.isArray(rawOrders)
+                ? rawOrders.map(function (order) {
+                return {
+                    id:           order.id           ?? order.Id           ?? "",
+                    buyerInitials: order.buyerInitials ?? order.BuyerInitials ?? "",
+                    buyerName:    order.buyerName     ?? order.BuyerName     ?? "",
+                    buyerTone:    order.buyerTone     ?? order.BuyerTone     ?? "",
+                    artworkName:  order.artworkName   ?? order.ArtworkName   ?? "",
+                    artworkType:  order.artworkType   ?? order.ArtworkType   ?? "",
+                    artworkTone:  order.artworkTone   ?? order.ArtworkTone   ?? "",
+                    amount:       order.amount        ?? order.Amount        ?? 0,
+                    amountText:   order.amountText    ?? order.AmountText    ?? "",
+                    status:       order.status        ?? order.Status        ?? "",
+                    createdAt:    order.createdAt     ?? order.CreatedAt     ?? null
+                };
+            })
+                : [];
+        }
+
+        let allOrders      = [];
+        let filteredOrders = [];
+        let currentPage    = 1;
+        let pageSize       = 5;
+
+        function updateSummaryCards(data) {
+            const totalRevenue = Number(data?.totalRevenue ?? data?.TotalRevenue ?? 0);
+            const orderVolume = Number(data?.orderVolume ?? data?.OrderVolume ?? 0);
+            const averageOrderValue = Number(data?.averageOrderValue ?? data?.AverageOrderValue ?? 0);
+
+            const usdCurrency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+            const wholeNumber = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
+
+            const totalRevenueElement = document.getElementById("totalRevenueValue");
+            const orderVolumeElement = document.getElementById("orderVolumeValue");
+            const averageOrderValueElement = document.getElementById("avgOrderValueValue");
+
+            if (totalRevenueElement) totalRevenueElement.textContent = usdCurrency.format(totalRevenue);
+            if (orderVolumeElement) orderVolumeElement.textContent = wholeNumber.format(orderVolume);
+            if (averageOrderValueElement) averageOrderValueElement.textContent = usdCurrency.format(averageOrderValue);
+        }
+
+        function loadOrdersFromApi() {
+            $.ajax({
+                url: `${API_BASE}/orders-dashboard`,
+                type: "GET",
+                headers: authHeader(),
+                dataType: "json",
+                success: function (payload) {
+                    allOrders = normalizeOrders(payload?.orders ?? payload?.Orders);
+                    filteredOrders = [...allOrders];
+                    currentPage = 1;
+
+                    populateCategoryFilter(payload?.categories ?? payload?.Categories ?? []);
+                    updateSummaryCards(payload);
+                    renderOrders();
+                },
+                error: function (xhr, status, error) {
+                    console.error("Failed to load orders dashboard from API.", { xhr, status, error });
+                }
+            });
+        }
+
+        /* ── Helpers ─────────────────────────────────────────────────── */
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g,  "&amp;")
+                .replace(/</g,  "&lt;")
+                .replace(/>/g,  "&gt;")
+                .replace(/"/g,  "&quot;")
+                .replace(/'/g,  "&#39;");
+        }
+
+        function escapeCsvValue(value) {
+            const text = String(value ?? "").replace(/"/g, '""');
+            return `"${text}"`;
+        }
+
+        function formatOrderDate(order) {
+            const createdAt = order.createdAt ? new Date(order.createdAt) : null;
+            if (!createdAt || Number.isNaN(createdAt.getTime())) return "-";
+            return createdAt.toLocaleDateString("en-US", {
+                month: "short",
+                day:   "numeric",
+                year:  "numeric"
+            });
+        }
+
+        function isInRecentWindow(order, days) {
+            if (!order.createdAt) return false;
+            const createdAt = new Date(order.createdAt);
+            if (Number.isNaN(createdAt.getTime())) return false;
+            const diffMs = new Date() - createdAt;
+            return diffMs >= 0 && diffMs <= days * 24 * 60 * 60 * 1000;
+        }
+
+        /* ── Category filter ─────────────────────────────────────────── */
+
+        function populateCategoryFilter(categories) {
+            const select = document.getElementById("categoryFilter");
+            if (!select) return;
+            select.innerHTML = '<option value="">Category</option>';
+            (categories || []).forEach(category => {
+                const option = document.createElement("option");
+                option.value       = category;
+                option.textContent = category;
+                select.appendChild(option);
+            });
+        }
+
+        /* ── Filtering ───────────────────────────────────────────────── */
+
+        function applyFilters() {
+            const timeVal     = document.getElementById("timeFilter")?.value     || "All Time";
+            const statusVal   = document.getElementById("statusFilter")?.value   || "";
+            const priceVal    = document.getElementById("priceFilter")?.value    || "";
+            const categoryVal = document.getElementById("categoryFilter")?.value || "";
+
+            filteredOrders = allOrders.filter(order => {
+                const orderCategories = String(order.artworkType || "")
+                    .split(",")
+                    .map(x => x.trim())
+                    .filter(Boolean);
+
+                const matchCategory = !categoryVal ||
+                    orderCategories.some(x => x.toLowerCase() === categoryVal.toLowerCase());
+
+                const matchStatus = !statusVal ||
+                    String(order.status || "").toLowerCase() === statusVal.toLowerCase();
+
+                let matchTime = true;
+                if      (timeVal === "Recent")    matchTime = isInRecentWindow(order, 3);
+                else if (timeVal === "This Week") matchTime = isInRecentWindow(order, 7);
+
+                const amount = Number(order.amount || 0);
+                let matchPrice = true;
+                if      (priceVal === "0-1000")    matchPrice = amount < 1000;
+                else if (priceVal === "1000-2000") matchPrice = amount >= 1000 && amount <= 2000;
+                else if (priceVal === "2000+")     matchPrice = amount > 2000;
+
+                return matchCategory && matchStatus && matchTime && matchPrice;
+            });
+
+            currentPage = 1;
+            renderOrders();
+        }
+
+        function resetFilters() {
+            document.getElementById("timeFilter").value     = "All Time";
+            document.getElementById("statusFilter").value   = "";
+            document.getElementById("priceFilter").value    = "";
+            document.getElementById("categoryFilter").value = "";
+            filteredOrders = [...allOrders];
+            currentPage    = 1;
+            renderOrders();
+        }
+
+        /* ── Render: pager ───────────────────────────────────────────── */
+
+        function renderPager() {
+            const pager = document.getElementById("ordersPager");
+            if (!pager) return;
+
+            const total = filteredOrders.length;
+            if (total === 0) { pager.innerHTML = ""; return; }
+
+            const totalPages = Math.max(1, Math.ceil(total / pageSize));
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            pager.innerHTML = "";
+
+            // Previous button
+            const prevBtn = document.createElement("button");
+            prevBtn.type      = "button";
+            prevBtn.innerHTML = '<i class="bi bi-chevron-left"></i>';
+            prevBtn.disabled  = currentPage <= 1;
+            prevBtn.addEventListener("click", function () {
+                if (currentPage > 1) { currentPage--; renderOrders(); }
+            });
+            pager.appendChild(prevBtn);
+
+            // Page number buttons
+            const visiblePages = Math.min(5, totalPages);
+            const startPage    = Math.max(1, Math.min(
+                currentPage - Math.floor(visiblePages / 2),
+                totalPages - visiblePages + 1
+            ));
+            const endPage = Math.min(totalPages, startPage + visiblePages - 1);
+
+            for (let page = startPage; page <= endPage; page++) {
+                const btn = document.createElement("button");
+                btn.type        = "button";
+                btn.textContent = page;
+                if (page === currentPage) btn.classList.add("active");
+                btn.addEventListener("click", function () {
+                    currentPage = page;
+                    renderOrders();
+                });
+                pager.appendChild(btn);
+            }
+
+            // Next button
+            const nextBtn = document.createElement("button");
+            nextBtn.type      = "button";
+            nextBtn.innerHTML = '<i class="bi bi-chevron-right"></i>';
+            nextBtn.disabled  = currentPage >= totalPages;
+            nextBtn.addEventListener("click", function () {
+                if (currentPage < totalPages) { currentPage++; renderOrders(); }
+            });
+            pager.appendChild(nextBtn);
+        }
+
+        /* ── Render: table rows ──────────────────────────────────────── */
+
+        function renderOrders() {
+            const tableBody = document.getElementById("ordersTableBody");
+            if (!tableBody) return;
+
+            const start = (currentPage - 1) * pageSize;
+            const rows  = filteredOrders.slice(start, start + pageSize);
+
+            if (rows.length === 0) {
+                tableBody.innerHTML =
+                    '<tr><td colspan="5" class="orders-empty">No orders found in the connected database yet.</td></tr>';
+                renderPager();
+                return;
+            }
+
+            tableBody.innerHTML = rows.map(order => `
+                <tr>
+                    <td>
+                        <span class="order-id">${escapeHtml(order.id || "")}</span>
+                    </td>
+                    <td>
+                        <div class="buyer-wrap">
+                            <div class="buyer-avatar ${escapeHtml(order.buyerTone || "")}">
+                                ${escapeHtml(order.buyerInitials || "")}
+                            </div>
+                            <div class="stack-strong">${escapeHtml(order.buyerName || "")}</div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="artwork-wrap">
+                            <div class="artwork-thumb ${escapeHtml(order.artworkTone || "")}"></div>
+                            <div>
+                                <div class="stack-strong">${escapeHtml(order.artworkName || "")}</div>
+                                <div class="stack-soft">${escapeHtml(order.artworkType  || "")}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="order-date">${escapeHtml(formatOrderDate(order))}</span></td>
+                    <td><span class="order-amount">${escapeHtml(order.amountText || "")}</span></td>
+                </tr>
+            `).join("");
+
+            renderPager();
+        }
+
+        /* ── CSV export ──────────────────────────────────────────────── */
+
+        function exportOrdersCsv() {
+            const rows = [["Order ID", "Buyer", "Artwork", "Artwork Type", "Date", "Amount"]];
+
+            filteredOrders.forEach(order => {
+                rows.push([
+                    order.id,
+                    order.buyerName,
+                    order.artworkName,
+                    order.artworkType,
+                    formatOrderDate(order),
+                    order.amountText
+                ]);
+            });
+
+            const csv  = rows.map(row => row.map(escapeCsvValue).join(",")).join("\r\n");
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url  = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+
+            link.href     = url;
+            link.download = "artify-orders.csv";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        /* ── Init ────────────────────────────────────────────────────── */
+
+        populateCategoryFilter([]);
+        renderOrders();
+
+        document.getElementById("timeFilter")?.addEventListener("change", applyFilters);
+        document.getElementById("statusFilter")?.addEventListener("change", applyFilters);
+        document.getElementById("priceFilter")?.addEventListener("change", applyFilters);
+        document.getElementById("categoryFilter")?.addEventListener("change", applyFilters);
+        document.getElementById("resetFilters")?.addEventListener("click", resetFilters);
+        document.getElementById("exportOrders")?.addEventListener("click", exportOrdersCsv);
+
+        loadOrdersFromApi();
+    </script>
+}
+

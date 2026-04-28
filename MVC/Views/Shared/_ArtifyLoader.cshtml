@@ -1,0 +1,483 @@
+<!-- ============================================================
+     ARTIFY PAGE LOADER  —  drop before closing </body>
+     Usage: include this partial in _ArtistLayout.cshtml
+     The loader auto-hides after window.onload fires.
+     To dismiss manually: ArtifyLoader.hide()
+     To show again:       ArtifyLoader.show()
+============================================================ -->
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+    /* ── LOADER OVERLAY ── */
+    #artifyLoader {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        background: #08080e;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        overflow: hidden;
+        transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+                    visibility 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #artifyLoader.al-hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+    /* ── CANVAS LAYER ── */
+    #alCanvas {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+    }
+
+    /* ── AMBIENT BLOBS ── */
+    .al-blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.14;
+        pointer-events: none;
+        animation: alBlobDrift 9s ease-in-out infinite alternate;
+    }
+
+    .al-blob-1 {
+        width: 500px; height: 500px;
+        background: #6d28d9;
+        top: -180px; left: -120px;
+        animation-delay: 0s;
+    }
+
+    .al-blob-2 {
+        width: 380px; height: 380px;
+        background: #e8c97e;
+        bottom: -100px; right: -80px;
+        animation-delay: -4s;
+    }
+
+    .al-blob-3 {
+        width: 260px; height: 260px;
+        background: #e87eb4;
+        top: 45%; left: 55%;
+        animation-delay: -7s;
+    }
+
+    @@keyframes alBlobDrift {
+        from { transform: translate(0, 0) scale(1); }
+        to   { transform: translate(40px, 25px) scale(1.12); }
+    }
+
+    /* ── GRID DOT TEXTURE ── */
+    .al-grid {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+        background-size: 32px 32px;
+        pointer-events: none;
+    }
+
+    /* ── CORE CONTENT ── */
+    .al-core {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* ── BRUSH STAGE ── */
+    .al-brush-stage {
+        width: 200px;
+        height: 200px;
+        position: relative;
+        perspective: 600px;
+        margin-bottom: 28px;
+    }
+
+    .al-brush-wrap {
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+        animation: alBrushFloat 3.4s ease-in-out infinite;
+    }
+
+    @@keyframes alBrushFloat {
+        0%,  100% { transform: rotateX(14deg) rotateY(-18deg) translateY(0px); }
+        50%        { transform: rotateX(8deg)  rotateY(22deg)  translateY(-14px); }
+    }
+
+    .al-brush-svg {
+        width: 200px;
+        height: 200px;
+        overflow: visible;
+        filter: drop-shadow(0 22px 44px rgba(232,201,126,0.22));
+    }
+
+    /* ── LOGO ── */
+    .al-logo {
+        font-family: 'Syne', sans-serif;
+        font-size: clamp(2rem, 6vw, 3rem);
+        font-weight: 800;
+        letter-spacing: -1.5px;
+        color: #fff;
+        line-height: 1;
+    }
+
+    .al-logo span {
+        background: linear-gradient(135deg, #e8c97e, #f0a96b, #e87eb4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .al-tagline {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.72rem;
+        font-weight: 400;
+        letter-spacing: 3.5px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.28);
+        margin-top: 7px;
+        margin-bottom: 32px;
+    }
+
+    /* ── PAINT STROKE PROGRESS ── */
+    .al-stroke-wrap {
+        position: relative;
+        width: min(280px, 70vw);
+        height: 6px;
+        margin-bottom: 22px;
+    }
+
+    .al-stroke-bg {
+        position: absolute;
+        inset: 0;
+        background: rgba(255,255,255,0.07);
+        border-radius: 3px;
+    }
+
+    .al-stroke-fill {
+        position: absolute;
+        top: 0; left: 0;
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, #e8c97e, #f0a96b, #e87eb4, #7eb4e8);
+        border-radius: 3px;
+        animation: alStrokeReveal 2.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    .al-stroke-shim {
+        position: absolute;
+        top: 0; left: -60px;
+        width: 60px; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+        animation: alShimmer 2.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    @@keyframes alStrokeReveal {
+        0%         { width: 0;    opacity: 1; }
+        68%        { width: 100%; opacity: 1; }
+        84%, 100%  { width: 100%; opacity: 0; }
+    }
+
+    @@keyframes alShimmer {
+        0%        { left: -60px; }
+        68%       { left: 100%;  }
+        100%      { left: 100%;  }
+    }
+
+    /* ── STATUS TEXT ── */
+    .al-status {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.72rem;
+        font-weight: 500;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.3);
+        animation: alTextPulse 2.6s ease infinite;
+        height: 18px;
+    }
+
+    @@keyframes alTextPulse {
+        0%, 15%    { opacity: 0; transform: translateY(6px); }
+        25%, 72%   { opacity: 1; transform: translateY(0); }
+        88%, 100%  { opacity: 0; transform: translateY(-6px); }
+    }
+
+    /* ── PIXEL SPARKS ── */
+    .al-spark {
+        position: absolute;
+        width: 3px; height: 3px;
+        border-radius: 1px;
+        pointer-events: none;
+        animation: alSparkLife ease-out infinite;
+        opacity: 0;
+    }
+
+    @@keyframes alSparkLife {
+        0%   { opacity: 0; transform: scale(0) rotate(0deg) translateY(0); }
+        20%  { opacity: 1; transform: scale(1) rotate(45deg) translateY(-8px); }
+        100% { opacity: 0; transform: scale(0) rotate(180deg) translateY(-48px); }
+    }
+</style>
+
+<div id="artifyLoader">
+    <!-- ambient blobs -->
+    <div class="al-blob al-blob-1"></div>
+    <div class="al-blob al-blob-2"></div>
+    <div class="al-blob al-blob-3"></div>
+
+    <!-- grid texture -->
+    <div class="al-grid"></div>
+
+    <!-- paint drop canvas -->
+    <canvas id="alCanvas"></canvas>
+
+    <!-- floating sparks (JS-injected) -->
+    <div id="alSparks"></div>
+
+    <!-- CORE -->
+    <div class="al-core">
+
+        <!-- 3D BRUSH ILLUSTRATION -->
+        <div class="al-brush-stage">
+            <div class="al-brush-wrap">
+                <svg class="al-brush-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="alHandleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%"   stop-color="#2a1a3e"/>
+                            <stop offset="100%" stop-color="#160d25"/>
+                        </linearGradient>
+                        <linearGradient id="alMetalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%"   stop-color="#777" stop-opacity="0.4"/>
+                            <stop offset="50%"  stop-color="#ccc" stop-opacity="0.75"/>
+                            <stop offset="100%" stop-color="#777" stop-opacity="0.4"/>
+                        </linearGradient>
+                        <linearGradient id="alBristleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%"   stop-color="#e8c97e"/>
+                            <stop offset="60%"  stop-color="#f0a96b"/>
+                            <stop offset="100%" stop-color="#b86a08"/>
+                        </linearGradient>
+                        <linearGradient id="alPaintGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%"   stop-color="#e87eb4"/>
+                            <stop offset="50%"  stop-color="#7eb4e8"/>
+                            <stop offset="100%" stop-color="#e8c97e"/>
+                        </linearGradient>
+                        <radialGradient id="alGlowRing" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%"   stop-color="#e8c97e" stop-opacity="0.18"/>
+                            <stop offset="100%" stop-color="#e8c97e" stop-opacity="0"/>
+                        </radialGradient>
+                    </defs>
+
+                    <!-- glow under brush -->
+                    <ellipse cx="100" cy="148" rx="52" ry="16" fill="url(#alGlowRing)"/>
+
+                    <!-- BRUSH (rotated -36°) -->
+                    <g transform="rotate(-36,100,100)">
+                        <!-- handle -->
+                        <rect x="87" y="16" width="26" height="122" rx="4" fill="url(#alHandleGrad)" stroke="rgba(255,255,255,0.07)" stroke-width="0.5"/>
+                        <!-- grain lines -->
+                        <line x1="93"  y1="20" x2="93"  y2="132" stroke="rgba(255,255,255,0.06)" stroke-width="0.7"/>
+                        <line x1="100" y1="20" x2="100" y2="132" stroke="rgba(255,255,255,0.04)" stroke-width="0.5"/>
+                        <line x1="107" y1="20" x2="107" y2="132" stroke="rgba(255,255,255,0.06)" stroke-width="0.7"/>
+                        <!-- top cap -->
+                        <rect x="87" y="14" width="26" height="7" rx="3.5" fill="#3a2550" stroke="rgba(255,255,255,0.09)" stroke-width="0.5"/>
+                        <!-- ferrule -->
+                        <rect x="84" y="132" width="32" height="13" rx="2" fill="url(#alMetalGrad)"/>
+                        <line x1="84" y1="137" x2="116" y2="137" stroke="rgba(255,255,255,0.14)" stroke-width="0.5"/>
+                        <line x1="84" y1="141" x2="116" y2="141" stroke="rgba(0,0,0,0.18)"      stroke-width="0.5"/>
+                        <!-- bristle base -->
+                        <path d="M87 145 L113 145 L108 185 L92 185Z" fill="#b86a08" opacity="0.55"/>
+                        <!-- bristles -->
+                        <path d="M93 145 L93 190 Q94 192 95 190 L95 145Z" fill="url(#alBristleGrad)" opacity="0.9"/>
+                        <path d="M97 145 L96 193 Q97.5 195 99 193 L98 145Z" fill="url(#alBristleGrad)"/>
+                        <path d="M101 145 L100 195 Q101.5 197 103 195 L102 145Z" fill="url(#alBristleGrad)"/>
+                        <path d="M105 145 L104 193 Q105.5 195 107 193 L106 145Z" fill="url(#alBristleGrad)"/>
+                        <path d="M109 145 L109 190 Q110 192 111 190 L111 145Z" fill="url(#alBristleGrad)" opacity="0.9"/>
+                        <!-- paint blob tip -->
+                        <ellipse cx="101" cy="196" rx="11" ry="5.5" fill="url(#alPaintGrad)" opacity="0.88"/>
+                        <ellipse cx="94"  cy="194" rx="5"  ry="3"   fill="#e87eb4" opacity="0.7"/>
+                        <ellipse cx="109" cy="194" rx="4"  ry="2.5" fill="#7eb4e8" opacity="0.7"/>
+                    </g>
+
+                    <!-- decorative paint splatters -->
+                    <path d="M22 55 Q44 44 62 60 Q46 68 22 55Z" fill="#e87eb4" opacity="0.5"/>
+                    <path d="M142 34 Q166 28 175 50 Q158 47 142 34Z" fill="#7eb4e8" opacity="0.45"/>
+                    <path d="M155 158 Q178 152 184 172 Q166 167 155 158Z" fill="#e8c97e" opacity="0.5"/>
+                    <path d="M14 155 Q34 149 38 168 Q24 163 14 155Z" fill="#a78be8" opacity="0.45"/>
+                    <circle cx="172" cy="90" r="4" fill="#7ee8c9" opacity="0.5"/>
+                    <circle cx="20" cy="115" r="3" fill="#e8c97e" opacity="0.4"/>
+                    <circle cx="165" cy="130" r="2.5" fill="#e87eb4" opacity="0.45"/>
+
+                    <!-- orbiting dots -->
+                    <circle r="4" fill="#e8c97e" opacity="0.85">
+                        <animateMotion dur="4s" repeatCount="indefinite" path="M100,18 A82,82 0 1,1 99.9,18"/>
+                    </circle>
+                    <circle r="3" fill="#e87eb4" opacity="0.75">
+                        <animateMotion dur="5.8s" repeatCount="indefinite" begin="-2.2s" path="M100,18 A82,82 0 1,1 99.9,18"/>
+                    </circle>
+                    <circle r="2.5" fill="#7eb4e8" opacity="0.65">
+                        <animateMotion dur="7.2s" repeatCount="indefinite" begin="-4.5s" path="M100,18 A82,82 0 1,1 99.9,18"/>
+                    </circle>
+                </svg>
+            </div>
+        </div>
+
+        <!-- LOGO & TAGLINE -->
+        <div class="al-logo">Artif<span>y</span></div>
+        <div class="al-tagline">Your creative universe</div>
+
+        <!-- PAINT STROKE PROGRESS -->
+        <div class="al-stroke-wrap">
+            <div class="al-stroke-bg"></div>
+            <div class="al-stroke-fill">
+                <div class="al-stroke-shim"></div>
+            </div>
+        </div>
+
+        <!-- STATUS TEXT -->
+        <div class="al-status" id="alStatus">Loading studio...</div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var loader    = document.getElementById('artifyLoader');
+        var canvas    = document.getElementById('alCanvas');
+        var sparksDiv = document.getElementById('alSparks');
+        var statusEl  = document.getElementById('alStatus');
+        var ctx       = canvas.getContext('2d');
+        var W, H;
+
+        /* ── RESIZE ── */
+        function resize() {
+            W = window.innerWidth;
+            H = window.innerHeight;
+            canvas.width  = W;
+            canvas.height = H;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        /* ── PAINT DROP SYSTEM ── */
+        var colors  = ['#e8c97e', '#f0a96b', '#e87eb4', '#7eb4e8', '#a78be8', '#7ee8c9'];
+        var drops   = [];
+        var splats  = [];
+        var frameN  = 0;
+
+        function spawnDrop() {
+            drops.push({
+                x: Math.random() * W,
+                y: -12,
+                r: 2.5 + Math.random() * 5,
+                vy: 0.9 + Math.random() * 1.5,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                alpha: 0.55 + Math.random() * 0.3,
+                done: false
+            });
+        }
+
+        function paintTick() {
+            ctx.clearRect(0, 0, W, H);
+
+            if (frameN % 26 === 0) spawnDrop();
+            frameN++;
+
+            for (var i = drops.length - 1; i >= 0; i--) {
+                var d = drops[i];
+                d.y  += d.vy;
+                d.vy += 0.045;
+
+                if (!d.done) {
+                    ctx.beginPath();
+                    ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+                    ctx.fillStyle  = d.color;
+                    ctx.globalAlpha = d.alpha;
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+
+                if (d.y > H * 0.9 && !d.done) {
+                    d.done = true;
+                    splats.push({
+                        x: d.x, y: d.y,
+                        color: d.color,
+                        r: 0,
+                        maxR: d.r * 5 + Math.random() * 14,
+                        alpha: 0.42
+                    });
+                }
+            }
+            drops = drops.filter(function (d) { return d.y < H + 20 && !d.done; });
+
+            for (var j = splats.length - 1; j >= 0; j--) {
+                var s = splats[j];
+                s.r     += 0.75;
+                s.alpha -= 0.013;
+                if (s.alpha <= 0) { splats.splice(j, 1); continue; }
+                ctx.beginPath();
+                ctx.ellipse(s.x, s.y, s.r * 1.7, s.r * 0.5, 0, 0, Math.PI * 2);
+                ctx.fillStyle   = s.color;
+                ctx.globalAlpha = s.alpha;
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+
+            requestAnimationFrame(paintTick);
+        }
+        paintTick();
+
+        /* ── FLOATING SPARKS ── */
+        var sparkColors = ['#e8c97e', '#e87eb4', '#7eb4e8', '#a78be8'];
+        function createSpark() {
+            var sp = document.createElement('div');
+            sp.className = 'al-spark';
+            sp.style.left     = (10 + Math.random() * 80) + '%';
+            sp.style.top      = (20 + Math.random() * 60) + '%';
+            sp.style.background = sparkColors[Math.floor(Math.random() * sparkColors.length)];
+            var dur = (1.2 + Math.random() * 1.4).toFixed(2) + 's';
+            sp.style.animationDuration = dur;
+            sp.style.animationDelay    = (Math.random() * 2).toFixed(2) + 's';
+            sparksDiv.appendChild(sp);
+            setTimeout(function () { sp.remove(); }, 3500);
+        }
+        setInterval(createSpark, 420);
+
+        /* ── STATUS TEXT CYCLE ── */
+        var messages = [
+            'Loading studio...',
+            'Mixing pigments...',
+            'Charging brush...',
+            'Priming canvas...',
+            'Setting up palette...',
+            'Almost there...'
+        ];
+        var mi = 0;
+        setInterval(function () {
+            statusEl.style.animation = 'none';
+            void statusEl.offsetWidth;
+            statusEl.style.animation = 'alTextPulse 2.6s ease infinite';
+            mi = (mi + 1) % messages.length;
+            statusEl.textContent = messages[mi];
+        }, 2600);
+
+        /* ── AUTO-HIDE ON PAGE LOAD ── */
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                loader.classList.add('al-hidden');
+            }, 600);
+        });
+
+        /* ── PUBLIC API ── */
+        window.ArtifyLoader = {
+            show: function () { loader.classList.remove('al-hidden'); },
+            hide: function () { loader.classList.add('al-hidden'); }
+        };
+    })();
+</script>

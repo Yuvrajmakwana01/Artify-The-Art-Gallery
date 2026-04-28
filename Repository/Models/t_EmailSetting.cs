@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Repository.Models
 {
-    public class t_EmailSettings
+    public class t_EmailSetting
     {
         public string Email { get; set; }
         public string Password { get; set; }

@@ -20,12 +20,11 @@ namespace Repository.Models
         public decimal c_price { get; set; }
         public string? c_preview_path { get; set; }
         public string? c_original_path { get; set; }
-        public string c_approval_status { get; set; }
+        public string? c_approval_status { get; set; }
         public string? c_admin_note { get; set; }
         public int c_likes_count { get; set; }
         public int c_sell_count { get; set; }
 
-
-        public IFormFile ArtworkFile { get; set; }
+        public IFormFile? ArtworkFile { get; set; }
     }
 }
