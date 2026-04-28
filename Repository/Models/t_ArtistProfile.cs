@@ -30,5 +30,11 @@ public class t_ArtistProfile
     public string? ArtistEmail { get; set; }
     public decimal RatingAvg { get; set; }
     public bool IsVerified { get; set; }
+
+    // ── Profile Picture ──────────────────────────────────────────
+    /// <summary>Stored file name (saved to wwwroot/Profile_Images/)</summary>
+    public string? ProfilePicture { get; set; }
+    /// <summary>Uploaded file — bound from multipart/form-data</summary>
+    public IFormFile? ProfilePictureFile { get; set; }
 }
     }

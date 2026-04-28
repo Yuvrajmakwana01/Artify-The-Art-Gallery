@@ -1,0 +1,925 @@
+@{
+    ViewData["Title"] = "Explore Art | Artify";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+    <style>
+            :root {
+                --background: hsl(36, 33%, 97%);
+                --foreground: hsl(30, 10%, 15%);
+                --card: hsl(36, 30%, 95%);
+                --card-foreground: hsl(30, 10%, 15%);
+                --primary: hsl(30, 45%, 25%);
+                --primary-foreground: hsl(36, 33%, 97%);
+                --secondary: hsl(32, 25%, 88%);
+                --secondary-foreground: hsl(30, 10%, 15%);
+                --muted: hsl(30, 10%, 45%);
+                --accent: hsl(38, 60%, 55%);
+                --accent-foreground: hsl(30, 10%, 10%);
+                --border: hsl(32, 20%, 85%);
+                --wishlist: #DC4A4A;
+                --gold-light: hsl(38, 50%, 75%);
+                --radius: 0.75rem;
+            }
+
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Inter', sans-serif; background: var(--background); color: var(--foreground); line-height: 1.6; }
+            h1,h2,h3,h4,h5,h6 { font-family: 'Playfair Display', serif; }
+
+            /* ── Navbar ── */
+            .navbar { position: sticky; top: 0; z-index: 50; background: hsla(36, 33%, 97%, 0.85); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); }
+            .navbar-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; }
+            .logo { font-family: 'Playfair Display', serif; font-size: 1.875rem; font-weight: 700; color: var(--foreground); text-decoration: none; letter-spacing: -0.025em; transition: color 0.3s; }
+            .logo:hover { color: var(--accent); }
+            .nav-links { display: flex; gap: 2rem; }
+            .nav-links a { font-size: 0.875rem; font-weight: 500; color: var(--muted); text-decoration: none; transition: color 0.3s; position: relative; padding-bottom: 2px; }
+            .nav-links a::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background: var(--accent); transform: scaleX(0); transition: transform 0.25s; }
+            .nav-links a:hover, .nav-links a.active { color: var(--foreground); }
+            .nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
+            .nav-actions { display: flex; align-items: center; gap: 0.75rem; }
+            .icon-btn { position: relative; width: 38px; height: 38px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); transition: all 0.2s; text-decoration: none; }
+            .icon-btn:hover { background: var(--secondary); color: var(--foreground); }
+            .badge { position: absolute; top: -2px; right: -2px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9999px; background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+            .badge.zero { display: none; }
+            .avatar-btn { width: 38px; height: 38px; border-radius: 50%; border: none; background: var(--primary); color: var(--primary-foreground); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s; }
+            .avatar-btn:hover { opacity: 0.85; }
+
+            /* ── Hero ── */
+            .hero { position: relative; overflow: hidden; min-height: 52vh; display: flex; align-items: center; padding: 5rem 0 3rem; }
+
+            /* Floating art images behind hero text */
+            .hero-floating-images { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+            .hero-float-img { position: absolute; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 30px -8px hsla(30, 10%, 15%, 0.2); opacity: 0.45; }
+            .hero-float-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+            /* Individual floating image positions & animations */
+            .hero-float-img:nth-child(1) { width: 180px; height: 240px; top: 5%; left: -2%; transform: rotate(-6deg); animation: heroFloat1 12s ease-in-out infinite; }
+            .hero-float-img:nth-child(2) { width: 150px; height: 200px; top: 10%; right: 2%; transform: rotate(5deg); animation: heroFloat2 14s ease-in-out infinite; }
+            .hero-float-img:nth-child(3) { width: 130px; height: 170px; bottom: 8%; left: 8%; transform: rotate(4deg); animation: heroFloat3 11s ease-in-out infinite; }
+            .hero-float-img:nth-child(4) { width: 160px; height: 210px; bottom: 5%; right: 5%; transform: rotate(-4deg); animation: heroFloat4 13s ease-in-out infinite; }
+            .hero-float-img:nth-child(5) { width: 120px; height: 160px; top: 30%; left: 15%; transform: rotate(-3deg); animation: heroFloat5 10s ease-in-out infinite; }
+            .hero-float-img:nth-child(6) { width: 140px; height: 180px; top: 25%; right: 12%; transform: rotate(6deg); animation: heroFloat6 15s ease-in-out infinite; }
+
+            @@keyframes heroFloat1 { 0%, 100% { transform: rotate(-6deg) translate(0, 0); } 25% { transform: rotate(-4deg) translate(15px, -20px); } 50% { transform: rotate(-7deg) translate(30px, -10px); } 75% { transform: rotate(-5deg) translate(10px, 15px); } }
+            @@keyframes heroFloat2 { 0%, 100% { transform: rotate(5deg) translate(0, 0); } 25% { transform: rotate(3deg) translate(-20px, 15px); } 50% { transform: rotate(6deg) translate(-10px, 25px); } 75% { transform: rotate(4deg) translate(-25px, 5px); } }
+            @@keyframes heroFloat3 { 0%, 100% { transform: rotate(4deg) translate(0, 0); } 25% { transform: rotate(2deg) translate(20px, -15px); } 50% { transform: rotate(5deg) translate(10px, -25px); } 75% { transform: rotate(3deg) translate(25px, -5px); } }
+            @@keyframes heroFloat4 { 0%, 100% { transform: rotate(-4deg) translate(0, 0); } 25% { transform: rotate(-2deg) translate(-15px, -20px); } 50% { transform: rotate(-5deg) translate(-25px, -10px); } 75% { transform: rotate(-3deg) translate(-10px, 10px); } }
+            @@keyframes heroFloat5 { 0%, 100% { transform: rotate(-3deg) translate(0, 0); } 33% { transform: rotate(-1deg) translate(18px, -12px); } 66% { transform: rotate(-4deg) translate(-8px, 18px); } }
+            @@keyframes heroFloat6 { 0%, 100% { transform: rotate(6deg) translate(0, 0); } 33% { transform: rotate(4deg) translate(-18px, 14px); } 66% { transform: rotate(7deg) translate(12px, -16px); } }
+
+            .hero-content { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 10; text-align: center; }
+            .hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; background: var(--secondary); border-radius: 9999px; margin-bottom: 1.25rem; }
+            .hero-badge span { font-size: 0.8rem; font-weight: 500; color: var(--secondary-foreground); }
+            .hero h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; color: var(--foreground); }
+            .hero h1 .accent-text { color: var(--accent); }
+            .hero p { margin-top: 1rem; font-size: 1rem; color: var(--muted); max-width: 34rem; margin-left: auto; margin-right: auto; }
+
+            /* ── Discover Marquee ── */
+            .discover-section { padding: 4rem 0 2rem; overflow: hidden; position: relative; }
+            .discover-section .section-header { text-align: center; margin-bottom: 2.5rem; }
+            .discover-section .section-header h2 { font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 700; color: var(--foreground); }
+            .discover-section .section-header h2 span { color: var(--accent); }
+            .discover-section .section-header p { margin-top: 0.75rem; font-size: 1rem; color: var(--muted); max-width: 28rem; margin-left: auto; margin-right: auto; }
+            .marquee-wrapper { position: relative; }
+            .marquee-wrapper::before, .marquee-wrapper::after { content: ''; position: absolute; top: 0; bottom: 0; width: 120px; z-index: 2; pointer-events: none; }
+            .marquee-wrapper::before { left: 0; background: linear-gradient(to right, var(--background), transparent); }
+            .marquee-wrapper::after { right: 0; background: linear-gradient(to left, var(--background), transparent); }
+            .marquee-track { display: flex; gap: 1.25rem; width: max-content; animation: marquee-scroll 35s linear infinite; }
+            .marquee-wrapper:hover .marquee-track { animation-play-state: paused; }
+            .marquee-track-reverse { animation-direction: reverse; animation-duration: 40s; }
+            .marquee-item { flex-shrink: 0; width: 280px; height: 180px; border-radius: var(--radius); overflow: hidden; position: relative; box-shadow: 0 4px 20px -4px hsla(30, 10%, 15%, 0.12); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s; }
+            .marquee-item:hover { transform: scale(1.06); box-shadow: 0 8px 32px -4px hsla(38, 60%, 55%, 0.25); }
+            .marquee-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+            .marquee-item:hover img { transform: scale(1.08); }
+            .marquee-item .marquee-overlay { position: absolute; inset: 0; background: linear-gradient(to top, hsla(30, 10%, 15%, 0.35), transparent 60%); opacity: 0; transition: opacity 0.4s; }
+            .marquee-item:hover .marquee-overlay { opacity: 1; }
+            .marquee-row { margin-bottom: 1.25rem; }
+            @@keyframes marquee-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+            /* ── Search + Filter ── */
+            .search-section { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+            .search-row { display: flex; gap: 1rem; margin-bottom: 1rem; }
+            .search-input-wrap { position: relative; flex: 1; }
+            .search-input-wrap svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--muted); pointer-events: none; }
+            .search-input-wrap input { width: 100%; padding: 0.75rem 1rem 0.75rem 2.75rem; border: 1.5px solid var(--border); border-radius: var(--radius); background: white; font-size: 0.9rem; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; color: var(--foreground); }
+            .search-input-wrap input:focus { border-color: var(--accent); }
+            .filter-btn { padding: 0.75rem 1.25rem; border: 1.5px solid var(--border); border-radius: var(--radius); background: white; font-size: 0.875rem; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: all 0.2s; color: var(--foreground); }
+            .filter-btn:hover { border-color: var(--accent); }
+            .categories { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+            .cat-btn { padding: 0.45rem 1.1rem; border: 1.5px solid var(--border); border-radius: 9999px; background: white; font-size: 0.8rem; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s; color: var(--foreground); }
+            .cat-btn:hover { border-color: var(--accent); color: var(--accent); }
+            .cat-btn.active { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+
+            /* ── Grid Header ── */
+            .grid-header { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 1rem; display: flex; align-items: center; justify-content: space-between; }
+            .grid-header p { font-size: 0.875rem; color: var(--muted); }
+            .grid-header select { padding: 0.5rem 0.875rem; border: 1.5px solid var(--border); border-radius: var(--radius); background: white; font-size: 0.875rem; font-family: 'Inter', sans-serif; outline: none; cursor: pointer; color: var(--foreground); }
+
+            /* ── Art Grid ── */
+            .art-grid { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 4rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+            .art-card { background: var(--card); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s; animation: fade-up 0.5s ease-out both; }
+            .art-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px -6px hsla(30, 10%, 15%, 0.15); }
+            .card-img { position: relative; aspect-ratio: 4/3; overflow: hidden; }
+            .card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+            .art-card:hover .card-img img { transform: scale(1.06); }
+            .overlay { position: absolute; inset: 0; background: linear-gradient(to top, hsla(30, 10%, 10%, 0.4), transparent 60%); opacity: 0; transition: opacity 0.3s; }
+            .art-card:hover .overlay { opacity: 1; }
+            .glass-overlay { position: absolute; inset: 0; background: hsla(36, 33%, 97%, 0.06); opacity: 0; transition: opacity 0.3s; }
+            .art-card:hover .glass-overlay { opacity: 1; }
+            .cat-badge { position: absolute; top: 10px; left: 10px; padding: 3px 10px; border-radius: 9999px; background: hsla(36, 33%, 97%, 0.9); font-size: 11px; font-weight: 600; color: var(--foreground); backdrop-filter: blur(6px); }
+            .quick-actions { position: absolute; bottom: 12px; left: 12px; right: 12px; display: flex; gap: 8px; opacity: 0; transform: translateY(8px); transition: all 0.3s; }
+            .art-card:hover .quick-actions { opacity: 1; transform: translateY(0); }
+            .view-btn { flex: 1; padding: 8px 0; border-radius: 8px; border: none; background: white; font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; color: var(--foreground); text-decoration: none; transition: background 0.2s; }
+            .view-btn:hover { background: var(--primary); color: var(--primary-foreground); }
+            .cart-btn { flex: 1; padding: 8px 0; border-radius: 8px; border: none; background: var(--primary); color: var(--primary-foreground); font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: opacity 0.2s; }
+            .cart-btn:hover { opacity: 0.85; }
+            .cart-btn.in-cart { background: var(--secondary); color: var(--foreground); cursor: default; }
+            .card-info { padding: 1rem; }
+            .card-info h3 { font-size: 1rem; font-weight: 600; color: var(--foreground); margin-bottom: 2px; }
+            .card-info .artist { font-size: 0.8rem; color: var(--muted); margin-bottom: 8px; }
+            .card-info .meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+            .card-info .price { font-size: 1rem; font-weight: 700; color: var(--foreground); }
+            .card-info .views { display: flex; align-items: center; gap: 4px; font-size: 0.78rem; color: var(--muted); }
+            .wishlist-btn { width: 100%; padding: 8px; border-radius: 8px; border: 1.5px solid var(--border); background: transparent; font-size: 12px; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--muted); transition: all 0.2s; }
+            .wishlist-btn:hover { border-color: var(--wishlist); color: var(--wishlist); }
+            .wishlist-btn.active { background: hsla(0, 75%, 58%, 0.08); border-color: var(--wishlist); color: var(--wishlist); }
+
+            /* Toast notification */
+            .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--foreground); color: var(--primary-foreground); padding: 12px 24px; border-radius: 9999px; font-size: 13px; font-weight: 500; font-family: 'Inter', sans-serif; z-index: 9999; opacity: 0; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); pointer-events: none; white-space: nowrap; }
+            .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+            /* ── Loading / Error ── */
+            .loading-state { text-align: center; padding: 4rem 1.5rem; color: var(--muted); }
+            .loading-spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
+            @@keyframes spin { to { transform: rotate(360deg); } }
+            .error-state { text-align: center; padding: 4rem 1.5rem; color: var(--muted); }
+            .empty-state { text-align: center; padding: 4rem 1.5rem; color: var(--muted); }
+            @@keyframes fade-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+            @@media(max-width:768px) {
+                .nav-links { display: none; }
+                .marquee-item { width: 200px; height: 130px; }
+                .hero-float-img { opacity: 0.3; }
+                .hero-float-img:nth-child(1) { width: 120px; height: 160px; }
+                .hero-float-img:nth-child(2) { width: 100px; height: 130px; }
+                .hero-float-img:nth-child(3) { width: 90px; height: 120px; }
+                .hero-float-img:nth-child(4) { width: 110px; height: 140px; }
+                .hero-float-img:nth-child(5), .hero-float-img:nth-child(6) { display: none; }
+            }
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 4rem;
+            background: rgba(223, 230, 233, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(3, 40, 159, 0.08);
+        }
+        .nav-logo { display: flex; align-items: center; gap: .7rem; text-decoration: none; }
+        .nav-logo-icon {
+            height: 40px; width: 40px; border-radius: 12px; background: #03289F;
+            display: grid; place-items: center; font-weight: 900; color: #fff; font-size: 1.2rem;
+        }
+        .nav-logo span {
+            font-size: 1.4rem; font-weight: 700; color: #1a1a1a; letter-spacing: -.02em; font-family: 'Playfair Display', serif;
+        }
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+        .nav-links a {
+            text-decoration: none;
+            font-size: .88rem;
+            color: #1a1a1a;
+            opacity: .7;
+            transition: opacity .2s, color .2s;
+        }
+        .nav-links a:hover { opacity: 1; color: #6B9BE6; }
+        .nav-actions { display: flex; align-items: center; gap: 1rem; }
+        .nav-icon-btn {
+            position: relative; display: grid; place-items: center; height: 40px; width: 40px; border-radius: 50%;
+            border: 1.5px solid rgba(3, 40, 159, 0.08); background: rgba(255,255,255,.5); cursor: pointer; color: #1a1a1a;
+            transition: background .2s, border-color .2s, transform .2s; text-decoration: none;
+        }
+        .nav-icon-btn:hover { background: #6B9BE6; color: #fff; border-color: #6B9BE6; transform: scale(1.08); }
+        .nav-badge {
+            position: absolute; top: -4px; right: -4px; height: 16px; min-width: 16px; padding: 0 3px;
+            background: #EDA312; color: #fff; border-radius: 999px; font-size: .62rem; font-weight: 700; display: grid; place-items: center;
+        }
+
+        .page {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 2.75rem 2rem 4rem;
+            min-height: 80vh;
+        }
+        .gallery-shell {
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.82);
+            box-shadow: 0 15px 45px rgba(3, 40, 159, 0.06);
+            border-radius: 30px;
+            padding: 2rem;
+            backdrop-filter: blur(18px);
+        }
+        .page-header {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 28px;
+            align-items: end;
+            margin-bottom: 2rem;
+        }
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(23, 59, 122, 0.07);
+            color: #6B9BE6;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            margin-bottom: 0.9rem;
+        }
+        .page-header h1 {
+            font-size: clamp(1.9rem, 3vw, 2.7rem);
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 0.55rem;
+            line-height: 1.08;
+        }
+        .page-header p {
+            max-width: 680px;
+            font-size: 0.92rem;
+            color: #636e72;
+            font-weight: 500;
+        }
+        .count-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.8rem 1.05rem;
+            border-radius: 999px;
+            background: #fff;
+            border: 1px solid rgba(3, 40, 159, 0.08);
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            box-shadow: 0 10px 30px rgba(31, 41, 51, 0.05);
+        }
+        .toolbar {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 18px;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .search-section {
+            max-width: none;
+            margin: 0;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background: rgba(255,255,255,0.8);
+            border: 1px solid rgba(3, 40, 159, 0.08);
+            border-radius: 24px;
+        }
+        .search-row { margin-bottom: 0; }
+        .search-input-wrap input {
+            padding: 0.9rem 1rem 0.9rem 2.9rem;
+            border: 1.5px solid rgba(3, 40, 159, 0.08);
+            border-radius: 16px;
+        }
+        .search-input-wrap input:focus {
+            border-color: rgba(107, 155, 230, 0.7);
+            box-shadow: 0 0 0 4px rgba(107, 155, 230, 0.12);
+        }
+        .filter-btn {
+            padding: 0.88rem 1.15rem;
+            border: 1.5px solid rgba(3, 40, 159, 0.08);
+            border-radius: 16px;
+            background: white;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            cursor: default;
+        }
+        .sort-select {
+            padding: 0.88rem 1.15rem;
+            border: 1.5px solid rgba(3, 40, 159, 0.08);
+            border-radius: 16px;
+            background: white;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            font-family: 'Inter', sans-serif;
+            min-width: 200px;
+        }
+        .cat-btn {
+            padding: 0.5rem 1.05rem;
+            border: 1.5px solid rgba(3, 40, 159, 0.08);
+            border-radius: 9999px;
+            background: white;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        .cat-btn:hover { border-color: rgba(107, 155, 230, 0.5); color: #6B9BE6; }
+        .cat-btn.active { background: #03289F; color: #fff; border-color: #03289F; }
+        .grid-header {
+            max-width: none;
+            margin: 0;
+            padding: 0 0.25rem 1.25rem;
+        }
+        .grid-header p { font-size: 0.9rem; color: #636e72; font-weight: 600; }
+        .art-grid {
+            max-width: none;
+            margin: 0;
+            padding: 0;
+            gap: 1.35rem;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+        .art-card {
+            background: #fff;
+            border-radius: 24px;
+            border: 1px solid rgba(3, 40, 159, 0.08);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+        }
+        .art-card:hover {
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+            border-color: rgba(3, 40, 159, 0.12);
+        }
+        .card-img { background: #ebeef2; }
+        .card-img img { transition: transform 0.6s; }
+        .art-card:hover .card-img img { transform: scale(1.08); }
+        .cat-badge {
+            top: 12px;
+            left: 12px;
+            padding: 6px 11px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.94);
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #6B9BE6;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .view-btn, .cart-btn {
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            gap: 6px;
+        }
+        .view-btn {
+            background: rgba(255,255,255,0.96);
+            color: #1a1a1a;
+        }
+        .view-btn:hover { background: white; transform: translateY(-2px); }
+        .cart-btn { background: #03289F; color: #fff; }
+        .cart-btn:hover { opacity: 1; background: #2045b8; }
+        .cart-btn.in-cart { background: rgba(23, 59, 122, 0.08); color: #03289F; }
+        .card-info { padding: 1.15rem; }
+        .card-info h3 { font-size: 1.02rem; font-weight: 700; color: #1a1a1a; line-height: 1.2; }
+        .card-info .artist { font-size: 0.82rem; color: #636e72; margin-bottom: 12px; font-weight: 600; }
+        .card-info .price { font-size: 1.1rem; font-weight: 800; color: #1a1a1a; font-family: 'Playfair Display', serif; }
+        .wishlist-btn {
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border: 1.5px solid rgba(3, 40, 159, 0.08);
+        }
+        .wishlist-btn:hover { border-color: #d64c41; color: #d64c41; }
+        .wishlist-btn.active { background: rgba(214, 76, 65, 0.08); border-color: rgba(214, 76, 65, 0.22); color: #d64c41; }
+        .trend-card {
+            border-radius: 28px;
+            overflow: hidden;
+            border: 1px solid rgba(3, 40, 159, 0.08);
+            background: rgba(255,255,255,0.85);
+            box-shadow: 0 15px 45px rgba(3, 40, 159, 0.06);
+            transition: border-color .3s, box-shadow .3s, transform .3s;
+            position: relative;
+            cursor: pointer;
+        }
+        .trend-card:hover { border-color: rgba(237,163,18,.5); box-shadow: 0 0 40px rgba(107,155,230,.2); transform: translateY(-4px); }
+        .trend-img { aspect-ratio: 1 / 1.22; overflow: hidden; position: relative; background: #ebeef2; }
+        .trend-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .7s; display: block; }
+        .trend-card:hover .trend-img img { transform: scale(1.08); }
+        .trend-img .action-btn {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 10;
+        }
+        .trend-body { padding: 1.45rem 1.45rem 1.35rem; }
+        .trend-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #111827;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
+            text-decoration: none;
+            display: block;
+        }
+        .trend-artist { font-size: .8rem; color: #636e72; margin-top: .25rem; }
+        .artwork-card-actions {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 52px;
+            align-items: center;
+            gap: .85rem;
+            margin: 1.2rem 0 0;
+        }
+        .trend-price-row {
+            margin-top: 1.3rem;
+            border-top: 1px solid rgba(3, 40, 159, 0.08);
+            padding-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .trend-price-lbl {
+            font-size: .72rem;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+            color: rgba(107,155,230,.75);
+            font-weight: 700;
+        }
+        .trend-price-val { font-size: 1.05rem; font-weight: 800; color: #6B9BE6; }
+        .pixel-btn {
+            position: relative; width: 100%; height: 52px; border-radius: 18px; background: #1b39b5; color: #fff; border: none; cursor: pointer;
+            font-size: .85rem; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(3,40,159,0.15);
+        }
+        .pixel-btn span { position: absolute; transition: transform 0.5s ease, opacity 0.3s ease; display: flex; align-items: center; gap: 8px; }
+        .btn-cart-icon { transform: translateX(-120%); opacity: 0; }
+        .btn-text-done { transform: translateY(100%); opacity: 0; }
+        .pixel-btn.animating { background: #22c55e; box-shadow: 0 8px 25px rgba(34,197,94,0.25); pointer-events: none; }
+        .pixel-btn.animating .btn-text-add { transform: translateY(-100%); opacity: 0; }
+        .pixel-btn.animating .btn-cart-icon { animation: cartDrive 1.2s forwards; opacity: 1; }
+        .pixel-btn.animating .btn-text-done { animation: fadeDone 0.4s 1s forwards; }
+        @@keyframes cartDrive { 0% { transform: translateX(-120%); } 30% { transform: translateX(0); } 70% { transform: translateX(0); } 100% { transform: translateX(120%); opacity: 0; } }
+        @@keyframes fadeDone { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .action-btn {
+            width: 52px; height: 52px; border-radius: 18px; display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,1); border: 1px solid rgba(3, 40, 159, 0.08); cursor: pointer; color: #1a1a1a;
+            transition: all .25s; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .action-btn.liked { color: #ff4757; border-color: #ff4757; background: rgba(255,71,87,0.1); }
+        .action-btn.liked:hover { background: #ff4757; color: #fff; }
+        .action-btn.wished { color: #EDA312; border-color: #EDA312; background: rgba(237,163,18,0.1); }
+        .action-btn.wished:hover { background: #EDA312; color: #fff; }
+        .action-btn svg { width: 18px; height: 18px; transition: fill 0.3s ease; }
+        .loading-state, .error-state, .empty-state {
+            background: rgba(255,255,255,0.72);
+            border: 1px solid rgba(3, 40, 159, 0.08);
+            border-radius: 32px;
+        }
+        .loading-spinner { border: 3px solid rgba(3, 40, 159, 0.12); border-top-color: #6B9BE6; }
+        @@media(max-width: 1100px) {
+            .art-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        @@media(max-width: 900px) {
+            .page-header, .toolbar { grid-template-columns: 1fr; align-items: start; }
+            .sort-select { width: 100%; }
+            .art-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @@media(max-width:768px) {
+            nav { padding: 1rem 1.25rem; }
+            .nav-links { display: none; }
+            .page { padding: 2rem 1rem 3rem; }
+            .gallery-shell { padding: 1.2rem; border-radius: 28px; }
+            .page-header h1 { font-size: 2.25rem; }
+            .search-row, .grid-header { flex-direction: column; align-items: stretch; }
+            .art-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+    @Html.Partial("_Navbar")
+
+    <div class="toast" id="toast"></div>
+
+    <div class="page">
+        <div class="gallery-shell">
+            <div class="page-header">
+                <div>
+                    <span class="eyebrow">Curated Gallery</span>
+                    <h1>Browse all artworks</h1>
+                    <p>Explore the full collection, filter by category, and save pieces to your wishlist or cart without leaving the gallery.</p>
+                </div>
+                <div class="count-pill" id="artCount">Loading...</div>
+            </div>
+
+            <div class="toolbar">
+                <div class="search-section">
+                    <div class="search-row">
+                        <div class="search-input-wrap">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                            <input type="text" id="searchInput" placeholder="Search artworks or artists..." oninput="filterArt()" />
+                        </div>
+                        <button class="filter-btn" type="button">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" /><line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" /><line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" /></svg>
+                            Filters
+                        </button>
+                    </div>
+                    <div class="categories" id="categories"></div>
+                </div>
+
+                <select class="sort-select" onchange="sortArt(this.value)">
+                    <option value="popular">Sort by: Popular</option>
+                    <option value="low">Price: Low to High</option>
+                    <option value="high">Price: High to Low</option>
+                    <option value="new">Newest First</option>
+                </select>
+            </div>
+
+            <div class="grid-header">
+                <p id="gridSummary">Loading artworks...</p>
+            </div>
+
+            <div class="art-grid" id="artGrid">
+                <div class="loading-state" style="grid-column:1/-1">
+                    <div class="loading-spinner"></div>
+                    <p>Loading artworks...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ─── State ───────────────────────────────────────────────────────────
+        var artworks = [];
+        var allCategories = ['All'];
+        var activeCategory = 'All';
+        var currentSort = 'popular';
+
+        var API_BASE = 'http://localhost:5183';
+
+        // ── Auth helpers ──────────────────────────────────────────────────────
+        function getToken() {
+            return localStorage.getItem('token')
+                || (document.cookie.split('; ').find(function(r) { return r.indexOf('token=') === 0; }) || '').split('=')[1]
+                || '';
+        }
+        function isLoggedIn() { return !!getToken(); }
+        function requireLogin(returnUrl) {
+            window.location.href = '/Auth/UserLogin?returnUrl=' + encodeURIComponent(returnUrl || window.location.pathname);
+        }
+        function authFetch(url, options) {
+            options = options || {};
+            var token = getToken();
+            return fetch(url, Object.assign({}, options, {
+                headers: Object.assign({ 'Content-Type': 'application/json' },
+                    token ? { 'Authorization': 'Bearer ' + token } : {},
+                    options.headers || {})
+            }));
+        }
+
+        // ─── localStorage helpers (artworkId-based, shared across all pages) ─
+        function getCart() {
+            try { return JSON.parse(localStorage.getItem('artify_cart') || '[]'); } catch(e) { return []; }
+        }
+        function saveCart(arr) { localStorage.setItem('artify_cart', JSON.stringify(arr)); }
+        function isInCart(id) {
+            return getCart().some(function(x) { return x.toString() === id.toString(); });
+        }
+        function addToCartLocal(id) {
+            var ct = getCart();
+            if (!ct.some(function(x) { return x.toString() === id.toString(); })) { ct.push(id.toString()); saveCart(ct); }
+        }
+
+        function getWishlist() {
+            try { return JSON.parse(localStorage.getItem('artify_wishlist') || '[]'); } catch(e) { return []; }
+        }
+        function saveWishlist(arr) { localStorage.setItem('artify_wishlist', JSON.stringify(arr)); }
+        function isInWishlist(id) {
+            return getWishlist().some(function(x) { return x.toString() === id.toString(); });
+        }
+        function getLikes() {
+            try { return JSON.parse(localStorage.getItem('artify_likes') || '[]'); } catch(e) { return []; }
+        }
+        function saveLikes(arr) { localStorage.setItem('artify_likes', JSON.stringify(arr)); }
+        function isLiked(id) {
+            return getLikes().some(function(x) { return x.toString() === id.toString(); });
+        }
+        function toggleLike(artworkId) {
+            var likes = getLikes();
+            var idx = likes.findIndex(function(x) { return x.toString() === artworkId.toString(); });
+            var nowLiked = idx === -1;
+            if (nowLiked) likes.push(artworkId.toString()); else likes.splice(idx, 1);
+            saveLikes(likes);
+
+            var btn = document.querySelector('[data-like-id="' + artworkId + '"]');
+            if (btn) {
+                btn.className = 'action-btn like-btn' + (nowLiked ? ' liked' : '');
+                var icon = btn.querySelector('svg');
+                if (icon) icon.style.fill = nowLiked ? 'currentColor' : 'none';
+            }
+        }
+        function toggleWishlistLocal(id) {
+            var wl = getWishlist();
+            var idx = wl.findIndex(function(x) { return x.toString() === id.toString(); });
+            if (idx === -1) { wl.push(id.toString()); } else { wl.splice(idx, 1); }
+            saveWishlist(wl);
+            return idx === -1;
+        }
+
+        // ─── Badges ──────────────────────────────────────────────────────────
+        function updateBadges() {
+            var wSize = getWishlist().length;
+            var cSize = getCart().length;
+            var wb = document.getElementById('wishBadge');
+            var cb = document.getElementById('cartBadge');
+            if (wb) {
+                wb.textContent = wSize;
+                wb.className = 'nav-badge';
+                wb.style.display = wSize === 0 ? 'none' : 'grid';
+            }
+            if (cb) {
+                cb.textContent = cSize;
+                cb.className = 'nav-badge';
+                cb.style.display = cSize === 0 ? 'none' : 'grid';
+            }
+        }
+
+        // ─── Toast ───────────────────────────────────────────────────────────
+        var toastTimer = null;
+        function showToast(msg) {
+            var t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2200);
+        }
+
+        // ─── Toggle Wishlist ─────────────────────────────────────────────────
+        function toggleWishlist(artworkId) {
+            if (!isLoggedIn()) { requireLogin('/Buyer/ViewArts'); return; }
+
+            var nowWishlisted = toggleWishlistLocal(artworkId);
+            updateBadges();
+            showToast(nowWishlisted ? '♥ Added to Wishlist' : 'Removed from Wishlist');
+
+            var btn = document.querySelector('[data-wishlist-id="' + artworkId + '"]');
+            if (btn) {
+                if (btn.classList.contains('action-btn')) {
+                    btn.className = 'action-btn' + (nowWishlisted ? ' wished' : '');
+                    var icon = btn.querySelector('svg');
+                    if (icon) icon.style.fill = nowWishlisted ? 'currentColor' : 'none';
+                } else {
+                    btn.className = 'wishlist-btn' + (nowWishlisted ? ' active' : '');
+                    var svg = btn.querySelector('svg');
+                    if (svg) svg.setAttribute('fill', nowWishlisted ? 'currentColor' : 'none');
+                    btn.childNodes[btn.childNodes.length - 1].textContent = nowWishlisted ? ' Added to Wishlist' : ' Add to Wishlist';
+                }
+            }
+
+            authFetch(API_BASE + '/api/wishlist/toggle', {
+                method: 'POST',
+                body: JSON.stringify({ artworkId: artworkId })
+            }).then(function(res) {
+                if (res.status === 401) { requireLogin('/Buyer/ViewArts'); }
+            }).catch(function() {});
+        }
+
+        // ─── Add to Cart ─────────────────────────────────────────────────────
+        function addToCart(artworkId) {
+            if (!isLoggedIn()) {
+                addToCartLocal(artworkId);
+                requireLogin('/Buyer/ViewArts');
+                return;
+            }
+            if (isInCart(artworkId)) return;
+
+            addToCartLocal(artworkId);
+            updateBadges();
+            showToast('🛒 Added to Cart');
+
+            var btn = document.querySelector('[data-cart-id="' + artworkId + '"]');
+            if (btn) {
+                if (btn.classList.contains('pixel-btn')) {
+                    btn.classList.add('animating');
+                    btn.disabled = true;
+                } else {
+                    btn.className = 'cart-btn in-cart';
+                    btn.disabled = true;
+                    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>In Cart';
+                }
+            }
+
+            authFetch(API_BASE + '/api/cart/add', {
+                method: 'POST',
+                body: JSON.stringify({ artworkId: artworkId })
+            }).then(function(res) {
+                if (res.status === 401) { requireLogin('/Buyer/ViewArts'); }
+            }).catch(function() {});
+        }
+
+        // ─── Image helper ────────────────────────────────────────────────────
+        function imageUrl(path) {
+            if (!path) return 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600';
+            if (path.startsWith('http')) return path;
+            return API_BASE.replace(/\/+$/, '') + '/' + path.replace(/^\/+/, '');
+        }
+
+        function getArtworkId(a) { return a.artworkId || a.c_artwork_id || a.id || 0; }
+        function getArtworkTitle(a) { return a.title || a.c_title || 'Untitled'; }
+        function getArtworkArtist(a) { return a.artistName || a.c_artist_name || 'Unknown Artist'; }
+        function getArtworkCategory(a) { return a.categoryName || a.c_category_name || ''; }
+        function getArtworkPrice(a) { return parseFloat(a.price || a.c_price || 0); }
+        function getArtworkLikes(a) { return parseInt(a.likesCount || a.c_likes_count || 0, 10) || 0; }
+        function getArtworkCreatedAt(a) { return a.createdAt || a.c_created_at || a.created_at || ''; }
+        function getArtworkPreview(a) { return a.previewPath || a.originalPath || a.c_preview_path || a.c_original_path || ''; }
+
+        // ─── Categories ──────────────────────────────────────────────────────
+        function buildCategories() {
+            var cats = ['All'];
+            artworks.forEach(function(a) {
+                if (a.categoryName && cats.indexOf(a.categoryName) === -1) cats.push(a.categoryName);
+            });
+            allCategories = cats;
+            renderCategories();
+        }
+
+        function renderCategories() {
+            var html = '';
+            for (var i = 0; i < allCategories.length; i++) {
+                var c = allCategories[i];
+                html += '<button class="cat-btn ' + (c === activeCategory ? 'active' : '') + '" onclick="setCategory(\'' + c + '\')">' + c + '</button>';
+            }
+            document.getElementById('categories').innerHTML = html;
+        }
+
+        function setCategory(cat) { activeCategory = cat; renderCategories(); filterArt(); }
+
+        // ─── Filter & Sort ────────────────────────────────────────────────────
+        function getFiltered() {
+            var q = document.getElementById('searchInput').value.toLowerCase();
+            return artworks.filter(function(a) {
+                var title = getArtworkTitle(a).toLowerCase();
+                var artist = getArtworkArtist(a).toLowerCase();
+                var category = getArtworkCategory(a);
+                var matchCat = activeCategory === 'All' || category === activeCategory;
+                var matchQ = title.indexOf(q) >= 0 || artist.indexOf(q) >= 0;
+                return matchCat && matchQ;
+            });
+        }
+
+        function sortArt(val) { currentSort = val; filterArt(); }
+
+        function filterArt() {
+            var filtered = getFiltered();
+            if (currentSort === 'low') filtered = filtered.slice().sort(function(a,b){ return getArtworkPrice(a) - getArtworkPrice(b); });
+            if (currentSort === 'high') filtered = filtered.slice().sort(function(a,b){ return getArtworkPrice(b) - getArtworkPrice(a); });
+            if (currentSort === 'popular') filtered = filtered.slice().sort(function(a,b){ return getArtworkLikes(b) - getArtworkLikes(a); });
+            if (currentSort === 'new') filtered = filtered.slice().sort(function(a,b){ return new Date(getArtworkCreatedAt(b)) - new Date(getArtworkCreatedAt(a)); });
+            document.getElementById('artCount').textContent = filtered.length + ' artwork' + (filtered.length === 1 ? '' : 's');
+            document.getElementById('gridSummary').textContent = filtered.length + ' artwork' + (filtered.length === 1 ? '' : 's') + ' found';
+            renderGrid(filtered);
+        }
+
+        // ─── Render Art Grid ──────────────────────────────────────────────────
+        function renderGrid(filtered) {
+            if (filtered.length === 0) {
+                document.getElementById('artGrid').innerHTML = '<div class="empty-state" style="grid-column:1/-1"><p>No artworks found.</p></div>';
+                return;
+            }
+
+            var html = '';
+            for (var fi = 0; fi < filtered.length; fi++) {
+                var a = filtered[fi];
+                var id = getArtworkId(a);
+                var isWished = isInWishlist(id);
+                var inCart = isInCart(id);
+                var title = getArtworkTitle(a);
+                var artist = getArtworkArtist(a);
+                var category = getArtworkCategory(a);
+                var price = getArtworkPrice(a);
+                var likes = getArtworkLikes(a);
+                var liked = isLiked(id);
+                var imgSrc = imageUrl(getArtworkPreview(a));
+                var url = '/Buyer/ArtworkDetail/' + id;
+
+                var priceStr = price > 0 ? '₹' + price.toLocaleString('en-IN') : 'Price on request';
+                html += '<div class="trend-card art-card" data-id="' + id + '" style="animation-delay:' + (fi * 0.07) + 's">'
+                    + '<div class="trend-img" onclick="window.location.href=\'' + url + '\'">'
+                    + '<img src="' + imgSrc + '" alt="' + title + '" loading="lazy"/>'
+                    + '<button class="action-btn like-btn ' + (liked ? 'liked' : '') + '" data-like-id="' + id + '" title="Like" onclick="event.stopPropagation(); toggleLike(' + id + ')">'
+                    + '<svg viewBox="0 0 24 24" fill="' + (liked ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'
+                    + '</button>'
+                    + '</div>'
+                    + '<div class="trend-body">'
+                    + '<a href="' + url + '" class="trend-title" title="' + title + '">' + title + '</a>'
+                    + '<div class="trend-artist">by ' + artist + '</div>'
+                    + '<div class="artwork-card-actions">'
+                    + '<button class="pixel-btn' + (inCart ? ' animating' : '') + '" data-cart-id="' + id + '" ' + (inCart ? 'disabled' : 'onclick="addToCart(' + id + ')"') + '>'
+                    + '<span class="btn-text-add">Add to Cart</span>'
+                    + '<span class="btn-cart-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>'
+                    + '<span class="btn-text-done"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>In Cart</span>'
+                    + '</button>'
+                    + '<button class="action-btn ' + (isWished ? 'wished' : '') + '" data-wishlist-id="' + id + '" title="Wishlist" onclick="toggleWishlist(' + id + ')">'
+                    + '<svg viewBox="0 0 24 24" fill="' + (isWished ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'
+                    + '</button>'
+                    + '</div>'
+                    + '<div class="trend-price-row">'
+                    + '<span class="trend-price-lbl">Price</span>'
+                    + '<span class="trend-price-val">' + priceStr + '</span>'
+                    + '</div>'
+                    + '</div></div>';
+            }
+            document.getElementById('artGrid').innerHTML = html;
+        }
+
+        // ─── Marquee ─────────────────────────────────────────────────────────
+        function buildMarquee() {
+            var row1 = document.getElementById('marqueeRow1');
+            var row2 = document.getElementById('marqueeRow2');
+            if (!row1 || !row2) return;
+            var imgs = artworks.slice(0, 10).map(function(a) { return imageUrl(a.previewPath); });
+            if (imgs.length === 0) return;
+            var html1 = '', html2 = '';
+            for (var rep = 0; rep < 2; rep++) {
+                for (var i = 0; i < imgs.length; i++) html1 += '<div class="marquee-item"><img src="' + imgs[i] + '" alt="Gallery art" loading="lazy"/><div class="marquee-overlay"></div></div>';
+                for (var j = imgs.length - 1; j >= 0; j--) html2 += '<div class="marquee-item"><img src="' + imgs[j] + '" alt="Gallery art" loading="lazy"/><div class="marquee-overlay"></div></div>';
+            }
+            row1.innerHTML = html1;
+            row2.innerHTML = html2;
+        }
+
+        // ─── Hero Floating Images ─────────────────────────────────────────────
+        function buildHeroFloatingImages() {
+            var container = document.getElementById('heroFloatingImages');
+            if (!container) return;
+            var imgs = artworks.slice(0, 6).map(function(a) { return imageUrl(a.previewPath); });
+            if (imgs.length === 0) return;
+            var html = '';
+            for (var i = 0; i < imgs.length; i++) {
+                html += '<div class="hero-float-img"><img src="' + imgs[i] + '" alt="Art" loading="lazy"/></div>';
+            }
+            container.innerHTML = html;
+        }
+
+        // ─── Fetch from API ───────────────────────────────────────────────────
+        async function loadArtworks() {
+            try {
+                var res = await authFetch(API_BASE + '/api/artwork');
+                if (!res.ok) throw new Error('Server error ' + res.status);
+                var data = await res.json();
+
+                if (Array.isArray(data)) artworks = data;
+                else if (data && Array.isArray(data.$values)) artworks = data.$values;
+                else if (data && Array.isArray(data.items)) artworks = data.items;
+                else if (data && Array.isArray(data.data)) artworks = data.data;
+                else if (data && Array.isArray(data.artworks)) artworks = data.artworks;
+                else { console.error('Unexpected API shape:', data); artworks = []; }
+
+                buildCategories();
+                filterArt();
+                buildMarquee();
+                buildHeroFloatingImages();
+            } catch (err) {
+                console.error('Failed to load artworks:', err);
+                document.getElementById('artGrid').innerHTML =
+                    '<div class="error-state" style="grid-column:1/-1"><p>Failed to load artworks. Please try again later.</p></div>';
+            }
+        }
+
+        function refreshLocalStates() {
+            updateBadges();
+            if (artworks && artworks.length) {
+                filterArt();
+            }
+        }
+
+        // ─── Init ─────────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBadges();
+            loadArtworks();
+        });
+        window.addEventListener('focus', refreshLocalStates);
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'artify_cart' || e.key === 'artify_wishlist' || e.key === 'artify_likes') {
+                refreshLocalStates();
+            }
+        });
+    </script>
+</body>
+</html>

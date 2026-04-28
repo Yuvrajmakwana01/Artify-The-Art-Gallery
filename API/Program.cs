@@ -261,14 +261,14 @@ builder.Services.AddScoped<IWishlistInterface, WishlistRepository>();
 builder.Services.AddScoped<IOrderInterface, OrderRepository>();
 builder.Services.AddHttpClient<PaypalService>();
 builder.Services.AddScoped<InvoiceService>();
-builder.Services.AddScoped<EmailServices>();
+// builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<IBuyerOrderInterface, BuyerOrderRepository>();
 
 // =========================
 // Services
 // =========================
 builder.Services.AddScoped<AdminArtworkService>();
-builder.Services.AddScoped<EmailServices>();
+builder.Services.AddScoped<EmailService>();
 
 // =========================
 // Redis

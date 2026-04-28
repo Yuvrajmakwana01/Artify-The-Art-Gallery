@@ -1,587 +1,1155 @@
 @{
-    ViewData["Title"] = "Explore Art | Artify";
+    Layout = null;
+    ViewData["Title"] = "Artify — A New Era of Digital Art";
+    var apiBase = ViewData["ApiBaseUrl"]?.ToString() ?? "";
 }
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"]</title>
-    <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
-    rel="stylesheet" />
-    <style>
-            :root {
-                --background: hsl(36, 33%, 97%);
-                --foreground: hsl(30, 10%, 15%);
-                --card: hsl(36, 30%, 95%);
-                --card-foreground: hsl(30, 10%, 15%);
-                --primary: hsl(30, 45%, 25%);
-                --primary-foreground: hsl(36, 33%, 97%);
-                --secondary: hsl(32, 25%, 88%);
-                --secondary-foreground: hsl(30, 10%, 15%);
-                --muted: hsl(30, 10%, 45%);
-                --accent: hsl(38, 60%, 55%);
-                --accent-foreground: hsl(30, 10%, 10%);
-                --border: hsl(32, 20%, 85%);
-                --wishlist: #DC4A4A;
-                --gold-light: hsl(38, 50%, 75%);
-                --radius: 0.75rem;
-            }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>@ViewData["Title"]</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── COLOR PALETTE ─────────────────────────────────────── */  
+    :root {
+      --bg:          #DFE6E9;
+      --text:        #1a1a1a;
+      --text-muted:  #636e72;
+      --btn:         #03289F;
+      --btn-fg:      #ffffff;
+      --heading:     #6B9BE6;
+      --accent:      #EDA312;
+      --border:      rgba(3,40,159,.08);
+      --card-bg:     rgba(255,255,255,.85);
+      --card-shadow: 0 15px 45px rgba(3,40,159,.06);
+      --glow:        0 0 40px rgba(107,155,230,.2);
+    }
 
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Inter', sans-serif; background: var(--background); color: var(--foreground); line-height: 1.6; }
-            h1,h2,h3,h4,h5,h6 { font-family: 'Playfair Display', serif; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
 
-            /* ── Navbar ── */
-            .navbar { position: sticky; top: 0; z-index: 50; background: hsla(36, 33%, 97%, 0.85); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); }
-            .navbar-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; }
-            .logo { font-family: 'Playfair Display', serif; font-size: 1.875rem; font-weight: 700; color: var(--foreground); text-decoration: none; letter-spacing: -0.025em; transition: color 0.3s; }
-            .logo:hover { color: var(--accent); }
-            .nav-links { display: flex; gap: 2rem; }
-            .nav-links a { font-size: 0.875rem; font-weight: 500; color: var(--muted); text-decoration: none; transition: color 0.3s; position: relative; padding-bottom: 2px; }
-            .nav-links a::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background: var(--accent); transform: scaleX(0); transition: transform 0.25s; }
-            .nav-links a:hover, .nav-links a.active { color: var(--foreground); }
-            .nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
-            .nav-actions { display: flex; align-items: center; gap: 0.75rem; }
-            .icon-btn { position: relative; width: 38px; height: 38px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); transition: all 0.2s; text-decoration: none; }
-            .icon-btn:hover { background: var(--secondary); color: var(--foreground); }
-            .badge { position: absolute; top: -2px; right: -2px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9999px; background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-            .badge.zero { display: none; }
-            .avatar-btn { width: 38px; height: 38px; border-radius: 50%; border: none; background: var(--primary); color: var(--primary-foreground); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s; }
-            .avatar-btn:hover { opacity: 0.85; }
+    /* ── ANIMATIONS ────────────────────────────────────────── */
+    @@keyframes marqueeUp   { from { transform: translateY(0); }   to { transform: translateY(-50%); } }
+    @@keyframes marqueeDown { from { transform: translateY(-50%); } to { transform: translateY(0); } }
+    @@keyframes fadeUp      { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @@keyframes blobDrift   {
+      0%, 100% { transform: translate(0,0) scale(1); }
+      33%       { transform: translate(30px,-30px) scale(1.05); }
+      66%       { transform: translate(-20px,20px) scale(0.95); }
+    }
+    @@keyframes marqueeX    { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    @@keyframes floatUp     { 0%,100% { transform: translateY(0); opacity:.7; } 50% { transform: translateY(-12px); opacity:1; } }
+    @@keyframes shimmer     { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
 
-            /* ── Hero ── */
-            .hero { position: relative; overflow: hidden; min-height: 52vh; display: flex; align-items: center; padding: 5rem 0 3rem; }
+    /* ── UTILITY ───────────────────────────────────────────── */
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
+    h1,h2,h3,h4 { font-family: 'Playfair Display', serif; }
 
-            /* Floating art images behind hero text */
-            .hero-floating-images { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
-            .hero-float-img { position: absolute; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 30px -8px hsla(30, 10%, 15%, 0.2); opacity: 0.45; }
-            .hero-float-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    /* ── SKELETON LOADER ───────────────────────────────────── */
+    .skeleton {
+      background: linear-gradient(90deg, rgba(255,255,255,.3) 25%, rgba(255,255,255,.6) 50%, rgba(255,255,255,.3) 75%);
+      background-size: 400px 100%;
+      animation: shimmer 1.4s ease-in-out infinite;
+      border-radius: 8px;
+    }
+    .skeleton-card {
+      flex-shrink: 0; width: 250px; height: 320px;
+      border-radius: 20px; overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .skeleton-trend {
+      border-radius: 18px; overflow: hidden;
+      border: 1px solid var(--border); background: var(--card-bg);
+    }
+    .skeleton-trend-img { aspect-ratio: 3/4; }
+    .skeleton-trend-body { padding: 1.25rem 1rem; }
+    .skeleton-line { height: 14px; border-radius: 4px; margin-bottom: 8px; }
 
-            /* Individual floating image positions & animations */
-            .hero-float-img:nth-child(1) { width: 180px; height: 240px; top: 5%; left: -2%; transform: rotate(-6deg); animation: heroFloat1 12s ease-in-out infinite; }
-            .hero-float-img:nth-child(2) { width: 150px; height: 200px; top: 10%; right: 2%; transform: rotate(5deg); animation: heroFloat2 14s ease-in-out infinite; }
-            .hero-float-img:nth-child(3) { width: 130px; height: 170px; bottom: 8%; left: 8%; transform: rotate(4deg); animation: heroFloat3 11s ease-in-out infinite; }
-            .hero-float-img:nth-child(4) { width: 160px; height: 210px; bottom: 5%; right: 5%; transform: rotate(-4deg); animation: heroFloat4 13s ease-in-out infinite; }
-            .hero-float-img:nth-child(5) { width: 120px; height: 160px; top: 30%; left: 15%; transform: rotate(-3deg); animation: heroFloat5 10s ease-in-out infinite; }
-            .hero-float-img:nth-child(6) { width: 140px; height: 180px; top: 25%; right: 12%; transform: rotate(6deg); animation: heroFloat6 15s ease-in-out infinite; }
+    /* ─────────────────────────────────────────────────────── */
+    /* NAVBAR (Floating)                                       */
+    /* ─────────────────────────────────────────────────────── */
+    .floating-nav {
+        position: fixed;
+        bottom: 28px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 220;
+        width: min(92vw, 860px);
+        display: grid;
+        place-items: center;
+        pointer-events: none;
+    }
+    .floating-nav-trigger,
+    .floating-nav-panel {
+        grid-area: 1 / 1;
+    }
+    .floating-nav-trigger,
+    .floating-nav-panel,
+    .floating-nav-logo,
+    .floating-nav-link,
+    .floating-nav-toggle,
+    .nav-icon-btn {
+        pointer-events: auto;
+    }
+    .floating-nav-trigger {
+        border: none;
+        border-radius: 18px;
+        min-width: 150px;
+        min-height: 58px;
+        padding: 0 30px;
+        background: #111111;
+        color: #ffffff;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 24px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, .22);
+        transition: opacity .28s ease, transform .34s cubic-bezier(.16, 1, .3, 1), box-shadow .25s ease;
+    }
+    .floating-nav-trigger:hover { box-shadow: 0 22px 48px rgba(0, 0, 0, .28); }
+    .floating-nav.is-open .floating-nav-trigger {
+        opacity: 0;
+        transform: translateY(10px) scale(.88);
+        pointer-events: none;
+    }
+    .floating-nav-panel {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 68px minmax(0, 1fr) 68px;
+        align-items: center;
+        gap: 18px;
+        opacity: 0;
+        transform: translateY(10px) scale(.96);
+        transform-origin: bottom center;
+        transition: opacity .32s ease, transform .42s cubic-bezier(.16, 1, .3, 1);
+        pointer-events: none;
+    }
+    .floating-nav.is-open .floating-nav-panel {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        pointer-events: auto;
+    }
+    .floating-nav-logo {
+        width: 68px;
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        filter: drop-shadow(0 18px 34px rgba(0, 0, 0, .18));
+        overflow: hidden; 
+        border-radius: 25%; 
+        background: #0b0c10;
+    }
+    .floating-nav-logo img {
+        width: 68px;
+        height: 68px;
+        display: block;
+        object-fit: cover;
+        transform: scale(2.65) translateX(3%);
+    }
+    .floating-nav-links {
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 20px;
+        background: rgba(246, 247, 249, .96);
+        border: 1px solid rgba(17, 17, 17, .05);
+        box-shadow: 0 18px 40px rgba(15, 23, 42, .14);
+        backdrop-filter: blur(16px);
+    }
+    .floating-nav-link {
+        flex: 0 0 auto;
+        padding: 13px 22px;
+        border-radius: 999px;
+        color: #151515;
+        font-size: 15px;
+        font-weight: 700;
+        line-height: 1;
+        text-decoration: none;
+        transition: background .22s ease, color .22s ease, transform .22s ease;
+    }
+    .floating-nav-link.is-active,
+    .floating-nav-link:hover,
+    .floating-nav-link:focus-visible {
+        background: #111111;
+        color: #ffffff;
+    }
+    .floating-nav-logo:focus-visible,
+    .floating-nav-trigger:focus-visible,
+    .floating-nav-link:focus-visible {
+        outline: 2px solid var(--subhead);
+        outline-offset: 4px;
+    }
+    .floating-nav-toggle {
+        position: relative;
+        width: 68px;
+        height: 68px;
+        border: none;
+        border-radius: 18px;
+        background: #111111;
+        box-shadow: 0 18px 34px rgba(0, 0, 0, .18);
+        cursor: default;
+    }
+    .floating-nav-toggle::before,
+    .floating-nav-toggle::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        transform: translateY(-50%);
+    }
+    .floating-nav-toggle::before {
+        left: 21px;
+        background: rgba(221, 214, 204, .42);
+    }
+    .floating-nav-toggle::after {
+        left: 31px;
+        background: #ffffff;
+    }
+    .nav-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+    .nav-icon-btn {
+      position: relative; display: grid; place-items: center;
+      height: 40px; width: 40px; border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: rgba(255,255,255,.5); cursor: pointer;
+      color: var(--text); transition: background .2s, border-color .2s, transform .2s;
+      text-decoration: none;
+    }
+    .nav-icon-btn:hover { background: #111111; color: #ffffff; border-color: #111111; transform: scale(1.08); }
+    .nav-badge {
+      position: absolute; top: -4px; right: -4px;
+      height: 16px; min-width: 16px; padding: 0 3px;
+      background: var(--heading); color: #fff; border-radius: 999px;
+      font-size: .62rem; font-weight: 700; display: grid; place-items: center;
+    }
+    @@media(max-width:950px) {
+        .floating-nav-links {
+            justify-content: flex-start;
+            overflow-x: auto;
+            padding: 8px;
+            gap: 6px;
+            scrollbar-width: none;
+        }
+        .floating-nav-links::-webkit-scrollbar { display: none; }
+        .floating-nav-link { padding: 11px 16px; font-size: 13px; }
+    }
+    .nav-signin { font-size: .88rem; color: var(--text); text-decoration: none; opacity: .8; transition: opacity .2s, color .2s; }
+    .nav-signin:hover { opacity: 1; color: var(--heading); }
+    @@media(max-width:768px) { nav { padding: 1rem 1.25rem; } .nav-links { display: none; } }
 
-            @@keyframes heroFloat1 { 0%, 100% { transform: rotate(-6deg) translate(0, 0); } 25% { transform: rotate(-4deg) translate(15px, -20px); } 50% { transform: rotate(-7deg) translate(30px, -10px); } 75% { transform: rotate(-5deg) translate(10px, 15px); } }
-            @@keyframes heroFloat2 { 0%, 100% { transform: rotate(5deg) translate(0, 0); } 25% { transform: rotate(3deg) translate(-20px, 15px); } 50% { transform: rotate(6deg) translate(-10px, 25px); } 75% { transform: rotate(4deg) translate(-25px, 5px); } }
-            @@keyframes heroFloat3 { 0%, 100% { transform: rotate(4deg) translate(0, 0); } 25% { transform: rotate(2deg) translate(20px, -15px); } 50% { transform: rotate(5deg) translate(10px, -25px); } 75% { transform: rotate(3deg) translate(25px, -5px); } }
-            @@keyframes heroFloat4 { 0%, 100% { transform: rotate(-4deg) translate(0, 0); } 25% { transform: rotate(-2deg) translate(-15px, -20px); } 50% { transform: rotate(-5deg) translate(-25px, -10px); } 75% { transform: rotate(-3deg) translate(-10px, 10px); } }
-            @@keyframes heroFloat5 { 0%, 100% { transform: rotate(-3deg) translate(0, 0); } 33% { transform: rotate(-1deg) translate(18px, -12px); } 66% { transform: rotate(-4deg) translate(-8px, 18px); } }
-            @@keyframes heroFloat6 { 0%, 100% { transform: rotate(6deg) translate(0, 0); } 33% { transform: rotate(4deg) translate(-18px, 14px); } 66% { transform: rotate(7deg) translate(12px, -16px); } }
+    /* ─────────────────────────────────────────────────────── */
+    /* HERO                                                    */
+    /* ─────────────────────────────────────────────────────── */
+    .hero {
+      position: relative; min-height: 100vh;
+      display: flex; align-items: center;
+      padding: 0 4rem; overflow: hidden;
+    }
+    @@media(max-width:768px){ .hero { padding: 2rem 1.25rem; } }
 
-            .hero-content { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 10; text-align: center; }
-            .hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; background: var(--secondary); border-radius: 9999px; margin-bottom: 1.25rem; }
-            .hero-badge span { font-size: 0.8rem; font-weight: 500; color: var(--secondary-foreground); }
-            .hero h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; color: var(--foreground); }
-            .hero h1 .accent-text { color: var(--accent); }
-            .hero p { margin-top: 1rem; font-size: 1rem; color: var(--muted); max-width: 34rem; margin-left: auto; margin-right: auto; }
+    .hero-bg {
+      position: absolute; inset: 0; pointer-events: none;
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; padding: 12px;
+      overflow: hidden;
+    }
+    .art-col { overflow: hidden; position: relative; height: 100%; }
+    .art-col-inner { display: flex; flex-direction: column; gap: 12px; }
+    .art-col-inner.up   { animation: marqueeUp   var(--dur) linear infinite; }
+    .art-col-inner.down { animation: marqueeDown var(--dur) linear infinite; }
+    .art-col-inner img { width: 100%; height: 220px; object-fit: cover; border-radius: 14px; }
 
-            /* ── Discover Marquee ── */
-            .discover-section { padding: 4rem 0 2rem; overflow: hidden; position: relative; }
-            .discover-section .section-header { text-align: center; margin-bottom: 2.5rem; }
-            .discover-section .section-header h2 { font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 700; color: var(--foreground); }
-            .discover-section .section-header h2 span { color: var(--accent); }
-            .discover-section .section-header p { margin-top: 0.75rem; font-size: 1rem; color: var(--muted); max-width: 28rem; margin-left: auto; margin-right: auto; }
-            .marquee-wrapper { position: relative; }
-            .marquee-wrapper::before, .marquee-wrapper::after { content: ''; position: absolute; top: 0; bottom: 0; width: 120px; z-index: 2; pointer-events: none; }
-            .marquee-wrapper::before { left: 0; background: linear-gradient(to right, var(--background), transparent); }
-            .marquee-wrapper::after { right: 0; background: linear-gradient(to left, var(--background), transparent); }
-            .marquee-track { display: flex; gap: 1.25rem; width: max-content; animation: marquee-scroll 35s linear infinite; }
-            .marquee-wrapper:hover .marquee-track { animation-play-state: paused; }
-            .marquee-track-reverse { animation-direction: reverse; animation-duration: 40s; }
-            .marquee-item { flex-shrink: 0; width: 280px; height: 180px; border-radius: var(--radius); overflow: hidden; position: relative; box-shadow: 0 4px 20px -4px hsla(30, 10%, 15%, 0.12); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s; }
-            .marquee-item:hover { transform: scale(1.06); box-shadow: 0 8px 32px -4px hsla(38, 60%, 55%, 0.25); }
-            .marquee-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-            .marquee-item:hover img { transform: scale(1.08); }
-            .marquee-item .marquee-overlay { position: absolute; inset: 0; background: linear-gradient(to top, hsla(30, 10%, 15%, 0.35), transparent 60%); opacity: 0; transition: opacity 0.4s; }
-            .marquee-item:hover .marquee-overlay { opacity: 1; }
-            .marquee-row { margin-bottom: 1.25rem; }
-            @@keyframes marquee-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .hero-overlay-lr {
+      position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(to right, var(--bg) 22%, rgba(222,230,233,.65) 55%, rgba(222,230,233,.2) 100%);
+    }
+    .hero-overlay-tb {
+      position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(to bottom, rgba(222,230,233,.5) 0%, transparent 30%, transparent 70%, var(--bg) 100%);
+    }
+    .orb { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; animation: blobDrift 14s ease-in-out infinite; }
+    .orb1 { width:320px; height:320px; background:rgba(237,163,18,.18); top:15%; left:30%; }
+    .orb2 { width:400px; height:400px; background:rgba(107,155,230,.15); bottom:15%; right:20%; animation-delay:-6s; }
+    .particle { position: absolute; width:7px; height:7px; border-radius:50%; background: rgba(237,163,18,.6); animation: floatUp 5s ease-in-out infinite; }
 
-            /* ── Curated Collections ── */
-            .curated-section { padding: 3rem 0 4rem; overflow: hidden; }
-            .curated-section .section-header { text-align: center; margin-bottom: 2.5rem; }
-            .curated-section .section-header h2 { font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 700; color: var(--foreground); }
-            .curated-section .section-header p { margin-top: 0.75rem; font-size: 1rem; color: var(--muted); max-width: 30rem; margin-left: auto; margin-right: auto; }
-            .curated-grid { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: auto auto; gap: 1rem; }
-            .curated-grid .curated-card:nth-child(1) { grid-column: span 2; grid-row: span 2; }
-            .curated-grid .curated-card:nth-child(4) { grid-column: span 2; }
-            .curated-card { position: relative; border-radius: var(--radius); overflow: hidden; min-height: 200px; box-shadow: 0 4px 20px -4px hsla(30, 10%, 15%, 0.1); cursor: pointer; transition: box-shadow 0.4s; }
-            .curated-card:hover { box-shadow: 0 12px 40px -6px hsla(38, 60%, 55%, 0.25); }
-            .curated-card img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-            .curated-card:hover img { transform: scale(1.08); }
-            .curated-card .curated-overlay { position: absolute; inset: 0; background: linear-gradient(to top, hsla(30, 10%, 15%, 0.55), transparent 60%); display: flex; flex-direction: column; justify-content: flex-end; padding: 1.25rem; opacity: 0; transition: opacity 0.4s; }
-            .curated-card:hover .curated-overlay { opacity: 1; }
-            .curated-overlay h3 { font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 0.25rem; }
-            .curated-overlay span { font-size: 0.8rem; color: hsla(0, 0%, 100%, 0.7); font-family: 'Inter', sans-serif; }
+    .hero-content { position: relative; z-index: 10; max-width: 680px; animation: fadeUp .9s ease both; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      border: 1px solid rgba(237,163,18,.45); background: rgba(255,255,255,.4);
+      backdrop-filter: blur(8px); border-radius: 999px;
+      padding: .45rem 1.1rem; font-size: .72rem; letter-spacing: .18em;
+      text-transform: uppercase; color: var(--heading); font-weight: 600;
+    }
+    .hero-title { margin-top: 1.4rem; font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 900; line-height: 1; color: var(--text); letter-spacing: -0.02em; }
+    .hero-title .accent { color: var(--accent); }
+    .hero-desc { margin-top: 1.4rem; max-width: 500px; font-size: 1.05rem; line-height: 1.7; color: rgba(3,40,159,.7); }
+    .hero-btns { margin-top: 2.5rem; display: flex; flex-wrap: wrap; gap: 1rem; }
+    .btn-primary {
+      display: inline-block; padding: .9rem 2.2rem; border-radius: 999px;
+      background: var(--btn); color: var(--btn-fg); font-size: .92rem; font-weight: 600;
+      text-decoration: none; border: 2px solid var(--btn);
+      box-shadow: var(--glow); transition: transform .25s, box-shadow .25s;
+    }
+    .btn-primary:hover { transform: scale(1.05); box-shadow: 0 0 80px rgba(237,163,18,.5); }
+    .btn-secondary {
+      display: inline-block; padding: .9rem 2.2rem; border-radius: 999px;
+      border: 2px solid rgba(3,40,159,.3); background: rgba(255,255,255,.35);
+      backdrop-filter: blur(8px); color: var(--text); font-size: .92rem; font-weight: 600;
+      text-decoration: none; transition: border-color .25s, color .25s, transform .25s;
+    }
+    .btn-secondary:hover { border-color: var(--heading); color: var(--heading); transform: scale(1.05); }
 
-            /* ── Search + Filter ── */
-            .search-section { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
-            .search-row { display: flex; gap: 1rem; margin-bottom: 1rem; }
-            .search-input-wrap { position: relative; flex: 1; }
-            .search-input-wrap svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--muted); pointer-events: none; }
-            .search-input-wrap input { width: 100%; padding: 0.75rem 1rem 0.75rem 2.75rem; border: 1.5px solid var(--border); border-radius: var(--radius); background: white; font-size: 0.9rem; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; color: var(--foreground); }
-            .search-input-wrap input:focus { border-color: var(--accent); }
-            .filter-btn { padding: 0.75rem 1.25rem; border: 1.5px solid var(--border); border-radius: var(--radius); background: white; font-size: 0.875rem; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: all 0.2s; color: var(--foreground); }
-            .filter-btn:hover { border-color: var(--accent); }
-            .categories { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-            .cat-btn { padding: 0.45rem 1.1rem; border: 1.5px solid var(--border); border-radius: 9999px; background: white; font-size: 0.8rem; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s; color: var(--foreground); }
-            .cat-btn:hover { border-color: var(--accent); color: var(--accent); }
-            .cat-btn.active { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+    .hero-stats { margin-top: 3.5rem; display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; max-width: 420px; }
+    .stat-card {
+      border-radius: 18px; border: 1px solid var(--border);
+      background: rgba(255,255,255,.5); backdrop-filter: blur(10px);
+      padding: 1.4rem 1rem; box-shadow: var(--card-shadow);
+    }
+    .stat-val { font-size: 1.9rem; font-weight: 900; color: var(--heading); font-family: 'Playfair Display', serif; }
+    .stat-lbl { margin-top: .2rem; font-size: .7rem; letter-spacing: .18em; text-transform: uppercase; color: rgba(3,40,159,.5); }
 
-            /* ── Grid Header ── */
-            .grid-header { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 1rem; display: flex; align-items: center; justify-content: space-between; }
-            .grid-header p { font-size: 0.875rem; color: var(--muted); }
-            .grid-header select { padding: 0.5rem 0.875rem; border: 1.5px solid var(--border); border-radius: var(--radius); background: white; font-size: 0.875rem; font-family: 'Inter', sans-serif; outline: none; cursor: pointer; color: var(--foreground); }
+    /* ─────────────────────────────────────────────────────── */
+    /* MARQUEE DISCOVER                                        */
+    /* ─────────────────────────────────────────────────────── */
+    .section-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: #6B9BE6;
+      font-weight: 400;
+    }
+    .section-title {
+      margin-top: 10px;
+      font-size: clamp(28px, 4vw, 44px);
+      color: #EDA312;
+      font-weight: 700;
+      font-family: 'Playfair Display', serif;
+    }
 
-            /* ── Art Grid ── */
-            .art-grid { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 4rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
-            .art-card { background: var(--card); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s; animation: fade-up 0.5s ease-out both; }
-            .art-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px -6px hsla(30, 10%, 15%, 0.15); }
-            .card-img { position: relative; aspect-ratio: 4/3; overflow: hidden; }
-            .card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-            .art-card:hover .card-img img { transform: scale(1.06); }
-            .overlay { position: absolute; inset: 0; background: linear-gradient(to top, hsla(30, 10%, 10%, 0.4), transparent 60%); opacity: 0; transition: opacity 0.3s; }
-            .art-card:hover .overlay { opacity: 1; }
-            .glass-overlay { position: absolute; inset: 0; background: hsla(36, 33%, 97%, 0.06); opacity: 0; transition: opacity 0.3s; }
-            .art-card:hover .glass-overlay { opacity: 1; }
-            .cat-badge { position: absolute; top: 10px; left: 10px; padding: 3px 10px; border-radius: 9999px; background: hsla(36, 33%, 97%, 0.9); font-size: 11px; font-weight: 600; color: var(--foreground); backdrop-filter: blur(6px); }
-            .quick-actions { position: absolute; bottom: 12px; left: 12px; right: 12px; display: flex; gap: 8px; opacity: 0; transform: translateY(8px); transition: all 0.3s; }
-            .art-card:hover .quick-actions { opacity: 1; transform: translateY(0); }
-            .view-btn { flex: 1; padding: 8px 0; border-radius: 8px; border: none; background: white; font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; color: var(--foreground); text-decoration: none; transition: background 0.2s; }
-            .view-btn:hover { background: var(--primary); color: var(--primary-foreground); }
-            .cart-btn { flex: 1; padding: 8px 0; border-radius: 8px; border: none; background: var(--primary); color: var(--primary-foreground); font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: opacity 0.2s; }
-            .cart-btn:hover { opacity: 0.85; }
-            .cart-btn.in-cart { background: var(--secondary); color: var(--foreground); cursor: default; }
-            .card-info { padding: 1rem; }
-            .card-info h3 { font-size: 1rem; font-weight: 600; color: var(--foreground); margin-bottom: 2px; }
-            .card-info .artist { font-size: 0.8rem; color: var(--muted); margin-bottom: 8px; }
-            .card-info .meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-            .card-info .price { font-size: 1rem; font-weight: 700; color: var(--foreground); }
-            .card-info .views { display: flex; align-items: center; gap: 4px; font-size: 0.78rem; color: var(--muted); }
-            .wishlist-btn { width: 100%; padding: 8px; border-radius: 8px; border: 1.5px solid var(--border); background: transparent; font-size: 12px; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--muted); transition: all 0.2s; }
-            .wishlist-btn:hover { border-color: var(--wishlist); color: var(--wishlist); }
-            .wishlist-btn.active { background: hsla(0, 75%, 58%, 0.08); border-color: var(--wishlist); color: var(--wishlist); }
+    .discover { padding: 5rem 0; overflow: hidden; }
+    .discover-header { display: flex; align-items: flex-end; justify-content: space-between; padding: 0 4rem 2.5rem; }
+    @@media(max-width:768px){ .discover-header { padding: 0 1.25rem 2rem; } }
+    .discover-header a { font-size: .88rem; color: var(--text-muted); text-decoration: none; transition: color .2s; }
+    .discover-header a:hover { color: var(--heading); }
 
-            /* Toast notification */
-            .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--foreground); color: var(--primary-foreground); padding: 12px 24px; border-radius: 9999px; font-size: 13px; font-weight: 500; font-family: 'Inter', sans-serif; z-index: 9999; opacity: 0; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); pointer-events: none; white-space: nowrap; }
-            .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .marquee-wrap { position: relative; }
+    .marquee-fade-l { position:absolute; inset-y:0; left:0; width:8rem; background:linear-gradient(to right, var(--bg), transparent); z-index:10; pointer-events:none; }
+    .marquee-fade-r { position:absolute; inset-y:0; right:0; width:8rem; background:linear-gradient(to left, var(--bg), transparent); z-index:10; pointer-events:none; }
+    .marquee-track {
+      display: flex; gap: 1.25rem; padding: 0 1.5rem;
+      width: max-content;
+      animation: marqueeX 40s linear infinite;
+    }
+    .marquee-track:hover { animation-play-state: paused; }
 
-            /* ── Loading / Error ── */
-            .loading-state { text-align: center; padding: 4rem 1.5rem; color: var(--muted); }
-            .loading-spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
-            @@keyframes spin { to { transform: rotate(360deg); } }
-            .error-state { text-align: center; padding: 4rem 1.5rem; color: var(--muted); }
-            .empty-state { text-align: center; padding: 4rem 1.5rem; color: var(--muted); }
-            @@keyframes fade-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .art-card {
+      position: relative; flex-shrink: 0; width: 250px; height: 320px;
+      border-radius: 20px; overflow: hidden;
+      border: 1px solid var(--border); background: var(--card-bg);
+      box-shadow: var(--card-shadow); cursor: pointer;
+      transition: transform .3s, box-shadow .3s; text-decoration: none; display: block;
+    }
+    .art-card:hover { transform: translateY(-6px); box-shadow: 0 20px 60px rgba(3,40,159,.2); }
+    .art-card img { width: 100%; height: 100%; object-fit: cover; transition: transform .7s; }
+    .art-card:hover img { transform: scale(1.08); }
+    .art-card-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(3,40,159,.75) 0%, transparent 55%); }
+    .artwork-top-actions { position: absolute; top: .75rem; left: .75rem; opacity: 1; transform: none; z-index: 10; }
+    .artwork-card-actions {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: .6rem; margin: .8rem 0 0; opacity: 1; transform: none;
+    }
+    .art-card-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.25rem 1rem; z-index: 5; }
+    .art-card-title { font-size: .95rem; font-weight: 600; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    .art-card-artist { font-size: .78rem; color: rgba(255,255,255,.85); margin-top: .2rem; }
 
-            @@media(max-width:1024px) { .curated-grid { grid-template-columns: repeat(2, 1fr); } .curated-grid .curated-card:nth-child(1) { grid-column: span 2; grid-row: span 1; } .curated-grid .curated-card:nth-child(4) { grid-column: span 2; } }
-            @@media(max-width:768px) {
-                .nav-links { display: none; }
-                .curated-grid { grid-template-columns: 1fr; }
-                .curated-grid .curated-card:nth-child(1), .curated-grid .curated-card:nth-child(4) { grid-column: span 1; }
-                .marquee-item { width: 200px; height: 130px; }
-                .hero-float-img { opacity: 0.3; }
-                .hero-float-img:nth-child(1) { width: 120px; height: 160px; }
-                .hero-float-img:nth-child(2) { width: 100px; height: 130px; }
-                .hero-float-img:nth-child(3) { width: 90px; height: 120px; }
-                .hero-float-img:nth-child(4) { width: 110px; height: 140px; }
-                .hero-float-img:nth-child(5), .hero-float-img:nth-child(6) { display: none; }
-            }
-    </style>
+    /* ─────────────────────────────────────────────────────── */
+    /* TRENDING DROPS                                          */
+    /* ─────────────────────────────────────────────────────── */
+    .trending { padding: 5rem 4rem; }
+    @@media(max-width:768px){ .trending { padding: 4rem 1.25rem; } }
+    .trending-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 3rem; }
+    .trending-header a { font-size: .88rem; color: var(--text-muted); text-decoration: none; }
+    .trending-header a:hover { color: var(--heading); }
+    .trending-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.25rem; }
+    @@media(max-width:900px){ .trending-grid { grid-template-columns: repeat(2,1fr); } }
+    @@media(max-width:480px){ .trending-grid { grid-template-columns: 1fr; } }
+
+    .trend-card {
+      border-radius: 18px; overflow: hidden;
+      border: 1px solid var(--border); background: var(--card-bg);
+      box-shadow: var(--card-shadow); transition: border-color .3s, box-shadow .3s, transform .3s;
+      position: relative; cursor: pointer;
+    }
+    .trend-card:hover { border-color: rgba(237,163,18,.5); box-shadow: var(--glow); transform: translateY(-4px); }
+    .trend-img { aspect-ratio: 3/4; overflow: hidden; position: relative; }
+    .trend-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .7s; display: block; }
+    .trend-card:hover .trend-img img { transform: scale(1.08); }
+    .trend-body { padding: 1.25rem 1rem; }
+    .trend-title { font-size: .95rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .trend-artist { font-size: .78rem; color: var(--text-muted); margin-top: .1rem; }
+    .trend-price-row {
+      margin-top: .75rem; border-top: 1px solid rgba(0,0,0,0.05); padding-top: .75rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .trend-price-lbl { font-size: .68rem; letter-spacing: .15em; text-transform: uppercase; color: rgba(3,40,159,.45); font-weight: 600; }
+    .trend-price-val { font-size: 1rem; font-weight: 700; color: var(--heading); }
+
+    /* ── BUTTONS ───────────────────────────────────────────── */
+    .pixel-btn {
+      position: relative; width: 100%; height: 42px; border-radius: 12px;
+      background: var(--btn); color: #fff; border: none; cursor: pointer;
+      font-size: .85rem; font-weight: 600; font-family: 'Inter', sans-serif;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      overflow: hidden; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 25px rgba(3,40,159,0.15);
+    }
+    .pixel-btn span { position: absolute; transition: transform 0.5s ease, opacity 0.3s ease; display: flex; align-items: center; gap: 8px; }
+    .btn-cart-icon { transform: translateX(-120%); opacity: 0; }
+    .btn-text-done { transform: translateY(100%); opacity: 0; }
+    .pixel-btn.animating { background: #22c55e; box-shadow: 0 8px 25px rgba(34,197,94,0.25); pointer-events: none; }
+    .pixel-btn.animating .btn-text-add { transform: translateY(-100%); opacity: 0; }
+    .pixel-btn.animating .btn-cart-icon { animation: cartDrive 1.2s forwards; opacity: 1; }
+    .pixel-btn.animating .btn-text-done { animation: fadeDone 0.4s 1s forwards; }
+    @@keyframes cartDrive { 0% { transform: translateX(-120%); } 30% { transform: translateX(0); } 70% { transform: translateX(0); } 100% { transform: translateX(120%); opacity: 0; } }
+    @@keyframes fadeDone  { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .action-btn {
+      width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,1); border: 1px solid var(--border); cursor: pointer;
+      color: var(--text); transition: all .25s; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .action-btn.liked  { color: #ff4757; border-color: #ff4757; background: rgba(255,71,87,0.1); }
+    .action-btn.wished { color: var(--accent); border-color: var(--accent); background: rgba(237,163,18,0.1); }
+    .action-btn.liked:hover  { background: #ff4757; color: #fff; }
+    .action-btn.wished:hover { background: var(--accent); color: #fff; }
+    .action-btn svg { width: 18px; height: 18px; transition: fill 0.3s ease; }
+
+    /* ─────────────────────────────────────────────────────── */
+    /* CTA                                                     */
+    /* ─────────────────────────────────────────────────────── */
+    .cta-wrap { padding: 5rem 4rem; }
+    @@media(max-width:768px){ .cta-wrap { padding: 4rem 1.25rem; } }
+    .cta-box {
+      max-width: 900px;
+      margin: 0 auto;
+      border-radius: 36px;
+      padding: 72px 56px;
+      text-align: center;
+      background: #03289F;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 80px rgba(3, 40, 159, .35);
+      transition: all .4s;
+    }
+    .cta-box:hover { transform: translateY(-4px); }
+    .cta-orb1 { position:absolute; width:280px; height:280px; border-radius:50%; background:rgba(237,163,18,.20); filter:blur(60px); top:-80px; right:-80px; pointer-events:none; }
+    .cta-orb2 { position:absolute; width:220px; height:220px; border-radius:50%; background:rgba(107,155,230,.20); filter:blur(60px); bottom:-80px; left:-80px; pointer-events:none; }
+    .cta-title {
+      font-size: clamp(32px, 4vw, 52px);
+      color: #ffffff;
+      margin-bottom: 16px;
+      position: relative;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+    }
+    .cta-title .accent { color: inherit; }
+    .cta-desc {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      color: rgba(255,255,255,.80);
+      max-width: 500px;
+      margin: 0 auto 40px;
+      position: relative;
+    }
+    .cta-btns { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; position: relative; z-index: 2; }
+
+    /* ─────────────────────────────────────────────────────── */
+    /* FOOTER                                                  */
+    /* ─────────────────────────────────────────────────────── */
+    footer { margin-top: 88px; padding: 80px 64px 32px; background: #03289F; color: rgba(255, 255, 255, .7); }
+    @@media(max-width:768px){ footer { padding: 3rem 1.25rem 2rem; } }
+    .footer-grid { display: grid; grid-template-columns: 2fr repeat(3,1fr); gap: 2.5rem; }
+    @@media(max-width:900px){ .footer-grid { grid-template-columns: 1fr 1fr; } }
+    @@media(max-width:480px){ .footer-grid { grid-template-columns: 1fr; } }
+    .footer-brand-desc { margin-top: 1rem; font-size: .85rem; color: rgba(255, 255, 255, .7); line-height: 1.7; max-width: 300px; }
+    .footer-social { margin-top: 1.5rem; display: flex; gap: .65rem; }
+    .footer-social a { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; color: #fff; text-decoration: none; transition: border-color .2s, color .2s; }
+    .footer-social a:hover { border-color: #EDA312; color: #EDA312; }
+    .footer-col-title { font-size: .72rem; letter-spacing: .2em; text-transform: uppercase; color: #EDA312; font-weight: 600; }
+    .footer-col ul { margin-top: 1.1rem; list-style: none; display: flex; flex-direction: column; gap: .65rem; }
+    .footer-col ul a { text-decoration: none; font-size: .86rem; color: rgba(255,255,255,0.7); transition: color .2s; }
+    .footer-col ul a:hover { color: #fff; }
+    .footer-bottom { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.15); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; font-size: .78rem; color: rgba(255,255,255,.5); }
+    .footer-bottom-links { display: flex; gap: 1.5rem; }
+    .footer-bottom-links a { color: rgba(255,255,255,.5); text-decoration: none; transition: color .2s; }
+    .footer-bottom-links a:hover { color: var(--heading); }
+    .icon { display: inline-block; vertical-align: middle; }
+
+    /* ── Empty state ───────────────────────────────────────── */
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); grid-column: 1/-1; }
+    .empty-state svg { opacity: .3; margin-bottom: 1rem; }
+  </style>
 </head>
-
 <body>
-    @await Html.PartialAsync("_NavbarPartial")
-    <div class="toast" id="toast"></div>
 
-    <!-- Hero -->
-    <section class="hero">
-        <div class="hero-floating-images" id="heroFloatingImages">
-            <!-- Filled dynamically from artwork data -->
-        </div>
-        <div class="hero-content">
-            <div class="hero-badge">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                <span>Handpicked Masterpieces</span>
+<!-- ══════════════════════════════════════════════ NAVBAR -->
+<div class="floating-nav" id="floatingNav">
+    <button class="floating-nav-trigger" id="floatingNavTrigger" aria-expanded="false" aria-controls="floatingNavPanel">Menu</button>
+
+    <div class="floating-nav-panel" id="floatingNavPanel">
+        <a href="/" class="floating-nav-logo" aria-label="Artify home">
+            <img src="/Images/Artify-Logos.png" alt="" aria-hidden="true" />
+        </a>
+
+        <nav class="floating-nav-links" aria-label="Primary">
+            <a href="#explore" class="floating-nav-link is-active" data-nav-link>Explore</a>
+            <a href="#trending" class="floating-nav-link" data-nav-link>Trending</a>
+            <a href="#about" class="floating-nav-link" data-nav-link>About</a>
+            
+            <div class="nav-actions" style="margin-left: 10px;">
+                <a href="/Wishlist/Index" class="nav-icon-btn" title="Wishlist" aria-label="Wishlist">
+                  <svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                  </svg>
+                  <span class="nav-badge" id="wishBadge" style="background:#EDA312; display:none;">0</span>
+                </a>
+                <a href="/Cart/Index" class="nav-icon-btn" title="Cart" aria-label="Cart">
+                  <svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                  </svg>
+                  <span class="nav-badge" id="cartBadge" style="display:none;">0</span>
+                </a>
+                <a href="/Buyer/Orders" class="nav-icon-btn" title="Orders" aria-label="Orders">
+                  <svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                </a>
             </div>
-            <h1>Discover &amp; Collect<br /><span class="accent-text">Extraordinary</span> Art</h1>
-            <p>Discover thousands of original artworks from independent artists. Find your perfect piece to transform any space.</p>
-        </div>
-    </section>
+        </nav>
 
-    <!-- Discover & Collect Marquee -->
-    <section class="discover-section">
-        <div class="section-header">
-            <h2>Discover &amp; <span>Collect</span></h2>
-            <p>Endlessly inspiring pieces, hand-selected for you</p>
-        </div>
-        <div class="marquee-wrapper marquee-row">
-            <div class="marquee-track" id="marqueeRow1"></div>
-        </div>
-        <div class="marquee-wrapper marquee-row">
-            <div class="marquee-track marquee-track-reverse" id="marqueeRow2"></div>
-        </div>
-    </section>
+        <button class="floating-nav-toggle" type="button" aria-hidden="true" tabindex="-1"></button>
+    </div>
+</div>
 
-    @* <!-- Curated Collections -->
-    <section class="curated-section">
-        <div class="section-header">
-            <h2>Curated Collections</h2>
-            <p>Explore themed galleries crafted by our curators</p>
-        </div>
-        <div class="curated-grid" id="curatedGrid"></div>
-    </section> *@
+<!-- ══════════════════════════════════════════════ HERO -->
+<section class="hero">
+  <div class="hero-bg" id="heroBg"></div>
+  <div class="hero-overlay-lr"></div>
+  <div class="hero-overlay-tb"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div id="particles"></div>
+  <div class="hero-content">
+    <div class="hero-badge">✦ A new era of digital art</div>
+    <h1 class="hero-title">
+      Step into the<br>
+      <span class="accent">World of Art</span>
+    </h1>
+    <p class="hero-desc">
+      Discover, collect and experience extraordinary digital artworks from a curated community of visionary artists across the globe.
+    </p>
+    <div class="hero-btns">
+      <a href="#explore" class="btn-primary">Explore Artworks →</a>
+      <a href="#trending" class="btn-secondary">Trending Drops</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-card"><div class="stat-val" id="statArtworks">—</div><div class="stat-lbl">Artworks</div></div>
+      <div class="stat-card"><div class="stat-val">850+</div><div class="stat-lbl">Artists</div></div>
+      <div class="stat-card"><div class="stat-val">60+</div><div class="stat-lbl">Countries</div></div>
+    </div>
+  </div>
+</section>
 
-    <!-- Search + Categories -->
-    <div class="search-section">
-        <div class="search-row">
-            <div class="search-input-wrap">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="text" id="searchInput" placeholder="Search artworks or artists..." oninput="filterArt()" />
+<!-- ══════════════════════════════════════════════ DISCOVER MARQUEE -->
+<section id="explore" class="discover">
+  <div class="discover-header">
+    <div>
+      <div class="section-label">Discover</div>
+      <h2 class="section-title">A living gallery, always in motion</h2>
+    </div>
+    <a href="#trending">View trending →</a>
+  </div>
+  <div class="marquee-wrap">
+    <div class="marquee-fade-l"></div>
+    <div class="marquee-fade-r"></div>
+    <!-- Skeleton placeholders shown while loading -->
+    <div id="marqueeSkeleton" style="display:flex; gap:1.25rem; padding:0 1.5rem; overflow:hidden;">
+      <div class="skeleton-card skeleton"></div>
+      <div class="skeleton-card skeleton"></div>
+      <div class="skeleton-card skeleton"></div>
+      <div class="skeleton-card skeleton"></div>
+      <div class="skeleton-card skeleton"></div>
+    </div>
+    <div class="marquee-track" id="marqueeTrack" style="display:none;"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ TRENDING DROPS -->
+<section id="trending" class="trending">
+  <div class="trending-header">
+    <div>
+      <div class="section-label">Trending</div>
+      <h2 class="section-title">Drops moving fast</h2>
+    </div>
+    <a href="/Buyer/ViewArts">View all →</a>
+  </div>
+  <!-- Skeleton placeholders -->
+  <div class="trending-grid" id="trendSkeleton">
+    <div class="skeleton-trend">
+      <div class="skeleton-trend-img skeleton"></div>
+      <div class="skeleton-trend-body">
+        <div class="skeleton-line skeleton" style="width:70%;"></div>
+        <div class="skeleton-line skeleton" style="width:50%;"></div>
+        <div class="skeleton-line skeleton" style="width:40%; margin-top:12px;"></div>
+      </div>
+    </div>
+    <div class="skeleton-trend">
+      <div class="skeleton-trend-img skeleton"></div>
+      <div class="skeleton-trend-body">
+        <div class="skeleton-line skeleton" style="width:65%;"></div>
+        <div class="skeleton-line skeleton" style="width:45%;"></div>
+        <div class="skeleton-line skeleton" style="width:35%; margin-top:12px;"></div>
+      </div>
+    </div>
+    <div class="skeleton-trend">
+      <div class="skeleton-trend-img skeleton"></div>
+      <div class="skeleton-trend-body">
+        <div class="skeleton-line skeleton" style="width:75%;"></div>
+        <div class="skeleton-line skeleton" style="width:55%;"></div>
+        <div class="skeleton-line skeleton" style="width:40%; margin-top:12px;"></div>
+      </div>
+    </div>
+    <div class="skeleton-trend">
+      <div class="skeleton-trend-img skeleton"></div>
+      <div class="skeleton-trend-body">
+        <div class="skeleton-line skeleton" style="width:60%;"></div>
+        <div class="skeleton-line skeleton" style="width:50%;"></div>
+        <div class="skeleton-line skeleton" style="width:38%; margin-top:12px;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="trending-grid" id="trendGrid" style="display:none;"></div>
+</section>
+
+<!-- ══════════════════════════════════════════════ CTA -->
+<section id="about" class="cta-wrap">
+  <div class="cta-box">
+    <div class="cta-orb1"></div>
+    <div class="cta-orb2"></div>
+    <h2 class="cta-title">Ready to start <span class="accent">collecting?</span></h2>
+    <p class="cta-desc">Join thousands of collectors discovering tomorrow's masterpieces today.</p>
+    <div class="cta-btns">
+      <a href="/Auth/Register" class="btn-primary">Create your account</a>
+      <a href="/Auth/UserLogin" class="btn-secondary">Sign in</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="nav-logo" style="display:flex;align-items:center;gap:.6rem;">
+        <div class="logo-icon" style="width: 58px; height: 58px; border-radius: 18px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #0b0c10; box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24); margin-right: 14px;">
+                <img src="/images/Untitled design.png" alt="" aria-hidden="true" style="width: 100%; height: 100%; object-fit: cover; transform: scale(2.65) translateX(3%);" />
             </div>
-            <button class="filter-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
-                Filters
+        <span style="font-size:1.2rem;font-weight:600;color:var(--btn-fg)">Artify</span>
+      </div>
+      <p class="footer-brand-desc">A curated home for digital art. Discover, collect and live with extraordinary works from visionary artists.</p>
+      <div class="footer-social">
+        <a href="#" aria-label="Twitter">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+        </a>
+        <a href="#" aria-label="Instagram">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </a>
+        <a href="#" aria-label="GitHub">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Explore</div>
+      <ul>
+        <li><a href="#explore">Gallery</a></li>
+        <li><a href="#trending">Trending</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Account</div>
+      <ul>
+        <li><a href="/Auth/UserLogin">Sign in</a></li>
+        <li><a href="/Auth/Register">Sign up</a></li>
+        <li><a href="/Wishlist/Index">Wishlist</a></li>
+        <li><a href="/Cart/Index">Cart</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Company</div>
+      <ul>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2025 Artify. All rights reserved.</div>
+    <div class="footer-bottom-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Cookies</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════════ SCRIPTS -->
+<script>
+  /* ═══════════════════════════════════════════════════════════
+     FLOATING NAV BEHAVIOR
+  ═══════════════════════════════════════════════════════════ */
+  document.addEventListener("DOMContentLoaded", function() {
+      var nav = document.getElementById('floatingNav');
+      var trigger = document.getElementById('floatingNavTrigger');
+      var panel = document.getElementById('floatingNavPanel');
+      var links = Array.prototype.slice.call(document.querySelectorAll('[data-nav-link]'));
+      var defaultLink = links[0];
+      var closeTimer = null;
+      var isOpen = false;
+
+      if (!nav || !trigger || !panel) return;
+
+      function clearCloseTimer() {
+          if (closeTimer) { window.clearTimeout(closeTimer); closeTimer = null; }
+      }
+      function setActive(link) {
+          links.forEach(function (item) { item.classList.toggle('is-active', item === link); });
+      }
+      function openNav() {
+          clearCloseTimer();
+          if (isOpen) return;
+          isOpen = true;
+          nav.classList.add('is-open');
+          trigger.setAttribute('aria-expanded', 'true');
+      }
+      function closeNav() {
+          clearCloseTimer();
+          if (!isOpen) return;
+          isOpen = false;
+          nav.classList.remove('is-open');
+          trigger.setAttribute('aria-expanded', 'false');
+          if (defaultLink) setActive(defaultLink);
+      }
+      function scheduleClose() {
+          clearCloseTimer();
+          closeTimer = window.setTimeout(closeNav, 120);
+      }
+
+      trigger.addEventListener('mouseenter', openNav);
+      trigger.addEventListener('focus', openNav);
+      trigger.addEventListener('click', function () { if (isOpen) closeNav(); else openNav(); });
+
+      nav.addEventListener('mouseenter', clearCloseTimer);
+      nav.addEventListener('mouseleave', scheduleClose);
+      panel.addEventListener('focusin', openNav);
+      nav.addEventListener('focusout', function (event) { if (!nav.contains(event.relatedTarget)) scheduleClose(); });
+
+      links.forEach(function (link) {
+          link.addEventListener('mouseenter', function () { setActive(link); });
+          link.addEventListener('focus', function () { setActive(link); openNav(); });
+          link.addEventListener('click', closeNav);
+      });
+
+      document.addEventListener('click', function (event) { if (!nav.contains(event.target)) closeNav(); });
+      document.addEventListener('keydown', function (event) { if (event.key === 'Escape') closeNav(); });
+  });
+
+  /* ═══════════════════════════════════════════════════════════
+     CONFIG — ApiBaseUrl is injected from BuyerController via ViewData
+     Same pattern used in ArtworkDetail.cshtml
+  ═══════════════════════════════════════════════════════════ */
+ const API_BASE = 'http://localhost:5183';
+
+  /* ═══════════════════════════════════════════════════════════
+     IMAGE HELPER — resolves relative paths from DB the same
+     way ArtworkDetail.cshtml does.
+  ═══════════════════════════════════════════════════════════ */
+  function imageUrl(path) {
+    if (!path) return 'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=600&q=80';
+    if (/^https?:\/\//i.test(path)) return path;
+    // Strip leading slash so we can safely join
+    var clean = path.replace(/^\/+/, '');
+    return API_BASE.replace(/\/+$/, '') + '/' + clean;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     HERO BACKGROUND
+     Called immediately with placeholders so the animated
+     columns are visible right away (no API wait).
+     Called again after API loads to swap in real artwork imgs.
+  ═══════════════════════════════════════════════════════════ */
+  var PLACEHOLDERS = [
+    'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=600&q=80',
+    'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=600&q=80',
+    'https://images.unsplash.com/photo-1501472312651-726afe119ff1?w=600&q=80',
+    'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600&q=80',
+    'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=600&q=80',
+    'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=600&q=80',
+  ];
+
+  function buildHeroBg(artworks) {
+    var heroBg = document.getElementById('heroBg');
+    heroBg.innerHTML = '';
+
+    // Use real artwork images if available, pad with placeholders
+    var imgs = (artworks || []).slice(0, 12).map(function(a) {
+      return imageUrl(a.previewPath || a.originalPath);
+    });
+    while (imgs.length < 12) imgs = imgs.concat(PLACEHOLDERS);
+
+    var dirs = ['up','down','up','down','up'];
+    var durs = ['35s','45s','50s','40s','55s'];
+    dirs.forEach(function(dir, ci) {
+      var col = document.createElement('div');
+      col.className = 'art-col';
+      var inner = document.createElement('div');
+      inner.className = 'art-col-inner ' + dir;
+      // ── CRITICAL: set CSS variable --dur AND animationDuration ──
+      inner.style.setProperty('--dur', durs[ci]);
+      inner.style.animationDuration = durs[ci];
+      inner.style.animationDelay = '-' + (Math.random() * 50).toFixed(1) + 's';
+      // Duplicate images so the marquee loops seamlessly
+      var colImgs = imgs.concat(imgs);
+      colImgs.forEach(function(src) {
+        var img = document.createElement('img');
+        img.src = src; img.alt = ''; img.loading = 'lazy';
+        inner.appendChild(img);
+      });
+      col.appendChild(inner);
+      heroBg.appendChild(col);
+    });
+  }
+
+  // ── Build hero immediately with placeholders (no API wait) ──
+  buildHeroBg([]);
+
+  /* ═══════════════════════════════════════════════════════════
+     PARTICLES
+  ═══════════════════════════════════════════════════════════ */
+  (function buildParticles() {
+    var pc = document.getElementById('particles');
+    for (var i = 0; i < 22; i++) {
+      var p = document.createElement('div');
+      p.className = 'particle';
+      p.style.cssText = 'top:'+(i*53%100)+'%;left:'+(i*37%100)+'%;animation-delay:'+(i*.4)+'s;animation-duration:'+(5+(i%4))+'s;pointer-events:none;';
+      pc.appendChild(p);
+    }
+  })();
+
+  /* ═══════════════════════════════════════════════════════════
+     MARQUEE (Discover section)
+     Renders all artworks as cards that link to ArtworkDetail
+  ═══════════════════════════════════════════════════════════ */
+  function buildMarquee(artworks) {
+    var track = document.getElementById('marqueeTrack');
+    var skeleton = document.getElementById('marqueeSkeleton');
+    track.innerHTML = '';
+
+    if (!artworks.length) {
+      skeleton.style.display = 'none';
+      track.style.display = 'flex';
+      track.innerHTML = '<div style="padding:2rem;color:var(--text-muted);">No artworks yet.</div>';
+      return;
+    }
+
+    // Duplicate for seamless loop
+    var doubled = [...artworks, ...artworks];
+    doubled.forEach(function(a, idx) {
+      var id = a.artworkId || a.c_artwork_id || idx;
+      var title = a.title || a.c_title || 'Untitled';
+      var artist = a.artistName || a.c_artist_name || 'Unknown Artist';
+      var img = imageUrl(a.previewPath || a.originalPath || a.c_preview_path || a.c_original_path);
+
+      track.innerHTML += `
+        <a class="art-card" data-id="${id}" href="/Buyer/ArtworkDetail/${id}">
+          <img src="${img}" alt="${escapeHtml(title)}" loading="lazy" />
+          <div class="art-card-overlay"></div>
+          <div class="artwork-top-actions">
+            <button class="action-btn" title="Like" onclick="event.preventDefault(); toggleLike(this, ${id})">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
             </button>
-        </div>
-        <div class="categories" id="categories"></div>
-    </div>
+          </div>
+          <div class="art-card-info">
+            <div class="art-card-title">${escapeHtml(title)}</div>
+            <div class="art-card-artist">by ${escapeHtml(artist)}</div>
+          </div>
+        </a>`;
+    });
 
-    <!-- Grid Header -->
-    <div class="grid-header">
-        <p id="artCount">Loading...</p>
-        <select onchange="sortArt(this.value)">
-            <option value="popular">Sort by: Popular</option>
-            <option value="low">Price: Low to High</option>
-            <option value="high">Price: High to Low</option>
-            <option value="new">Newest First</option>
-        </select>
-    </div>
+    skeleton.style.display = 'none';
+    track.style.display = '';
+  }
 
-    <!-- Art Grid -->
-    <div class="art-grid" id="artGrid">
-        <div class="loading-state" style="grid-column:1/-1">
-            <div class="loading-spinner"></div>
-            <p>Loading artworks...</p>
-        </div>
-    </div>
+  /* ═══════════════════════════════════════════════════════════
+     TRENDING DROPS
+     Shows top 8 by sell_count (desc), then likes_count as tiebreaker.
+     Each card links to ArtworkDetail.
+  ═══════════════════════════════════════════════════════════ */
+  function buildTrending(artworks) {
+    var grid = document.getElementById('trendGrid');
+    var skeleton = document.getElementById('trendSkeleton');
+    grid.innerHTML = '';
 
-    <script>
-        // ─── State ───────────────────────────────────────────────────────────
-        var artworks = [];
-        var allCategories = ['All'];
-        var activeCategory = 'All';
-        var currentSort = 'popular';
+    // Sort by sellCount desc, likesCount desc
+    var sorted = artworks.slice().sort(function(a, b) {
+      var sellA = a.sellCount || a.c_sell_count || 0;
+      var sellB = b.sellCount || b.c_sell_count || 0;
+      if (sellB !== sellA) return sellB - sellA;
+      var likeA = a.likesCount || a.c_likes_count || 0;
+      var likeB = b.likesCount || b.c_likes_count || 0;
+      return likeB - likeA;
+    });
 
-        var API_BASE = 'http://localhost:5183';
+    var top8 = sorted.slice(0, 8);
 
-        // ── Auth helpers ──────────────────────────────────────────────────────
-        function getToken() { return localStorage.getItem('token'); }
-        function isLoggedIn() { return !!getToken(); }
-        function requireLogin(returnUrl) {
-            window.location.href = '/Auth/UserLogin?returnUrl=' + encodeURIComponent(returnUrl || window.location.pathname);
-        }
-        function authFetch(url, options) {
-            options = options || {};
-            var token = getToken();
-            return fetch(url, Object.assign({}, options, {
-                headers: Object.assign({ 'Content-Type': 'application/json' },
-                    token ? { 'Authorization': 'Bearer ' + token } : {},
-                    options.headers || {})
-            }));
-        }
+    if (!top8.length) {
+      grid.innerHTML = '<div class="empty-state"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h18v18H3z"/><path d="M9 9h6v6H9z"/></svg><p>No artworks available yet.</p></div>';
+      skeleton.style.display = 'none';
+      grid.style.display = 'grid';
+      return;
+    }
 
-        // ─── localStorage helpers (artworkId-based, shared across all pages) ─
-        // Cart: stored as array of artworkIds
-        function getCart() {
-            try { return JSON.parse(localStorage.getItem('artify_cart') || '[]'); } catch(e) { return []; }
-        }
-        function saveCart(arr) { localStorage.setItem('artify_cart', JSON.stringify(arr)); }
-        function isInCart(id) { return getCart().indexOf(id) !== -1; }
-        function addToCartLocal(id) {
-            var ct = getCart();
-            if (ct.indexOf(id) === -1) { ct.push(id); saveCart(ct); }
-        }
+    top8.forEach(function(a) {
+      var id     = a.artworkId     || a.c_artwork_id  || 0;
+      var title  = a.title         || a.c_title        || 'Untitled';
+      var artist = a.artistName    || a.c_artist_name  || 'Unknown Artist';
+      var price  = parseFloat(a.price || a.c_price || 0);
+      var img    = imageUrl(a.previewPath || a.originalPath || a.c_preview_path || a.c_original_path);
+      var priceStr = price > 0 ? '₹' + price.toLocaleString('en-IN') : 'Price on request';
 
-        // Wishlist: stored as array of artworkIds
-        function getWishlist() {
-            try { return JSON.parse(localStorage.getItem('artify_wishlist') || '[]'); } catch(e) { return []; }
-        }
-        function saveWishlist(arr) { localStorage.setItem('artify_wishlist', JSON.stringify(arr)); }
-        function isInWishlist(id) { return getWishlist().indexOf(id) !== -1; }
-        function toggleWishlistLocal(id) {
-            var wl = getWishlist();
-            var idx = wl.indexOf(id);
-            if (idx === -1) { wl.push(id); } else { wl.splice(idx, 1); }
-            saveWishlist(wl);
-            return idx === -1; // returns true if now wishlisted
-        }
+      grid.innerHTML += `
+        <div class="trend-card" data-id="${id}">
+          <div class="trend-img" onclick="window.location='/Buyer/ArtworkDetail/${id}'">
+            <img src="${img}" alt="${escapeHtml(title)}" loading="lazy"/>
+            <div class="artwork-top-actions">
+              <button class="action-btn" title="Like" onclick="event.stopPropagation(); toggleLike(this, ${id})">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="trend-body">
+            <div class="trend-title" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
+            <div class="trend-artist">by ${escapeHtml(artist)}</div>
+            <div class="artwork-card-actions">
+              <button class="pixel-btn" onclick="addToCart(this, ${id})">
+                <span class="btn-text-add">Add to Cart</span>
+                <span class="btn-cart-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                  </svg>
+                </span>
+                <span class="btn-text-done">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  In Cart
+                </span>
+              </button>
+              <button class="action-btn" title="Wishlist" onclick="toggleWishlist(this, ${id})">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                </svg>
+              </button>
+            </div>
+            <div class="trend-price-row">
+              <span class="trend-price-lbl">Price</span>
+              <span class="trend-price-val">${escapeHtml(priceStr)}</span>
+            </div>
+          </div>
+        </div>`;
+    });
 
-        // ─── Badges ──────────────────────────────────────────────────────────
-        function updateBadges() {
-            var wSize = getWishlist().length;
-            var cSize = getCart().length;
-            var wb = document.getElementById('wishlistBadge');
-            var cb = document.getElementById('cartBadge');
-            wb.textContent = wSize; wb.className = 'badge' + (wSize === 0 ? ' zero' : '');
-            cb.textContent = cSize; cb.className = 'badge' + (cSize === 0 ? ' zero' : '');
-        }
+    skeleton.style.display = 'none';
+    grid.style.display = 'grid';
+  }
 
-        // ─── Toast ───────────────────────────────────────────────────────────
-        var toastTimer = null;
-        function showToast(msg) {
-            var t = document.getElementById('toast');
-            t.textContent = msg;
-            t.classList.add('show');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2200);
-        }
+  /* ═══════════════════════════════════════════════════════════
+     MAIN: fetch all approved artworks from GET /api/artwork
+     API response shape: { success: true, count: N, data: [...] }
+     Each artwork has: artworkId, title, artistName, categoryName,
+       price, description, previewPath, originalPath,
+       likesCount, sellCount, createdAt, approvalStatus
+  ═══════════════════════════════════════════════════════════ */
+  async function loadArtworks() {
+    try {
+      var token = document.cookie.split('; ').find(r => r.startsWith('token='));
+      var headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = 'Bearer ' + token.split('=')[1];
 
-        // ─── Toggle Wishlist ─────────────────────────────────────────────────
-        function toggleWishlist(artworkId) {
-            if (!isLoggedIn()) { requireLogin('/Buyer/ExploreArt'); return; }
+      var res = await fetch(API_BASE.replace(/\/+$/, '') + '/api/artwork', { headers: headers });
 
-            var nowWishlisted = toggleWishlistLocal(artworkId);
-            updateBadges();
-            showToast(nowWishlisted ? '♥ Added to Wishlist' : 'Removed from Wishlist');
+      if (!res.ok) throw new Error('API responded with ' + res.status);
 
-            // Update this card's button in-place without full re-render
-            var btn = document.querySelector('[data-wishlist-id="' + artworkId + '"]');
-            if (btn) {
-                btn.className = 'wishlist-btn' + (nowWishlisted ? ' active' : '');
-                var svg = btn.querySelector('svg');
-                if (svg) svg.setAttribute('fill', nowWishlisted ? 'currentColor' : 'none');
-                btn.childNodes[btn.childNodes.length - 1].textContent = nowWishlisted ? ' Added to Wishlist' : ' Add to Wishlist';
-            }
+      var json = await res.json();
+      // Handle { success, count, data: [...] } shape
+      var artworks = Array.isArray(json) ? json
+                   : (json.data && Array.isArray(json.data)) ? json.data
+                   : [];
 
-            // Also call backend (fire-and-forget — UI already updated above)
-            authFetch(API_BASE + '/api/wishlist/toggle', {
-                method: 'POST',
-                body: JSON.stringify({ artworkId: artworkId })
-            }).then(function(res) {
-                if (res.status === 401) { requireLogin('/Buyer/ExploreArt'); }
-            }).catch(function() {});
-        }
+      // Update hero stats counter
+      var statEl = document.getElementById('statArtworks');
+      if (statEl) statEl.textContent = artworks.length >= 1000
+        ? (artworks.length / 1000).toFixed(1) + 'k+'
+        : artworks.length + '+';
 
-        // ─── Add to Cart ─────────────────────────────────────────────────────
-        function addToCart(artworkId) {
-            if (!isLoggedIn()) {
-                addToCartLocal(artworkId); // save optimistically
-                requireLogin('/Buyer/ExploreArt');
-                return;
-            }
-            if (isInCart(artworkId)) return;
+      buildHeroBg(artworks);
+      buildMarquee(artworks);
+      buildTrending(artworks);
+      restoreUIStates();
 
-            addToCartLocal(artworkId);
-            updateBadges();
-            showToast('🛒 Added to Cart');
+    } catch (err) {
+      console.error('Failed to load artworks:', err);
 
-            // Update this card's button in-place
-            var btn = document.querySelector('[data-cart-id="' + artworkId + '"]');
-            if (btn) {
-                btn.className = 'cart-btn in-cart';
-                btn.disabled = true;
-                btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>In Cart';
-            }
+      // Hide skeletons and show a graceful error in trending
+      document.getElementById('marqueeSkeleton').style.display = 'none';
+      document.getElementById('marqueeTrack').style.display = '';
+      document.getElementById('marqueeTrack').innerHTML =
+        '<div style="padding:2rem 1.5rem;color:var(--text-muted);font-size:.88rem;">Could not load artworks. Please try again later.</div>';
 
-            // Also call backend
-            authFetch(API_BASE + '/api/cart/add', {
-                method: 'POST',
-                body: JSON.stringify({ artworkId: artworkId })
-            }).then(function(res) {
-                if (res.status === 401) { requireLogin('/Buyer/ExploreArt'); }
-            }).catch(function() {});
-        }
+      document.getElementById('trendSkeleton').style.display = 'none';
+      var trendGrid = document.getElementById('trendGrid');
+      trendGrid.style.display = 'grid';
+      trendGrid.innerHTML = '<div class="empty-state"><p>Could not load artworks. Please try again later.</p></div>';
 
-        // ─── Image helper ────────────────────────────────────────────────────
-        function imageUrl(path) {
-            if (!path) return 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600';
-            if (path.startsWith('http')) return path;
-            return window.location.origin + path;
-        }
+      // Still build hero bg with placeholders
+      buildHeroBg([]);
+    }
+  }
 
-        // ─── Categories ──────────────────────────────────────────────────────
-        function buildCategories() {
-            var cats = ['All'];
-            artworks.forEach(function(a) {
-                if (a.categoryName && cats.indexOf(a.categoryName) === -1) cats.push(a.categoryName);
-            });
-            allCategories = cats;
-            renderCategories();
-        }
+  /* ═══════════════════════════════════════════════════════════
+     STORAGE HELPERS (localStorage — same keys as before)
+  ═══════════════════════════════════════════════════════════ */
+  function getStorage(key) {
+    try { var d = localStorage.getItem(key); return d ? JSON.parse(d) : []; }
+    catch(e) { return []; }
+  }
 
-        function renderCategories() {
-            var html = '';
-            for (var i = 0; i < allCategories.length; i++) {
-                var c = allCategories[i];
-                html += '<button class="cat-btn ' + (c === activeCategory ? 'active' : '') + '" onclick="setCategory(\'' + c + '\')">' + c + '</button>';
-            }
-            document.getElementById('categories').innerHTML = html;
-        }
+  // updateBadges is now handled globally via globalBadges.js
 
-        function setCategory(cat) { activeCategory = cat; renderCategories(); filterArt(); }
+  function restoreUIStates() {
+    var cart     = getStorage('artify_cart');
+    var wishlist = getStorage('artify_wishlist');
+    var likes    = getStorage('artify_likes');
 
-        // ─── Filter & Sort ────────────────────────────────────────────────────
-        function getFiltered() {
-            var q = document.getElementById('searchInput').value.toLowerCase();
-            return artworks.filter(function(a) {
-                var matchCat = activeCategory === 'All' || a.categoryName === activeCategory;
-                var matchQ = a.title.toLowerCase().indexOf(q) >= 0 || a.artistName.toLowerCase().indexOf(q) >= 0;
-                return matchCat && matchQ;
-            });
-        }
+    document.querySelectorAll('.pixel-btn').forEach(function(btn) {
+      var card = btn.closest('[data-id]');
+      if (card && cart.includes(card.getAttribute('data-id').toString())) {
+        btn.classList.add('animating');
+      }
+    });
 
-        function sortArt(val) { currentSort = val; filterArt(); }
+    document.querySelectorAll('.action-btn').forEach(function(btn) {
+      var card = btn.closest('[data-id]');
+      if (!card) return;
+      var id = card.getAttribute('data-id').toString();
+      var icon = btn.querySelector('svg');
+      if (btn.getAttribute('title') === 'Like' && likes.includes(id)) {
+        btn.classList.add('liked');
+        if (icon) icon.style.fill = '#ff4757';
+      } else if (btn.getAttribute('title') === 'Wishlist' && wishlist.includes(id)) {
+        btn.classList.add('wished');
+        if (icon) icon.style.fill = '#EDA312';
+      }
+    });
 
-        function filterArt() {
-            var filtered = getFiltered();
-            if (currentSort === 'low') filtered = filtered.slice().sort(function(a,b){ return a.price - b.price; });
-            if (currentSort === 'high') filtered = filtered.slice().sort(function(a,b){ return b.price - a.price; });
-            if (currentSort === 'popular') filtered = filtered.slice().sort(function(a,b){ return b.likesCount - a.likesCount; });
-            if (currentSort === 'new') filtered = filtered.slice().sort(function(a,b){ return new Date(b.createdAt) - new Date(a.createdAt); });
-            document.getElementById('artCount').textContent = filtered.length + ' artworks found';
-            renderGrid(filtered);
-        }
+    updateBadges();
+  }
 
-        // ─── Render Art Grid ──────────────────────────────────────────────────
-        function renderGrid(filtered) {
-            if (filtered.length === 0) {
-                document.getElementById('artGrid').innerHTML = '<div class="empty-state" style="grid-column:1/-1"><p>No artworks found.</p></div>';
-                return;
-            }
+  /* ═══════════════════════════════════════════════════════════
+     INTERACTIONS
+  ═══════════════════════════════════════════════════════════ */
+  function toggleLike(btn, id) {
+    var likes = getStorage('artify_likes');
+    var idx = likes.indexOf(id.toString());
+    var icon = btn.querySelector('svg');
+    if (idx === -1) {
+      likes.push(id.toString());
+      btn.classList.add('liked');
+      if (icon) icon.style.fill = '#ff4757';
+    } else {
+      likes.splice(idx, 1);
+      btn.classList.remove('liked');
+      if (icon) icon.style.fill = 'none';
+    }
+    localStorage.setItem('artify_likes', JSON.stringify(likes));
+  }
 
-            var html = '';
-            for (var fi = 0; fi < filtered.length; fi++) {
-                var a = filtered[fi];
-                var id = a.artworkId;
-                var isWished = isInWishlist(id);
-                var inCart = isInCart(id);
-                var imgSrc = imageUrl(a.previewPath);
-                var url = '/Buyer/ArtworkDetail/' + id;
+  function toggleWishlist(btn, id) {
+    var wishlist = getStorage('artify_wishlist');
+    var idx = wishlist.indexOf(id.toString());
+    var icon = btn.querySelector('svg');
+    if (idx === -1) {
+      wishlist.push(id.toString());
+      btn.classList.add('wished');
+      if (icon) icon.style.fill = '#EDA312';
+    } else {
+      wishlist.splice(idx, 1);
+      btn.classList.remove('wished');
+      if (icon) icon.style.fill = 'none';
+    }
+    localStorage.setItem('artify_wishlist', JSON.stringify(wishlist));
+    updateBadges();
+  }
 
-                html += '<div class="art-card" style="animation-delay:' + (fi * 0.07) + 's">'
-                    + '<div class="card-img">'
-                    + '<img src="' + imgSrc + '" alt="' + a.title + '" loading="lazy"/>'
-                    + '<div class="overlay"></div>'
-                    + '<div class="glass-overlay"></div>'
-                    + '<span class="cat-badge">' + (a.categoryName || '') + '</span>'
-                    + '<div class="quick-actions">'
-                    + '<a href="' + url + '" class="view-btn">'
-                    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View</a>'
-                    + '<button class="cart-btn ' + (inCart ? 'in-cart' : '') + '" data-cart-id="' + id + '" '
-                    + (inCart ? 'disabled' : 'onclick="addToCart(' + id + ')"') + '>'
-                    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>'
-                    + (inCart ? 'In Cart' : 'Add') + '</button>'
-                    + '</div></div>'
-                    + '<div class="card-info">'
-                    + '<h3>' + a.title + '</h3>'
-                    + '<p class="artist">by ' + a.artistName + '</p>'
-                    + '<div class="meta">'
-                    + '<span class="price">$' + Number(a.price).toLocaleString('en-US') + '</span>'
-                    + '<span class="views"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
-                    + (a.likesCount || 0).toLocaleString() + '</span>'
-                    + '</div>'
-                    + '<button class="wishlist-btn ' + (isWished ? 'active' : '') + '" data-wishlist-id="' + id + '" onclick="toggleWishlist(' + id + ')">'
-                    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="' + (isWished ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'
-                    + (isWished ? ' Added to Wishlist' : ' Add to Wishlist') + '</button>'
-                    + '</div></div>';
-            }
-            document.getElementById('artGrid').innerHTML = html;
-        }
+  function addToCart(btn, id) {
+    if (btn && !btn.classList.contains('animating')) {
+      btn.classList.add('animating');
+    }
+    var cart = getStorage('artify_cart');
+    if (!cart.includes(id.toString())) {
+      cart.push(id.toString());
+      localStorage.setItem('artify_cart', JSON.stringify(cart));
+      updateBadges();
+    }
+  }
 
-        // ─── Marquee ─────────────────────────────────────────────────────────
-        function buildMarquee() {
-            var row1 = document.getElementById('marqueeRow1');
-            var row2 = document.getElementById('marqueeRow2');
-            if (!row1 || !row2) return;
-            var imgs = artworks.slice(0, 10).map(function(a) { return imageUrl(a.previewPath); });
-            if (imgs.length === 0) return;
-            var html1 = '', html2 = '';
-            for (var rep = 0; rep < 2; rep++) {
-                for (var i = 0; i < imgs.length; i++) html1 += '<div class="marquee-item"><img src="' + imgs[i] + '" alt="Gallery art" loading="lazy"/><div class="marquee-overlay"></div></div>';
-                for (var j = imgs.length - 1; j >= 0; j--) html2 += '<div class="marquee-item"><img src="' + imgs[j] + '" alt="Gallery art" loading="lazy"/><div class="marquee-overlay"></div></div>';
-            }
-            row1.innerHTML = html1;
-            row2.innerHTML = html2;
-        }
+  /* ── Security helper ─────────────────────────────────────── */
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
 
-        // ─── Hero Floating Images ─────────────────────────────────────────────
-        function buildHeroFloatingImages() {
-            var container = document.getElementById('heroFloatingImages');
-            if (!container) return;
-            var imgs = artworks.slice(0, 6).map(function(a) { return imageUrl(a.previewPath); });
-            if (imgs.length === 0) return;
-            var html = '';
-            for (var i = 0; i < imgs.length; i++) {
-                html += '<div class="hero-float-img"><img src="' + imgs[i] + '" alt="Art" loading="lazy"/></div>';
-            }
-            container.innerHTML = html;
-        }
-
-        // ─── Curated Grid ─────────────────────────────────────────────────────
-        function buildCurated() {
-            var grid = document.getElementById('curatedGrid');
-            if (!grid) return;
-            var seen = {}, cards = [];
-            for (var i = 0; i < artworks.length && cards.length < 5; i++) {
-                var cat = artworks[i].categoryName;
-                if (cat && !seen[cat]) {
-                    seen[cat] = true;
-                    cards.push({ image: imageUrl(artworks[i].previewPath), title: cat + ' Art', cat: cat });
-                }
-            }
-            var html = '';
-            for (var k = 0; k < cards.length; k++) {
-                var c = cards[k];
-                html += '<div class="curated-card" onclick="setCategory(\'' + c.cat + '\'); document.getElementById(\'artGrid\').scrollIntoView({behavior:\'smooth\'})">'
-                    + '<img src="' + c.image + '" alt="' + c.title + '" loading="lazy"/>'
-                    + '<div class="curated-overlay"><h3>' + c.title + '</h3><span>' + c.cat + '</span></div>'
-                    + '</div>';
-            }
-            grid.innerHTML = html;
-        }
-
-        // ─── Fetch from API ───────────────────────────────────────────────────
-        async function loadArtworks() {
-            try {
-                var res = await authFetch(API_BASE + '/api/artwork');
-                if (!res.ok) throw new Error('Server error ' + res.status);
-                var data = await res.json();
-
-                // Normalize API response shape (.NET may wrap in $values)
-                if (Array.isArray(data)) artworks = data;
-                else if (data && Array.isArray(data.$values)) artworks = data.$values;
-                else if (data && Array.isArray(data.items)) artworks = data.items;
-                else if (data && Array.isArray(data.data)) artworks = data.data;
-                else if (data && Array.isArray(data.artworks)) artworks = data.artworks;
-                else { console.error('Unexpected API shape:', data); artworks = []; }
-
-                buildCategories();
-                filterArt();
-                buildMarquee();
-                buildHeroFloatingImages();
-                buildCurated();
-            } catch (err) {
-                console.error('Failed to load artworks:', err);
-                document.getElementById('artGrid').innerHTML =
-                    '<div class="error-state" style="grid-column:1/-1"><p>Failed to load artworks. Please try again later.</p></div>';
-            }
-        }
-
-        // ─── Init ─────────────────────────────────────────────────────────────
-        document.addEventListener('DOMContentLoaded', function() {
-            if (!isLoggedIn()) { requireLogin('/Buyer/ExploreArt'); return; }
-            updateBadges();
-            loadArtworks();
-        });
-    </script>
+  /* ── Boot ────────────────────────────────────────────────── */
+  document.addEventListener('DOMContentLoaded', function() {
+    // updateBadges(); // handled by globalBadges.js
+    loadArtworks();
+  });
+</script>
+<script src="/js/globalBadges.js"></script>
 </body>
 </html>

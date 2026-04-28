@@ -1,190 +1,599 @@
-﻿@* @model Repository.Models.t_ArtistProfile
 @{
-    ViewData["Title"] = "Artist Studio";
-    Layout = "_ArtistLayout"; // Or your specific layout
+    Layout = "~/Views/Artist/_ArtistLayout.cshtml";
+    ViewData["Title"] = "My Profile";
+    ViewData["Active"] = "Profile";
 }
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+@section HeadStyles {
 <style>
-    :root { --studio-gold: #b39359; --studio-dark: #0f172a; --glass: rgba(255,255,255,0.95); }
-    .profile-banner { height: 280px; background-size: cover; background-position: center; border-radius: 0 0 30px 30px; position: relative; }
-    .profile-overlay { position: absolute; inset: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); border-radius: 0 0 30px 30px; }
-    .profile-header-content { position: relative; margin-top: -100px; padding: 0 5%; }
-    .artist-avatar { width: 180px; height: 180px; border: 6px solid white; border-radius: 50%; box-shadow: 0 10px 30px rgba(0,0,0,0.1); background: #fff; object-fit: cover; }
-    .card-custom { background: var(--glass); border-radius: 20px; border: 1px solid #eee; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-    .stat-card { text-align: center; padding: 20px; border-right: 1px solid #eee; }
-    .stat-card:last-child { border-right: none; }
+    /* ── Layout ── */
+    .profile-grid {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    /* ── Profile Card (left) ── */
+    .profile-identity-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(3,40,159,.05);
+        overflow: hidden;
+        position: sticky;
+        top: 88px;
+    }
+
+    .cover-banner {
+        height: 120px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cover-banner img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+    }
+
+    .cover-edit-btn {
+        position: absolute;
+        bottom: 10px; right: 10px;
+        width: 32px; height: 32px;
+        border-radius: 8px;
+        background: rgba(0,0,0,.45);
+        border: none; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-size: .85rem;
+        transition: background var(--transition);
+    }
+    .cover-edit-btn:hover { background: rgba(0,0,0,.65); }
+
+    .avatar-ring {
+        width: 88px; height: 88px;
+        border-radius: 50%;
+        border: 4px solid var(--card-bg);
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem; font-weight: 700; color: #fff;
+        margin: -44px auto 0;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(3,40,159,.2);
+    }
+
+    .avatar-ring img { width:100%;height:100%;object-fit:cover; }
+
+    /* Profile picture upload overlay on hover */
+    .avatar-ring .avatar-upload-overlay {
+        position: absolute; inset: 0;
+        border-radius: 50%;
+        background: rgba(0,0,0,.45);
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0;
+        transition: opacity .2s;
+        pointer-events: none;
+    }
+    .avatar-ring:hover .avatar-upload-overlay { opacity: 1; }
+    .avatar-ring:hover { cursor: pointer; }
+
+    .identity-body { padding: 12px 20px 24px; text-align: center; }
+
+    .identity-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.25rem; font-weight: 700;
+        color: var(--text); margin-bottom: 2px;
+    }
+
+    .identity-email { font-size: .8rem; color: var(--muted); margin-bottom: 14px; }
+
+    .identity-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 5px 14px;
+        border-radius: 20px;
+        font-size: .72rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: .8px;
+        margin-bottom: 16px;
+    }
+
+    .badge-verified   { background: #d1fae5; color: #065f46; }
+    .badge-unverified { background: #fef3c7; color: #92400e; }
+
+    .identity-stats {
+        display: grid; grid-template-columns: 1fr 1fr 1fr;
+        gap: 1px; background: rgba(3,40,159,.06);
+        border-radius: 10px; overflow: hidden;
+        margin: 16px 0;
+    }
+
+    .identity-stat {
+        background: var(--card-bg);
+        padding: 12px 6px;
+        text-align: center;
+    }
+
+    .identity-stat .val {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.15rem; font-weight: 700; color: var(--primary);
+        display: block;
+    }
+
+    .identity-stat .lbl { font-size: .65rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+
+    .social-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+
+    .social-chip {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 5px 12px; border-radius: 20px;
+        background: rgba(107,155,230,.1); color: var(--primary);
+        font-size: .75rem; font-weight: 600; text-decoration: none;
+        transition: background var(--transition);
+        max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .social-chip:hover { background: rgba(3,40,159,.12); color: var(--primary); }
+
+    /* ── Edit Form (right) ── */
+    .edit-form-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(3,40,159,.05);
+        padding: 32px;
+    }
+
+    .form-group { margin-bottom: 20px; }
+
+    .form-label {
+        display: block; font-size: .78rem; font-weight: 700;
+        color: var(--text); text-transform: uppercase;
+        letter-spacing: .8px; margin-bottom: 8px;
+    }
+
+    .form-label .req { color: #ef4444; margin-left: 2px; }
+
+    .form-control-artify {
+        width: 100%; padding: 12px 16px;
+        border-radius: 10px;
+        border: 1.5px solid rgba(3,40,159,.13);
+        background: #f8faff;
+        font-size: .9rem; font-family: 'DM Sans', sans-serif;
+        color: var(--text); outline: none;
+        transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .form-control-artify:focus {
+        border-color: var(--accent);
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(107,155,230,.15);
+    }
+
+    textarea.form-control-artify { resize: vertical; min-height: 110px; }
+
+    /* Social URL list */
+    .url-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .url-row { display: flex; align-items: center; gap: 8px; }
+
+    .url-row .form-control-artify { flex: 1; }
+
+    .url-icon-btn {
+        width: 38px; height: 38px; border-radius: 10px;
+        border: none; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        font-size: .95rem; flex-shrink: 0;
+        transition: all var(--transition);
+    }
+
+    .btn-add-url  { background: rgba(3,40,159,.08); color: var(--primary); }
+    .btn-add-url:hover { background: rgba(3,40,159,.16); }
+    .btn-rem-url  { background: #fee2e2; color: #ef4444; }
+    .btn-rem-url:hover { background: #fca5a5; }
+
+    /* Cover preview */
+    .cover-preview-row {
+        display: flex; align-items: center; gap: 14px;
+        padding: 12px 14px;
+        background: #f8faff; border-radius: 10px;
+        border: 1.5px dashed rgba(3,40,159,.15);
+        cursor: pointer; transition: border-color var(--transition);
+    }
+    .cover-preview-row:hover { border-color: var(--accent); }
+
+    #coverPreviewThumb {
+        width: 64px; height: 44px; border-radius: 8px;
+        object-fit: cover;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        display: none;
+    }
+
+    .cover-preview-placeholder {
+        width: 64px; height: 44px; border-radius: 8px;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        display: flex; align-items: center; justify-content: center;
+        color: rgba(255,255,255,.6); font-size: 1.1rem;
+    }
+
+    /* Success/error toast */
+    .save-feedback {
+        display: none; padding: 12px 18px; border-radius: 10px;
+        font-weight: 600; font-size: .87rem;
+        margin-bottom: 16px; align-items: center; gap: 10px;
+    }
+    .save-feedback.success { background: #d1fae5; color: #065f46; display: flex; }
+    .save-feedback.error   { background: #fee2e2; color: #991b1b; display: flex; }
+
+    .char-count { font-size: .72rem; color: var(--muted); text-align: right; margin-top: 4px; }
+
+    @@media (max-width: 991px) {
+        .profile-grid { grid-template-columns: 1fr; }
+        .profile-identity-card { position: static; }
+    }
 </style>
+}
 
-<div class="container-fluid mb-5">
-    <div class="profile-banner" style="background-image: url('/Cover_Images/@Model.CoverImage');">
-        <div class="profile-overlay"></div>
-    </div>
+<div class="profile-grid">
 
-    <div class="profile-header-content">
-        <div class="d-flex align-items-end justify-content-between flex-wrap gap-3">
-            <div class="d-flex align-items-end gap-4 flex-wrap">
-                <img src="/Artist_Images/@Model.CoverImage" class="artist-avatar" alt="Artist Profile">
-                <div class="mb-3 text-white">
-                    <h1 class="display-5 fw-bold mb-1">@Model.ArtistName 
-                        @if(Model.IsVerified) { <i class="bi bi-patch-check-fill text-info fs-3"></i> }
-                    </h1>
-                    <p class="opacity-75"><i class="bi bi-envelope me-2"></i>@Model.ArtistEmail</p>
+    <!-- ── LEFT: Identity card ── -->
+    <div class="profile-identity-card">
+        <div class="cover-banner" id="coverBanner">
+            <img id="coverBannerImg" src="" alt="" style="display:none" />
+            <button class="cover-edit-btn" onclick="document.getElementById('coverFileInput').click()" title="Change cover"><i class="bi bi-camera-fill"></i></button>
+        </div>
+
+        <div class="avatar-ring" id="avatarRing" onclick="document.getElementById('profilePicInput').click()" title="Click to change profile picture">
+            <span id="avatarInitialLarge">A</span>
+            <img id="avatarImg" src="" alt="Avatar" style="display:none" />
+            <div class="avatar-upload-overlay"><i class="bi bi-camera-fill" style="color:#fff;font-size:1.1rem;"></i></div>
+        </div>
+        <input type="file" id="profilePicInput" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" onchange="handleProfilePicSelect(this)" />
+
+        <div class="identity-body">
+            <div class="identity-name" id="idName">Loading…</div>
+            <div class="identity-email" id="idEmail">—</div>
+
+            <span class="identity-badge badge-unverified" id="verifiedBadge">
+                <i class="bi bi-shield-check"></i> <span id="verifiedText">Loading</span>
+            </span>
+
+            <div class="identity-stats">
+                <div class="identity-stat">
+                    <span class="val" id="statArtworks">–</span>
+                    <span class="lbl">Artworks</span>
+                </div>
+                <div class="identity-stat">
+                    <span class="val" id="statSells">–</span>
+                    <span class="lbl">Sales</span>
+                </div>
+                <div class="identity-stat">
+                    <span class="val" id="statRating">–</span>
+                    <span class="lbl">Rating</span>
                 </div>
             </div>
-            <div class="mb-3">
-                <button class="btn btn-light btn-lg shadow-sm" onclick="showEditModal()">
-                    <i class="bi bi-gear-wide-connected me-2"></i>Edit Studio Profile
+
+            <div class="social-chips" id="socialChips">
+                <span style="font-size:.78rem;color:var(--muted)">No social links added</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── RIGHT: Edit form ── -->
+    <div class="edit-form-card">
+        <div class="section-title mb-4">Edit <span>Profile</span></div>
+
+        <div class="save-feedback" id="saveFeedback"></div>
+
+        <form id="profileForm" novalidate>
+            <input type="hidden" id="artistIdField" />
+            <input type="file" id="coverFileInput" accept="image/*" style="display:none" onchange="handleCoverSelect(this)" />
+
+            <!-- Profile Picture (compact row above name) -->
+            <div class="form-group" style="display:flex;align-items:center;gap:16px;padding:14px;background:#f8faff;border-radius:12px;border:1.5px dashed rgba(3,40,159,.15);cursor:pointer;" onclick="document.getElementById('profilePicInput').click()">
+                <div id="formPicPreview" style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;color:#fff;overflow:hidden;flex-shrink:0;">
+                    <span id="formPicInitial">A</span>
+                    <img id="formPicImg" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;" />
+                </div>
+                <div>
+                    <div style="font-size:.87rem;font-weight:600;color:var(--primary);">Profile Picture</div>
+                    <div style="font-size:.75rem;color:var(--muted);">Click to upload · JPG, PNG, WebP (max 5 MB)</div>
+                </div>
+                <i class="bi bi-camera-fill ms-auto" style="color:var(--accent);font-size:1.1rem;"></i>
+            </div>
+
+
+            <!-- Display Name -->
+            <div class="form-group">
+                <label class="form-label">Display Name <span class="req">*</span></label>
+                <input type="text" class="form-control-artify" id="fName" placeholder="Your full name" maxlength="100"
+                       oninput="liveSync()" />
+            </div>
+
+            <!-- Biography -->
+            <div class="form-group">
+                <label class="form-label">Bio / About</label>
+                <textarea class="form-control-artify" id="fBio" placeholder="Tell the world about you and your art…" maxlength="500" oninput="syncBioCount()"></textarea>
+                <div class="char-count"><span id="bioCount">0</span> / 500</div>
+            </div>
+
+            <!-- Cover Image -->
+            <div class="form-group">
+                <label class="form-label">Cover Image</label>
+                <div class="cover-preview-row" onclick="document.getElementById('coverFileInput').click()">
+                    <div class="cover-preview-placeholder" id="coverPlaceholder"><i class="bi bi-image"></i></div>
+                    <img id="coverPreviewThumb" alt="Cover preview" />
+                    <div>
+                        <div style="font-size:.87rem;font-weight:600;color:var(--primary)">Click to change cover</div>
+                        <div style="font-size:.75rem;color:var(--muted)">JPG or PNG recommended (1200×400)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Links -->
+            <div class="form-group">
+                <label class="form-label">Social Links</label>
+                <div class="url-list" id="urlList"></div>
+                <button type="button" class="url-icon-btn btn-add-url mt-2" onclick="addUrlRow()" style="width:auto;padding:8px 14px;gap:6px;font-size:.82rem;font-weight:600;">
+                    <i class="bi bi-plus-lg"></i> Add Link
                 </button>
             </div>
-        </div>
 
-        <div class="row mt-4">
-            <div class="col-lg-8">
-                <div class="card-custom mb-4">
-                    <h4 class="fw-bold mb-3">Artist Biography</h4>
-                    <p class="text-muted fs-5">@(string.IsNullOrEmpty(Model.Biography) ? "No biography provided." : Model.Biography)</p>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <div class="card-custom">
-                            <h5 class="fw-bold"><i class="bi bi-graph-up-arrow me-2"></i>Monthly Revenue</h5>
-                            <canvas id="revenueChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <div class="card-custom">
-                            <h5 class="fw-bold"><i class="bi bi-pie-chart me-2"></i>Sales by Category</h5>
-                            <canvas id="categoryChart"></canvas>
-                        </div>
-                    </div>
-                </div>
+            <!-- Actions -->
+            <div class="d-flex gap-3 mt-4">
+                <button type="submit" class="btn-artify" id="saveBtn" style="flex:1;justify-content:center;padding:14px;">
+                    <i class="bi bi-check2-circle"></i> Save Changes
+                </button>
+                <button type="button" class="btn-artify btn-artify-ghost" onclick="loadProfile()">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
             </div>
-
-            <div class="col-lg-4">
-                <div class="card-custom mb-4">
-                    <h5 class="fw-bold border-bottom pb-2">Collective Stats</h5>
-                    <div class="d-flex justify-content-around mt-3">
-                        <div class="stat-card">
-                            <h3 class="fw-bold">@Model.RatingAvg</h3>
-                            <small class="text-muted">Rating</small>
-                        </div>
-                        <div class="stat-card">
-                            <h3 class="fw-bold">@(Model.IsActive == true ? "Live" : "Idle")</h3>
-                            <small class="text-muted">Status</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-custom">
-                    <h5 class="fw-bold mb-3">Social Links</h5>
-                    <div class="list-group list-group-flush">
-                        @if (Model.Urls != null) {
-                            foreach (var url in Model.Urls) {
-                                <a href="@url" target="_blank" class="list-group-item list-group-item-action border-0 px-0">
-                                    <i class="bi bi-globe2 me-2 text-primary"></i> @url
-                                </a>
-                            }
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
+        </form>
     </div>
+
 </div>
 
-<div id="editWindow" style="display:none;">
-    <form id="editForm" class="p-3">
-        <input type="hidden" name="ArtistId" value="@Model.ArtistId" />
-        <div class="mb-3">
-            <label class="form-label fw-bold">Display Name</label>
-            <input id="inName" name="ArtistName" value="@Model.ArtistName" style="width: 100%;" />
-        </div>
-        <div class="mb-3">
-            <label class="form-label fw-bold">Biography</label>
-            <textarea id="inBio" name="Biography" rows="5" style="width: 100%;">@Model.Biography</textarea>
-        </div>
-        <div class="mb-3">
-            <label class="form-label fw-bold">External Portfolio URL</label>
-            <input id="inUrl" name="Urls" value="@(Model.Urls?.FirstOrDefault())" style="width: 100%;" />
-        </div>
-        <div class="mt-4">
-            <button type="button" class="btn btn-dark w-100 py-2" onclick="submitProfile()">Update Profile</button>
-        </div>
-    </form>
-</div>
-
+@section Scripts {
 <script>
-    $(document).ready(function() {
-        // Initialize Kendo Inputs
-        $("#inName").kendoTextBox();
-        $("#inBio").kendoTextArea({ rows: 5 });
-        $("#inUrl").kendoTextBox();
+    const artistId = @(Context.Session.GetInt32("ArtistId") ?? 0);
+    const API_BASE  = 'http://localhost:5183/api/ArtistApi';
+    let currentCoverFile = null;
+    let currentProfilePicFile = null;
 
-        // Initialize Kendo Window
-        $("#editWindow").kendoWindow({
-            width: "500px",
-            title: "Manage Studio Profile",
-            visible: false,
-            modal: true,
-            animation: { open: { effects: "fade:in" } }
-        });
+    /* ── Load profile ── */
+    async function loadProfile() {
+        try {
+            const [profRes, dashRes] = await Promise.all([
+                fetch(`${API_BASE}/profile/${artistId}`, { credentials: 'include' }),
+                fetch(`${API_BASE}/dashboard`,           { credentials: 'include' })
+            ]);
 
-        loadAnalytics();
+            const prof = await profRes.json();
+            const dash = dashRes.ok ? await dashRes.json() : {};
+
+            // Identity card — avatar
+            const initial = (prof.artistName || 'A').charAt(0).toUpperCase();
+            document.getElementById('idName').textContent       = prof.artistName  || 'Unknown Artist';
+            document.getElementById('idEmail').textContent      = prof.artistEmail || '—';
+            document.getElementById('avatarInitialLarge').textContent = initial;
+            document.getElementById('formPicInitial').textContent     = initial;
+
+            if (prof.profilePicture) {
+                const picSrc = `/Profile_Images/${prof.profilePicture}`;
+                // Avatar ring
+                document.getElementById('avatarImg').src          = picSrc;
+                document.getElementById('avatarImg').style.display = 'block';
+                document.getElementById('avatarInitialLarge').style.display = 'none';
+                // Form row thumbnail
+                document.getElementById('formPicImg').src           = picSrc;
+                document.getElementById('formPicImg').style.display = 'block';
+                document.getElementById('formPicInitial').style.display = 'none';
+                // Also update navbar avatar (cross-page)
+                sessionStorage.setItem('artistProfilePic', picSrc);
+                updateNavbarAvatar(picSrc);
+            } else {
+                sessionStorage.removeItem('artistProfilePic');
+            }
+
+
+            const vBadge = document.getElementById('verifiedBadge');
+            const vText  = document.getElementById('verifiedText');
+            if (prof.isVerified) {
+                vBadge.className = 'identity-badge badge-verified';
+                vText.textContent = 'Verified Artist';
+            } else {
+                vBadge.className = 'identity-badge badge-unverified';
+                vText.textContent = 'Pending Verification';
+            }
+
+            document.getElementById('statArtworks').textContent = dash.c_TotalArtworkCount ?? '–';
+            document.getElementById('statSells').textContent    = dash.c_TotalSellCount    ?? '–';
+            document.getElementById('statRating').textContent   = prof.ratingAvg != null ? parseFloat(prof.ratingAvg).toFixed(1) : '–';
+
+            // Cover image
+            if (prof.coverImage) {
+                const src = `/Cover_Images/${prof.coverImage}`;
+                document.getElementById('coverBannerImg').src    = src;
+                document.getElementById('coverBannerImg').style.display = 'block';
+                document.getElementById('coverPreviewThumb').src = src;
+                document.getElementById('coverPreviewThumb').style.display = 'block';
+                document.getElementById('coverPlaceholder').style.display  = 'none';
+            }
+
+            // Social chips
+            renderSocialChips(prof.urls || []);
+
+            // Form fields
+            document.getElementById('artistIdField').value = prof.artistId;
+            document.getElementById('fName').value         = prof.artistName || '';
+            document.getElementById('fBio').value          = prof.biography  || '';
+            syncBioCount();
+
+            // URL rows
+            const urlList = document.getElementById('urlList');
+            urlList.innerHTML = '';
+            const urls = prof.urls || [];
+            if (urls.length === 0) addUrlRow();
+            else urls.filter(u => u).forEach(u => addUrlRow(u));
+
+        } catch(e) {
+            console.error('Profile load error', e);
+        }
+    }
+
+    function renderSocialChips(urls) {
+        const el = document.getElementById('socialChips');
+        const valid = (urls || []).filter(u => u && u.trim());
+        if (valid.length === 0) {
+            el.innerHTML = `<span style="font-size:.78rem;color:var(--muted)">No social links added</span>`;
+            return;
+        }
+        el.innerHTML = valid.map(u => {
+            const icon = u.includes('instagram') ? 'bi-instagram' :
+                         u.includes('twitter') || u.includes('x.com') ? 'bi-twitter-x' :
+                         u.includes('facebook') ? 'bi-facebook' :
+                         u.includes('youtube') ? 'bi-youtube' :
+                         u.includes('behance') ? 'bi-behance' :
+                         u.includes('linkedin') ? 'bi-linkedin' : 'bi-link-45deg';
+            const label = u.replace(/https?:\/\/(www\.)?/, '').split('/')[0];
+            return `<a href="${escHtml(u)}" target="_blank" class="social-chip"><i class="bi ${icon}"></i>${escHtml(label)}</a>`;
+        }).join('');
+    }
+
+    function liveSync() {
+        const name = document.getElementById('fName').value;
+        document.getElementById('idName').textContent = name || 'Your Name';
+        document.getElementById('avatarInitialLarge').textContent = (name || 'A').charAt(0).toUpperCase();
+    }
+
+    function syncBioCount() {
+        document.getElementById('bioCount').textContent = document.getElementById('fBio').value.length;
+    }
+
+    /* ── URL rows ── */
+    function addUrlRow(value = '') {
+        const row = document.createElement('div');
+        row.className = 'url-row';
+        row.innerHTML = `
+            <i class="bi bi-link-45deg" style="color:var(--muted);font-size:1rem;flex-shrink:0;"></i>
+            <input type="url" class="form-control-artify url-input" placeholder="https://instagram.com/yourhandle" value="${escHtml(value)}" oninput="syncSocialChips()" />
+            <button type="button" class="url-icon-btn btn-rem-url" onclick="removeUrlRow(this)"><i class="bi bi-trash3"></i></button>`;
+        document.getElementById('urlList').appendChild(row);
+    }
+
+    function removeUrlRow(btn) {
+        btn.closest('.url-row').remove();
+        syncSocialChips();
+    }
+
+    function syncSocialChips() {
+        const urls = [...document.querySelectorAll('.url-input')].map(i => i.value.trim()).filter(Boolean);
+        renderSocialChips(urls);
+    }
+
+    /* ── Profile picture select ── */
+    function handleProfilePicSelect(input) {
+        const file = input.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+            alert('File too large. Max 5 MB.');
+            input.value = '';
+            return;
+        }
+        currentProfilePicFile = file;
+        const reader = new FileReader();
+        reader.onload = e => {
+            const src = e.target.result;
+            // Update avatar ring
+            document.getElementById('avatarImg').src           = src;
+            document.getElementById('avatarImg').style.display = 'block';
+            document.getElementById('avatarInitialLarge').style.display = 'none';
+            // Update form row thumbnail
+            document.getElementById('formPicImg').src            = src;
+            document.getElementById('formPicImg').style.display  = 'block';
+            document.getElementById('formPicInitial').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    /* ── Cover image ── */
+
+    function handleCoverSelect(input) {
+        const file = input.files[0];
+        if (!file) return;
+        currentCoverFile = file;
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById('coverBannerImg').src     = e.target.result;
+            document.getElementById('coverBannerImg').style.display = 'block';
+            document.getElementById('coverPreviewThumb').src  = e.target.result;
+            document.getElementById('coverPreviewThumb').style.display = 'block';
+            document.getElementById('coverPlaceholder').style.display  = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    /* ── Submit ── */
+    document.getElementById('profileForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const name = document.getElementById('fName').value.trim();
+        if (!name) { showFeedback('error', 'Display name is required.'); return; }
+
+        const btn = document.getElementById('saveBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving…';
+
+        const fd = new FormData();
+        fd.append('ArtistId',  artistId);
+        fd.append('ArtistName', name);
+        fd.append('Biography',  document.getElementById('fBio').value.trim());
+
+        const urls = [...document.querySelectorAll('.url-input')].map(i => i.value.trim()).filter(Boolean);
+        urls.forEach(u => fd.append('Urls', u));
+
+        if (currentCoverFile) fd.append('CoverImageFile', currentCoverFile);
+        if (currentProfilePicFile) fd.append('ProfilePictureFile', currentProfilePicFile);
+
+
+        try {
+            const res = await fetch(`${API_BASE}/profile`, {
+                method: 'POST', body: fd, credentials: 'include'
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                showFeedback('success', '✓ Profile updated successfully!');
+                sessionStorage.setItem('artistName', name);
+                document.getElementById('avatarName') && (document.getElementById('avatarName').textContent = name);
+                renderSocialChips(urls);
+                // Refresh navbar avatar if profile picture was updated
+                if (currentProfilePicFile) {
+                    // Reload profile to get the new server-stored path
+                    setTimeout(loadProfile, 600);
+                    currentProfilePicFile = null;
+                }
+            } else {
+                showFeedback('error', 'Update failed. Please try again.');
+            }
+        } catch(err) {
+            showFeedback('error', 'Server error: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check2-circle"></i> Save Changes';
+        }
     });
 
-    function showEditModal() {
-        $("#editWindow").data("kendoWindow").center().open();
+    function showFeedback(type, msg) {
+        const el = document.getElementById('saveFeedback');
+        el.className = 'save-feedback ' + type;
+        el.innerHTML = `<i class="bi bi-${type==='success'?'check-circle-fill':'exclamation-triangle-fill'}"></i> ${msg}`;
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        setTimeout(() => el.style.display = 'none', 5000);
     }
 
-    function loadAnalytics() {
-        // Fetch Revenue Data
-        $.get('/api/ArtistApi/revenue', function(data) {
-            new Chart(document.getElementById('revenueChart'), {
-                type: 'line',
-                data: {
-                    labels: data.map(x => x.month),
-                    datasets: [{ label: 'Revenue ($)', data: data.map(x => x.revenue), borderColor: '#b39359', tension: 0.4 }]
-                }
-            });
-        });
+    function escHtml(t) { return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-        // Fetch Category Data
-        $.get('/api/ArtistApi/category-sales', function(data) {
-            new Chart(document.getElementById('categoryChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: data.map(x => x.category),
-                    datasets: [{ data: data.map(x => x.sales), backgroundColor: ['#0f172a', '#b39359', '#e2e8f0', '#64748b'] }]
-                }
-            });
-        });
-    }
-
-    function submitProfile() {
-        var profileData = {
-            ArtistId: parseInt($("[name='ArtistId']").val()),
-            ArtistName: $("#inName").val(),
-            Biography: $("#inBio").val(),
-            Urls: [$("#inUrl").val()], // Array mapping
-            IsActive: true
-        };
-
-        $.ajax({
-            url: 'http://localhost:5183//api/ArtistApi/manageprofile', // Matches Controller
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(profileData),
-            success: function(res) {
-                if (res === 1) {
-                    Swal.fire({ icon: 'success', title: 'Studio Updated', timer: 1500 }).then(() => location.reload());
-                } else {
-                    Swal.fire('Error', 'Could not update profile', 'error');
-                }
-            }
-        });
-    }
-</script> *@
+    loadProfile();
+</script>
+}

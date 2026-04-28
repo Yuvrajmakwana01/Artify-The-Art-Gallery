@@ -1,4 +1,4 @@
-﻿@{
+@* @{
     ViewData["Title"] = "Settings";
     Layout = "~/Views/Shared/_ArtistLayout.cshtml";
 }
@@ -266,5 +266,680 @@ function deleteAccount() {
         confirmButtonColor: "#c53030"
     });
 }
+</script>
+} *@
+
+@{
+    Layout = "~/Views/Artist/_ArtistLayout.cshtml";
+    ViewData["Title"] = "Settings";
+    ViewData["Active"] = "Settings";
+}
+
+@section HeadStyles {
+<style>
+    .settings-grid {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    /* ── Settings nav (left) ── */
+    .settings-nav-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(3,40,159,.05);
+        padding: 12px;
+        position: sticky;
+        top: 88px;
+    }
+
+    .settings-nav-link {
+        display: flex; align-items: center; gap: 10px;
+        padding: 11px 14px; border-radius: 10px;
+        color: var(--muted); font-size: .875rem; font-weight: 500;
+        cursor: pointer; text-decoration: none;
+        transition: all var(--transition);
+        border: none; background: none; width: 100%; text-align: left;
+    }
+
+    .settings-nav-link i { font-size: 1rem; width: 18px; text-align: center; }
+
+    .settings-nav-link:hover { background: rgba(3,40,159,.06); color: var(--primary); }
+
+    .settings-nav-link.active {
+        background: rgba(3,40,159,.1);
+        color: var(--primary);
+        font-weight: 700;
+    }
+
+    /* ── Panels ── */
+    .settings-panel { display: none; }
+    .settings-panel.active { display: block; animation: fadeUp .3s ease; }
+
+    .settings-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(3,40,159,.05);
+        padding: 32px;
+        margin-bottom: 20px;
+    }
+
+    .panel-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.05rem; font-weight: 700;
+        color: var(--primary); margin-bottom: 6px;
+    }
+
+    .panel-subtitle { font-size: .83rem; color: var(--muted); margin-bottom: 24px; }
+
+    .form-group { margin-bottom: 20px; }
+
+    .form-label {
+        display: block; font-size: .78rem; font-weight: 700;
+        color: var(--text); text-transform: uppercase;
+        letter-spacing: .8px; margin-bottom: 8px;
+    }
+
+    .input-wrap { position: relative; }
+
+    .form-control-artify {
+        width: 100%; padding: 12px 42px 12px 16px;
+        border-radius: 10px;
+        border: 1.5px solid rgba(3,40,159,.13);
+        background: #f8faff;
+        font-size: .9rem; font-family: 'DM Sans', sans-serif;
+        color: var(--text); outline: none;
+        transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .form-control-artify:focus {
+        border-color: var(--accent);
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(107,155,230,.15);
+    }
+
+    .form-control-artify.err { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,.1); }
+
+    .toggle-pwd {
+        position: absolute; right: 14px; top: 50%;
+        transform: translateY(-50%);
+        background: none; border: none; cursor: pointer;
+        color: var(--muted); font-size: 1rem;
+        padding: 0; transition: color var(--transition);
+    }
+    .toggle-pwd:hover { color: var(--primary); }
+
+    /* Password strength meter */
+    .strength-bar {
+        height: 4px; border-radius: 4px;
+        background: rgba(3,40,159,.08);
+        margin-top: 8px; overflow: hidden;
+    }
+
+    .strength-fill {
+        height: 100%; border-radius: 4px;
+        width: 0%; transition: width .4s ease, background .4s ease;
+    }
+
+    .strength-label { font-size: .72rem; margin-top: 4px; font-weight: 600; }
+
+    .field-error { font-size: .76rem; color: #ef4444; margin-top: 5px; display: none; }
+    .field-error.show { display: block; }
+
+    /* Requirements list */
+    .pwd-reqs { margin-top: 8px; }
+    .pwd-req {
+        display: flex; align-items: center; gap: 6px;
+        font-size: .75rem; color: var(--muted); margin-bottom: 3px;
+        transition: color var(--transition);
+    }
+    .pwd-req i { font-size: .75rem; }
+    .pwd-req.met { color: #10b981; }
+
+    /* ── Toggle switches ── */
+    .pref-row {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 16px 0;
+        border-bottom: 1px solid rgba(3,40,159,.05);
+    }
+    .pref-row:last-child { border-bottom: none; }
+
+    .pref-info h6 { font-size: .9rem; font-weight: 600; color: var(--text); margin: 0 0 2px; }
+    .pref-info p  { font-size: .78rem; color: var(--muted); margin: 0; }
+
+    .toggle-switch {
+        position: relative; width: 46px; height: 26px; flex-shrink: 0;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+        position: absolute; inset: 0;
+        background: rgba(3,40,159,.12); border-radius: 13px;
+        cursor: pointer; transition: background var(--transition);
+    }
+    .toggle-track::before {
+        content: '';
+        position: absolute; left: 3px; top: 3px;
+        width: 20px; height: 20px; border-radius: 50%;
+        background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.15);
+        transition: transform var(--transition);
+    }
+    .toggle-switch input:checked + .toggle-track { background: var(--primary); }
+    .toggle-switch input:checked + .toggle-track::before { transform: translateX(20px); }
+
+    /* ── Danger zone ── */
+    .danger-card {
+        background: #fff5f5;
+        border: 1.5px solid #fecaca;
+        border-radius: var(--radius);
+        padding: 24px 32px;
+    }
+
+    .danger-card .panel-title { color: #991b1b; }
+
+    /* Feedback toast */
+    .inline-feedback {
+        display: none; padding: 12px 18px; border-radius: 10px;
+        font-weight: 600; font-size: .87rem; margin-bottom: 16px;
+        align-items: center; gap: 10px;
+    }
+    .inline-feedback.success { background: #d1fae5; color: #065f46; display: flex; }
+    .inline-feedback.error   { background: #fee2e2; color: #991b1b; display: flex; }
+
+    @@media (max-width: 768px) {
+        .settings-grid { grid-template-columns: 1fr; }
+        .settings-nav-card {
+            position: static;
+            display: flex; flex-wrap: wrap; gap: 4px; padding: 8px;
+        }
+        .settings-nav-link { flex: 1; min-width: 120px; justify-content: center; font-size: .8rem; }
+    }
+</style>
+}
+
+<div class="settings-grid">
+
+    <!-- ── Left nav ── -->
+    <div class="settings-nav-card">
+        <button class="settings-nav-link active" onclick="switchPanel('password', this)">
+            <i class="bi bi-shield-lock-fill"></i> Password
+        </button>
+        <button class="settings-nav-link" onclick="switchPanel('notifications', this)">
+            <i class="bi bi-bell-fill"></i> Notifications
+        </button>
+        <button class="settings-nav-link" onclick="switchPanel('account', this)">
+            <i class="bi bi-person-gear"></i> Account
+        </button>
+        <button class="settings-nav-link" onclick="switchPanel('danger', this)" style="margin-top:auto;">
+            <i class="bi bi-exclamation-triangle-fill" style="color:#ef4444"></i> Danger Zone
+        </button>
+    </div>
+
+    <!-- ── Panels ── -->
+    <div>
+
+        <!-- PASSWORD -->
+        <div class="settings-panel active" id="panel-password">
+            <div class="settings-card">
+                <div class="panel-title">Change Password</div>
+                <div class="panel-subtitle">Use a strong password with a mix of characters, numbers and symbols.</div>
+
+                <div class="inline-feedback" id="pwdFeedback"></div>
+
+                <form id="pwdForm" novalidate>
+                    <!-- Current -->
+                    <div class="form-group">
+                        <label class="form-label">Current Password</label>
+                        <div class="input-wrap">
+                            <input type="password" class="form-control-artify" id="currentPwd" placeholder="Enter current password" />
+                            <button type="button" class="toggle-pwd" onclick="togglePwd('currentPwd', this)"><i class="bi bi-eye"></i></button>
+                        </div>
+                        <div class="field-error" id="errCurrent">Current password is required.</div>
+                    </div>
+
+                    <!-- New -->
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <div class="input-wrap">
+                            <input type="password" class="form-control-artify" id="newPwd" placeholder="Min. 6 characters" oninput="checkStrength()" />
+                            <button type="button" class="toggle-pwd" onclick="togglePwd('newPwd', this)"><i class="bi bi-eye"></i></button>
+                        </div>
+                        <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                        <div class="strength-label" id="strengthLabel" style="color:var(--muted)"></div>
+                        <div class="field-error" id="errNew"></div>
+
+                        <div class="pwd-reqs mt-2">
+                            <div class="pwd-req" id="req-len"><i class="bi bi-circle"></i> At least 6 characters</div>
+                            <div class="pwd-req" id="req-upper"><i class="bi bi-circle"></i> One uppercase letter</div>
+                            <div class="pwd-req" id="req-lower"><i class="bi bi-circle"></i> One lowercase letter</div>
+                            <div class="pwd-req" id="req-digit"><i class="bi bi-circle"></i> One number</div>
+                            <div class="pwd-req" id="req-special"><i class="bi bi-circle"></i> One special character (@@$!%*?&)</div>
+                        </div>
+                    </div>
+
+                    <!-- Confirm -->
+                    <div class="form-group">
+                        <label class="form-label">Confirm New Password</label>
+                        <div class="input-wrap">
+                            <input type="password" class="form-control-artify" id="confirmPwd" placeholder="Repeat new password" oninput="checkMatch()" />
+                            <button type="button" class="toggle-pwd" onclick="togglePwd('confirmPwd', this)"><i class="bi bi-eye"></i></button>
+                        </div>
+                        <div class="field-error" id="errConfirm">Passwords do not match.</div>
+                    </div>
+
+                    <button type="submit" class="btn-artify" id="pwdSubmitBtn">
+                        <i class="bi bi-shield-check"></i> Update Password
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- NOTIFICATIONS -->
+        <div class="settings-panel" id="panel-notifications">
+            <div class="settings-card">
+                <div class="panel-title">Notification Preferences</div>
+                <div class="panel-subtitle">Choose which updates you'd like to receive.</div>
+
+                <div class="pref-row">
+                    <div class="pref-info">
+                        <h6>Artwork Approved</h6>
+                        <p>Get notified when an admin approves your artwork.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notifApproved" checked onchange="saveNotifPref()" />
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <div class="pref-row">
+                    <div class="pref-info">
+                        <h6>Artwork Sold</h6>
+                        <p>Get notified whenever someone purchases your artwork.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notifSale" checked onchange="saveNotifPref()" />
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <div class="pref-row">
+                    <div class="pref-info">
+                        <h6>New Like</h6>
+                        <p>Get notified when someone likes your artwork.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notifLike" onchange="saveNotifPref()" />
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <div class="pref-row">
+                    <div class="pref-info">
+                        <h6>Artwork Rejected</h6>
+                        <p>Get notified when an artwork is rejected with admin notes.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notifRejected" checked onchange="saveNotifPref()" />
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <div class="pref-row">
+                    <div class="pref-info">
+                        <h6>Payout Processed</h6>
+                        <p>Get notified when your payout is sent.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notifPayout" checked onchange="saveNotifPref()" />
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <div class="mt-3" id="notifSaveMsg" style="display:none;font-size:.8rem;color:#10b981;font-weight:600;">
+                    <i class="bi bi-check-circle-fill me-1"></i>Preferences saved.
+                </div>
+            </div>
+        </div>
+
+        <!-- ACCOUNT -->
+        <div class="settings-panel" id="panel-account">
+            <div class="settings-card">
+                <div class="panel-title">Account Preferences</div>
+                <div class="panel-subtitle">Manage your account display and visibility settings.</div>
+
+                <div class="pref-row">
+                    <div class="pref-info">
+                        <h6>Profile Visibility</h6>
+                        <p>Show your profile publicly on the Artify marketplace.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="prefPublic" checked onchange="saveAccountPref()" />
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <div class="pref-row">
+                    <div class="pref-info">
+                        <h6>Show Earnings Publicly</h6>
+                        <p>Display total sales count on your public profile.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="prefShowEarnings" onchange="saveAccountPref()" />
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <div class="pref-row">
+                    <div class="pref-info">
+                        <h6>Allow Direct Messages</h6>
+                        <p>Let buyers contact you directly through the platform.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="prefDMs" checked onchange="saveAccountPref()" />
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <div class="mt-3" id="accountSaveMsg" style="display:none;font-size:.8rem;color:#10b981;font-weight:600;">
+                    <i class="bi bi-check-circle-fill me-1"></i>Preferences saved.
+                </div>
+            </div>
+        </div>
+
+        <!-- DANGER ZONE -->
+        <div class="settings-panel" id="panel-danger">
+            <div class="danger-card">
+                <div class="panel-title" style="color:#991b1b;">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Danger Zone
+                </div>
+                <div class="panel-subtitle">These actions are permanent and cannot be undone.</div>
+
+                <!-- <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 p-3 border border-danger rounded-3 mb-3" style="background:#fff;">
+                    <div>
+                        <div style="font-weight:700;color:var(--text);font-size:.9rem;">Delete All My Artworks</div>
+                        <div style="font-size:.78rem;color:var(--muted);">Permanently removes all your uploaded artworks from the platform.</div>
+                    </div>
+                    <button class="btn-artify" style="background:#ef4444;flex-shrink:0;" onclick="showDangerConfirm('deleteAll')">
+                        <i class="bi bi-trash3-fill"></i> Delete All
+                    </button>
+                </div> -->
+
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 p-3 border border-danger rounded-3" style="background:#fff;">
+                    <div>
+                        <div style="font-weight:700;color:var(--text);font-size:.9rem;">Deactivate Account</div>
+                        <div style="font-size:.78rem;color:var(--muted);">Your profile will be hidden. Contact support to reactivate.</div>
+                    </div>
+                    <a href="/Artist/DeactivateAccount" class="btn-artify" style="background:#7f1d1d;flex-shrink:0;text-decoration:none;">
+                        <i class="bi bi-slash-circle-fill"></i> Deactivate
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Danger Confirm Modal -->
+<div class="modal fade" id="dangerModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:var(--radius);border:none;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" style="color:#991b1b;font-family:'Playfair Display',serif;">Confirm Action</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="bi bi-exclamation-triangle-fill" style="font-size:3rem;color:#ef4444;display:block;margin-bottom:14px;"></i>
+                <p id="dangerMsg" style="font-size:.92rem;color:var(--text);"></p>
+                <p class="text-muted" style="font-size:.8rem;">This cannot be undone. Are you absolutely sure?</p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center gap-2">
+                <button class="btn-artify btn-artify-ghost" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn-artify" style="background:#ef4444;" id="dangerConfirmBtn">Yes, proceed</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const artistId = @(Context.Session.GetInt32("ArtistId") ?? 0);
+    const API_BASE  = 'http://localhost:5183/api/ArtistApi'; // API runs on port 5183, MVC on 5092
+
+    /* ── Panel switching ── */
+    function switchPanel(name, btn) {
+        document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.settings-nav-link').forEach(b => b.classList.remove('active'));
+        document.getElementById('panel-' + name).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    /* ── Toggle password visibility ── */
+    function togglePwd(inputId, btn) {
+        const inp = document.getElementById(inputId);
+        const show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        btn.innerHTML = `<i class="bi bi-eye${show ? '-slash' : ''}"></i>`;
+    }
+
+    /* ── Password strength ── */
+    const reqs = {
+        len:     { re: /.{6,}/,      id: 'req-len' },
+        upper:   { re: /[A-Z]/,      id: 'req-upper' },
+        lower:   { re: /[a-z]/,      id: 'req-lower' },
+        digit:   { re: /\d/,         id: 'req-digit' },
+        special: { re: /[@@$!%*?&]/, id: 'req-special' }
+    };
+
+    function checkStrength() {
+        const val = document.getElementById('newPwd').value;
+        let score = 0;
+
+        Object.values(reqs).forEach(r => {
+            const met = r.re.test(val);
+            if (met) score++;
+            const el = document.getElementById(r.id);
+            el.classList.toggle('met', met);
+            el.querySelector('i').className = met ? 'bi bi-check-circle-fill' : 'bi bi-circle';
+        });
+
+        const fill = document.getElementById('strengthFill');
+        const label = document.getElementById('strengthLabel');
+        const pct = (score / 5) * 100;
+        fill.style.width = pct + '%';
+
+        const levels = [
+            { max: 1, color: '#ef4444', text: 'Very Weak' },
+            { max: 2, color: '#f59e0b', text: 'Weak' },
+            { max: 3, color: '#f59e0b', text: 'Fair' },
+            { max: 4, color: '#10b981', text: 'Strong' },
+            { max: 5, color: '#059669', text: 'Very Strong' }
+        ];
+        const level = levels.find(l => score <= l.max) || levels[4];
+        fill.style.background = level.color;
+        label.textContent = val ? level.text : '';
+        label.style.color = level.color;
+
+        checkMatch();
+    }
+
+    function checkMatch() {
+        const n = document.getElementById('newPwd').value;
+        const c = document.getElementById('confirmPwd').value;
+        const err = document.getElementById('errConfirm');
+        if (c && n !== c) err.classList.add('show');
+        else err.classList.remove('show');
+    }
+
+    /* ── Password form submit ── */
+    document.getElementById('pwdForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        let valid = true;
+
+        const current = document.getElementById('currentPwd').value;
+        const newPwd  = document.getElementById('newPwd').value;
+        const confirm = document.getElementById('confirmPwd').value;
+
+        if (!current) { showErr('errCurrent', 'Current password is required.'); valid = false; } else hideErr('errCurrent');
+
+        // Validate new password against backend regex
+        const pwdRe = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@@$!%*?&])[A-Za-z\d@@$!%*?&]{6,}$/;
+        if (!pwdRe.test(newPwd)) {
+            showErr('errNew', 'Password does not meet all requirements.'); valid = false;
+        } else hideErr('errNew');
+
+        if (newPwd !== confirm) { showErr('errConfirm', 'Passwords do not match.'); valid = false; } else hideErr('errConfirm');
+        if (!valid) return;
+
+        const btn = document.getElementById('pwdSubmitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating…';
+
+        try {
+            const res = await fetch(`${API_BASE}/change-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    c_user_id:         artistId,   // [Required] on model — must send
+                    c_Artist_Id:       artistId,
+                    c_CurrentPassword: current,
+                    c_NewPassword:     newPwd,
+                    c_ConfirmPassword: newPwd       // [Required][Compare] on model — must send
+                })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                showPwdFeedback('success', '✓ Password updated successfully!');
+                document.getElementById('pwdForm').reset();
+                document.getElementById('strengthFill').style.width = '0%';
+                document.getElementById('strengthLabel').textContent = '';
+                document.querySelectorAll('.pwd-req').forEach(r => { r.classList.remove('met'); r.querySelector('i').className = 'bi bi-circle'; });
+            } else {
+                showPwdFeedback('error', data.message || 'Incorrect current password.');
+            }
+        } catch(err) {
+            showPwdFeedback('error', 'Server error. Please try again.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-shield-check"></i> Update Password';
+        }
+    });
+
+    function showPwdFeedback(type, msg) {
+        const el = document.getElementById('pwdFeedback');
+        el.className = 'inline-feedback ' + type;
+        el.innerHTML = `<i class="bi bi-${type==='success'?'check-circle-fill':'exclamation-triangle-fill'}"></i> ${msg}`;
+        el.scrollIntoView({ behavior:'smooth', block:'nearest' });
+        setTimeout(() => el.style.display = 'none', 5000);
+    }
+
+    function showErr(id, msg) { const el = document.getElementById(id); el.textContent = msg; el.classList.add('show'); }
+    function hideErr(id) { document.getElementById(id)?.classList.remove('show'); }
+
+    /* ── Notification prefs (localStorage) ── */
+    function saveNotifPref() {
+        const prefs = {
+            approved: document.getElementById('notifApproved').checked,
+            sale:     document.getElementById('notifSale').checked,
+            like:     document.getElementById('notifLike').checked,
+            rejected: document.getElementById('notifRejected').checked,
+            payout:   document.getElementById('notifPayout').checked
+        };
+        localStorage.setItem('artify_notif_prefs', JSON.stringify(prefs));
+        flashMsg('notifSaveMsg');
+    }
+
+    function saveAccountPref() {
+        const prefs = {
+            public:       document.getElementById('prefPublic').checked,
+            showEarnings: document.getElementById('prefShowEarnings').checked,
+            dms:          document.getElementById('prefDMs').checked
+        };
+        localStorage.setItem('artify_account_prefs', JSON.stringify(prefs));
+        flashMsg('accountSaveMsg');
+    }
+
+    function flashMsg(id) {
+        const el = document.getElementById(id);
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 2500);
+    }
+
+    /* Load saved prefs */
+    (function() {
+        const notif = JSON.parse(localStorage.getItem('artify_notif_prefs') || '{}');
+        if (notif.approved  !== undefined) document.getElementById('notifApproved').checked = notif.approved;
+        if (notif.sale      !== undefined) document.getElementById('notifSale').checked     = notif.sale;
+        if (notif.like      !== undefined) document.getElementById('notifLike').checked     = notif.like;
+        if (notif.rejected  !== undefined) document.getElementById('notifRejected').checked = notif.rejected;
+        if (notif.payout    !== undefined) document.getElementById('notifPayout').checked   = notif.payout;
+
+        const acc = JSON.parse(localStorage.getItem('artify_account_prefs') || '{}');
+        if (acc.public       !== undefined) document.getElementById('prefPublic').checked       = acc.public;
+        if (acc.showEarnings !== undefined) document.getElementById('prefShowEarnings').checked = acc.showEarnings;
+        if (acc.dms          !== undefined) document.getElementById('prefDMs').checked          = acc.dms;
+    })();
+
+    /* ── Danger zone ── */
+    let dangerAction = null;
+    const dangerMessages = {
+        deleteAll:  'This will permanently delete ALL your artworks from the Artify platform.',
+        deactivate: 'This will deactivate your artist account. You will be logged out immediately.'
+    };
+
+    function showDangerConfirm(action) {
+        dangerAction = action;
+        document.getElementById('dangerMsg').textContent = dangerMessages[action];
+        new bootstrap.Modal(document.getElementById('dangerModal')).show();
+    }
+
+    document.getElementById('dangerConfirmBtn').addEventListener('click', async function() {
+        const btn = this;
+        btn.disabled = true; btn.textContent = 'Processing…';
+
+        try {
+            if (dangerAction === 'deactivate') {
+                // ── Call the real deactivate endpoint ─────────────────────
+                const res  = await fetch(`${API_BASE}/deactivate`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    // Also clear the MVC session cookie via server logout
+                    await fetch(`${API_BASE}/Logout`, { method:'POST', credentials:'include' }).catch(()=>{});
+                    bootstrap.Modal.getInstance(document.getElementById('dangerModal')).hide();
+                    // Redirect to login — account is now inactive
+                    window.location.href = '/Artist/Login';
+                } else {
+                    document.getElementById('dangerMsg').textContent =
+                        '⚠ ' + (data.message || 'Deactivation failed. Please try again.');
+                    btn.disabled = false; btn.textContent = 'Yes, proceed';
+                }
+
+            } else if (dangerAction === 'deleteAll') {
+                // Placeholder — no backend endpoint for bulk delete yet
+                bootstrap.Modal.getInstance(document.getElementById('dangerModal')).hide();
+                btn.disabled = false; btn.textContent = 'Yes, proceed';
+                showToastSettings('Bulk delete not implemented yet.', 'warning');
+            }
+        } catch(e) {
+            document.getElementById('dangerMsg').textContent = '⚠ Server error. Please try again.';
+            btn.disabled = false; btn.textContent = 'Yes, proceed';
+        }
+    });
+
+    function showToastSettings(msg, type) {
+        const t = document.createElement('div');
+        const bg = type === 'success' ? '#10b981' : type === 'warning' ? '#f59e0b' : '#ef4444';
+        t.style.cssText = `position:fixed;bottom:24px;right:24px;z-index:9999;padding:14px 22px;border-radius:10px;color:#fff;font-size:.87rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.18);background:${bg}`;
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3500);
+    }
 </script>
 }

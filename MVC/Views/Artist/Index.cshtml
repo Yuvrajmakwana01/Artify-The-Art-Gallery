@@ -1,574 +1,1451 @@
 ﻿@{
-    ViewData["Title"] = "Artify – Digital Art Marketplace";
+    ViewData["Title"] = "Artify";
     Layout = null;
 }
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ArtSpace – Where Art Meets Infinite Possibility</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
-<link rel="stylesheet" href="https://kendo.cdn.telerik.com/themes/7.2.1/default/default-main.css"/>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Jost:wght@300;400;500;600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet"/>
+    :root {
+      --ink: #0D0D0D;
+      @* --cream: #F5F0E8; *@
+      --cream: #FDFAF6;
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://kendo.cdn.telerik.com/2024.3.1015/js/kendo.all.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+      --gold: #EDA312;
+      --gold-light: #E8D5A0;
+      --cobalt: #1A3A6B;
+      --cobalt-light: #2E5FA3;
+      --mist: #E8ECF0;
+      --warm-white: #FAF8F4;
+      --serif: 'Playfair Display', Georgia, serif;
+      --sans: 'DM Sans', system-ui, sans-serif;
+      --mono: 'Space Mono', monospace;
+    }
 
-<style>
-/* ═══════════════════════════════════════════
-   DESIGN TOKENS — WARM BEIGE LIGHT PALETTE
-═══════════════════════════════════════════ */
-:root{
-  --cream:     #faf6f0;
-  --cream-2:   #f3ede3;
-  --cream-3:   #e8dfd2;
-  --parchment: #ede4d6;
-  --warm-tan:  #c9b49a;
-  --sienna:    #a0522d;
-  --sienna-2:  #884320;
-  --sienna-lt: #f5e9df;
-  --rust:      #c1440e;
-  --gold:      #b5860d;
-  --gold-lt:   #f9edc0;
-  --ink:       #2c1a0e;
-  --ink-2:     #4a3322;
-  --ink-3:     #7a5c44;
-  --muted:     #a08070;
-  --border:    rgba(160,120,80,.18);
-  --border-2:  rgba(160,120,80,.3);
-  --shadow:    rgba(120,80,40,.12);
-  --font-display: 'Cormorant Garamond', Georgia, serif;
-  --font-body:    'Jost', sans-serif;
-  --font-mono:    'Courier Prime', 'Courier New', monospace;
-}
+    html { scroll-behavior: smooth; }
 
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:var(--font-body);background:var(--cream);color:var(--ink);overflow-x:hidden;cursor:none}
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: var(--sans);
+      overflow-x: hidden;
+    }
 
-/* ── Custom Cursor ── */
-.cursor-dot,.cursor-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%)}
-.cursor-dot{width:6px;height:6px;background:var(--sienna);border-radius:50%}
-.cursor-ring{width:32px;height:32px;border:1.5px solid rgba(160,82,45,.4);border-radius:50%;transition:width .2s,height .2s,border-color .2s}
-.cursor-ring.grow{width:56px;height:56px;border-color:var(--sienna)}
+    /* ===== NOISE TEXTURE OVERLAY ===== */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+    }
 
-/* ── Scrollbar ── */
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:var(--cream-2)}
-::-webkit-scrollbar-thumb{background:var(--warm-tan);border-radius:4px}
+    /* ===== NAVBAR ===== */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 1.2rem 5vw;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.4s, backdrop-filter 0.4s, box-shadow 0.4s;
+    }
 
-/* ════════════════ NAVBAR ════════════════ */
-.navbar{
-  position:fixed;top:0;left:0;right:0;z-index:1000;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:18px 60px;
-  background:rgba(250,246,240,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--border);
-  transition:padding .3s,box-shadow .3s;
-  animation:fadeDown .6s ease both;
-}
-.navbar.scrolled{padding:12px 60px;box-shadow:0 4px 30px var(--shadow)}
-.nav-logo{display:flex;align-items:center;gap:11px;font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--ink);text-decoration:none;letter-spacing:.01em}
-.nav-logo-icon{width:38px;height:38px;background:var(--sienna);border-radius:10px;display:flex;align-items:center;justify-content:center}
-.nav-logo-icon svg{width:20px;height:20px;fill:white}
-.nav-logo .acc{color:var(--sienna)}
-.nav-links{display:flex;align-items:center;gap:36px;list-style:none;margin:0;padding:0}
-.nav-links a{font-size:14px;font-weight:500;color:var(--ink-3);text-decoration:none;letter-spacing:.03em;transition:color .2s;position:relative}
-.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1.5px;background:var(--sienna);transform:scaleX(0);transition:transform .25s;transform-origin:left}
-.nav-links a:hover{color:var(--sienna)}.nav-links a:hover::after{transform:scaleX(1)}
-.nav-cta{display:flex;align-items:center;gap:10px}
+    nav.scrolled {
+      background: #FDFAF6;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.08);
+    }
 
-/* ── Buttons ── */
-.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 22px;border-radius:10px;font-size:14px;font-weight:600;font-family:var(--font-body);cursor:pointer;transition:all .22s;border:none;text-decoration:none;line-height:1}
-.btn-ghost{background:transparent;color:var(--ink-3);border:1px solid var(--border-2)}
-.btn-ghost:hover{border-color:var(--sienna);color:var(--sienna)}
-.btn-primary{background:var(--sienna);color:white;box-shadow:0 4px 18px rgba(160,82,45,.25)}
-.btn-primary:hover{background:var(--sienna-2);box-shadow:0 6px 28px rgba(160,82,45,.38);transform:translateY(-1px);color:white}
-.btn-lg{padding:14px 32px;font-size:15px;border-radius:12px}
-.btn-outline{background:transparent;color:var(--ink);border:1.5px solid var(--border-2)}
-.btn-outline:hover{border-color:var(--sienna);color:var(--sienna)}
+    .nav-brand {
+      font-family: var(--serif);
+      font-size: 1.75rem;
+      font-weight: 900;
+      color: #040404ff;
+      letter-spacing: 0.03em;
+      text-decoration: none;
+    }
 
-/* ════════════════ HERO ════════════════ */
-.hero{min-height:100vh;display:flex;align-items:center;padding:120px 60px 80px;position:relative;overflow:hidden}
-.hero-bg{position:absolute;inset:0;z-index:0;
-  background:
-    radial-gradient(ellipse 70% 55% at 72% 50%, rgba(160,82,45,.09) 0%, transparent 60%),
-    radial-gradient(ellipse 45% 45% at 20% 75%, rgba(181,134,13,.07) 0%, transparent 55%),
-    radial-gradient(ellipse 55% 35% at 85% 15%, rgba(180,140,90,.08) 0%, transparent 50%),
-    var(--cream)}
-.grid-dots{position:absolute;inset:0;z-index:0;background-image:radial-gradient(circle,rgba(160,120,80,.1) 1px,transparent 1px);background-size:32px 32px}
-.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.22;pointer-events:none;animation:float 8s ease-in-out infinite}
-.orb-1{width:420px;height:420px;background:var(--sienna);top:-80px;right:8%;animation-delay:0s}
-.orb-2{width:260px;height:260px;background:#c97d4e;bottom:0;right:28%;animation-delay:-3s}
-.orb-3{width:200px;height:200px;background:var(--gold);top:40%;left:4%;animation-delay:-5s}
+    .nav-brand span { color: var(--gold); }
 
-.hero-content{position:relative;z-index:1;max-width:600px}
-.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--sienna-lt);border:1px solid rgba(160,82,45,.25);color:var(--sienna);font-size:12px;font-weight:600;letter-spacing:.08em;padding:6px 14px;border-radius:100px;margin-bottom:28px;animation:fadeUp .6s .2s ease both}
-.hero-badge-dot{width:6px;height:6px;background:var(--sienna);border-radius:50%;animation:pulseDot 2s infinite}
-.hero-title{font-family:var(--font-display);font-size:clamp(44px,5.5vw,74px);font-weight:700;line-height:1.05;color:var(--ink);margin-bottom:24px;animation:fadeUp .6s .35s ease both}
-.hero-title .accent{color:transparent;background:linear-gradient(135deg,var(--sienna),var(--gold));-webkit-background-clip:text;background-clip:text}
-.hero-sub{font-size:17px;color:var(--ink-3);line-height:1.65;max-width:480px;margin-bottom:40px;animation:fadeUp .6s .5s ease both}
-.hero-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;animation:fadeUp .6s .65s ease both}
-.hero-hstats{display:flex;align-items:center;gap:32px;margin-top:52px;animation:fadeUp .6s .8s ease both}
-.hstat-val{font-family:var(--font-mono);font-size:24px;font-weight:700;color:var(--ink)}
-.hstat-lbl{font-size:12px;color:var(--muted);margin-top:2px}
-.hstat-div{width:1px;height:36px;background:var(--border-2)}
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
 
-/* Hero Visual */
-.hero-visual{position:absolute;right:5%;top:50%;transform:translateY(-50%);width:44%;max-width:580px;z-index:1;animation:heroReveal .9s .4s ease both}
-.hero-card-stack{position:relative;height:480px}
-.hero-art-card{position:absolute;border-radius:20px;overflow:hidden;border:1px solid var(--border-2);box-shadow:0 30px 70px rgba(120,70,30,.18);transition:transform .3s ease}
-.hero-art-card:hover{transform:translateY(-10px) !important}
-.hac-1{width:255px;height:300px;top:0;left:0;z-index:3;transform:rotate(-4deg)}
-.hac-2{width:235px;height:275px;top:60px;left:175px;z-index:2;transform:rotate(3deg)}
-.hac-3{width:215px;height:255px;top:175px;left:75px;z-index:4;transform:rotate(-1deg)}
-.art-card-inner{width:100%;height:100%;display:flex;flex-direction:column}
-.art-card-img{flex:1;position:relative;overflow:hidden}
-.art-card-info{padding:12px 14px;background:var(--cream);border-top:1px solid var(--border)}
-.art-card-name{font-size:13px;font-weight:700;color:var(--ink)}
-.art-card-price{font-family:var(--font-mono);font-size:12px;color:var(--sienna);margin-top:2px}
-.hero-live-badge{position:absolute;bottom:20px;right:-24px;background:var(--cream);border:1px solid var(--border-2);border-radius:12px;padding:12px 18px;z-index:10;box-shadow:0 16px 36px rgba(120,70,30,.15);animation:badgeFloat 3s ease-in-out infinite}
-.hlb-top{font-size:11px;color:var(--muted);margin-bottom:4px}
-.hlb-val{font-family:var(--font-mono);font-size:20px;font-weight:700;color:#2e7d32}
-.hlb-dot{display:inline-block;width:7px;height:7px;background:#43a047;border-radius:50%;margin-right:5px;animation:pulseDot 1.5s infinite;vertical-align:middle}
+    .nav-links a {
+      font-size: 0.82rem;
+      font-weight: 900;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--cobalt);
+      text-decoration: none;
+      position: relative;
+      opacity: 0.75;
+      transition: opacity 0.2s;
+    }
 
-/* ════════════════ STATS BAR ════════════════ */
-.stats-bar{background:var(--parchment);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:52px 60px;position:relative;overflow:hidden}
-.stats-bar::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(160,82,45,.05),transparent);animation:shimmer 4s linear infinite}
-.stat-item{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 20px;border-right:1px solid var(--border-2)}
-.stat-item:last-child{border-right:none}
-.stat-icon{font-size:24px;color:var(--sienna);margin-bottom:10px}
-.stat-val{font-family:var(--font-mono);font-size:36px;font-weight:700;color:var(--ink);line-height:1}
-.stat-lbl{font-size:13px;color:var(--muted);margin-top:6px}
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -3px; left: 0;
+      width: 0; height: 1.5px;
+      background: var(--gold);
+      transition: width 0.3s ease;
+    }
 
-/* ════════════════ SECTIONS COMMON ════════════════ */
-section{padding:100px 60px}
-.section-label{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sienna);margin-bottom:16px}
-.section-label::before{content:'';display:block;width:20px;height:1.5px;background:var(--sienna)}
-.section-title{font-family:var(--font-display);font-size:clamp(32px,4vw,52px);font-weight:700;line-height:1.1;margin-bottom:16px;color:var(--ink)}
-.section-sub{font-size:16px;color:var(--ink-3);line-height:1.6;max-width:540px;margin-bottom:56px}
+    .nav-links a:hover { opacity: 1; }
+    .nav-links a:hover::after { width: 100%; }
 
-/* ════════════════ CATEGORIES ════════════════ */
-.categories-section{background:var(--cream)}
-.categories-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.cat-card{background:white;border:1px solid var(--border);border-radius:16px;padding:24px 26px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all .25s;text-decoration:none;position:relative;overflow:hidden}
-.cat-card:hover{border-color:var(--warm-tan);transform:translateY(-3px);box-shadow:0 16px 40px rgba(120,80,40,.1)}
-.cat-icon-wrap{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.cat-info{flex:1}
-.cat-name{font-size:15px;font-weight:600;margin-bottom:3px;color:var(--ink)}
-.cat-count{font-size:12px;color:var(--muted)}
-.cat-arrow{color:var(--muted);font-size:16px;transition:transform .2s}
-.cat-card:hover .cat-arrow{transform:translateX(4px);color:var(--sienna)}
+    .nav-cta {
+      background: var(--cobalt);
+      color: #fff !important;
+      padding: 0.55rem 1.4rem;
+      border-radius: 100px;
+      opacity: 1 !important;
+      transition: background 0.25s, transform 0.25s !important;
+    }
 
-/* ════════════════ ARTWORKS ════════════════ */
-.artworks-section{background:var(--cream-2)}
-.artworks-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:36px;flex-wrap:wrap}
-.filter-btn{background:transparent;border:1px solid var(--border-2);color:var(--ink-3);border-radius:8px;padding:8px 18px;font-size:13px;font-weight:500;font-family:var(--font-body);cursor:pointer;transition:all .2s}
-.filter-btn:hover,.filter-btn.active{background:var(--sienna);border-color:var(--sienna);color:white}
-.artworks-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
-.aw-card{background:white;border:1px solid var(--border);border-radius:18px;overflow:hidden;transition:transform .25s,box-shadow .25s,border-color .25s;cursor:pointer}
-.aw-card:hover{transform:translateY(-6px);box-shadow:0 24px 50px rgba(120,80,40,.14);border-color:var(--warm-tan)}
-.aw-img{height:220px;position:relative;overflow:hidden}
-.aw-img svg{position:absolute;inset:0;width:100%;height:100%}
-.aw-badge{position:absolute;top:14px;left:14px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:4px 10px;border-radius:20px;z-index:2}
-.badge-hot{background:#d84315;color:white}
-.badge-new{background:#2e7d32;color:white}
-.badge-exclusive{background:#0277bd;color:white}
-.badge-trending{background:var(--gold);color:white}
-.badge-featured{background:var(--sienna);color:white}
-.aw-overlay{position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(44,26,14,.65) 0%,transparent 60%);opacity:0;transition:opacity .25s;display:flex;align-items:flex-end;justify-content:center;padding-bottom:18px}
-.aw-card:hover .aw-overlay{opacity:1}
-.aw-buy-btn{background:white;color:var(--ink);border:none;border-radius:8px;padding:9px 22px;font-size:13px;font-weight:700;font-family:var(--font-body);cursor:pointer;transform:translateY(10px);transition:transform .25s}
-.aw-card:hover .aw-buy-btn{transform:translateY(0)}
-.aw-body{padding:18px 20px}
-.aw-category{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--sienna);margin-bottom:6px}
-.aw-title{font-size:17px;font-weight:700;margin-bottom:3px;color:var(--ink);font-family:var(--font-display)}
-.aw-artist{font-size:13px;color:var(--muted);margin-bottom:14px}
-.aw-footer{display:flex;align-items:center;justify-content:space-between}
-.aw-price{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--sienna)}
-.aw-meta{display:flex;gap:12px}
-.aw-meta-item{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted)}
+    .nav-cta::after { display: none !important; }
+    .nav-cta:hover { background: var(--cobalt-light) !important; transform: translateY(-1px); }
 
-/* ════════════════ HOW IT WORKS ════════════════ */
-.how-section{background:var(--cream)}
-.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
-.how-card{background:white;border:1px solid var(--border);border-radius:18px;padding:32px 26px;position:relative;transition:all .25s;box-shadow:0 2px 12px rgba(120,80,40,.06)}
-.how-card:hover{border-color:rgba(160,82,45,.35);transform:translateY(-4px);box-shadow:0 18px 40px rgba(120,80,40,.12)}
-.how-num{font-family:var(--font-mono);font-size:52px;font-weight:700;color:rgba(160,82,45,.12);line-height:1;margin-bottom:20px}
-.how-icon-wrap{width:50px;height:50px;background:var(--sienna-lt);border:1px solid rgba(160,82,45,.2);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--sienna);margin-bottom:18px}
-.how-title{font-size:17px;font-weight:700;margin-bottom:10px;color:var(--ink)}
-.how-desc{font-size:13px;color:var(--ink-3);line-height:1.6}
-.how-connector{position:absolute;top:70px;right:-30px;width:60px;height:2px;background:linear-gradient(90deg,var(--sienna),transparent);z-index:2}
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px;
+    }
 
-/* ════════════════ CTA ════════════════ */
-.cta-section{background:var(--cream);display:flex;align-items:center;justify-content:center;text-align:center;flex-direction:column;position:relative;overflow:hidden;padding-bottom: 120px;}
-.cta-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 100% at 50% 50%,rgba(160,82,45,.07) 0%,transparent 60%)}
-.cta-inner-box{position:relative;z-index:1;background:linear-gradient(135deg,#fffaf4,#f5ead8);border:1.5px solid var(--border-2);border-radius:28px;padding:80px 80px;max-width:760px;box-shadow:0 30px 80px rgba(120,70,30,.1)}
-.cta-title{font-family:var(--font-display);font-size:clamp(36px,5vw,62px);font-weight:700;line-height:1.05;margin-bottom:18px;color:var(--ink)}
-.cta-title .accent{color:var(--sienna)}
-.cta-sub{font-size:17px;color:var(--ink-3);margin-bottom:38px;line-height:1.6}
-.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+    .nav-hamburger span {
+      width: 24px; height: 2px;
+      background: var(--cobalt);
+      border-radius: 2px;
+      transition: 0.3s;
+    }
 
-/* ════════════════ REVEAL ════════════════ */
-.reveal{opacity:0;transform:translateY(30px);transition:opacity .65s ease,transform .65s ease}
-.reveal.visible{opacity:1;transform:translateY(0)}
-.rd1{transition-delay:.1s}.rd2{transition-delay:.2s}.rd3{transition-delay:.3s}.rd4{transition-delay:.4s}.rd5{transition-delay:.5s}
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 120px 5vw 80px;
+      gap: 4rem;
+      position: relative;
+      overflow: hidden;
+    }
 
-/* ════════════════ KEYFRAMES ════════════════ */
-@@keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
-@@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
-@@keyframes heroReveal{from{opacity:0;transform:translateY(-50%) translateX(40px)}to{opacity:1;transform:translateY(-50%) translateX(0)}}
-@@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
-@@keyframes badgeFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-@@keyframes pulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
-@@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+    /* Background decorative elements */
+    .hero-bg-circle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
 
-/* ════════════════ RESPONSIVE ════════════════ */
-@@media(max-width:1100px){
-  .hero-visual{display:none}
-  .hero-content{max-width:100%}
-}
-@@media(max-width:900px){
-  .navbar{padding:14px 24px}
-  .nav-links{display:none}
-  section{padding:70px 24px}
-  .stats-bar{padding:40px 24px}
-  .categories-grid{grid-template-columns:1fr 1fr}
-  .artworks-grid{grid-template-columns:1fr 1fr}
-  .how-grid{grid-template-columns:1fr 1fr}
-  .hero{padding:100px 24px 60px}
-}
-@@media(max-width:600px){
-  .categories-grid{grid-template-columns:1fr}
-  .artworks-grid{grid-template-columns:1fr}
-  .how-grid{grid-template-columns:1fr}
-  .cta-inner-box{padding:44px 28px}
-}
-</style>
+    .hero-bg-circle-1 {
+      width: 600px; height: 600px;
+      right: -80px; top: -80px;
+      background: radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%);
+      animation: floatCircle 8s ease-in-out infinite;
+    }
+
+    .hero-bg-circle-2 {
+      width: 400px; height: 400px;
+      left: -120px; bottom: 0;
+      background: radial-gradient(circle, rgba(26,58,107,0.08) 0%, transparent 70%);
+      animation: floatCircle 10s ease-in-out infinite reverse;
+    }
+
+    @@keyframes floatCircle {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(20px, -30px) scale(1.04); }
+      66% { transform: translate(-15px, 15px) scale(0.97); }
+    }
+
+    /* Diagonal decorative line */
+    .hero-diagonal {
+      position: absolute;
+      top: 0; right: 30%;
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(to bottom, transparent, rgba(201,168,76,0.2) 30%, rgba(201,168,76,0.2) 70%, transparent);
+      transform: rotate(15deg) translateX(100px);
+    }
+
+    .hero-left {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.8rem;
+      opacity: 0;
+      animation: fadeSlideUp 0.8s 0.2s forwards;
+    }
+
+    .hero-eyebrow::before {
+      content: '';
+      width: 32px; height: 1px;
+      background: var(--gold);
+    }
+
+    .hero-headline {
+      font-family: var(--serif);
+      font-size: clamp(3.2rem, 5vw, 5.5rem);
+      font-weight: 900;
+      line-height: 1.02;
+      color: var(--cobalt);
+      letter-spacing: -0.03em;
+      opacity: 0;
+      animation: fadeSlideUp 0.9s 0.4s forwards;
+    }
+
+    .hero-headline em {
+      font-style: italic;
+      color: var(--gold);
+      display: block;
+    }
+
+    .hero-typewriter-wrap {
+      margin-top: 1.6rem;
+      opacity: 0;
+      animation: fadeSlideUp 0.9s 0.6s forwards;
+    }
+
+    .hero-typewriter-label {
+      font-size: 0.78rem;
+      font-family: var(--mono);
+      color: rgba(13,13,13,0.45);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .hero-typewriter-line {
+      font-family: var(--serif);
+      font-size: clamp(1.4rem, 2.2vw, 1.85rem);
+      font-weight: 400;
+      font-style: italic;
+      color: var(--cobalt);
+      min-height: 2.4em;
+      display: flex;
+      align-items: center;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1.1em;
+      background: var(--gold);
+      margin-left: 3px;
+      vertical-align: middle;
+      animation: blink 0.75s step-end infinite;
+    }
+
+    @@keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .hero-desc {
+      margin-top: 1.8rem;
+      font-size: 1rem;
+      line-height: 1.75;
+      color: rgba(13,13,13,0.65);
+      max-width: 440px;
+      opacity: 0;
+      animation: fadeSlideUp 0.9s 0.8s forwards;
+    }
+
+    .hero-actions {
+      margin-top: 2.4rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeSlideUp 0.9s 1s forwards;
+    }
+
+    .btn-primary {
+      background: var(--cobalt);
+      color: #fff;
+      padding: 0.85rem 2rem;
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: background 0.25s, transform 0.25s, box-shadow 0.25s;
+      box-shadow: 0 8px 24px rgba(26,58,107,0.2);
+    }
+
+    .btn-primary:hover {
+      background: var(--cobalt-light);
+      transform: translateY(-2px);
+      box-shadow: 0 14px 32px rgba(26,58,107,0.28);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--cobalt);
+      padding: 0.85rem 2rem;
+      border-radius: 100px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      text-decoration: none;
+      border: 1.5px solid rgba(26,58,107,0.3);
+      cursor: pointer;
+      transition: border-color 0.25s, background 0.25s, transform 0.25s;
+    }
+
+    .btn-outline:hover {
+      border-color: var(--cobalt);
+      background: rgba(26,58,107,0.05);
+      transform: translateY(-2px);
+    }
+
+    .hero-stats {
+      margin-top: 3rem;
+      display: flex;
+      gap: 2.5rem;
+      opacity: 0;
+      animation: fadeSlideUp 0.9s 1.2s forwards;
+    }
+
+    .stat-item { }
+    .stat-num {
+      font-family: var(--serif);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--cobalt);
+      line-height: 1;
+    }
+
+    .stat-num span { color: var(--gold); }
+    .stat-label {
+      font-size: 0.72rem;
+      font-family: var(--mono);
+      color: rgba(13,13,13,0.45);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 0.25rem;
+    }
+
+    /* ===== HERO RIGHT - FLOATING GALLERY ===== */
+    .hero-right {
+      position: relative;
+      height: 580px;
+      z-index: 2;
+      opacity: 0;
+      animation: fadeIn 1.2s 0.6s forwards;
+    }
+
+    .float-card {
+      position: absolute;
+      border-radius: 20px;
+      overflow: hidden;
+      background: var(--warm-white);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.14), 0 4px 12px rgba(0,0,0,0.06);
+      transition: transform 0.08s ease-out;
+      border: 1px solid rgba(255,255,255,0.8);
+    }
+
+    .float-card img {
+      width: 100%;
+      height: 75%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .float-card-info {
+      padding: 10px 12px;
+      background: var(--warm-white);
+    }
+
+    .float-card-title {
+      font-family: var(--serif);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--cobalt);
+    }
+
+    .float-card-artist {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: rgba(13,13,13,0.45);
+      margin-top: 2px;
+    }
+
+    .fc-1 {
+      width: 200px; height: 260px;
+      top: 2%; left: 5%;
+      transform: rotate(-6deg);
+      animation: floatA 6s ease-in-out infinite;
+    }
+
+    .fc-2 {
+      width: 220px; height: 285px;
+      top: 15%; right: 5%;
+      transform: rotate(4deg);
+      animation: floatB 7s ease-in-out infinite;
+    }
+
+    .fc-3 {
+      width: 185px; height: 240px;
+      bottom: 8%; left: 22%;
+      transform: rotate(-3deg);
+      animation: floatC 8s ease-in-out infinite;
+    }
+
+    .fc-badge {
+      position: absolute;
+      top: -10px; right: -10px;
+      background: var(--gold);
+      color: #fff;
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 100px;
+      letter-spacing: 0.04em;
+    }
+
+    @@keyframes floatA {
+      0%, 100% { transform: rotate(-6deg) translateY(0); }
+      50% { transform: rotate(-6deg) translateY(-18px); }
+    }
+
+    @@keyframes floatB {
+      0%, 100% { transform: rotate(4deg) translateY(0); }
+      50% { transform: rotate(4deg) translateY(-24px); }
+    }
+
+    @@keyframes floatC {
+      0%, 100% { transform: rotate(-3deg) translateY(0); }
+      50% { transform: rotate(-3deg) translateY(-14px); }
+    }
+
+    @@keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @@keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* ===== MARQUEE ===== */
+    .marquee-section {
+      background: var(--cobalt);
+      padding: 1.2rem 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .marquee-inner {
+      display: flex;
+      gap: 0;
+      animation: marqueeRoll 30s linear infinite;
+      white-space: nowrap;
+      width: fit-content;
+    }
+
+    .marquee-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 1.2rem;
+      padding: 0 2rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+      flex-shrink: 0;
+    }
+
+    .marquee-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--gold);
+      flex-shrink: 0;
+    }
+
+    @@keyframes marqueeRoll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* ===== SECTIONS SHARED ===== */
+    .section {
+      padding: 7rem 5vw;
+    }
+
+    .section-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+
+    .section-tag::before {
+      content: '';
+      width: 24px; height: 1px;
+      background: var(--gold);
+    }
+
+    .section-title {
+      font-family: var(--serif);
+      font-size: clamp(2.2rem, 4vw, 3.8rem);
+      font-weight: 800;
+      line-height: 1.1;
+      color: var(--cobalt);
+      letter-spacing: -0.02em;
+    }
+
+    .section-title em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    /* ===== ARTISTS SECTION ===== */
+    .artists-section { background: var(--warm-white); }
+
+    .artists-grid {
+      margin-top: 3.5rem;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+    }
+
+    .artist-card {
+      background: #FBFBFB;
+      border-radius: 24px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      border: 2px solid rgba(201,168,76,0.15);
+      transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2), box-shadow 0.4s;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    .artist-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .artist-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 24px 48px rgba(26,58,107,0.12);
+    }
+
+    .artist-avatar {
+      width: 90px; height: 90px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--gold-light);
+      margin-bottom: 1.2rem;
+    }
+
+    .artist-name {
+      font-family: var(--serif);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--cobalt);
+    }
+
+    .artist-genre {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-top: 0.3rem;
+    }
+
+    .artist-quote {
+      font-size: 0.85rem;
+      font-style: italic;
+      color: rgba(13,13,13,0.5);
+      margin-top: 0.8rem;
+      line-height: 1.5;
+    }
+
+    /* ===== GALLERY ===== */
+    .gallery-section { background: var(--cream); }
+
+    .gallery-grid {
+      margin-top: 3.5rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .gallery-item {
+      border-radius: 20px;
+      overflow: hidden;
+      background: var(--warm-white);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+      opacity: 0;
+      transform: translateY(25px);
+      transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.4s;
+    }
+
+    .gallery-item.visible { opacity: 1; transform: translateY(0); }
+    .gallery-item:hover { box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
+
+    .gallery-item:hover .gallery-img { transform: scale(1.05); }
+
+    .gallery-img-wrap {
+      height: 260px;
+      overflow: hidden;
+    }
+
+    .gallery-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .gallery-meta {
+      padding: 1.2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .gallery-title {
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--cobalt);
+    }
+
+    .gallery-by {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: rgba(13,13,13,0.45);
+      margin-top: 3px;
+    }
+
+    .gallery-price {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    /* ===== JOIN FLOW SECTION ===== */
+    .join-section { background: var(--cobalt); position: relative; overflow: hidden; }
+
+    .join-section::before {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      top: -150px; right: -150px;
+      border-radius: 50%;
+      background: rgba(201,168,76,0.07);
+      pointer-events: none;
+    }
+
+    .join-section::after {
+      content: '';
+      position: absolute;
+      width: 400px; height: 400px;
+      bottom: -100px; left: -100px;
+      border-radius: 50%;
+      background: rgba(201,168,76,0.05);
+      pointer-events: none;
+    }
+
+    .join-section .section-tag { color: var(--gold-light); }
+    .join-section .section-tag::before { background: var(--gold-light); }
+    .join-section .section-title { color: #fff; }
+    .join-section .section-title em { color: var(--gold); }
+
+    .join-subtitle {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.6);
+      margin-top: 0.8rem;
+      max-width: 520px;
+      line-height: 1.7;
+    }
+
+    .join-steps {
+      margin-top: 4.5rem;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Connector line between steps */
+    .join-steps::before {
+      content: '';
+      position: absolute;
+      top: 38px;
+      left: calc(12.5% + 20px);
+      right: calc(12.5% + 20px);
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(201,168,76,0.4) 20%, rgba(201,168,76,0.4) 80%, transparent);
+      z-index: 0;
+    }
+
+    .join-step {
+      text-align: center;
+      padding: 0 1.5rem;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .join-step.visible { opacity: 1; transform: translateY(0); }
+
+    .step-num-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.8rem;
+    }
+
+    .step-num {
+      width: 76px; height: 76px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(201,168,76,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--serif);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--gold);
+      background: rgba(201,168,76,0.06);
+      position: relative;
+      transition: background 0.3s, border-color 0.3s, transform 0.3s;
+    }
+
+    .join-step:hover .step-num {
+      background: rgba(201,168,76,0.15);
+      border-color: var(--gold);
+      transform: scale(1.08);
+    }
+
+    .step-icon {
+      font-size: 1.8rem;
+    }
+
+    .step-title {
+      font-family: var(--serif);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.7rem;
+    }
+
+    .step-desc {
+      font-size: 0.875rem;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.65;
+    }
+
+    .join-cta-wrap {
+      margin-top: 4rem;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn-gold {
+      background: var(--gold);
+      color: var(--ink);
+      padding: 1rem 2.8rem;
+      border-radius: 100px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: background 0.25s, transform 0.25s, box-shadow 0.25s;
+      box-shadow: 0 8px 28px rgba(201,168,76,0.35);
+      display: inline-block;
+    }
+
+    .btn-gold:hover {
+      background: #d4b054;
+      transform: translateY(-2px);
+      box-shadow: 0 16px 40px rgba(201,168,76,0.45);
+    }
+
+    .join-note {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: rgba(255,255,255,0.35);
+      margin-top: 1.2rem;
+      letter-spacing: 0.08em;
+    }
+
+    /* ===== EDITORIAL QUOTE SECTION ===== */
+    .editorial-section {
+      background: var(--warm-white);
+      padding: 7rem 5vw;
+    }
+
+    .editorial-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+
+    .editorial-img-wrap {
+      position: relative;
+      border-radius: 28px;
+      overflow: hidden;
+    }
+
+    .editorial-img-wrap img {
+      width: 100%;
+      height: 500px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s ease;
+    }
+
+    .editorial-img-wrap:hover img { transform: scale(1.04); }
+
+    .editorial-img-caption {
+      position: absolute;
+      bottom: 1.5rem; left: 1.5rem;
+      background: rgba(245,240,232,0.92);
+      backdrop-filter: blur(8px);
+      padding: 0.6rem 1rem;
+      border-radius: 100px;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--cobalt);
+      letter-spacing: 0.08em;
+    }
+
+    .editorial-quote {
+      font-family: var(--serif);
+      font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+      font-weight: 400;
+      font-style: italic;
+      color: var(--cobalt);
+      line-height: 1.45;
+      padding-left: 1.8rem;
+      border-left: 3px solid var(--gold);
+      margin-bottom: 2rem;
+    }
+
+    .editorial-body {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: rgba(13,13,13,0.6);
+    }
+
+    /* ===== CTA SECTION ===== */
+    .cta-section {
+      background: var(--cream);
+      padding: 5rem 5vw 8rem;
+    }
+
+    .cta-card {
+      background: linear-gradient(135deg, var(--cobalt) 0%, #0f2548 100%);
+      border-radius: 40px;
+      padding: 5rem 4rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-card::before {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px;
+      top: -200px; right: -100px;
+      border-radius: 50%;
+      background: rgba(201,168,76,0.08);
+    }
+
+    .cta-headline {
+      font-family: var(--serif);
+      font-size: clamp(2.5rem, 4vw, 4rem);
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-headline em { color: var(--gold); font-style: italic; }
+
+    .cta-sub {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.6);
+      margin: 1.2rem auto 0;
+      max-width: 480px;
+      line-height: 1.7;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-actions {
+      margin-top: 2.4rem;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn-gold-outline {
+      background: transparent;
+      color: var(--gold);
+      padding: 0.85rem 2rem;
+      border-radius: 100px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      text-decoration: none;
+      border: 1.5px solid rgba(201,168,76,0.5);
+      cursor: pointer;
+      transition: border-color 0.25s, background 0.25s;
+    }
+
+    .btn-gold-outline:hover {
+      border-color: var(--gold);
+      background: rgba(201,168,76,0.08);
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: #0f2548;
+      color: rgba(255,255,255,0.45);
+      padding: 3rem 5vw;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-brand {
+      font-family: var(--serif);
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .footer-brand span { color: var(--gold); }
+
+    footer p {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+    }
+
+    /* ===== SCROLL REVEAL UTILITY ===== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @@media (max-width: 1024px) {
+      .artists-grid { grid-template-columns: repeat(2, 1fr); }
+      .join-steps { grid-template-columns: repeat(2, 1fr); gap: 3rem; }
+      .join-steps::before { display: none; }
+    }
+
+    @@media (max-width: 900px) {
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 100px 5vw 60px;
+        text-align: center;
+      }
+      .hero-right { display: none; }
+      .hero-desc { margin-left: auto; margin-right: auto; }
+      .hero-actions { justify-content: center; }
+      .hero-stats { justify-content: center; }
+      .hero-eyebrow { display: inline-flex; justify-content: center; }
+      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+      .editorial-inner { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+    }
+
+    @@media (max-width: 600px) {
+      .gallery-grid { grid-template-columns: 1fr; }
+      .artists-grid { grid-template-columns: 1fr; }
+      .join-steps { grid-template-columns: 1fr; }
+      .cta-card { padding: 3rem 1.5rem; }
+      footer { flex-direction: column; text-align: center; }
+    }
+
+    /* ===== MOBILE MENU ===== */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(245,240,232,0.97);
+      backdrop-filter: blur(20px);
+      z-index: 200;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+    }
+
+    .mobile-menu.open { display: flex; }
+
+    .mobile-menu a {
+      font-family: var(--serif);
+      font-size: 2rem;
+      font-weight: 700;
+      color: #366ca2ff;
+      text-decoration: none;
+    }
+
+    .mobile-close {
+      position: absolute;
+      top: 1.5rem; right: 2rem;
+      background: none; border: none;
+      font-size: 1.5rem;
+      color: var(--cobalt);
+      cursor: pointer;
+    }
+
+    /* Pulse animation for CTA button */
+    @@keyframes pulse {
+      0% { box-shadow: 0 8px 28px rgba(201,168,76,0.35); }
+      50% { box-shadow: 0 8px 40px rgba(201,168,76,0.6); }
+      100% { box-shadow: 0 8px 28px rgba(201,168,76,0.35); }
+    }
+
+    .btn-gold.pulse { animation: pulse 2s ease-in-out infinite; }
+
+    .logo-box{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap :10px;
+    }
+  </style>
 </head>
 <body>
 
-<div class="cursor-dot" id="cursorDot"></div>
-<div class="cursor-ring" id="cursorRing"></div>
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" id="mobileClose">✕</button>
+  <a href="#artists" onclick="closeMobileMenu()">Artists</a>
+  <a href="#gallery" onclick="closeMobileMenu()">Gallery</a>
+  <a href="#join" onclick="closeMobileMenu()">How it Works</a>
+  <a href="#editorial" onclick="closeMobileMenu()">Editorial</a>
+  <a href="#join" class="btn-primary" onclick="closeMobileMenu()">Join Artify</a>
+</div>
 
-<nav class="navbar" id="navbar">
-  <a asp-controller="Home" asp-action="Landingpage" class="nav-logo" >
-    <div class="nav-logo-icon">
-      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
-    </div>
-    Art<span class="acc">Space</span>
-  </a>
-  <ul class="nav-links">
-    <li><a asp-controller="Home" asp-action="Landingpage">Home</a></li>
-    <li><a href="#artworks">Explore</a></li>
-    <li><a href="#categories">Categories</a></li>
-    <li><a href="#how">How It Works</a></li>
-  </ul>
-  <div class="nav-cta">
-         <a asp-action="Register" asp-controller="Artist" class="btn btn-primary btn-lg"><span class="k-icon k-i-user"></span> Create Account</a>
-      <a asp-action="Login" asp-controller="Artist" class="btn btn-outline btn-lg"><span class="k-icon k-i-grid-layout"></span> Sign In</a>
-
+<!-- NAVBAR -->
+<nav id="mainNav">
+  <!-- <a class="nav-brand" href="#">ARTI<span>FY</span></a> -->
+  <div class="logo-box">
+    <a href="/" class="nav-brand"><img src="/Images/bob-logo.png" alt="artify logo" style="height: 40px; width: 40px; border-radius: 10px;" ></a>
+    <span class="nav-brand" style="margin-bottom: 10px;">ARTIFY</span>
+    
   </div>
+  <ul class="nav-links">
+    <li><a href="#artists">Artists</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#join">How it Works</a></li>
+    <!-- <li><a href="#editorial">Editorial</a></li> -->
+    <li><a href="/Artist/Register" class="nav-cta">Join Now</a></li>
+    <li><a href="/Artist/Login" class="nav-cta">Login</a></li>
+  </ul>
+  <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
 <!-- HERO -->
-<section class="hero">
-  <div class="hero-bg"></div>
-  <div class="grid-dots"></div>
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
+<section class="hero" id="hero">
+  <div class="hero-bg-circle hero-bg-circle-1"></div>
+  <div class="hero-bg-circle hero-bg-circle-2"></div>
+  <div class="hero-diagonal"></div>
 
-  <div class="hero-content">
-    <div class="hero-badge"><div class="hero-badge-dot"></div>The World's Premier Art Marketplace</div>
-    <h1 class="hero-title">Where Art Meets<br/><span class="accent">Infinite Possibility</span></h1>
-    <p class="hero-sub">Join 48,000+ artists selling digital, physical and NFT artwork to collectors worldwide. Set your price. Keep 85% of every sale.</p>
-    <div class="hero-actions">
-      <a href="#artworks" class="btn btn-primary btn-lg"><span class="k-icon k-i-image"></span> Explore Artworks</a>
-  
+  <div class="hero-left">
+    <div class="hero-eyebrow">Artists rise here</div>
+    <h1 class="hero-headline">
+       Where <em>imagination</em> takes center stage
+       
+    </h1>
+
+    <div class="hero-typewriter-wrap">
+      <div class="hero-typewriter-label">Our artists say —</div>
+      <div class="hero-typewriter-line">
+        <span id="typewriter-text"></span><span class="cursor"></span>
+      </div>
     </div>
-    <div class="hero-hstats">
-      <div><div class="hstat-val">48K+</div><div class="hstat-lbl">Artists</div></div>
-      <div class="hstat-div"></div>
-      <div><div class="hstat-val">$12M+</div><div class="hstat-lbl">Paid Out</div></div>
-      <div class="hstat-div"></div>
-      <div><div class="hstat-val">190+</div><div class="hstat-lbl">Countries</div></div>
+
+    <p class="hero-desc">Artify is a cinematic gallery platform for visionary creators — a space where digital brushstrokes meet global audiences, and every artwork tells a story worth living.</p>
+
+    <div class="hero-actions">
+      <a href="#gallery" class="btn-primary">Explore Gallery →</a>
+      <a href="#join" class="btn-outline">Become an Artist</a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num">4.2<span>K</span></div>
+        <div class="stat-label">Artists</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">89<span>K</span></div>
+        <div class="stat-label">Artworks</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">31<span>+</span></div>
+        <div class="stat-label">Countries</div>
+      </div>
     </div>
   </div>
 
-  <div class="hero-visual">
-    <div class="hero-card-stack">
-      <div class="hero-art-card hac-1">
-        <div class="art-card-inner">
-          <div class="art-card-img" style="background:linear-gradient(135deg,#e8794a,#c1440e);">
-            <svg viewBox="0 0 255 260" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
-              <polygon points="0,260 255,0 255,260" fill="rgba(0,0,0,.15)"/>
-              <line x1="0" y1="80" x2="255" y2="180" stroke="#fde68a" stroke-width="3" opacity=".6"/>
-              <circle cx="127" cy="130" r="60" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="1.5"/>
-            </svg>
-          </div>
-          <div class="art-card-info"><div class="art-card-name">Neon Dreams #42</div><div class="art-card-price">$850</div></div>
-        </div>
+  <div class="hero-right" id="hero3d">
+    <div class="float-card fc-1">
+      <img src="https://i.etsystatic.com/40045614/r/il/1ae8c5/4534317975/il_1140xN.4534317975_az2g.jpg" alt="Art-1">
+      <div class="float-card-info">
+        <div class="float-card-title">Frames Between Dreams</div>
+        <div class="float-card-artist">Nishi Shah</div>
       </div>
-      <div class="hero-art-card hac-2">
-        <div class="art-card-inner">
-          <div class="art-card-img" style="background:linear-gradient(135deg,#b5860d,#8a5e00);">
-            <svg viewBox="0 0 235 240" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
-              <path d="M0 120 Q58 30 117 120 T235 120" stroke="#fde68a" stroke-width="3" fill="none"/>
-              <path d="M0 155 Q58 65 117 155 T235 155" stroke="rgba(255,255,255,.3)" stroke-width="2" fill="none"/>
-              <circle cx="117" cy="120" r="35" fill="rgba(255,255,255,.08)"/>
-            </svg>
-          </div>
-          <div class="art-card-info"><div class="art-card-name">Golden Vortex</div><div class="art-card-price">$420</div></div>
-        </div>
+      @* <div class="fc-badge">SOLD</div> *@
+    </div>
+    <div class="float-card fc-2">
+      <img src="https://img.freepik.com/premium-vector/illustration-light-bulb-surrounded-by-various-objects-representing-ideas-knowledge-creativity_339976-47888.jpg?w=2000" alt="Art-2">
+      <div class="float-card-info">
+        <div class="float-card-title">Infinite Library</div>
+        <div class="float-card-artist">Brijesh Shah</div>
       </div>
-      <div class="hero-art-card hac-3">
-        <div class="art-card-inner">
-          <div class="art-card-img" style="background:linear-gradient(135deg,#4a3322,#7a5c44);">
-            <svg viewBox="0 0 215 220" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
-              <rect x="55" y="28" width="105" height="160" rx="4" fill="rgba(200,170,120,.12)" stroke="rgba(200,170,120,.4)" stroke-width="1.5"/>
-              <rect x="75" y="48" width="65" height="65" rx="4" fill="rgba(200,170,120,.18)"/>
-              <line x1="65" y1="130" x2="150" y2="130" stroke="rgba(200,170,120,.4)" stroke-width="1"/>
-              <line x1="65" y1="148" x2="130" y2="148" stroke="rgba(200,170,120,.3)" stroke-width="1"/>
-            </svg>
-          </div>
-          <div class="art-card-info"><div class="art-card-name">Silent Space</div><div class="art-card-price">$1,100</div></div>
-        </div>
-      </div>
-      <div class="hero-live-badge">
-        <div class="hlb-top"><span class="hlb-dot"></span>Live Earnings Today</div>
-        <div class="hlb-val">$3,840</div>
+    </div>
+    <div class="float-card fc-3">
+      <img src="https://thumbs.dreamstime.com/b/art-illustration-204109632.jpg" alt="Art-3">
+      <div class="float-card-info">
+        <div class="float-card-title">Abstract Flow</div>
+        <div class="float-card-artist">Disha Patel</div>
       </div>
     </div>
   </div>
 </section>
 
-<div class="stats-bar">
-  <div class="row g-0">
-    <div class="col-3">
-      <div class="stat-item reveal">
-        <span class="k-icon k-i-user stat-icon"></span>
-        <div class="stat-val">48K+</div>
-        <div class="stat-lbl">Artists Worldwide</div>
-      </div>
-    </div>
-    <div class="col-3">
-      <div class="stat-item reveal rd1">
-        <span class="k-icon k-i-image stat-icon"></span>
-        <div class="stat-val">320K+</div>
-        <div class="stat-lbl">Artworks Sold</div>
-      </div>
-    </div>
-    <div class="col-3">
-      <div class="stat-item reveal rd2">
-        <span class="k-icon k-i-dollar stat-icon"></span>
-        <div class="stat-val">$12M+</div>
-        <div class="stat-lbl">Total Earnings Paid</div>
-      </div>
-    </div>
-    <div class="col-3">
-      <div class="stat-item reveal rd3">
-        <span class="k-icon k-i-globe-outline stat-icon"></span>
-        <div class="stat-val">190+</div>
-        <div class="stat-lbl">Countries Reached</div>
-      </div>
-    </div>
-  </div>
+<!-- MARQUEE BAND -->
+<div class="marquee-section">
+  <div class="marquee-inner" id="marqueeInner"></div>
 </div>
 
-<section id="categories" class="categories-section">
-  <div class="section-label">Browse by Category</div>
-  <div class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-5">
-    <h2 class="section-title mb-0">Discover<br/>Art Form</h2>
-    <a href="#" class="btn btn-outline">View All Categories</a>
+<!-- FEATURED ARTISTS -->
+<section class="section artists-section" id="artists">
+  <div class="reveal">
+    <div class="section-tag">The Talent</div>
+    <h2 class="section-title">Featured <em>Creators</em></h2>
   </div>
-  <div class="categories-grid" id="categoriesGrid"></div>
+  <div class="artists-grid" id="artistsGrid">
+    <div class="artist-card">
+      <img src="https://xinva.ai/wp-content/uploads/2023/12/106.jpg" class="artist-avatar" alt="Amara Okonkwo">
+      <div class="artist-name">Brijesh Shah</div>
+      <div class="artist-genre">Multimedia · Afro-surrealist</div>
+      <div class="artist-quote">"Digital brushstrokes meet ancestral rhythm."</div>
+    </div>
+    <div class="artist-card">
+      <img src="https://xinva.ai/wp-content/uploads/2023/12/99.jpg" class="artist-avatar" alt="Julian Moreau">
+      <div class="artist-name">Vaidushi Oza</div>
+      <div class="artist-genre">Generative Art · AI Pioneer</div>
+      <div class="artist-quote">"AI-infused immersive installations."</div>
+    </div>
+    <div class="artist-card">
+      <img src="https://img.freepik.com/premium-photo/cute-boy-cartoon-character_960786-602.jpg" class="artist-avatar" alt="Yuki Tanaka">
+      <div class="artist-name">Yuvraj Makwana</div>
+      <div class="artist-genre">Minimalism · Light & Void</div>
+      <div class="artist-quote">"Exploring light, void and stillness."</div>
+    </div>
+    <div class="artist-card">
+      <img src="https://xinva.ai/wp-content/uploads/2023/12/100.jpg" class="artist-avatar" alt="Carlos Reyes">
+      <div class="artist-name">Meet Patel</div>
+      <div class="artist-genre">Kinetic · Digital Sculpture</div>
+      <div class="artist-quote">"Architectural digital sculptures."</div>
+    </div>
+  </div>
 </section>
 
-<section id="artworks" class="artworks-section">
-  <div class="section-label">Featured Artworks</div>
-  <div class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-4">
-    <h2 class="section-title mb-0">Artwork<br/>Showcase</h2>
-    <a href="#" class="btn btn-outline">Browse All</a>
+<!-- GALLERY -->
+<section class="section gallery-section" id="gallery">
+  <div class="reveal">
+    <div class="section-tag">The Collection</div>
+    <h2 class="section-title">Curated <em>Gallery</em></h2>
   </div>
-  <div class="artworks-toolbar">
-    <button class="filter-btn active" onclick="filterAW(this,'all')">All Works</button>
-    <button class="filter-btn" onclick="filterAW(this,'Digital Collectible')">Digital</button>
-    <button class="filter-btn" onclick="filterAW(this,'NFT')">NFT</button>
-    <button class="filter-btn" onclick="filterAW(this,'Canvas Print')">Canvas</button>
-    <button class="filter-btn" onclick="filterAW(this,'Photography')">Photography</button>
-  </div>
-  <div class="artworks-grid" id="artworksGrid"></div>
+  <div class="gallery-grid" id="galleryGrid"></div>
 </section>
 
-<section id="how" class="how-section">
-  <div class="text-center mb-5">
-    <div class="section-label" style="justify-content:center">Simple Process</div>
-    <h2 class="section-title">Start Earning in<br/><span style="color:var(--sienna)">4 Easy Steps</span></h2>
+<!-- HOW TO JOIN FLOW -->
+<section class="section join-section" id="join">
+  <div class="reveal">
+    <div class="section-tag">The Journey</div>
+    <h2 class="section-title">How to <em>Join</em> Artify</h2>
+    <p class="join-subtitle">From application to your first exhibition — we've made the path simple, transparent, and empowering for every artist.</p>
   </div>
-  <div class="how-grid" id="howGrid"></div>
+
+  <div class="join-steps" id="joinSteps">
+    <div class="join-step">
+      <div class="step-num-wrap">
+        <div class="step-num">01</div>
+      </div>
+      <div class="step-title">Apply Online</div>
+      <div class="step-desc">Fill out a short application with your portfolio link and artistic statement. Takes under 5 minutes.</div>
+    </div>
+    <div class="join-step">
+      <div class="step-num-wrap">
+        <div class="step-num">02</div>
+      </div>
+      <div class="step-title">Curator Review</div>
+      <div class="step-desc">Our editorial team reviews your work within 48 hours — evaluating style, originality, and vision.</div>
+    </div>
+    <div class="join-step">
+      <div class="step-num-wrap">
+        <div class="step-num">03</div>
+      </div>
+      <div class="step-title">Build Your Profile</div>
+      <div class="step-desc">Upload artworks, set your pricing, write your story. Your cinematic profile goes live to a global audience.</div>
+    </div>
+    <div class="join-step">
+      <div class="step-num-wrap">
+        <div class="step-num">04</div>
+      </div>
+      <div class="step-title">Exhibit & Earn</div>
+      <div class="step-desc">Receive commissions, collaborate with collectors worldwide, and attend exclusive Artify showcase events.</div>
+    </div>
+  </div>
+
+  <div class="join-cta-wrap">
+    <a href="#" class="btn-gold pulse" id="joinBtn">Apply for Membership →</a>
+    <div class="join-note">Applications reviewed within 48 hours · No fee to apply</div>
+  </div>
+</section>
+
+<!-- EDITORIAL -->
+<section class="editorial-section" id="editorial">
+  <div class="editorial-inner">
+    <div class="editorial-img-wrap reveal">
+      <img src="https://cdn.pixabay.com/photo/2017/04/13/18/48/drawing-2228403_1280.jpg" alt="Editorial visual" loading="lazy">
+       @* <img src="/Images/hero-section.png" alt="Editorial visual" loading="lazy"> *@
+      @* <video src="/MVC/wwwroot/Images/vid-1.mp4"  loading="lazy"></video> *@
+      <div class="editorial-img-caption">Artify Studio · 2026</div>
+    </div>
+    <div class="reveal">
+      <div class="section-tag">Our Manifesto</div>
+      <blockquote class="editorial-quote">
+        "Art is the bridge between imagination and the world that doesn't exist yet."
+      </blockquote>
+      <p class="editorial-body">Artify isn't just a platform — it's an immersive movement. We empower emerging and established artists to exhibit in cinematic, depth-rich environments where each scroll tells a story.</p>
+      <p class="editorial-body" style="margin-top:1rem;">Our community thrives on bold experimentation, blending classical aesthetics with modern technology. Join a global collective redefining what digital art can be and mean.</p>
+      <a href="#artists" class="btn-primary" style="display:inline-block; margin-top:2rem; text-decoration:none;">Meet the Artists →</a>
+    </div>
+  </div>
 </section>
 
 <!-- CTA -->
 <section class="cta-section">
-  <div class="cta-bg"></div>
-  <div class="cta-inner-box reveal">
-    <h2 class="cta-title">Your Art Deserves<br/>a <span class="accent">Global Stage</span></h2>
-    <p class="cta-sub">Join thousands of artists already earning on ArtSpace. Free to start, no monthly fees, no hidden charges.</p>
-    <div class="cta-btns">
-      <a asp-action="Register" asp-controller="Artist" class="btn btn-primary btn-lg"><span class="k-icon k-i-user"></span> Create Account</a>
-      <a asp-action="Login" asp-controller="Artist" class="btn btn-outline btn-lg"><span class="k-icon k-i-grid-layout"></span> Sign In</a>
+  <div class="cta-card reveal">
+    <h2 class="cta-headline">Your art deserves<br>a <em>world stage.</em></h2>
+    <p class="cta-sub">Join 4,200+ artists already exhibiting on Artify. No gatekeeping, no compromise — just pure creative freedom.</p>
+    <div class="cta-actions">
+      <a href="#join" class="btn-gold">Start Your Journey →</a>
+      <a href="#gallery" class="btn-gold-outline">Browse Gallery</a>
     </div>
   </div>
 </section>
 
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">ARTI<span>FY</span></div>
+  <p>© 2026 Artify — Cinematic Artist Index.</p>
+  <p style="opacity:0.4;">Luxury Edition · Where Art Lives</p>
+</footer>
+
 <script>
-$(function(){
-
-  /* ── Custom Cursor ── */
-  var dot = document.getElementById('cursorDot');
-  var ring = document.getElementById('cursorRing');
-  var cx=0,cy=0,rx=0,ry=0;
-  document.addEventListener('mousemove',function(e){cx=e.clientX;cy=e.clientY;dot.style.left=cx+'px';dot.style.top=cy+'px';});
-  (function animRing(){rx+=(cx-rx)*.1;ry+=(cy-ry)*.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);})();
-  document.querySelectorAll('a,button,.cat-card,.aw-card,.how-card').forEach(function(el){
-    el.addEventListener('mouseenter',function(){ring.classList.add('grow');});
-    el.addEventListener('mouseleave',function(){ring.classList.remove('grow');});
+  // ===== NAVBAR SCROLL =====
+  const nav = document.getElementById('mainNav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 50);
   });
 
-  /* ── Scroll Reveal ── */
-  var obs = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){if(e.isIntersecting) e.target.classList.add('visible');});
-  },{threshold:.12});
-  document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el);});
-
-  /* ── Navbar shrink ── */
-  $(window).on('scroll',function(){
-    if($(this).scrollTop()>60) $('#navbar').addClass('scrolled');
-    else $('#navbar').removeClass('scrolled');
+  // ===== MOBILE MENU =====
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('mobileMenu').classList.add('open');
   });
-
-  /* ══════════ DATA ══════════ */
-  var categories = [
-    {name:'Digital Art',   icon:'k-i-image',        count:'12,400', color:'#a0522d', bg:'rgba(160,82,45,.12)'},
-    {name:'Photography',   icon:'k-i-camera',        count:'8,320',  color:'#0277bd', bg:'rgba(2,119,189,.1)'},
-    {name:'NFT & Crypto',  icon:'k-i-dollar',        count:'5,910',  color:'#b5860d', bg:'rgba(181,134,13,.12)'},
-    {name:'Sculpture',     icon:'k-i-star-outline',  count:'3,240',  color:'#c1440e', bg:'rgba(193,68,14,.1)'},
-    {name:'Canvas & Oil',  icon:'k-i-brush',         count:'6,780',  color:'#2e7d32', bg:'rgba(46,125,50,.1)'},
-    {name:'Illustration',  icon:'k-i-pencil',        count:'9,100',  color:'#6a1b9a', bg:'rgba(106,27,154,.1)'},
-  ];
-
-  var artworks = [
-    {title:'Neon Dreams #42',  artist:'Zara Kline',   category:'Digital Collectible', price:'$850',   badge:'Hot',       from:'#e8794a',to:'#c1440e',accent:'#fde68a',likes:284,views:1820},
-    {title:'Golden Vortex',    artist:'Kenji Mori',   category:'Canvas Print',        price:'$420',   badge:'New',       from:'#b5860d',to:'#8a5e00',accent:'#fde68a',likes:156,views:940},
-    {title:'Silent Space',     artist:'Mia Fontaine', category:'NFT',                 price:'$1,100', badge:'Exclusive', from:'#4a3322',to:'#7a5c44',accent:'#c9b49a',likes:392,views:3100},
-    {title:'Static Motion',    artist:'Leo Santos',   category:'Sculpture (Physical)',price:'$2,400', badge:'Trending',  from:'#c1440e',to:'#a0522d',accent:'#fde68a',likes:517,views:4200},
-    {title:'Amber Threshold',  artist:'Priya Anand',  category:'Oil on Canvas',       price:'$3,200', badge:'Featured',  from:'#a0522d',to:'#6b3318',accent:'#e8dfd2',likes:621,views:5800},
-    {title:'Echo Chamber',     artist:'Raj Solis',    category:'Photography',         price:'$640',   badge:'New',       from:'#2e7d32',to:'#1b5e20',accent:'#c8e6c9',likes:198,views:1430},
-  ];
-
-  var steps = [
-    {num:'01',icon:'k-i-user',         title:'Create Profile',  desc:'Set up your artist profile with your portfolio, bio, and payout details in minutes.'},
-    {num:'02',icon:'k-i-upload',       title:'Upload Your Art', desc:'Upload digital files, add physical artwork listings, or mint NFTs directly on the platform.'},
-    {num:'03',icon:'k-i-dollar',       title:'Set Your Price',  desc:'Price your work in any currency. We handle conversions, taxes, and cross-border payments.'},
-    {num:'04',icon:'k-i-check-circle', title:'Get Paid Fast',   desc:'Earnings hit your account within 48 hours. Keep 85% — the best commission rate in the industry.'},
-  ];
-
-  /* ── Categories ── */
-  var catHtml = categories.map(function(c,i){
-    return '<a class="cat-card reveal rd'+(i%5+1)+'" href="#" style="--hoverBg:'+c.bg+'">' +
-      '<div class="cat-icon-wrap" style="background:'+c.bg+'"><span class="k-icon '+c.icon+'" style="color:'+c.color+'"></span></div>' +
-      '<div class="cat-info"><div class="cat-name">'+c.name+'</div><div class="cat-count">'+c.count+' artworks</div></div>' +
-      '<span class="k-icon k-i-arrow-chevron-right cat-arrow"></span>' +
-    '</a>';
-  }).join('');
-  $('#categoriesGrid').html(catHtml);
-  document.querySelectorAll('.cat-card').forEach(function(el){obs.observe(el);});
-
-  /* ── Artworks ── */
-  var allAW = artworks;
-  function badgeCls(b){ return {Hot:'badge-hot',New:'badge-new',Exclusive:'badge-exclusive',Trending:'badge-trending',Featured:'badge-featured'}[b]||'badge-new'; }
-  function artSVG(f,t,a,id){
-    return '<svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">' +
-      '<defs><linearGradient id="g'+id+'" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="'+f+'"/><stop offset="100%" stop-color="'+t+'"/></linearGradient></defs>' +
-      '<rect width="400" height="220" fill="url(#g'+id+')"/>' +
-      '<polygon points="0,220 400,0 400,220" fill="'+t+'" opacity=".25"/>' +
-      '<circle cx="200" cy="110" r="70" fill="none" stroke="'+a+'" stroke-width="1.5" opacity=".4"/>' +
-      '<line x1="0" y1="110" x2="400" y2="110" stroke="'+a+'" stroke-width="1" opacity=".2"/>' +
-      '<line x1="200" y1="0" x2="200" y2="220" stroke="'+a+'" stroke-width="1" opacity=".2"/>' +
-    '</svg>';
+  document.getElementById('mobileClose').addEventListener('click', () => closeMobileMenu());
+  function closeMobileMenu() {
+    document.getElementById('mobileMenu').classList.remove('open');
   }
-  function renderAW(data){
-    var html = data.map(function(d,i){
-      return '<div class="aw-card">' +
-        '<div class="aw-img">'+artSVG(d.from,d.to,d.accent,i)+
-          '<span class="aw-badge '+badgeCls(d.badge)+'">'+d.badge+'</span>' +
-          '<div class="aw-overlay"></button></div>' +
-        '</div>' +
-        '<div class="aw-body">' +
-          '<div class="aw-category">'+d.category+'</div>' +
-          '<div class="aw-title">'+d.title+'</div>' +
-          '<div class="aw-artist">by '+d.artist+'</div>' +
-          '<div class="aw-footer">' +
-            '<div class="aw-price">'+d.price+'</div>' +
-            '<div class="aw-meta">' +
-              '<div class="aw-meta-item"><span class="k-icon k-i-heart"></span>'+d.likes+'</div>' +
-              '<div class="aw-meta-item"><span class="k-icon k-i-eye"></span>'+d.views+'</div>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-    $('#artworksGrid').html(html);
-    document.querySelectorAll('#artworksGrid .aw-card').forEach(function(el,i){
-      el.classList.add('reveal','rd'+(i%5+1));obs.observe(el);
+
+  // ===== SMOOTH SCROLL =====
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+    });
+  });
+
+  // ===== TYPEWRITER EFFECT =====
+  const lines = [
+    "Every canvas holds a universe waiting to be seen.",
+    "We don't paint the world — we reimagine it entirely.",
+    "Art is the only language that needs no translation.",
+    "Bold strokes. Quiet revolutions. Endless possibility.",
+    "The canvas is infinite. So is your imagination.",
+    "Digital dreams come alive.",
+  ];
+
+  let lineIdx = 0, charIdx = 0, isDeleting = false;
+  const el = document.getElementById('typewriter-text');
+
+  function typeLoop() {
+    const current = lines[lineIdx];
+    if (!isDeleting) {
+      el.textContent = current.slice(0, ++charIdx);
+      if (charIdx === current.length) {
+        isDeleting = true;
+        setTimeout(typeLoop, 2200);
+        return;
+      }
+      setTimeout(typeLoop, 46);
+    } else {
+      el.textContent = current.slice(0, --charIdx);
+      if (charIdx === 0) {
+        isDeleting = false;
+        lineIdx = (lineIdx + 1) % lines.length;
+        setTimeout(typeLoop, 400);
+        return;
+      }
+      setTimeout(typeLoop, 22);
+    }
+  }
+  setTimeout(typeLoop, 1400);
+
+  // ===== MARQUEE =====
+  const marqueeItems = [
+    "Digital Art", "Generative Works", "Pixel Art", "Photography",
+    "Afro-surrealism", "3D Art", "Immersive Installations",
+    "Mixed Media", "Oil & Canvas", "Kinetic Art", "Sketch & Line Art", "Abstract"
+  ];
+  const inner = document.getElementById('marqueeInner');
+  const full = [...marqueeItems, ...marqueeItems];
+  inner.innerHTML = full.map(t =>
+    `<span class="marquee-item"><span class="marquee-dot"></span>${t}</span>`
+  ).join('');
+
+  // ===== GALLERY CARDS =====
+  const artworks = [
+    { img: "https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/baby-elephant-4-rhonda-barrett.jpg", title: "Crimson Echoes", artist: "Amara O.", price: "$ 2.4" },
+    { img: "https://wallup.net/wp-content/uploads/2018/10/05/962154-destiny-sci-fi-shooter-fps-action-fighting-futuristic-warrior-fantasy-mmo-online-rpg.jpg", title: "Midnight Bloom", artist: "Julian M.", price: "$ 1.8" },
+    { img: "https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/be750116096301.562a55a265fe9.jpg", title: "Digital Whispers", artist: "Yuki T.", price: "$ 3.1" },
+    { img: "https://img.freepik.com/premium-photo/digital-art-selected_1086710-20828.jpg", title: "Golden Ratio", artist: "Carlos R.", price: "$ 2.2" },
+    { img: "https://iso.500px.com/wp-content/uploads/2022/08/Fisher-in-Inle-lake-By-keehwan-Kim-2.jpeg", title: "Neon Spectrum", artist: "Elena V.", price: "$ 1.5" },
+    { img: "https://img.freepik.com/free-psd/3d-rendering-floating-island-illustration_23-2151403525.jpg", title: "Liquid Dreams", artist: "Kai C.", price: "$ 2.9" }
+  ];
+
+  const galleryGrid = document.getElementById('galleryGrid');
+  artworks.forEach(art => {
+    galleryGrid.innerHTML += `
+      <div class="gallery-item">
+        <div class="gallery-img-wrap">
+          <img class="gallery-img" src="${art.img}" alt="${art.title}" loading="lazy">
+        </div>
+        <div class="gallery-meta">
+          <div>
+            <div class="gallery-title">${art.title}</div>
+            <div class="gallery-by">by ${art.artist}</div>
+          </div>
+          <div class="gallery-price">${art.price}</div>
+        </div>
+      </div>`;
+  });
+
+  // ===== MOUSE PARALLAX ON HERO CARDS =====
+  const hero3d = document.getElementById('hero3d');
+  if (hero3d) {
+    document.addEventListener('mousemove', e => {
+      const mx = (e.clientX / window.innerWidth - 0.5) * 18;
+      const my = (e.clientY / window.innerHeight - 0.5) * 12;
+      hero3d.querySelectorAll('.float-card').forEach((c, i) => {
+        const depth = [0.6, 0.4, 0.8][i] || 0.5;
+        c.style.transform = c.style.transform.replace(/translate\(.*?\)/g, '') ||
+          c.classList.contains('fc-1') ? `rotate(-6deg) translate(${mx*depth}px,${my*depth}px)` :
+          c.classList.contains('fc-2') ? `rotate(4deg) translate(${mx*depth*0.7}px,${my*depth*0.7}px)` :
+          `rotate(-3deg) translate(${mx*depth*1.1}px,${my*depth*1.1}px)`;
+      });
     });
   }
-  renderAW(allAW);
-  window.filterAW = function(btn,cat){
-    $('.filter-btn').removeClass('active');$(btn).addClass('active');
-    renderAW(cat==='all'?allAW:allAW.filter(function(a){return a.category===cat;}));
-  };
 
-  /* ── How It Works ── */
-  var howHtml = steps.map(function(s,i){
-    return '<div class="how-card reveal rd'+(i+1)+'">' +
-      '<div class="how-num">'+s.num+'</div>' +
-      '<div class="how-icon-wrap"><span class="k-icon '+s.icon+'"></span></div>' +
-      '<div class="how-title">'+s.title+'</div>' +
-      '<div class="how-desc">'+s.desc+'</div>' +
-      (i<3?'<div class="how-connector"></div>':'') +
-    '</div>';
-  }).join('');
-  $('#howGrid').html(howHtml);
-  document.querySelectorAll('.how-card').forEach(function(el){obs.observe(el);});
+  // ===== INTERSECTION OBSERVER =====
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
 
-  /* ── Counter animation ── */
-  var counted = false;
-  var statsObs = new IntersectionObserver(function(entries){
-    if(entries[0].isIntersecting && !counted){
-      counted = true;
-      var targets = [{val:'48000',suf:'K+'},{val:'320000',suf:'K+'},{val:'12',suf:'M+',pre:'$'},{val:'190',suf:'+'}];
-      document.querySelectorAll('.stat-val').forEach(function(el,i){
-        var t = targets[i]; if(!t) return;
-        var num = parseInt(t.val); var start=0; var step=num/1800*16;
-        var iv = setInterval(function(){
-          start+=step;
-          if(start>=num){start=num;clearInterval(iv);}
-          var n = Math.floor(start);
-          if(t.pre) el.textContent = t.pre + n + t.suf;
-          else el.textContent = n.toLocaleString().replace(/,000$/,'K').replace(/,000,000$/,'M') + t.suf;
-        },16);
-      });
-    }
-  },{threshold:0.3});
-  var sb = document.querySelector('.stats-bar');
-  if(sb) statsObs.observe(sb);
+  document.querySelectorAll('.reveal, .artist-card, .gallery-item, .join-step').forEach((el, i) => {
+    el.style.transitionDelay = el.classList.contains('artist-card') || el.classList.contains('gallery-item') || el.classList.contains('join-step')
+      ? `${i * 0.08}s` : '0s';
+    io.observe(el);
+  });
 
-});
+  // ===== JOIN BUTTON =====
+  document.getElementById('joinBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    this.textContent = '✓ Application Sent — We\'ll reach out within 48h!';
+    this.style.background = '#2E7D32';
+    this.style.boxShadow = '0 8px 28px rgba(46,125,50,0.4)';
+    this.classList.remove('pulse');
+  });
 </script>
 </body>
-</html> 
+</html>

@@ -1,427 +1,3 @@
-// // ============================================================
-// //  API/Controllers/ArtistApiController.cs
-// //  All protected endpoints use [Authorize] with JWT Bearer.
-// //  Login issues both a JWT *and* sets an HttpOnly cookie so
-// //  MVC pages can authenticate server-side via the cookie.
-// // ============================================================
-
-// using Microsoft.AspNetCore.Authentication.Cookies;
-// using Microsoft.AspNetCore.Authorization;
-// using Microsoft.AspNetCore.Mvc;
-// using Microsoft.IdentityModel.Tokens;
-// using System.IdentityModel.Tokens.Jwt;
-// using System.Security.Claims;
-// using System.Text;
-// using CloudinaryDotNet;
-// using CloudinaryDotNet.Actions;
-// using Repository.Interfaces;
-// using Repository.Models;
-
-// namespace API.Controllers;
-
-// [ApiController]
-// [Route("api/[controller]")]
-// public class ArtistApiController : ControllerBase
-// {
-//     private readonly IArtistInterface _repo;
-//     private readonly IArtworkInterface _artworkRepo;
-//     private readonly IConfiguration _config;
-//     private readonly Cloudinary _cloudinary;
-
-//     public ArtistApiController(
-//         IArtistInterface repo,
-//         IArtworkInterface artworkRepo,
-//         IConfiguration config)
-//     {
-//         _repo = repo;
-//         _artworkRepo = artworkRepo;
-//         _config = config;
-
-//         var cloudName = config["CloudinarySettings:CloudName"]
-//             ?? throw new InvalidOperationException("Cloudinary CloudName missing.");
-//         _cloudinary = new Cloudinary(new Account(
-//             cloudName,
-//             config["CloudinarySettings:ApiKey"],
-//             config["CloudinarySettings:ApiSecret"]));
-//     }
-
-//     // ── REGISTER ─────────────────────────────────────────────
-//     [HttpPost("Register")]
-//     public async Task<IActionResult> Register([FromForm] t_Artist user)
-//     {
-//         if (user.ProfilePicture != null)
-//         {
-//             using var stream = user.ProfilePicture.OpenReadStream();
-//             var up = await _cloudinary.UploadAsync(new ImageUploadParams
-//             {
-//                 File = new FileDescription(user.ProfilePicture.FileName, stream),
-//                 Folder = "Artify_Profiles",
-//                 Transformation = new Transformation().Width(500).Height(500).Crop("fill")
-//             });
-//             user.c_Profile_Image = up.SecureUrl?.ToString();
-//         }
-
-//         var rows = await _repo.Register(user);
-//         return rows > 0
-//             ? Ok(new { success = true, message = "Registered successfully. Awaiting admin approval." })
-//             : BadRequest(new { success = false, message = "Email already registered." });
-//     }
-
-//     // ── LOGIN — issues JWT + HttpOnly cookie ──────────────────
-//     [HttpPost("Login")]
-//     public async Task<IActionResult> Login([FromForm] vm_Login login)
-//     {
-//         var user = await _repo.Login(login);
-
-//         if (user == null)
-//             return Ok(new { success = false, message = "Invalid email or password." });
-
-//         if (!user.c_Is_Active)
-//             return Ok(new
-//             {
-//                 success = false,
-//                 inactive = true,
-//                 message = "Your account is awaiting admin approval."
-//             });
-
-//         var token = GenerateJwtToken(user);
-
-//         // ── Store JWT in HttpOnly cookie so MVC server-side guard works ──
-//         Response.Cookies.Append("ArtistToken", token, new CookieOptions
-//         {
-//             HttpOnly = true,
-//             Secure = Request.IsHttps,
-//             SameSite = SameSiteMode.Lax,
-//             Expires = DateTimeOffset.UtcNow.AddDays(7)
-//         });
-
-//         // ── Also store ArtistId in Session (used by MVC controller guard) ──
-//         HttpContext.Session.SetInt32("ArtistId", user.c_User_Id);
-//         HttpContext.Session.SetString("ArtistEmail", user.c_Email);
-//         HttpContext.Session.SetString("ArtistName", user.c_Full_Name);
-
-//         return Ok(new
-//         {
-//             success = true,
-//             message = "Login successful.",
-//             token = token,         // returned to JS → stored in localStorage
-//             userData = new            // safe subset for localStorage
-//             {
-//                 user.c_User_Id,
-//                 user.c_UserName,
-//                 user.c_Email,
-//                 user.c_Full_Name,
-//                 user.c_Profile_Image,
-//                 user.c_Is_Active
-//             }
-//         });
-//     }
-
-//     // ── UPLOAD ARTWORK ─────────────────────────────────────────
-//     [Authorize]
-//     [HttpPost("Upload")]
-//     public async Task<IActionResult> Upload([FromForm] t_Artwork art)
-//     {
-//         if (art.ArtworkFile == null || art.ArtworkFile.Length == 0)
-//             return BadRequest(new { success = false, message = "Please select an image." });
-
-//         try
-//         {
-//             using var stream = art.ArtworkFile.OpenReadStream();
-//             var uploadResult = await _cloudinary.UploadAsync(new ImageUploadParams
-//             {
-//                 File = new FileDescription(art.ArtworkFile.FileName, stream),
-//                 Folder = "Artify_Gallery",
-//                 UploadPreset = _config["CloudinarySettings:UploadPreset"] ?? "Cloudinary_Setup"
-//             });
-
-//             if (uploadResult.Error != null)
-//                 return BadRequest(new { success = false, message = uploadResult.Error.Message });
-
-//             art.c_original_path = uploadResult.SecureUrl.ToString();
-//             art.c_preview_path = _cloudinary.Api.UrlImgUp
-//                 .Transform(new Transformation()
-//                     .Width(800).Crop("scale").Quality("auto")
-//                     .Overlay(new TextLayer().Text("Artify").FontFamily("Arial").FontSize(60).FontWeight("bold"))
-//                     .Opacity(30).Chain())
-//                 .BuildUrl(uploadResult.PublicId);
-
-//             var rows = await _artworkRepo.UploadArtwork(art);
-//             return rows > 0
-//                 ? Ok(new { success = true, message = "Masterpiece uploaded and submitted for review!" })
-//                 : BadRequest(new { success = false, message = "Failed to save artwork." });
-//         }
-//         catch (Exception ex)
-//         {
-//             return StatusCode(500, new { success = false, message = ex.Message });
-//         }
-//     }
-
-//     // ── GET ALL ARTWORKS ───────────────────────────────────────
-//     [HttpGet("GetAll")]
-//     public async Task<IActionResult> GetAll()
-//     {
-//         var artworks = await _artworkRepo.GetAllArtworks();
-//         return Ok(new { success = true, data = artworks });
-//     }
-
-//     // ── GET ARTWORKS FOR THIS ARTIST ONLY ─────────────────────
-//     // Uses JWT claim — no artistId in URL (prevents IDOR)
-//     [Authorize]
-//     [HttpGet("GetMyArtworks")]
-//     public async Task<IActionResult> GetMyArtworks()
-//     {
-//         var artistId = GetArtistIdFromToken();
-//         if (artistId == 0) return Unauthorized(new { message = "Invalid token." });
-
-//         var artworks = await _artworkRepo.GetArtworksByArtist(artistId);
-//         return Ok(new { success = true, data = artworks });
-//     }
-
-//     // ── GET BY ARTIST ID (kept for backward compat) ───────────
-//     [Authorize]
-//     [HttpGet("GetByArtist/{id}")]
-//     public async Task<IActionResult> GetByArtist(int id)
-//     {
-//         // Validate caller owns this data
-//         var callerArtistId = GetArtistIdFromToken();
-//         if (callerArtistId != id)
-//             return Forbid(); // 403 — prevents artists accessing each other's lists
-
-//         return Ok(await _artworkRepo.GetArtworksByArtist(id));
-//     }
-
-//     // ── GET CATEGORIES ─────────────────────────────────────────
-//     [HttpGet("GetCategories")]
-//     public async Task<IActionResult> GetCategories()
-//     {
-//         var data = await _artworkRepo.GetCategories();
-//         return Ok(data);
-//     }
-
-//     // ── GET ARTWORK BY ID ──────────────────────────────────────
-//     [HttpGet("GetById/{id}")]
-//     public async Task<IActionResult> GetById(int id)
-//     {
-//         var artwork = await _artworkRepo.GetById(id);
-//         return artwork == null
-//             ? NotFound(new { message = $"Artwork {id} not found." })
-//             : Ok(artwork);
-//     }
-
-//     // ── GET APPROVED ARTWORKS ──────────────────────────────────
-//     [HttpGet("GetApproved")]
-//     public async Task<IActionResult> GetApproved()
-//         => Ok(await _artworkRepo.GetApprovedArtworks());
-
-//     // ── DELETE ARTWORK ─────────────────────────────────────────
-//     [Authorize]
-//     [HttpDelete("Delete/{id}")]
-//     public async Task<IActionResult> Delete(int id)
-//     {
-//         var rows = await _artworkRepo.DeleteArtwork(id);
-//         return rows > 0
-//             ? Ok(new { success = true, message = "Artwork deleted." })
-//             : NotFound(new { success = false, message = "Artwork not found." });
-//     }
-
-//     // ── UPDATE ARTWORK ─────────────────────────────────────────
-//     [Authorize]
-//     [HttpPut("Update")]
-//     public async Task<IActionResult> Update([FromForm] t_Artwork art)
-//     {
-//         try
-//         {
-//             if (art.ArtworkFile != null && art.ArtworkFile.Length > 0)
-//             {
-//                 using var stream = art.ArtworkFile.OpenReadStream();
-//                 var result = await _cloudinary.UploadAsync(new ImageUploadParams
-//                 {
-//                     File = new FileDescription(art.ArtworkFile.FileName, stream),
-//                     Folder = "Artify_Gallery",
-//                     UploadPreset = _config["CloudinarySettings:UploadPreset"] ?? "Cloudinary_Setup"
-//                 });
-//                 art.c_original_path = result.SecureUrl.ToString();
-//                 art.c_preview_path = _cloudinary.Api.UrlImgUp
-//                     .Transform(new Transformation()
-//                         .Width(800).Crop("scale").Quality("auto")
-//                         .Overlay(new TextLayer().Text("Artify").FontFamily("Arial").FontSize(40).FontWeight("bold"))
-//                         .Opacity(30).Chain())
-//                     .BuildUrl(result.PublicId);
-//             }
-//             else
-//             {
-//                 art.c_original_path = null;
-//                 art.c_preview_path = null;
-//             }
-
-//             var rows = await _artworkRepo.UpdateArtwork(art);
-//             return rows > 0
-//                 ? Ok(new { success = true, message = "Artwork updated successfully." })
-//                 : NotFound(new { success = false, message = "Artwork not found." });
-//         }
-//         catch (Exception ex)
-//         {
-//             return StatusCode(500, new { success = false, message = ex.Message });
-//         }
-//     }
-
-//     // ── DASHBOARD — JWT claim extracts artistId ────────────────
-//     [Authorize]
-//     [HttpGet("dashboard")]
-//     public async Task<IActionResult> GetDashboard()
-//     {
-//         var artistId = GetArtistIdFromToken();
-//         if (artistId == 0) return Unauthorized(new { message = "Invalid token." });
-
-//         var data = await _repo.GetDashboardData(artistId);
-//         return data == null ? NotFound() : Ok(data);
-//     }
-
-//     // ── CHANGE PASSWORD ────────────────────────────────────────
-//     [Authorize]
-//     [HttpPost("change-password")]
-//     public async Task<IActionResult> ChangePassword([FromBody] t_ChangePassword model)
-//     {
-//         // Extra safety: ensure the token owner matches the request body artistId
-//         var callerArtistId = GetArtistIdFromToken();
-//         if (callerArtistId != model.c_Artist_Id)
-//             return Forbid();
-
-//         var result = await _repo.ChangePassword(
-//             model.c_Artist_Id, model.c_CurrentPassword, model.c_NewPassword);
-
-//         if (result == 1) return Ok(new { success = true, message = "Password updated." });
-//         if (result == 0) return Ok(new { success = false, message = "Incorrect current password." });
-//         return BadRequest(new { success = false, message = "Update failed." });
-//     }
-
-//     // ── GET PROFILE ────────────────────────────────────────────
-//     [Authorize]
-//     [HttpGet("profile/{id}")]
-//     public async Task<IActionResult> GetProfile(int id)
-//     {
-//         // Validate caller owns the profile
-//         var callerArtistId = GetArtistIdFromToken();
-//         if (callerArtistId != id) return Forbid();
-
-//         var data = await _repo.GetArtistById(id);
-//         return Ok(data);
-//     }
-
-//     // ── EDIT PROFILE ───────────────────────────────────────────
-//     [Authorize]
-//     [HttpPost("profile")]
-//     public async Task<IActionResult> EditProfile([FromForm] t_ArtistProfile model)
-//     {
-//         var callerArtistId = GetArtistIdFromToken();
-//         if (callerArtistId != model.ArtistId) return Forbid();
-
-//         if (model.CoverImageFile != null)
-//         {
-//             var fileName = Guid.NewGuid() + Path.GetExtension(model.CoverImageFile.FileName);
-//             var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "MVC", "wwwroot", "Cover_Images");
-//             Directory.CreateDirectory(folderPath);
-//             using var stream = new FileStream(Path.Combine(folderPath, fileName), FileMode.Create);
-//             await model.CoverImageFile.CopyToAsync(stream);
-//             model.CoverImage = fileName;
-//         }
-
-//         var result = await _repo.EditArtistProfile(model);
-//         return Ok(new { success = result == 1, rows = result });
-//     }
-
-//     // ── REVENUE ────────────────────────────────────────────────
-//     [Authorize]
-//     [HttpGet("revenue")]
-//     public async Task<IActionResult> GetRevenue()
-//     {
-//         var artistId = GetArtistIdFromToken();
-//         if (artistId == 0) return Unauthorized();
-//         return Ok(await _repo.GetMonthlyRevenue(artistId));
-//     }
-
-//     // ── CATEGORY SALES ─────────────────────────────────────────
-//     [Authorize]
-//     [HttpGet("category-sales")]
-//     public async Task<IActionResult> GetCategorySales()
-//     {
-//         var artistId = GetArtistIdFromToken();
-//         if (artistId == 0) return Unauthorized();
-//         return Ok(await _repo.GetSalesByCategory(artistId));
-//     }
-
-//     // ── EARNINGS SUMMARY ───────────────────────────────────────
-//     [Authorize]
-//     [HttpGet("earnings-summary")]
-//     public async Task<IActionResult> GetEarningsSummary()
-//     {
-//         var artistId = GetArtistIdFromToken();
-//         if (artistId == 0) return Unauthorized();
-//         return Ok(await _repo.GetEarningsSummary(artistId));
-//     }
-
-//     // ── LOGOUT — clears both cookie and session ────────────────
-//     [HttpPost("Logout")]
-//     public IActionResult Logout()
-//     {
-//         Response.Cookies.Delete("ArtistToken");
-//         HttpContext.Session.Clear();
-//         return Ok(new { success = true, message = "Logged out successfully." });
-//     }
-
-//     // ── PRIVATE HELPERS ───────────────────────────────────────
-
-//     /// <summary>Extracts ArtistId from the validated JWT "UserId" claim.</summary>
-//     private int GetArtistIdFromToken()
-//     {
-//         var claim = User.FindFirst("UserId");
-//         return claim != null && int.TryParse(claim.Value, out var id) ? id : 0;
-//     }
-
-//     /// <summary>Generates a signed JWT valid for 7 days.</summary>
-//     private string GenerateJwtToken(t_Artist user)
-//     {
-//         var jwtKey = _config["Jwt:Key"]!;
-//         if (jwtKey.Length < 32)
-//             throw new InvalidOperationException("JWT Key must be at least 32 characters.");
-
-//         var claims = new[]
-//         {
-//             new Claim(JwtRegisteredClaimNames.Sub, user.c_Email),
-//             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-//             new Claim("UserId",   user.c_User_Id.ToString()),
-//             new Claim("UserName", user.c_UserName),
-//             new Claim("Email",    user.c_Email)
-//         };
-
-//         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
-//         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-//         var token = new JwtSecurityToken(
-//             issuer: _config["Jwt:Issuer"],
-//             audience: _config["Jwt:Audience"],
-//             claims: claims,
-//             expires: DateTime.UtcNow.AddDays(7),
-//             signingCredentials: creds);
-
-//         return new JwtSecurityTokenHandler().WriteToken(token);
-//     }
-// }
-
-
-// ============================================================
-//  API/Controllers/ArtistApiController.cs
-//
-//  KEY FIX vs previous version:
-//    Cookie SameSite is set to None (required for cross-origin
-//    cookie delivery when API and MVC run on different ports).
-//    SameSite=Lax only works when same site; cross-origin
-//    (localhost:5183 → localhost:5092) requires SameSite=None
-//    + Secure=true (HTTPS) or, in development, the Secure flag
-//    can be omitted if using HTTP.
-// ============================================================
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -440,28 +16,33 @@ namespace API.Controllers;
 [Route("api/[controller]")]
 public class ArtistApiController : ControllerBase
 {
-    private readonly IArtistInterface  _repo;
+    private readonly IArtistInterface _repo;
     private readonly IArtworkInterface _artworkRepo;
-    private readonly IConfiguration    _config;
-    private readonly RedisService      _redis;
-    private readonly RabbitService            _rabbit;
+    private readonly IConfiguration _config;
+    private readonly RedisService _redis;
+
+    private readonly EmailService _emailService;
+
+    private readonly RabbitService _rabbit;
     private readonly ILogger<ArtistApiController> _logger;
-    private readonly Cloudinary        _cloudinary;
+    private readonly Cloudinary _cloudinary;
 
     public ArtistApiController(
-        IArtistInterface  repo,
+        IArtistInterface repo,
         IArtworkInterface artworkRepo,
-        IConfiguration    config,
-        RedisService      redis,
-        RabbitService rabbit,           
+        IConfiguration config,
+        EmailService emailService,
+        RedisService redis,
+        RabbitService rabbit,
         ILogger<ArtistApiController> logger)
     {
-        _repo        = repo;
+        _repo = repo;
         _artworkRepo = artworkRepo;
-        _config      = config;
-        _redis       = redis;
-        _rabbit      = rabbit;
-        _logger      = logger;
+        _config = config;
+        _redis = redis;
+        _rabbit = rabbit;
+        _emailService = emailService;
+        _logger = logger;
 
         var cloudName = config["CloudinarySettings:CloudName"]
             ?? throw new InvalidOperationException("Cloudinary CloudName missing.");
@@ -480,33 +61,48 @@ public class ArtistApiController : ControllerBase
             using var stream = user.ProfilePicture.OpenReadStream();
             var up = await _cloudinary.UploadAsync(new ImageUploadParams
             {
-                File           = new FileDescription(user.ProfilePicture.FileName, stream),
-                Folder         = "Artify_Profiles",
+                File = new FileDescription(user.ProfilePicture.FileName, stream),
+                Folder = "Artify_Profiles",
                 Transformation = new Transformation().Width(500).Height(500).Crop("fill")
             });
             user.c_Profile_Image = up.SecureUrl?.ToString();
         }
 
         var rows = await _repo.Register(user);
+
         if (rows > 0)
         {
-            // Notify admin — fire-and-forget, registration must not fail if Rabbit is down
             try
             {
-                await _rabbit.PublishRegisterNotificationAsync(
-                    userId:   rows,          // 0 until DB assigns it; sufficient for admin display
-                    userName: user.c_UserName,
-                    role:     "Artist");
+                string activationUrl = _config["AppBaseUrl"] + "/Artist/Login";
+                string logoPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "mvc", "wwwroot", "images", "Logo.jpeg"));
+
+                var placeholders = new Dictionary<string, string>
+            {
+                { "ArtistName", user.c_Full_Name ?? user.c_UserName },
+                { "ArtistEmail", user.c_Email },
+                { "ActivationUrl", activationUrl },
+                { "RegisterDate", DateTime.Now.ToString("MMMM dd, yyyy") }
+            };
+
+                await _emailService.SendEmailAsync(
+                    toEmail: user.c_Email,
+                    subject: "Welcome to Artify - Artist Registration Received",
+                    templateFile: "WelcomeArtistTemplate.html",
+                    placeholders: placeholders,
+                    logoPath: logoPath
+                );
+
+                Console.WriteLine($"Welcome email sent successfully to {user.c_Email}");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
-                    "Failed to publish artist-registration notification for {Email}.", user.c_Email);
+                Console.WriteLine($"Artist welcome email failed: {ex.Message}");
             }
- 
+
             return Ok(new { success = true, message = "Registered! Awaiting admin approval." });
         }
- 
+
         return BadRequest(new { success = false, message = "Email already registered." });
     }
 
@@ -524,9 +120,9 @@ public class ArtistApiController : ControllerBase
         if (!user.c_Is_Active)
             return Ok(new
             {
-                success  = false,
+                success = false,
                 inactive = true,
-                message  = "Your account is pending admin approval."
+                message = "Your account is pending admin approval."
             });
 
         var token = GenerateJwtToken(user);
@@ -539,11 +135,11 @@ public class ArtistApiController : ControllerBase
         // on localhost specifically).
         var cookieOptions = new CookieOptions
         {
-            HttpOnly    = true,
-            SameSite    = SameSiteMode.None,   // ← cross-origin cookie delivery
-            Secure      = Request.IsHttps,     // true in prod HTTPS; false on HTTP dev
-            Expires     = DateTimeOffset.UtcNow.AddDays(7),
-            Path        = "/"
+            HttpOnly = true,
+            SameSite = SameSiteMode.None,   // ← cross-origin cookie delivery
+            Secure = Request.IsHttps,     // true in prod HTTPS; false on HTTP dev
+            Expires = DateTimeOffset.UtcNow.AddDays(7),
+            Path = "/"
         };
 
         // Development fallback: if not HTTPS, set Secure=false explicitly
@@ -554,9 +150,9 @@ public class ArtistApiController : ControllerBase
             {
                 HttpOnly = true,
                 SameSite = SameSiteMode.Lax,   // Lax works fine for same-site HTTP dev
-                Secure   = false,
-                Expires  = DateTimeOffset.UtcNow.AddDays(7),
-                Path     = "/"
+                Secure = false,
+                Expires = DateTimeOffset.UtcNow.AddDays(7),
+                Path = "/"
             };
         }
 
@@ -569,9 +165,9 @@ public class ArtistApiController : ControllerBase
 
         return Ok(new
         {
-            success  = true,
-            message  = "Login successful.",
-            token    = token,
+            success = true,
+            message = "Login successful.",
+            token = token,
             userData = new
             {
                 user.c_User_Id,
@@ -584,9 +180,10 @@ public class ArtistApiController : ControllerBase
         });
     }
 
+
     // ── UPLOAD ARTWORK ─────────────────────────────────────────
     [Authorize]
-     [HttpPost("Upload")]
+    [HttpPost("Upload")]
     public async Task<IActionResult> Upload([FromForm] t_Artwork art)
     {
         if (art.ArtworkFile == null || art.ArtworkFile.Length == 0)
@@ -620,10 +217,34 @@ public class ArtistApiController : ControllerBase
 
                 art.c_original_path = uploadResult.SecureUrl.ToString();
 
+                // ============================================================
+                // WATERMARK CONFIGURATION - Small & Visible Only on Zoom
+                // ============================================================
+                // 
+                // Design approach:
+                // 1. Very low opacity (8-12%) so it blends with image
+                // 2. Small font size (proportional to image)
+                // 3. Positioned in corner (bottom-right)
+                // 4. Becomes visible when user zooms in due to rasterization
+                // 5. Uses subtle color that complements the image
+                // ============================================================
+
                 art.c_preview_path = cloudinary.Api.UrlImgUp.Transform(new Transformation()
                     .Width(800).Crop("scale").Quality("auto")
-                    .Overlay(new TextLayer().Text("Artify").FontFamily("Arial").FontSize(60).FontWeight("bold"))
-                    .Opacity(30).Chain())
+                    // Subtle watermark that appears only on zoom
+                    // Position: bottom-right corner, small size, very low opacity
+                    .Overlay(new TextLayer()
+                        .Text("© Artify")
+                        .FontFamily("Arial")
+                        .FontSize(24)           // Small size - barely visible at normal view
+                        .FontWeight("normal")
+                        .TextAlign("right"))
+                    .Gravity("south_east")       // Position at bottom-right corner
+                    .X(15)                       // 15px margin from edge
+                    .Y(15)                       // 15px margin from bottom
+                    .Opacity(12)                 // 12% opacity - very subtle, visible only on zoom
+                    .Color("#FFFFFF")             // White color blends with most images
+                    .Chain())
                     .BuildUrl(uploadResult.PublicId);
             }
 
@@ -752,11 +373,11 @@ public class ArtistApiController : ControllerBase
     {
         var rows = await _artworkRepo.DeleteArtwork(id);
         return rows > 0
-            ? Ok(new    { success = true,  message = "Artwork deleted." })
+            ? Ok(new { success = true, message = "Artwork deleted." })
             : NotFound(new { success = false, message = "Artwork not found." });
     }
 
-    // ── UPDATE ────────────────────────────────────────────────
+
     [Authorize]
     [HttpPut("Update")]
     public async Task<IActionResult> Update([FromForm] t_Artwork art)
@@ -765,31 +386,47 @@ public class ArtistApiController : ControllerBase
         {
             if (art.ArtworkFile != null && art.ArtworkFile.Length > 0)
             {
+                // New image uploaded - apply fresh watermark
                 using var stream = art.ArtworkFile.OpenReadStream();
-                var result       = await _cloudinary.UploadAsync(new ImageUploadParams
+                var result = await _cloudinary.UploadAsync(new ImageUploadParams
                 {
-                    File         = new FileDescription(art.ArtworkFile.FileName, stream),
-                    Folder       = "Artify_Gallery",
+                    File = new FileDescription(art.ArtworkFile.FileName, stream),
+                    Folder = "Artify_Gallery",
                     UploadPreset = _config["CloudinarySettings:UploadPreset"] ?? "Cloudinary_Setup"
                 });
+
                 art.c_original_path = result.SecureUrl.ToString();
-                art.c_preview_path  = _cloudinary.Api.UrlImgUp
+                art.c_preview_path = _cloudinary.Api.UrlImgUp
                     .Transform(new Transformation()
                         .Width(800).Crop("scale").Quality("auto")
                         .Overlay(new TextLayer()
-                            .Text("Artify").FontFamily("Arial").FontSize(40).FontWeight("bold"))
-                        .Opacity(30).Chain())
+                            .Text("© Artify")
+                            .FontFamily("Arial")
+                            .FontSize(24)
+                            .FontWeight("normal")
+                            .TextAlign("right"))
+                        .Gravity("south_east")
+                        .X(15)
+                        .Y(15)
+                        .Opacity(12)
+                        .Color("#FFFFFF")
+                        .Chain())
                     .BuildUrl(result.PublicId);
             }
             else
             {
-                art.c_original_path = null;
-                art.c_preview_path  = null;
+                // No new image - keep existing paths from database
+                var existingArtwork = await _artworkRepo.GetById(art.c_artwork_id);
+                if (existingArtwork != null)
+                {
+                    art.c_original_path = existingArtwork.c_original_path;
+                    art.c_preview_path = existingArtwork.c_preview_path;
+                }
             }
 
             var rows = await _artworkRepo.UpdateArtwork(art);
             return rows > 0
-                ? Ok(new    { success = true,  message = "Artwork updated." })
+                ? Ok(new { success = true, message = "Artwork updated successfully!" })
                 : NotFound(new { success = false, message = "Artwork not found." });
         }
         catch (Exception ex)
@@ -817,7 +454,7 @@ public class ArtistApiController : ControllerBase
         if (GetArtistIdFromToken() != model.c_Artist_Id) return Forbid();
         var result = await _repo.ChangePassword(
             model.c_Artist_Id, model.c_CurrentPassword, model.c_NewPassword);
-        if (result == 1) return Ok(new { success = true,  message = "Password updated." });
+        if (result == 1) return Ok(new { success = true, message = "Password updated." });
         if (result == 0) return Ok(new { success = false, message = "Incorrect current password." });
         return BadRequest(new { success = false, message = "Update failed." });
     }
@@ -837,9 +474,10 @@ public class ArtistApiController : ControllerBase
     {
         if (GetArtistIdFromToken() != model.ArtistId) return Forbid();
 
+        // ── Handle Cover Image ──────────────────────────────────
         if (model.CoverImageFile != null)
         {
-            var fileName   = Guid.NewGuid() + Path.GetExtension(model.CoverImageFile.FileName);
+            var fileName = Guid.NewGuid() + Path.GetExtension(model.CoverImageFile.FileName);
             var folderPath = Path.Combine(Directory.GetCurrentDirectory(),
                 "..", "MVC", "wwwroot", "Cover_Images");
             Directory.CreateDirectory(folderPath);
@@ -847,6 +485,19 @@ public class ArtistApiController : ControllerBase
                 Path.Combine(folderPath, fileName), FileMode.Create);
             await model.CoverImageFile.CopyToAsync(stream);
             model.CoverImage = fileName;
+        }
+
+        // ── Handle Profile Picture ──────────────────────────────
+        if (model.ProfilePictureFile != null)
+        {
+            var picName = Guid.NewGuid() + Path.GetExtension(model.ProfilePictureFile.FileName);
+            var picFolder = Path.Combine(Directory.GetCurrentDirectory(),
+                "..", "MVC", "wwwroot", "Profile_Images");
+            Directory.CreateDirectory(picFolder);
+            await using var picStream = new FileStream(
+                Path.Combine(picFolder, picName), FileMode.Create);
+            await model.ProfilePictureFile.CopyToAsync(picStream);
+            model.ProfilePicture = picName;
         }
 
         var result = await _repo.EditArtistProfile(model);
@@ -893,6 +544,29 @@ public class ArtistApiController : ControllerBase
         return Ok(new { success = true, message = "Logged out." });
     }
 
+    // ── DEACTIVATE ACCOUNT ────────────────────────────────────
+    // Sets c_is_active = false; clears auth cookie so the artist is
+    // immediately signed out. Admin can reactivate from the admin panel.
+    [Authorize]
+    [HttpPost("deactivate")]
+    public async Task<IActionResult> DeactivateAccount()
+    {
+        var artistId = GetArtistIdFromToken();
+        if (artistId == 0) return Unauthorized(new { message = "Invalid token." });
+
+        var result = await _repo.DeactivateAccount(artistId);
+
+        if (result < 0)
+            return StatusCode(500, new { success = false, message = "Deactivation failed." });
+
+        // Clear auth cookie so the browser session ends immediately
+        Response.Cookies.Delete("ArtistToken",
+            new CookieOptions { SameSite = SameSiteMode.None, Secure = Request.IsHttps });
+        HttpContext.Session.Clear();
+
+        return Ok(new { success = true, message = "Account deactivated. You have been logged out." });
+    }
+
     // ── PRIVATE HELPERS ───────────────────────────────────────
     private int GetArtistIdFromToken()
     {
@@ -916,13 +590,13 @@ public class ArtistApiController : ControllerBase
         };
 
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
-        var creds      = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+        var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            issuer:             _config["Jwt:Issuer"],
-            audience:           _config["Jwt:Audience"],
-            claims:             claims,
-            expires:            DateTime.UtcNow.AddDays(7),
+            issuer: _config["Jwt:Issuer"],
+            audience: _config["Jwt:Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddDays(7),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

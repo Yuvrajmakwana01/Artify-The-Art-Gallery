@@ -12,22 +12,22 @@ namespace Repository.Services
     public class AdminArtworkService
     {
         private readonly IAdminArtworkInterface _repo;
-        private readonly RedisService           _redis;
-        private readonly RabbitService          _rabbit;
-        private readonly EmailServices          _email;
+        private readonly RedisService _redis;
+        private readonly RabbitService _rabbit;
+        private readonly EmailService _email;
         private readonly ILogger<AdminArtworkService> _logger;
 
         public AdminArtworkService(
-            IAdminArtworkInterface       repo,
-            RedisService                 redis,
-            RabbitService                rabbit,
-            EmailServices                email,
+            IAdminArtworkInterface repo,
+            RedisService redis,
+            RabbitService rabbit,
+            EmailService email,
             ILogger<AdminArtworkService> logger)
         {
-            _repo   = repo;
-            _redis  = redis;
+            _repo = repo;
+            _redis = redis;
             _rabbit = rabbit;
-            _email  = email;
+            _email = email;
             _logger = logger;
         }
 
@@ -61,7 +61,7 @@ namespace Repository.Services
         //  APPROVE
         // ─────────────────────────────────────────────────────────────────
 
-         public async Task ApproveArtworkAsync(int artworkId, string? adminNote)
+        public async Task ApproveArtworkAsync(int artworkId, string? adminNote)
         {
             var artwork = await _repo.GetArtworkByIdAsync(artworkId)
                 ?? throw new KeyNotFoundException($"Artwork {artworkId} not found.");
@@ -77,12 +77,12 @@ namespace Repository.Services
                     $"Your artwork '{artwork.c_Title}' has been approved and is now live!");
 
                 await SendModerationEmailAsync(
-                    artistId:     artwork.c_ArtistId,
-                    artistName:   artwork.c_ArtistName,
+                    artistId: artwork.c_ArtistId,
+                    artistName: artwork.c_ArtistName,
                     artworkTitle: artwork.c_Title,
                     categoryName: artwork.c_CategoryName,
-                    isApproved:   true,
-                    adminNote:    adminNote ?? string.Empty);
+                    isApproved: true,
+                    adminNote: adminNote ?? string.Empty);
             }
             finally
             {
@@ -96,60 +96,60 @@ namespace Repository.Services
         // ─────────────────────────────────────────────────────────────────
 
         public async Task RejectArtworkAsync(int artworkId, string adminNote)
-{
-    var artwork = await _repo.GetArtworkByIdAsync(artworkId)
-        ?? throw new KeyNotFoundException($"Artwork {artworkId} not found.");
+        {
+            var artwork = await _repo.GetArtworkByIdAsync(artworkId)
+                ?? throw new KeyNotFoundException($"Artwork {artworkId} not found.");
 
-    try
-    {
-        await _repo.UpdateArtworkStatusAsync(artworkId, "Rejected", adminNote);
+            try
+            {
+                await _repo.UpdateArtworkStatusAsync(artworkId, "Rejected", adminNote);
 
-        int rejectCount = await _repo.IncrementRejectedCountAsync(artwork.c_ArtistId);
+                int rejectCount = await _repo.IncrementRejectedCountAsync(artwork.c_ArtistId);
 
-        // ✅ >= 3 use karo agar 3rd rejection pe block karna ho
-        bool shouldBlock = rejectCount >= 3;
+                // ✅ >= 3 use karo agar 3rd rejection pe block karna ho
+                bool shouldBlock = rejectCount >= 3;
 
-        if (shouldBlock)
-            await _repo.BlockArtistAsync(artwork.c_ArtistId);
+                if (shouldBlock)
+                    await _repo.BlockArtistAsync(artwork.c_ArtistId);
 
-        string blockWarning = shouldBlock
-            ? " Your account has been temporarily blocked for 15 days."
-            : string.Empty;
+                string blockWarning = shouldBlock
+                    ? " Your account has been temporarily blocked for 15 days."
+                    : string.Empty;
 
-        await PublishArtworkNotificationAsync(
-            artwork,
-            "rejected",
-            $"Your artwork '{artwork.c_Title}' was rejected. Reason: {adminNote}.{blockWarning}");
+                await PublishArtworkNotificationAsync(
+                    artwork,
+                    "rejected",
+                    $"Your artwork '{artwork.c_Title}' was rejected. Reason: {adminNote}.{blockWarning}");
 
-        string fullNote = shouldBlock
-            ? $"{adminNote}\n\n⚠️ Your account has been temporarily blocked for 15 days due to multiple rejections."
-            : adminNote;
+                string fullNote = shouldBlock
+                    ? $"{adminNote}\n\n⚠️ Your account has been temporarily blocked for 15 days due to multiple rejections."
+                    : adminNote;
 
-        await SendModerationEmailAsync(
-            artistId:     artwork.c_ArtistId,
-            artistName:   artwork.c_ArtistName,
-            artworkTitle: artwork.c_Title,
-            categoryName: artwork.c_CategoryName,
-            isApproved:   false,
-            adminNote:    fullNote);
-    }
-    finally
-    {
-        // ✅ Cache hamesha clear hoga
-        await _redis.ClearAdminArtworkCacheAsync();
-    }
-}
+                await SendModerationEmailAsync(
+                    artistId: artwork.c_ArtistId,
+                    artistName: artwork.c_ArtistName,
+                    artworkTitle: artwork.c_Title,
+                    categoryName: artwork.c_CategoryName,
+                    isApproved: false,
+                    adminNote: fullNote);
+            }
+            finally
+            {
+                // ✅ Cache hamesha clear hoga
+                await _redis.ClearAdminArtworkCacheAsync();
+            }
+        }
 
         // ─────────────────────────────────────────────────────────────────
         //  PRIVATE — fetch artist email + send moderation email
         // ─────────────────────────────────────────────────────────────────
 
         private async Task SendModerationEmailAsync(
-            int    artistId,
+            int artistId,
             string artistName,
             string artworkTitle,
             string categoryName,
-            bool   isApproved,
+            bool isApproved,
             string adminNote)
         {
             try
@@ -164,13 +164,13 @@ namespace Repository.Services
                     return;
                 }
 
-                await _email.SendArtworkModerationEmailAsync(
-                    toEmail:      artistEmail,
-                    artistName:   artistName,
-                    artworkTitle: artworkTitle,
-                    categoryName: categoryName,
-                    isApproved:   isApproved,
-                    adminNote:    adminNote);
+                // await _email.SendArtworkModerationEmailAsync(
+                //     toEmail: artistEmail,
+                //     artistName: artistName,
+                //     artworkTitle: artworkTitle,
+                //     categoryName: categoryName,
+                //     isApproved: isApproved,
+                //     adminNote: adminNote);
 
                 _logger.LogInformation(
                     "Moderation email ({Status}) sent to {Email} for artwork '{Title}'.",

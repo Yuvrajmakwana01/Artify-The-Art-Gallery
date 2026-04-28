@@ -25,7 +25,7 @@ namespace API.Controllers
     {
         private readonly IAuthInterface _auth;
         private readonly IConfiguration _config;
-        private readonly EmailServices _emailService;
+        private readonly EmailService _emailService;
         private readonly RedisService _redis;
         private readonly RabbitService _rabbit;
         private readonly ILogger<AuthApiController> _logger;
@@ -34,7 +34,7 @@ namespace API.Controllers
         public AuthApiController(
             IAuthInterface auth,
             IConfiguration config,
-            EmailServices emailService,
+            EmailService emailService,
             RedisService redis,
             RabbitService rabbit,
             ILogger<AuthApiController> logger)
@@ -143,34 +143,38 @@ namespace API.Controllers
             int result = await _auth.UserRegister(model);
             if (result > 0)
             {
-                // 1. Template file read karein
-                string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "UserRegisterEmail.html");
-                string body = await System.IO.File.ReadAllTextAsync(templatePath);
-
-                // 2. DYNAMIC NAME REPLACE:
-                // Yahan 'model.c_UserName' aapki property ka naam hai jo register waqt aayi thi
-                body = body.Replace("{UserName}", model.c_UserName) 
-                        .Replace("{LoginUrl}", "http://localhost:5092/Auth/UserLogin");
-
-                string logoPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "mvc", "wwwroot", "images", "Logo.jpeg"));
-
-                // 3. Email send karein
-                await _emailService.SendEmailAsync(model.c_Email, "Welcome to Artify!", body, logoPath);
-
                 try
                 {
-                    var registeredUser = await _auth.GetUserByEmail(model.c_Email);
-                    await _rabbit.PublishRegisterNotificationAsync(
-                        registeredUser?.c_UserId ?? 0,
-                        registeredUser?.c_UserName ?? model.c_UserName,
-                        "User");
+                    string loginUrl = _config["AppBaseUrl"] + "/Auth/UserLogin";
+                    string logoPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "mvc", "wwwroot", "images", "Logo.jpeg"));
+
+                    // Use placeholders dictionary
+                    var placeholders = new Dictionary<string, string>
+            {
+                { "UserName", model.c_FullName ?? model.c_UserName },
+                { "UserEmail", model.c_Email },
+                { "LoginUrl", loginUrl },
+                { "RegisterDate", DateTime.Now.ToString("MMMM dd, yyyy") }
+            };
+
+                    await _emailService.SendEmailAsync(
+                        toEmail: model.c_Email,
+                        subject: "Welcome to Artify Gallery!",
+                        templateFile: "WelcomeBuyerTemplate.html",
+                        placeholders: placeholders,
+                        logoPath: logoPath
+                    );
+
+                    Console.WriteLine($"Welcome email sent successfully to {model.c_Email}");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to publish user register notification for {Email}.", model.c_Email);
+                    Console.WriteLine($"Welcome email failed: {ex.Message}");
+                    Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 }
 
                 return Ok(new { message = "Registration successful" });
+
             }
             return result switch
             {
@@ -237,7 +241,7 @@ namespace API.Controllers
 
         [HttpPost("UserForgotPassword")]
         public async Task<IActionResult> UserForgotPassword([FromBody] t_ForgotPassword model)
-        {   
+        {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -252,26 +256,36 @@ namespace API.Controllers
 
             try
             {
-                // Template Path (API ke andar hi hai)
-                string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "UserOtpTemplate.html");
-                string body = await System.IO.File.ReadAllTextAsync(templatePath);
-
-                // Expiry time string banayein
-                var expiryDisplay = DateTime.Now.AddMinutes(5).ToString("hh:mm tt");
-
-                body = body.Replace("{{UserName}}", user.c_FullName)
-                        .Replace("{{OTP}}", otp)
-                        .Replace("2 minutes", $"2 minutes (Valid until {expiryDisplay})");  
-
-                // // --- DYNAMIC LOGO PATH ---
-                // // Maan lijiye structure hai: SolutionFolder/api aur SolutionFolder/mvc
+                string resetUrl = _config["AppBaseUrl"] + "/Auth/UserResetPassword?email=" + Uri.EscapeDataString(model.c_Email);
                 string logoPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "mvc", "wwwroot", "images", "Logo.jpeg"));
 
-                // Service Call
-                await _emailService.SendEmailAsync(user.c_Email, "Reset Password", body, logoPath);
+                string roleName = "Art Collector / Buyer";
+                string roleClass = "buyer";
+
+                var placeholders = new Dictionary<string, string>
+        {
+            { "UserName", user.c_FullName ?? user.c_UserName },
+            { "UserEmail", user.c_Email },
+            { "OTP_CODE", otp },
+            { "ResetUrl", resetUrl },
+            { "RequestTime", DateTime.Now.ToString("MMMM dd, yyyy, HH:mm UTC") },
+            { "RoleName", roleName },
+            { "RoleClass", roleClass }
+        };
+
+                await _emailService.SendEmailAsync(
+                    toEmail: user.c_Email,
+                    subject: "Artify Password Reset OTP",
+                    templateFile: "ResetPasswordOtp.html",
+                    placeholders: placeholders,
+                    logoPath: logoPath
+                );
+
+                Console.WriteLine($"OTP email sent to {user.c_Email}");
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"OTP email failed: {ex.Message}");
                 return StatusCode(500, "Error: " + ex.Message);
             }
 
@@ -284,11 +298,11 @@ namespace API.Controllers
         [HttpPost("UserVerifyOtp")]
         public async Task<IActionResult> UserVerifyOtpAsync([FromBody] t_VerifyOtp model)
         {
-            
+
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-                
-             var email = model.c_Email.ToLower().Trim();
+
+            var email = model.c_Email.ToLower().Trim();
 
             var savedOtp = await _redis.GetOtpAsync(email);
 
@@ -297,7 +311,7 @@ namespace API.Controllers
 
             if (savedOtp != model.c_Otp)
                 return BadRequest("Invalid OTP");
-            
+
             // Success hone par ye line ADD karein:
             await _redis.SetOtpVerifiedAsync(email);
 
@@ -313,7 +327,7 @@ namespace API.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
- 
+
 
             var email = model.c_Email.ToLower().Trim();
 
@@ -322,7 +336,7 @@ namespace API.Controllers
 
             if (!isVerified)
                 return BadRequest("OTP not verified");
-                
+
             // model.c_NewPassword ko hash karein
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.c_NewPassword);
 
@@ -348,11 +362,11 @@ namespace API.Controllers
                 // 4. Send Success Email
                 await _emailService.SendEmailAsync(model.c_Email, "Security Alert: Password Changed", body, logoPath);
 
-                 // ✅ Cleanup after success
+                // ✅ Cleanup after success
                 await _redis.DeleteOtpAsync(email);
                 await _redis.DeleteVerifiedFlagAsync(email);
 
-               
+
                 // Clear Sessions...
                 return Ok(new { message = "Password updated successfully" });
             }

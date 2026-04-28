@@ -59,6 +59,24 @@ public class ArtistController : Controller
         return View();
     }
 
+    public IActionResult Exhibition()
+    {
+        var guard = Guard(); if (guard != null) return guard;
+        return View();
+    }
+
+    public IActionResult EditArtwork()
+    {
+        var guard = Guard(); if (guard != null) return guard;
+        return View();
+    }
+
+    public IActionResult DeactivateAccount()
+    {
+        var guard = Guard(); if (guard != null) return guard;
+        return View();
+    }
+
     public IActionResult MyProfile()
     {
         var guard = Guard(); if (guard != null) return guard;

@@ -1,194 +1,413 @@
+
 @{
+    Layout = "~/Views/Artist/_ArtistLayout.cshtml";
     ViewData["Title"] = "Dashboard";
-    Layout = "../Shared/_ArtistLayout.cshtml";
+    ViewData["Active"] = "Dashboard";
 }
 
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
-
+@section HeadStyles {
 <style>
-    :root{--navy:#14122a;--gold:#a0692a;--gold-dim:rgba(160,105,42,.1);
-          --paper:#faf8f5;--white:#fff;--border:rgba(0,0,0,.07);
-          --text:#1a1612;--text-2:#6b6057;--text-3:#a89e94;--radius:16px;}
-    body{font-family:'Outfit',sans-serif;background:var(--paper);}
+    /* ── KPI Cards ── */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        margin-bottom: 28px;
+    }
 
-    .dash-hero{background:var(--navy);border-radius:var(--radius);padding:2rem 2.25rem;
-               margin-bottom:1.5rem;position:relative;overflow:hidden;}
-    .dash-hero::before{content:'';position:absolute;width:280px;height:280px;border-radius:50%;
-                        border:1px solid rgba(201,169,110,.12);top:-100px;right:-60px;}
-    .dash-hero::after{content:'';position:absolute;width:150px;height:150px;border-radius:50%;
-                       border:1px solid rgba(201,169,110,.08);bottom:-40px;right:80px;}
-    .dash-hero h2{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:700;color:#fff;
-                  margin:0 0 4px;position:relative;z-index:1;}
-    .dash-hero .bio{font-size:.85rem;color:rgba(255,255,255,.5);position:relative;z-index:1;margin:0 0 1rem;}
-    .dash-hero .earning{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:700;
-                         color:var(--gold);position:relative;z-index:1;line-height:1;}
-    .dash-hero .earning-label{font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;
-                               color:rgba(255,255,255,.4);margin-top:2px;position:relative;z-index:1;}
+    .kpi-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        padding: 22px 20px;
+        border: 1px solid rgba(3,40,159,.05);
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        position: relative;
+        overflow: hidden;
+        transition: all var(--transition);
+    }
 
-    .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;}
-    .stat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;
-               transition:transform .2s,box-shadow .2s;}
-    .stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.07);}
-    .stat-card .lbl{font-size:.68rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;}
-    .stat-card .val{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--navy);line-height:1;}
-    .stat-card .ico{width:36px;height:36px;border-radius:10px;background:var(--gold-dim);
-                    display:flex;align-items:center;justify-content:center;color:var(--gold);
-                    font-size:.9rem;margin-bottom:.75rem;}
+    .kpi-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-hover);
+    }
 
-    .chart-panel{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.25rem;}
-    .chart-panel h5{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.25rem;}
-    .chart-wrap{position:relative;height:280px;}
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0; right: 0;
+        width: 80px; height: 80px;
+        border-radius: 0 var(--radius) 0 80px;
+        opacity: .07;
+    }
 
-    .skel{background:linear-gradient(90deg,#f3f0eb 25%,#e8e2da 50%,#f3f0eb 75%);
-          background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px;display:inline-block;}
-    @@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .kpi-card.c1::before { background: var(--primary); }
+    .kpi-card.c2::before { background: var(--gold); }
+    .kpi-card.c3::before { background: #10b981; }
+    .kpi-card.c4::before { background: #f59e0b; }
 
-    @@media(max-width:768px){.stat-row{grid-template-columns:repeat(2,1fr)}}
+    .kpi-icon {
+        width: 44px; height: 44px;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.15rem;
+    }
+
+    .kpi-card.c1 .kpi-icon { background: rgba(3,40,159,.1); color: var(--primary); }
+    .kpi-card.c2 .kpi-icon { background: rgba(237,163,18,.12); color: var(--gold); }
+    .kpi-card.c3 .kpi-icon { background: rgba(16,185,129,.12); color: #10b981; }
+    .kpi-card.c4 .kpi-icon { background: rgba(245,158,11,.12); color: #f59e0b; }
+
+    .kpi-label {
+        font-size: .75rem;
+        font-weight: 500;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .8px;
+    }
+
+    .kpi-value {
+        font-family: Times New Roman, serif;
+        font-size: 1.9rem;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1;
+    }
+
+    .kpi-delta {
+        font-size: .75rem;
+        display: flex; align-items: center; gap: 4px;
+    }
+
+    .kpi-delta.up { color: #10b981; }
+    .kpi-delta.down { color: #ef4444; }
+
+    /* ── Bottom Grid ── */
+    .bottom-grid {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 20px;
+    }
+
+    /* ── Activity List ── */
+    .activity-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 14px 0;
+        border-bottom: 1px solid rgba(3,40,159,.05);
+    }
+
+    .activity-item:last-child { border-bottom: none; }
+
+    .activity-dot {
+        width: 36px; height: 36px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: .9rem;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .dot-upload  { background: rgba(107,155,230,.15); color: var(--accent); }
+    .dot-sale    { background: rgba(16,185,129,.12); color: #10b981; }
+    .dot-review  { background: rgba(245,158,11,.12); color: #f59e0b; }
+    .dot-like    { background: rgba(239,68,68,.1); color: #ef4444; }
+
+    .activity-text { font-size: .855rem; color: var(--text); line-height: 1.5; }
+    .activity-time { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── Quick Actions ── */
+    .quick-actions { display: flex; flex-direction: column; gap: 10px; }
+
+    .qa-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 16px;
+        border-radius: 10px;
+        background: var(--bg);
+        text-decoration: none;
+        color: var(--text);
+        font-size: .87rem;
+        font-weight: 500;
+        transition: all var(--transition);
+        border: 1px solid rgba(3,40,159,.06);
+    }
+
+    .qa-item:hover {
+        background: rgba(3,40,159,.06);
+        color: var(--primary);
+        transform: translateX(4px);
+    }
+
+    .qa-icon {
+        width: 38px; height: 38px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1rem;
+        background: var(--card-bg);
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+
+    /* ── Welcome Banner ── */
+    .welcome-banner {
+        background: linear-gradient(120deg, var(--primary) 0%, #1e4fc9 55%, var(--accent) 100%);
+        border-radius: var(--radius);
+        padding: 28px 32px;
+        margin-bottom: 24px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .welcome-banner::before {
+        content: '';
+        position: absolute;
+        top: -40px; right: -40px;
+        width: 200px; height: 200px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.06);
+    }
+
+    .welcome-banner::after {
+        content: '';
+        position: absolute;
+        bottom: -60px; right: 80px;
+        width: 150px; height: 150px;
+        border-radius: 50%;
+        background: rgba(237,163,18,.12);
+    }
+
+    .welcome-banner h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .welcome-banner p {
+        font-size: .88rem;
+        opacity: .8;
+        margin: 0;
+    }
+
+    @@media (max-width: 1199px) {
+        .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @@media (max-width: 991px) {
+        .bottom-grid { grid-template-columns: 1fr; }
+    }
+
+    @@media (max-width: 575px) {
+        .kpi-grid { grid-template-columns: 1fr 1fr; }
+        .welcome-banner { flex-direction: column; align-items: flex-start; gap: 16px; }
+    }
+
+    @@media (max-width: 420px) {
+        .kpi-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Stagger animation */
+    .kpi-card { animation: fadeUp .45s ease both; }
+    .kpi-card:nth-child(1) { animation-delay: .05s; }
+    .kpi-card:nth-child(2) { animation-delay: .10s; }
+    .kpi-card:nth-child(3) { animation-delay: .15s; }
+    .kpi-card:nth-child(4) { animation-delay: .20s; }
 </style>
+}
 
-<div class="dash-hero">
-    <h2 id="artistName">Loading...</h2>
-    <p class="bio" id="artistBio"></p>
-    <div class="earning" id="totalEarnings">$—</div>
-    <div class="earning-label">Total Earnings</div>
+<!-- Welcome Banner -->
+<div class="welcome-banner">
+    <div>
+        <h2>Welcome back, <span id="wbName" style="color:var(--gold)">Artist</span> 👋</h2>
+        <p>Here's what's happening in your studio today.</p>
+    </div>
+    <a href="/Artist/Upload" class="btn-artify btn-artify-gold" style="position:relative;z-index:2">
+        <i class="bi bi-plus-lg"></i> Upload Artwork
+    </a>
 </div>
 
-<div class="stat-row">
-    <div class="stat-card">
-        <div class="ico"><i class="bi bi-images"></i></div>
-        <div class="lbl">Artworks</div>
-        <div class="val" id="artworks">—</div>
+<!-- KPI Cards -->
+<div class="kpi-grid" id="kpiGrid">
+    <div class="kpi-card c1">
+        <div class="kpi-icon"><i class="bi bi-images"></i></div>
+        <div class="kpi-label">Total Artworks</div>
+        <div class="kpi-value" id="kpiArtworks">–</div>
+        <div class="kpi-delta up"><i class="bi bi-arrow-up-short"></i><span id="kpiArtworksDelta">Loading…</span></div>
     </div>
-    <div class="stat-card">
-        <div class="ico"><i class="bi bi-heart"></i></div>
-        <div class="lbl">Likes</div>
-        <div class="val" id="likes">—</div>
+    <div class="kpi-card c2">
+        <div class="kpi-icon"><i class="bi bi-bag-check-fill"></i></div>
+        <div class="kpi-label">Total Sales</div>
+        <div class="kpi-value" id="kpiSales">–</div>
+        <div class="kpi-delta up"><i class="bi bi-arrow-up-short"></i><span id="kpiSalesDelta">Loading…</span></div>
     </div>
-    <div class="stat-card">
-        <div class="ico"><i class="bi bi-bag-check"></i></div>
-        <div class="lbl">Sales</div>
-        <div class="val" id="sales">—</div>
+    <div class="kpi-card c3">
+        <div class="kpi-icon"><i class="bi bi-currency-dollar"></i></div>
+        <div class="kpi-label">Total Earnings</div>
+        <div class="kpi-value" id="kpiEarnings">–</div>
+        <div class="kpi-delta up"><i class="bi bi-arrow-up-short"></i><span id="kpiEarningsDelta">Loading…</span></div>
     </div>
-    <div class="stat-card">
-        <div class="ico"><i class="bi bi-star"></i></div>
-        <div class="lbl">Rating</div>
-        <div class="val" id="rating">—</div>
+    <div class="kpi-card c4">
+        <div class="kpi-icon"><i class="bi bi-clock-history"></i></div>
+        <div class="kpi-label">Pending Approvals</div>
+        <div class="kpi-value" id="kpiPending">–</div>
+        <div class="kpi-delta" id="kpiPendingDelta"><span style="color:var(--muted)">Loading…</span></div>
     </div>
 </div>
 
-<div class="chart-panel">
-    <h5>Revenue — Last 12 Months</h5>
-    <div class="chart-wrap"><canvas id="revenueChart"></canvas></div>
-</div>
+<!-- Bottom Row -->
+<div class="bottom-grid">
 
-<div class="chart-panel">
-    <h5>Sales by Category</h5>
-    <div class="chart-wrap"><canvas id="categoryChart"></canvas></div>
+    <!-- Recent Activity -->
+    <div class="card-artify p-4">
+        <div class="section-title">Recent <span>Activity</span></div>
+        <div id="activityList">
+            <!-- Skeleton placeholders -->
+            @for (int i = 0; i < 5; i++) {
+                <div class="activity-item">
+                    <div class="activity-dot" style="background:#eee;"></div>
+                    <div style="flex:1">
+                        <div style="height:13px;background:#eee;border-radius:6px;width:70%;margin-bottom:6px;"></div>
+                        <div style="height:10px;background:#f5f5f5;border-radius:6px;width:35%;"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card-artify p-4">
+        <div class="section-title">Quick <span>Actions</span></div>
+        <div class="quick-actions">
+            <a href="/Artist/Upload" class="qa-item">
+                <div class="qa-icon" style="color:var(--primary)"><i class="bi bi-cloud-arrow-up-fill"></i></div>
+                Upload New Artwork
+            </a>
+            <a href="/Artist/Gallery" class="qa-item">
+                <div class="qa-icon" style="color:var(--accent)"><i class="bi bi-images"></i></div>
+                View My Gallery
+            </a>
+            <a href="/Artist/Sales_Earnings" class="qa-item">
+                <div class="qa-icon" style="color:#10b981"><i class="bi bi-bar-chart-line-fill"></i></div>
+                Earnings & Analytics
+            </a>
+            <a href="/Artist/ManageProfile" class="qa-item">
+                <div class="qa-icon" style="color:var(--gold)"><i class="bi bi-person-circle"></i></div>
+                Edit My Profile
+            </a>
+            <a href="/Artist/Settings" class="qa-item">
+                <div class="qa-icon" style="color:var(--muted)"><i class="bi bi-gear-fill"></i></div>
+                Account Settings
+            </a>
+        </div>
+    </div>
+
 </div>
 
 @section Scripts {
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="/js/authHelper.js"></script>
 <script>
-$(function () {
-    if (!AuthHelper.requireAuth()) return;
+(async function() {
+    const artistId = @(Context.Session.GetInt32("ArtistId") ?? 0);
+    const API_BASE  = 'http://localhost:5183/api/ArtistApi'; // API runs on port 5183, MVC on 5092
 
-    var BASE = AuthHelper.API_BASE;
-    
-    // Show loading state
-    function showLoading() {
-        $("#artistName").text("Loading...");
-        $("#artworks, #likes, #sales, #rating").text("—");
-        $("#totalEarnings").text("$—");
+    // Set welcome name from session / localStorage
+    const storedName = sessionStorage.getItem('artistName') || 'Artist';
+    document.getElementById('wbName').textContent = storedName;
+
+    if (!artistId) return;
+
+    /* ── Fetch dashboard KPIs ── */
+    try {
+        const res = await fetch(`${API_BASE}/dashboard`, {
+            credentials: 'include'
+        });
+        if (!res.ok) throw new Error('API error');
+        const d = await res.json();
+
+        // Map actual t_Artist_Dashboard model fields (c_ prefix, exact casing)
+        document.getElementById('kpiArtworks').textContent = d.c_TotalArtworkCount ?? 0;
+        document.getElementById('kpiSales').textContent    = d.c_TotalSellCount ?? 0;
+        document.getElementById('kpiEarnings').textContent = '$' + (d.c_TotalEarning ?? 0).toLocaleString('en-IN');
+        document.getElementById('kpiPending').textContent  = '…'; // updated after artworks load
+
+        document.getElementById('kpiSalesDelta').textContent    = d.c_TotalSellCount > 0 ? `${d.c_TotalSellCount} sold` : '—';
+        document.getElementById('kpiEarningsDelta').textContent = d.c_TotalEarning   > 0 ? `$${parseFloat(d.c_TotalEarning).toLocaleString('en-IN')} total` : '—';
+    } catch(e) {
+        console.warn('Dashboard KPI fetch failed', e);
+        ['kpiArtworks','kpiSales','kpiEarnings','kpiPending'].forEach(id => {
+            document.getElementById(id).textContent = '–';
+        });
     }
-    
-    showLoading();
 
-    // Dashboard data
-    $.ajax({
-        url: BASE + "/dashboard",
-        type: "GET",
-        success: function (data) {
-            if (data) {
-                $("#artistName").text("Welcome, " + (data.c_ArtistName || "Artist"));
-                $("#artistBio").text(data.c_Biography || "");
-                $("#rating").text(parseFloat(data.c_RatingAvg || 0).toFixed(1));
-                $("#artworks").text(data.c_TotalArtworkCount || 0);
-                $("#likes").text(data.c_TotalLikeCount || 0);
-                $("#sales").text(data.c_TotalSellCount || 0);
-                $("#totalEarnings").text("$" + parseFloat(data.c_TotalEarning || 0).toLocaleString("en-US", { minimumFractionDigits: 2 }));
-            }
-        },
-        error: function (xhr) {
-            console.error("Dashboard error:", xhr.status, xhr.statusText);
-            if (xhr.status === 401) return;
-            Swal.fire({ icon: "error", title: "Could not load dashboard", text: "Please refresh the page.", confirmButtonColor: "#14122a" });
+    /* ── Build activity list from artworks + compute pending count ── */
+    try {
+        const res = await fetch(`${API_BASE}/GetMyArtworks`, { credentials: 'include' });
+        const json = await res.json();
+        // GetMyArtworks returns { success, data: [...] } wrapper
+        const artworks = Array.isArray(json) ? json : (json.data || json.c_Data || []);
+
+        // ── Fix #1: Compute pending count from artworks list ──────────────
+        const pendingCount  = artworks.filter(a => (a.c_approval_status || 'Pending') === 'Pending').length;
+        const approvedCount = artworks.filter(a => a.c_approval_status === 'Approved').length;
+        const rejectedCount = artworks.filter(a => a.c_approval_status === 'Rejected').length;
+
+        document.getElementById('kpiPending').textContent = pendingCount;
+        const pendingDeltaEl = document.getElementById('kpiPendingDelta');
+        if (pendingCount > 0) {
+            pendingDeltaEl.innerHTML = `<i class="bi bi-hourglass-split" style="color:#f59e0b"></i> <span style="color:#f59e0b">${pendingCount} awaiting review</span>`;
+        } else {
+            pendingDeltaEl.innerHTML = `<span style="color:#10b981"><i class="bi bi-check-circle"></i> All approved</span>`;
         }
-    });
 
-    // Revenue chart
-    $.ajax({
-        url: BASE + "/revenue",
-        type: "GET",
-        success: function (res) {
-            var allMonths = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-            var map = {};
-            (res || []).forEach(function (x) { map[x.month] = x.revenue; });
-            var finalData = allMonths.map(function (m) { return map[m] || 0; });
+        // Update artworks delta (total vs approved breakdown)
+        document.getElementById('kpiArtworksDelta').textContent =
+            `${approvedCount} approved · ${rejectedCount} rejected`;
+        // ─────────────────────────────────────────────────────────────────
 
-            new Chart(document.getElementById("revenueChart"), {
-                type: "line",
-                data: {
-                    labels: allMonths,
-                    datasets: [{
-                        label: "Revenue ($)",
-                        data: finalData,
-                        borderColor: "#a0692a",
-                        backgroundColor: "rgba(160,105,42,.08)",
-                        borderWidth: 2,
-                        pointBackgroundColor: "#a0692a",
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-            });
-        },
-        error: function (xhr) {
-            console.error("Revenue error:", xhr.status);
+        const icons = { Approved: { cls:'dot-sale', icon:'bi-check-circle-fill' },
+                        Pending:  { cls:'dot-review', icon:'bi-hourglass-split' },
+                        Rejected: { cls:'dot-like', icon:'bi-x-circle-fill' } };
+
+        const list = document.getElementById('activityList');
+        list.innerHTML = '';
+
+        const recent = artworks.slice(0, 6);
+        if (recent.length === 0) {
+            list.innerHTML = `<p class="text-muted text-center py-4" style="font-size:.87rem">No activity yet. Upload your first artwork!</p>`;
+            return;
         }
-    });
 
-    // Category pie chart
-    $.ajax({
-        url: BASE + "/category-sales",
-        type: "GET",
-        success: function (res) {
-            var labels = (res || []).map(function (x) { return x.category; });
-            var data = (res || []).map(function (x) { return x.sales; });
-            var colors = ["#a0692a","#14122a","#c9a96e","#4a3728","#6b4226","#e8d5b7"];
+        recent.forEach(a => {
+            const status = a.c_approval_status || 'Pending';
+            const ic = icons[status] || icons['Pending'];
+            list.innerHTML += `
+                <div class="activity-item">
+                    <div class="activity-dot ${ic.cls}"><i class="bi ${ic.icon}"></i></div>
+                    <div>
+                        <div class="activity-text">
+                            <strong>${escapeHtml(a.c_title)}</strong>
+                            <span class="ms-2 badge-${status.toLowerCase()}">${status}</span>
+                        </div>
+                        <div class="activity-time">$${parseFloat(a.c_price).toLocaleString('en-IN')} &bull; Artwork #${a.c_artwork_id}</div>
+                    </div>
+                </div>`;
+        });
+    } catch(e) {
+        document.getElementById('activityList').innerHTML =
+            `<p class="text-muted text-center py-4" style="font-size:.87rem">Could not load activity.</p>`;
+    }
 
-            new Chart(document.getElementById("categoryChart"), {
-                type: "doughnut",
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: colors,
-                        borderWidth: 2,
-                        borderColor: "#fff"
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "right" } } }
-            });
-        },
-        error: function (xhr) {
-            console.error("Category sales error:", xhr.status);
-        }
-    });
-});
+    function escapeHtml(t) {
+        return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+})();
 </script>
 }

@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] – Artify Studio</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+
+    <style>
+        /* ── CSS Variables ── */
+        :root {
+            --bg:        #DFE6E9;
+            --primary:   #03289F;
+            --gold:      #EDA312;
+            --accent:    #6B9BE6;
+            --sidebar-w: 250px;
+            --card-bg:   #ffffff;
+            --text:      #1a1a2e;
+            --muted:     #718096;
+            --radius:    14px;
+            --shadow:    0 4px 24px rgba(3,40,159,.08);
+            --shadow-hover: 0 8px 32px rgba(3,40,159,.16);
+            --transition: .25s cubic-bezier(.4,0,.2,1);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            position: fixed;
+            top: 0; left: 0;
+            width: var(--sidebar-w);
+            height: 100vh;
+            background: linear-gradient(170deg, #03289F 0%, #021a6a 60%, #010e3d 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            z-index: 1000;
+            overflow: hidden;
+            transition: transform var(--transition);
+        }
+
+        .sidebar-brand {
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,.1);
+        }
+
+        .sidebar-brand .logo-mark {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -.5px;
+        }
+
+        .sidebar-brand .logo-mark span {
+            color: var(--gold);
+        }
+
+        .sidebar-brand .logo-sub {
+            font-size: .68rem;
+            color: rgba(255,255,255,.45);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 2px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 14px;
+            overflow-y: auto;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }
+
+        .nav-label {
+            font-size: .62rem;
+            font-weight: 600;
+            color: rgba(255,255,255,.3);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 8px 12px 6px;
+            margin-top: 8px;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: 10px;
+            color: rgba(255,255,255,.65);
+            text-decoration: none;
+            font-size: .875rem;
+            font-weight: 400;
+            margin-bottom: 2px;
+            transition: all var(--transition);
+            position: relative;
+        }
+
+        .sidebar-link i {
+            font-size: 1.05rem;
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .sidebar-link:hover {
+            background: rgba(255,255,255,.1);
+            color: #fff;
+            transform: translateX(3px);
+        }
+
+        .sidebar-link.active {
+            background: var(--gold);
+            color: #1a1a2e;
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(237,163,18,.3);
+        }
+
+        .sidebar-link.active i { color: #1a1a2e; }
+
+        .sidebar-footer {
+            padding: 16px 14px 24px;
+            border-top: 1px solid rgba(255,255,255,.1);
+        }
+
+        .sidebar-link.logout-link {
+            color: rgba(255,120,120,.8);
+        }
+
+        .sidebar-link.logout-link:hover {
+            background: rgba(255,80,80,.12);
+            color: #ff8080;
+        }
+
+        /* ── Main Wrapper ── */
+        .main-wrapper {
+            margin-left: var(--sidebar-w);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: margin-left var(--transition);
+        }
+
+        /* ── Topbar ── */
+        .topbar {
+            height: 68px;
+            background: rgba(255,255,255,.75);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(3,40,159,.07);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .page-heading {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .notif-btn {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            background: var(--bg);
+            border: none;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--primary);
+            font-size: 1.1rem;
+            cursor: pointer;
+            position: relative;
+            transition: background var(--transition);
+        }
+
+        .notif-btn:hover { background: rgba(3,40,159,.1); }
+
+        .notif-dot {
+            position: absolute;
+            top: 7px; right: 7px;
+            width: 8px; height: 8px;
+            background: var(--gold);
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+
+        .avatar-btn {
+            display: flex; align-items: center; gap: 10px;
+            background: none; border: none; cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 10px;
+            transition: background var(--transition);
+        }
+
+        .avatar-btn:hover { background: rgba(3,40,159,.07); }
+
+        .avatar-circle {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #fff;
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 2px solid var(--gold);
+        }
+        .avatar-circle img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .avatar-name {
+            font-size: .83rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* ── Page Content ── */
+        .page-content {
+            flex: 1;
+            padding: 32px 28px 40px;
+            animation: fadeUp .45s ease both;
+        }
+
+        @@keyframes fadeUp {
+            from { opacity:0; transform: translateY(18px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+
+        /* ── Cards ── */
+        .card-artify {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(3,40,159,.05);
+            transition: box-shadow var(--transition), transform var(--transition);
+        }
+
+        .card-artify:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-2px);
+        }
+
+        /* ── Section Title ── */
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 18px;
+        }
+
+        .section-title span {
+            color: var(--gold);
+        }
+
+        /* ── Buttons ── */
+        .btn-artify {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 22px;
+            font-size: .875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: inline-flex; align-items: center; gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-artify:hover {
+            background: #0232b8;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(3,40,159,.28);
+        }
+
+        .btn-artify-ghost {
+            background: transparent;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+        }
+
+        .btn-artify-ghost:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-artify-gold {
+            background: var(--gold);
+            color: #1a1a2e;
+        }
+
+        .btn-artify-gold:hover {
+            background: #d4920f;
+            color: #1a1a2e;
+            box-shadow: 0 6px 20px rgba(237,163,18,.3);
+        }
+
+        /* ── Badge status ── */
+        .badge-pending  { background: #fff3cd; color: #856404; border-radius: 20px; padding: 4px 12px; font-size:.73rem; font-weight:600; }
+        .badge-approved { background: #d1fae5; color: #065f46; border-radius: 20px; padding: 4px 12px; font-size:.73rem; font-weight:600; }
+        .badge-rejected { background: #fee2e2; color: #991b1b; border-radius: 20px; padding: 4px 12px; font-size:.73rem; font-weight:600; }
+
+        /* ── Hamburger ── */
+        .hamburger {
+            display: none;
+            background: none; border: none;
+            font-size: 1.3rem;
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        /* ── Overlay ── */
+        .sidebar-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.45);
+            z-index: 999;
+        }
+
+        /* ── Responsive ── */
+        @@media (max-width: 991px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-wrapper { margin-left: 0; }
+            .hamburger { display: flex; }
+            .page-content { padding: 22px 16px 32px; }
+        }
+
+        @@media (max-width: 576px) {
+            .avatar-name { display: none; }
+            .topbar { padding: 0 16px; }
+        }
+    </style>
+
+    @RenderSection("HeadStyles", required: false)
+</head>
+<body>
+
+<!-- Sidebar Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <div class="logo-mark">
+            <img src="/Images/bob-logo.png" alt="logo" style="height:40px; width:40px; border-radius: 20%;"><span style="color: aliceblue; font-weight: bold; font-size: 1.7rem; padding-left: 8px; margin-top: 8px; letter-spacing: 2px;">ARTIFY</span>
+        </div>
+        <!-- <div class="logo-sub">Artist Studio</div> -->
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-label">Main</div>
+        <a href="/Artist/DashBoard" class="sidebar-link @(ViewData["Active"]?.ToString()=="Dashboard"?"active":"")">
+            <i class="bi bi-grid-1x2-fill"></i> Dashboard
+        </a>
+        <a href="/Artist/Upload" class="sidebar-link @(ViewData["Active"]?.ToString()=="Upload"?"active":"")">
+            <i class="bi bi-cloud-arrow-up-fill"></i> Upload Artwork
+        </a>
+        <a href="/Artist/Gallery" class="sidebar-link @(ViewData["Active"]?.ToString()=="Gallery"?"active":"")">
+            <i class="bi bi-images"></i> My Artworks
+        </a>
+        <a href="/Artist/Exhibition" class="sidebar-link @(ViewData["Active"]?.ToString()=="Exhibition"?"active":"")">
+            <i class="bi bi-building"></i> Virtual Exhibition
+        </a>
+
+        <div class="nav-label">Finance</div>
+        <a href="/Artist/Sales_Earnings" class="sidebar-link @(ViewData["Active"]?.ToString()=="Earnings"?"active":"")">
+            <i class="bi bi-bar-chart-line-fill"></i> Earnings & Analytics
+        </a>
+        <a href="/Artist/Sales" class="sidebar-link @(ViewData["Active"]?.ToString()=="Sales"?"active":"")">
+            <i class="bi bi-receipt"></i> Sales
+        </a>
+
+        <div class="nav-label">Account</div>
+        <a href="/Artist/ManageProfile" class="sidebar-link @(ViewData["Active"]?.ToString()=="Profile"?"active":"")">
+            <i class="bi bi-person-fill"></i> Profile
+        </a>
+        <a href="/Artist/Settings" class="sidebar-link @(ViewData["Active"]?.ToString()=="Settings"?"active":"")">
+            <i class="bi bi-gear-fill"></i> Settings
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <a href="#" class="sidebar-link logout-link" onclick="doLogout(); return false;">
+            <i class="bi bi-box-arrow-left"></i> Logout
+        </a>
+    </div>
+</aside>
+
+<!-- ── MAIN WRAPPER ── -->
+<div class="main-wrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+        <div class="d-flex align-items-center gap-3">
+            <button class="hamburger" onclick="openSidebar()"><i class="bi bi-list"></i></button>
+            <div class="page-heading">@ViewData["Title"]</div>
+        </div>
+        <div class="topbar-right">
+
+        <!-- Notification Bell with Dropdown -->
+        <div class="dropdown" id="notifDropdown">
+            <button class="notif-btn" id="notifBell" data-bs-toggle="dropdown" data-bs-auto-close="outside" title="Notifications">
+                <i class="bi bi-bell"></i>
+                <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end shadow border-0 p-0" id="notifPanel"
+                 style="width:360px;border-radius:14px;overflow:hidden;min-width:340px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(0,0,0,.06);">
+                    <span style="font-weight:700;font-size:.92rem;color:var(--text);">Notifications</span>
+                    <button id="markAllReadBtn" style="background:none;border:none;font-size:.75rem;color:var(--primary);cursor:pointer;font-weight:600;">Mark all read</button>
+                </div>
+                <div id="notifList" style="max-height:360px;overflow-y:auto;"></div>
+                <div id="notifEmpty" style="text-align:center;padding:32px 16px;color:var(--muted);font-size:.83rem;display:none;">
+                    <i class="bi bi-bell-slash" style="font-size:1.8rem;display:block;margin-bottom:8px;"></i>No new notifications
+                </div>
+            </div>
+        </div>
+
+            <div class="dropdown">
+                <button class="avatar-btn" data-bs-toggle="dropdown">
+                    <div class="avatar-circle" id="avatarInitial">
+                        <img id="navbarProfileImg" src="" alt="" style="display:none;" />
+                        <span id="navbarInitialText">A</span>
+                    </div>
+                    <span class="avatar-name" id="avatarName">Artist</span>
+                    <i class="bi bi-chevron-down" style="font-size:.7rem;color:var(--muted)"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius:12px;padding:8px;">
+                    <li><a class="dropdown-item rounded-2" href="/Artist/ManageProfile"><i class="bi bi-person me-2"></i>My Profile</a></li>
+                    <li><a class="dropdown-item rounded-2" href="/Artist/Settings"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item rounded-2 text-danger" href="#" onclick="doLogout();return false;"><i class="bi bi-box-arrow-left me-2"></i>Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="page-content">
+        @RenderBody()
+    </main>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+    /* ── Notification UI ── */
+    .notif-badge {
+        position: absolute;
+        top: 4px; right: 4px;
+        min-width: 16px; height: 16px;
+        border-radius: 8px;
+        background: #ef4444;
+        color: #fff;
+        font-size: .62rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 3px;
+        line-height: 1;
+    }
+    .notif-item {
+        display: flex;
+        gap: 12px;
+        padding: 12px 18px;
+        border-bottom: 1px solid rgba(0,0,0,.05);
+        cursor: pointer;
+        transition: background var(--transition);
+    }
+    .notif-item:hover  { background: #f4f7ff; }
+    .notif-item.unread { background: #f0f4ff; }
+    .notif-icon {
+        width: 34px; height: 34px;
+        border-radius: 50%;
+        background: rgba(3,40,159,.1);
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+        color: var(--primary);
+        font-size: .9rem;
+    }
+    .notif-text { font-size: .8rem; color: var(--text); line-height: 1.4; }
+    .notif-time { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+</style>
+
+<script>
+    const _LAYOUT_API = 'http://localhost:5183/api/ArtistApi';
+
+    /* ── Sidebar toggle ── */
+    function openSidebar()  { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('show'); }
+    function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('show'); }
+
+    /* ── Complete logout ────────────────────────────────────────────────────
+     * Steps:
+     * 1. Wipe sessionStorage + localStorage (client-cached user identity)
+     * 2. Delete non-HttpOnly cookies via JS document.cookie
+     * 3. Call API /Logout (POST, credentials:include) — clears API-side HttpOnly JWT cookie
+     * 4. Navigate to /Artist/Logout — clears MVC session + MVC-side HttpOnly cookie
+     * ──────────────────────────────────────────────────── */
+    async function doLogout() {
+        // 1. Clear browser storage
+        try { sessionStorage.clear(); } catch(e) {}
+        try { localStorage.clear();   } catch(e) {}
+
+        // 2. Clear non-HttpOnly cookies (document.cookie accessible)
+        document.cookie.split(';').forEach(c => {
+            const name = c.trim().split('=')[0];
+            if (name) {
+                // Clear on current path + root path
+                document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/Artist;`;
+            }
+        });
+
+        // 3. Ask API to invalidate its HttpOnly JWT cookie (port 5183)
+        try {
+            await fetch('http://localhost:5183/api/ArtistApi/Logout', {
+                method: 'POST',
+                credentials: 'include'  // sends & clears the cross-origin HttpOnly cookie
+            });
+        } catch(e) { /* API may be down — proceed anyway */ }
+
+        // 4. Navigate to MVC logout (clears session + MVC HttpOnly cookie, then redirects)
+        window.location.href = '/Artist/Logout';
+    }
+
+    /* ── Avatar from sessionStorage ── */
+    (function() {
+        const name = sessionStorage.getItem('artistName') || 'Artist';
+        const el = document.getElementById('avatarName');
+        if (el) el.textContent = name;
+
+        const picUrl = sessionStorage.getItem('artistProfilePic');
+        updateNavbarAvatar(picUrl || null, name);
+    })();
+
+    /* ── Navbar avatar helper (also called by ManageProfile after upload) ── */
+    function updateNavbarAvatar(picUrl, name) {
+        const imgEl     = document.getElementById('navbarProfileImg');
+        const initialEl = document.getElementById('navbarInitialText');
+        if (!imgEl || !initialEl) return;
+
+        if (picUrl) {
+            imgEl.src           = picUrl;
+            imgEl.style.display = 'block';
+            initialEl.style.display = 'none';
+        } else {
+            const n = name || sessionStorage.getItem('artistName') || 'Artist';
+            initialEl.textContent   = n.charAt(0).toUpperCase();
+            initialEl.style.display = 'block';
+            imgEl.style.display     = 'none';
+        }
+    }
+
+    /* ── Notifications: load on every page ── */
+    (async function loadNotifications() {
+        try {
+            const res = await fetch(`${_LAYOUT_API}/notifications?take=20`, { credentials: 'include' });
+            if (!res.ok) return; // not logged in or API down — skip silently
+
+            const json  = await res.json();
+            const count = json.unreadCount || 0;
+            const items = json.data || [];
+
+            // Update badge
+            const badge = document.getElementById('notifBadge');
+            if (badge) {
+                badge.textContent    = count > 99 ? '99+' : count;
+                badge.style.display  = count > 0 ? 'flex' : 'none';
+            }
+
+            const list  = document.getElementById('notifList');
+            const empty = document.getElementById('notifEmpty');
+            if (!list) return;
+
+            if (items.length === 0) {
+                list.innerHTML = '';
+                if (empty) empty.style.display = 'block';
+                return;
+            }
+            if (empty) empty.style.display = 'none';
+
+            const iconMap = {
+                'upload':   'bi-cloud-arrow-up-fill',
+                'approved': 'bi-check-circle-fill',
+                'rejected': 'bi-x-circle-fill',
+                'sale':     'bi-bag-check-fill',
+                'payout':   'bi-cash-stack',
+                'system':   'bi-info-circle-fill'
+            };
+
+            list.innerHTML = items.map(n => {
+                const icon    = iconMap[n.type] || 'bi-bell-fill';
+                const timeStr = n.createdAt
+                    ? new Date(n.createdAt).toLocaleString('en-IN', { dateStyle:'short', timeStyle:'short' })
+                    : '';
+                return `<div class="notif-item ${n.isRead ? '' : 'unread'}" onclick="markNotifRead('${n.id}', this)">
+                    <div class="notif-icon"><i class="bi ${icon}"></i></div>
+                    <div>
+                        <div class="notif-text">${n.message || 'New notification'}</div>
+                        ${timeStr ? `<div class="notif-time">${timeStr}</div>` : ''}
+                    </div>
+                </div>`;
+            }).join('');
+
+        } catch(e) {
+            console.debug('Notifications fetch skipped:', e.message);
+        }
+    })();
+
+    async function markNotifRead(notifId, el) {
+        if (el) el.classList.remove('unread');
+        try {
+            const res = await fetch(`${_LAYOUT_API}/notifications/${notifId}/read`, {
+                method: 'POST', credentials: 'include'
+            });
+            if (res.ok) {
+                const data  = await res.json();
+                const badge = document.getElementById('notifBadge');
+                if (badge) {
+                    const c = data.unreadCount || 0;
+                    badge.textContent   = c > 99 ? '99+' : c;
+                    badge.style.display = c > 0 ? 'flex' : 'none';
+                }
+            }
+        } catch(e) { /* silent */ }
+    }
+
+    document.getElementById('markAllReadBtn')?.addEventListener('click', async function() {
+        try {
+            await fetch(`${_LAYOUT_API}/notifications/read`, { method: 'POST', credentials: 'include' });
+            document.querySelectorAll('.notif-item').forEach(el => el.classList.remove('unread'));
+            const badge = document.getElementById('notifBadge');
+            if (badge) badge.style.display = 'none';
+        } catch(e) { /* silent */ }
+    });
+</script>
+
+@RenderSection("Scripts", required: false)
+</body>
+</html>

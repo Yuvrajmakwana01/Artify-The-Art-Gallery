@@ -24,9 +24,20 @@ public class PaymentRepository : IPaymentInterface
 
         try
         {
-            decimal total = model.Cart.Sum(x => x.Price);
-            decimal commission = Math.Round(total * 0.20M, 2);
-            decimal payout = total - commission;
+            // Use values passed from frontend (which already computed subtotal + 2% fee)
+            decimal subtotal = model.Subtotal > 0
+                ? model.Subtotal
+                : model.Cart.Sum(x => x.Price);
+
+            decimal commission = model.CommissionAmount > 0
+                ? model.CommissionAmount
+                : Math.Round(subtotal * 0.02M, 2);   // 2% platform fee
+
+            decimal total = model.TotalAmount > 0
+                ? model.TotalAmount
+                : subtotal + commission;              // e.g. 149 + 3 = 152
+
+            decimal payout = subtotal - commission;
 
             // ── INSERT ORDER ─────────────────────────────────────────────
             await using var orderCmd = new NpgsqlCommand(@"

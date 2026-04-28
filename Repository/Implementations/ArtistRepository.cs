@@ -277,19 +277,21 @@ namespace Repository.Implementations
                 // Use a string builder or a clean string to avoid hidden character issues
                 string sql = @"
             UPDATE t_artist_profile SET
-                c_artist_name = @name,
-                c_biography   = @bio,
-                c_cover_image = COALESCE(@cover, c_cover_image),
-                c_url         = @urls
+                c_artist_name   = @name,
+                c_biography     = @bio,
+                c_cover_image   = COALESCE(@cover, c_cover_image),
+                c_profile_image = COALESCE(@pic,   c_profile_image),
+                c_url           = @urls
             WHERE c_artist_id = @id";
+
 
                 using (var cmd = new NpgsqlCommand(sql, _conn))
                 {
-                    cmd.Parameters.AddWithValue("@id", data.ArtistId);
-                    cmd.Parameters.AddWithValue("@name", (object)data.ArtistName ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@bio", (object)data.Biography ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@cover", (object)data.CoverImage ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@active", (object)data.IsActive ?? true);
+                    cmd.Parameters.AddWithValue("@id",    data.ArtistId);
+                    cmd.Parameters.AddWithValue("@name",  (object)data.ArtistName  ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@bio",   (object)data.Biography   ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@cover", (object)data.CoverImage  ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@pic",   (object)data.ProfilePicture ?? DBNull.Value);
 
                     // FORCE the NpgsqlDbType to ensure the driver knows it is a Text Array
                     var urlParam = new NpgsqlParameter("@urls", NpgsqlTypes.NpgsqlDbType.Array | NpgsqlTypes.NpgsqlDbType.Text);
@@ -299,6 +301,7 @@ namespace Repository.Implementations
                     int rows = await cmd.ExecuteNonQueryAsync();
                     return rows > 0 ? 1 : 0;
                 }
+
             }
             catch (Exception ex)
             {
@@ -320,11 +323,13 @@ namespace Repository.Implementations
                 if (_conn.State != System.Data.ConnectionState.Open)
                     await _conn.OpenAsync();
 
-                // Ensure these column names (c_artist_name, etc.) match your DB exactly
-                var qry = @"SELECT c_artist_id, c_artist_name, c_artist_email, c_biography, 
-                           c_cover_image, c_rating_avg, c_is_verified, c_url 
-                    FROM t_artist_profile 
+                // c_profile_image lives directly in t_artist_profile — no JOIN needed
+                var qry = @"SELECT c_artist_id, c_artist_name, c_artist_email, c_biography,
+                           c_cover_image, c_rating_avg, c_is_verified, c_url,
+                           c_profile_image
+                    FROM t_artist_profile
                     WHERE c_artist_id = @id";
+
 
                 using (var cmd = new NpgsqlCommand(qry, _conn))
                 {
@@ -341,6 +346,7 @@ namespace Repository.Implementations
                             profile.RatingAvg = reader.IsDBNull(5) ? 0 : reader.GetDecimal(5);
                             profile.IsVerified = !reader.IsDBNull(6) && reader.GetBoolean(6);
                             profile.Urls = reader.IsDBNull(7) ? null : (string[])reader.GetValue(7);
+                            profile.ProfilePicture = reader.IsDBNull(8) ? null : reader.GetString(8);
                         }
                     }
                 }
@@ -530,6 +536,37 @@ namespace Repository.Implementations
             }
 
             return result;
+        }
+        /// <summary>
+        /// Soft-deactivates an artist account by setting c_is_active = false.
+        /// The artist can be reactivated by an admin later.
+        /// </summary>
+        public async Task<int> DeactivateAccount(int artistId)
+        {
+            try
+            {
+                if (_conn.State != System.Data.ConnectionState.Open)
+                    await _conn.OpenAsync();
+
+                const string sql = @"UPDATE t_artist_profile
+                                     SET    c_is_active = FALSE
+                                     WHERE  c_artist_id = @id";
+
+                using var cmd = new NpgsqlCommand(sql, _conn);
+                cmd.Parameters.AddWithValue("@id", artistId);
+                var rows = await cmd.ExecuteNonQueryAsync();
+                return rows > 0 ? 1 : 0;   // 1 = success, 0 = artist not found
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DeactivateAccount ERROR: {ex.Message}");
+                return -1;
+            }
+            finally
+            {
+                if (_conn.State == System.Data.ConnectionState.Open)
+                    await _conn.CloseAsync();
+            }
         }
     }
 }

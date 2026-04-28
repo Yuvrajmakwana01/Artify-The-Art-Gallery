@@ -63,6 +63,15 @@ namespace MVC.Controllers
             return View();
         }
 
+        public ActionResult Dashboard()
+        {
+            return View();
+        }
+        public ActionResult ViewArts()
+        {
+            return View();
+        }
+
         // [HttpGet("/Buyer/ExploreArt")]
         public IActionResult ExploreArt()
         {
