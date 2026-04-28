@@ -25,6 +25,9 @@ namespace Repository.Interfaces
 
         Task<int> ChangePassword(int artistId, string oldPwd, string newPwd);
 
+        /// <summary>Sets c_is_active = false for the given artist (soft-deactivation).</summary>
+        Task<int> DeactivateAccount(int artistId);
+
         public Task<t_Artist_EarningsSummary> GetEarningsSummary(int artistId);
     }
 }

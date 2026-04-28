@@ -1,719 +1,627 @@
 @model Repository.Models.t_UserRegister
 @{
     Layout = "_AuthLayout";
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Create Account";
 }
 
+<!-- SweetAlert2 CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <style>
-    /* ── Auth page wrapper ── */
-    @* .auth-page {
-        position: relative;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-    } *@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .auth-page {
-        position: relative;
-        /* Changed from 100vh to auto with vertical padding to reduce large top/bottom gaps */
-        min-height: 100vh; 
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-        padding: 40px 0; /* Adds a small fixed gap at top and bottom */
-    }
+:root {
+    --bg:       #DFE6E9;
+    --bg-card:  rgba(255,255,255,0.72);
+    --cobalt:   #03289F;
+    --cobalt-dk:#021A6E;
+    --cobalt-lt:#1A3DB5;
+    --gold:     #EDA312;
+    --gold-lt:  #F5C84A;
+    --sky:      #6B9BE6;
+    --sky-lt:   #A8C4F0;
+    --ink:      #0A1628;
+    --mist:     rgba(107,155,230,0.15);
+    --err:      #C0392B;
+    --ok:       #27AE60;
+    --white:    #FFFFFF;
+}
 
-    /* Background image with slow pan */
-    .auth-bg-img {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        animation: bgPan 25s ease-in-out infinite;
-    }
+html, body {
+    height: 100%;
+    font-family: 'Jost', sans-serif;
+    background: var(--bg);
+    overflow: hidden;
+}
 
+/* ═══════════════════════════════════════
+   MARQUEE BACKGROUND
+═══════════════════════════════════════ */
+.marquee-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: #e4eaed;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 5px 0;
+    overflow: hidden;
+}
 
+.marquee-row {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    min-height: 0;
+}
 
-    /* Dark overlay */
-    .auth-bg-overlay {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(
-            180deg,
-            hsl(25 20% 8% / 0.70) 0%,
-            hsl(25 20% 8% / 0.50) 50%,
-            hsl(25 20% 8% / 0.75) 100%
-        );
-    }
+.marquee-strip {
+    display: flex;
+    gap: 5px;
+    height: 100%;
+    flex-shrink: 0;
+    will-change: transform;
+}
 
-    /* Card wrapper */
-    @* .auth-wrapper {
-        position: relative;
-        z-index: 10;
-        width: 100%;
-        max-width: 520px;
-        margin: 24px 16px;
-        animation: scaleIn 0.4s ease-out;
-    } *@
+.marquee-row:nth-child(odd)  .marquee-strip { animation: marqLeft  var(--spd, 30s) linear infinite; }
+.marquee-row:nth-child(even) .marquee-strip { animation: marqRight var(--spd, 38s) linear infinite; }
 
-    .auth-wrapper {
-        position: relative;
-        z-index: 10;
-        width: 100%;
-        max-width: 480px; /* Reduced from 520px to make the form narrower */
-        margin: 0 auto;   /* Center horizontally */
-        animation: scaleIn 0.4s ease-out;
-    }
+@@keyframes marqLeft  { from { transform: translateX(0);    } to { transform: translateX(-50%); } }
+@@keyframes marqRight { from { transform: translateX(-50%); } to { transform: translateX(0);    } }
 
-    /* Glass card */
-    @* .glass-card {
-        background: hsl(35 30% 92% / 0.88);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border: 1px solid hsl(30 15% 82% / 0.35);
-        border-radius: 1.25rem;
-        padding: 2rem 2rem 1.5rem;
-        box-shadow:
-            0 8px 32px -8px hsl(25 20% 10% / 0.40),
-            inset 0 1px 0 hsl(35 30% 97% / 0.18);
-    } *@
+.art-tile {
+    flex-shrink: 0;
+    height: 100%;
+    border-radius: 7px;
+    overflow: hidden;
+    background: #c5cdd3;
+}
+.art-tile img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+    pointer-events: none; user-select: none;
+}
 
-    .glass-card {
-        background: hsl(35 30% 92% / 0.88);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border: 1px solid hsl(30 15% 82% / 0.35);
-        border-radius: 1.25rem;
-        /* Reduced padding from 2rem to 1.5rem to pull content closer to edges */
-        padding: 1.5rem 1.75rem 1.25rem; 
-        box-shadow: 0 8px 32px -8px hsl(25 20% 10% / 0.40),
-                    inset 0 1px 0 hsl(35 30% 97% / 0.18);
-    }
+/* Overlay layers */
+.marquee-veil {
+    position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(
+        135deg,
+        rgba(223,230,233,0.82) 0%,
+        rgba(223,230,233,0.52) 50%,
+        rgba(223,230,233,0.80) 100%
+    );
+    backdrop-filter: blur(1.5px);
+    -webkit-backdrop-filter: blur(1.5px);
+}
 
-    /* Logo float */
-    .logo-float {
-        width: 64px;
-        height: 64px;
-        object-fit: contain;
-        display: block;
-        margin: 0 auto 0.6rem;
-        animation: float 3s ease-in-out infinite;
-    }
+.orb {
+    position: absolute; border-radius: 50%;
+    filter: blur(80px); pointer-events: none; z-index: 2;
+}
+.orb-a {
+    width: 480px; height: 480px;
+    background: radial-gradient(circle, rgba(107,155,230,0.22) 0%, transparent 70%);
+    top: -15%; right: -8%;
+    animation: orbDrift 22s ease-in-out infinite;
+}
+.orb-b {
+    width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(237,163,18,0.14) 0%, transparent 70%);
+    bottom: -12%; left: -5%;
+    animation: orbDrift 28s ease-in-out infinite;
+    animation-delay: -10s;
+}
+@@keyframes orbDrift {
+    0%,100% { transform: translate(0,0); }
+    50%      { transform: translate(-20px, 16px); }
+}
 
-    .auth-title {
-        font-family: 'Playfair Display', serif;
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: hsl(25, 30%, 10%);
-        text-align: center;
-        margin: 0;
-    }
-
-    .auth-subtitle {
-        font-size: 0.8rem;
-        color: hsl(25, 15%, 35%);
-        text-align: center;
-        margin: 0.25rem 0 0;
-        font-weight: 500;
-    }
-
-    /* ── Form layout ── */
-    .form-group {
-        margin-top: 0.9rem;
-    }
-
-    .form-label {
-        display: block;
-        font-size: 0.78rem;
-        font-weight: 600;
-        color: hsl(25, 30%, 10%);
-        margin-bottom: 0.3rem;
-    }
-
-    .form-grid-2 {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.75rem;
-        margin-top: 0.9rem;
-    }
-
-    /* ── Kendo input override — beige theme ── */
-    .k-textbox,
-    .k-input.k-textbox,
-    .k-input {
-        background-color: hsl(32, 18%, 88%) !important;
-        border-color: hsl(30, 15%, 78%) !important;
-        border-radius: 0.6rem !important;
-        color: hsl(25, 30%, 10%) !important;
-        font-family: 'Inter', sans-serif !important;
-        font-size: 0.85rem !important;
-        height: 38px !important;
-        width: 100% !important;
-        transition: border-color 0.25s, box-shadow 0.25s !important;
-    }
-
-    .k-textbox:focus,
-    .k-input:focus-within {
-        border-color: hsl(28, 60%, 45%) !important;
-        box-shadow: 0 0 0 3px hsl(28 60% 45% / 0.15) !important;
-        outline: none !important;
-    }
-
-    /* Kendo DropDownList */
-    .k-dropdownlist {
-        background-color: hsl(32, 18%, 88%) !important;
-        border-color: hsl(30, 15%, 78%) !important;
-        border-radius: 0.6rem !important;
-        height: 38px !important;
-        width: 100% !important;
-        font-size: 0.85rem !important;
-        font-family: 'Inter', sans-serif !important;
-        color: hsl(25, 30%, 10%) !important;
-    }
-
-    .k-dropdownlist:focus,
-    .k-dropdownlist.k-focus {
-        border-color: hsl(28, 60%, 45%) !important;
-        box-shadow: 0 0 0 3px hsl(28 60% 45% / 0.15) !important;
-    }
-
-    .k-list-item.k-selected,
-    .k-list-item:hover {
-        background-color: hsl(28, 60%, 45%) !important;
-        color: hsl(35, 30%, 97%) !important;
-    }
-
-    /* Password wrapper */
-    .pass-wrapper {
-        position: relative;
-        display: block; /* Ensure full width */
-    }
-
-    .pass-wrapper .k-textbox,
-    .pass-wrapper .k-input {
-        padding-right: 2.4rem !important;
-    }
-
-    .pass-toggle {
-        position: absolute;
-        right: 8px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: hsl(25, 15%, 45%);
-        display: flex;
-        align-items: center;
-        z-index: 10;
-        padding: 0;
-        line-height: 1;
-    }
-
-    .pass-toggle:hover {
-        color: hsl(25, 30%, 10%);
-    }
-
-    /* Kendo Validator error tooltip override */
-    .k-tooltip-validation {
-        background: hsl(0, 65%, 48%) !important;
-        border-color: hsl(0, 65%, 40%) !important;
-        border-radius: 0.4rem !important;
-        font-size: 0.72rem !important;
-        font-family: 'Inter', sans-serif !important;
-        margin-top: 3px !important;
-        padding: 3px 8px !important;
-    }
-
-    .k-tooltip-validation .k-callout {
-        color: hsl(0, 65%, 48%) !important;
-    }
-
-    /* ── Profile image upload ── */
-    .upload-zone {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        width: 84px;
-        height: 84px;
-        border-radius: 50%;
-        border: 2px dashed hsl(30, 15%, 70%);
-        background: hsl(32, 18%, 88%);
-        cursor: pointer;
-        margin: 0.8rem auto 0;
-        transition: border-color 0.25s, background 0.25s;
-    }
-
-    .upload-zone:hover {
-        border-color: hsl(28, 60%, 45%);
-        background: hsl(32, 22%, 85%);
-    }
-
-    .upload-zone span {
-        font-size: 0.62rem;
-        color: hsl(25, 15%, 40%);
-        margin-top: 3px;
-        font-family: 'Inter', sans-serif;
-    }
-
-    .profile-preview-wrap {
-        position: relative;
-        width: 84px;
-        margin: 0.8rem auto 0;
-    }
-
-    .profile-preview-wrap img {
-        width: 84px;
-        height: 84px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2.5px solid hsl(28 60% 45% / 0.40);
-        display: block;
-    }
-
-    .remove-img-btn {
-        position: absolute;
-        top: -3px;
-        right: -3px;
-        width: 22px;
-        height: 22px;
-        border-radius: 50%;
-        background: hsl(0, 65%, 48%);
-        border: none;
-        cursor: pointer;
-        color: white;
-        font-size: 11px;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        line-height: 1;
-        transition: background 0.2s;
-    }
-
-    .remove-img-btn:hover {
-        background: hsl(0, 65%, 40%);
-    }
-
-    /* ── Gold submit button ── */
-    .btn-gold {
-        display: block;
-        width: 100%;
-        height: 42px;
-        background: linear-gradient(135deg, hsl(28,60%,45%), hsl(18,70%,38%));
-        color: hsl(35, 30%, 97%);
-        font-family: 'Inter', sans-serif;
-        font-size: 0.875rem;
-        font-weight: 600;
-        border: none;   
-        border-radius: 0.65rem;
-        cursor: pointer;
-        margin-top: 1.2rem;
-        transition: filter 0.25s, box-shadow 0.25s, transform 0.1s;
-        box-shadow: 0 4px 14px hsl(28 60% 45% / 0.32);
-        letter-spacing: 0.01em;
-    }
-
-    .btn-gold:hover:not(:disabled) {
-        filter: brightness(1.08);
-        box-shadow: 0 6px 20px hsl(28 60% 45% / 0.42);
-    }
-
-    .btn-gold:active:not(:disabled) {
-        transform: scale(0.985);
-    }
-
-    .btn-gold:disabled {
-        opacity: 0.55;
-        cursor: not-allowed;
-    }
-
-    /* ── Bottom footer link ── */
-    .auth-footer {
-        text-align: center;
-        font-size: 0.82rem;
-        color: hsl(25 30% 10% / 0.60);
-        font-weight: 500;
-        margin-top: 1.1rem;
-    }
-
-    .auth-footer a {
-        color: hsl(22, 50%, 38%);
-        font-weight: 700;
-        text-decoration: underline;
-        text-underline-offset: 2px;
-        transition: color 0.2s;
-    }
-
-    .auth-footer a:hover {
-        color: hsl(28, 60%, 45%);
-    }
-
-    /* Password hint text */
-    .pass-hint {
-        font-size: 0.67rem;
-        color: hsl(25, 15%, 40%);
-        margin-top: 0.35rem;
-    }
-
-    /* ── Kendo Notification custom style ── */
-    .k-notification-wrap {
-        font-family: 'Inter', sans-serif !important;
-        font-size: 0.82rem !important;
-        border-radius: 0.6rem !important;
-    }
-
-    body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--paper);
-    min-height: 100vh;
+/* ═══════════════════════════════════════
+   AUTH STAGE + GLASS CARD  (unchanged)
+═══════════════════════════════════════ */
+.auth-stage {
+    position: fixed; inset: 0; z-index: 10;
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Reduce 2rem to a smaller value, e.g., 0.5rem */
-    padding: 0.5rem 1rem; 
 }
 
-     /* Background  */
-    .netflix-bg-wrapper {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+.glass-card {
+    position: relative; z-index: 10;
+    width: 100%; max-width: 880px;
+    margin: 0 1rem;
+    display: flex;
+    border-radius: 24px;
     overflow: hidden;
-    background-color: #000;
-    z-index: -1;
-    perspective: 1000px;
-    }
-    .background-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
+    background: var(--bg-card);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(107,155,230,0.22);
+    box-shadow:
+        0 2px 0 rgba(255,255,255,0.9) inset,
+        0 0 0 1px rgba(255,255,255,0.35),
+        0 24px 64px rgba(3,40,159,0.12),
+        0 4px 16px rgba(107,155,230,0.10);
+    animation: cardIn 0.7s cubic-bezier(0.16,1,0.3,1) both;
+}
+@@keyframes cardIn {
+    from { opacity:0; transform: translateY(24px) scale(0.98); }
+    to   { opacity:1; transform: translateY(0) scale(1); }
+}
+.glass-card::before {
+    content:'';
+    position: absolute; top:0; left:0; right:0; height:2px;
+    background: linear-gradient(90deg, transparent 0%, var(--sky) 30%, var(--gold) 60%, transparent 100%);
+    z-index: 20;
+}
+
+/* ── Art Side Panel ── */
+.art-side {
+    width: 220px; flex-shrink: 0;
+    position: relative; overflow: hidden;
+    background: linear-gradient(160deg, var(--cobalt-dk) 0%, var(--cobalt) 60%, var(--cobalt-lt) 100%);
+    @* background:URL('https://img.freepik.com/premium-photo/biggest-art-gallery-india-portrait-design_762785-54209.jpg'); *@
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+    border-radius: 20px 5px;
+    padding: 2rem 1.4rem;
+}
+
+.art-side-grid {
+    position: absolute; inset: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Har image ki width set karega */
-    gap: 0;
-    overflow: hidden;
-    background-color: #151515; /* Base color black rakhein */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    opacity: 0.18;
 }
-.background-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Isse images stretch nahi hongi */
-    opacity: 0.1; /* Images ko thoda light rakhein taaki form focus me rahe */
-}
-.overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(0,0,0,0) 20%, rgba(0,0,0,0.8) 90%);
-    z-index: 0;
+.art-side-tile { background-size: cover; background-position: center; }
+
+.art-side-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(160deg, rgba(2,26,110,0.6) 0%, rgba(3,40,159,0.3) 100%);
 }
 
-    /* Moving Grid */
-   .art-mosaic-grid {
-    display: grid;
-    /* Density badhane ke liye dynamic columns */
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
-    gap: 0;
-    
-    /* Screen coverage ke liye size badhayein */
-    width: 200%; 
-    height: 200%;
-    position: absolute;
-    top: -50%;
-    left: -50%;
-     
-    opacity: 0.5;
-    z-index: 1
-
-    /* 3D Tilted Effect */
-    transform: rotateX(25deg) rotateZ(-15deg) skewX(-5deg); 
-    
-    @* transition: opacity 1.5s ease-in-out; *@
-
-    /* Browser style continuous moving animation: duration, linear, infinite */
-    animation: background-browse-up 60s linear infinite;
-
-     
+.art-side-brand {
+    position: relative; z-index: 2;
+    display: flex; align-items: center; gap: 8px;
+}
+.art-side-gem {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-lt));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 14px rgba(237,163,18,0.5);
+}
+.art-side-gem svg { width:16px; height:16px; }
+.art-side-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem; font-weight: 700;
+    color: var(--white); letter-spacing: 0.04em;
 }
 
-    .art-tile {
-    width: 100%;
-    height: 300px; /* Thodi dense grid */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-   margin: -0.5px;
-    padding: 0;
-
-    border-radius: 0;
-     box-shadow: none;
-     border: none;
-
-    /* Zoom animation hamesha chalti rahegi */
-    animation: browse-zoom 20s infinite ease-in-out;
-    animation-delay: calc(var(--tile-index) * 0.2s);
-
-    /* Browsing effect ke liye smooth transition */
-    transition: transform 0.5s ease;
-    @* display: block;  *@
+.art-side-tagline { position: relative; z-index: 2; }
+.art-side-tagline h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem; font-weight: 600; font-style: italic;
+    color: var(--white); line-height: 1.3; margin-bottom: 0.5rem;
+}
+.art-side-tagline h2 span { color: var(--gold-lt); font-style: normal; }
+.art-side-tagline p {
+    font-size: 0.7rem; color: rgba(168,196,240,0.7);
+    line-height: 1.5; font-weight: 300;
 }
 
-    /* Gradual Dark Shadow (Netflix Overlay) */
-    .netflix-overlay {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(to top),
-                    radial-gradient(circle, transparent 20%, #000 100%);
-        z-index: 1;
-    }
-    .art-mosaic-grid.grid-reveal {
-    opacity: 0.6 !important; 
-    /* Reveal state mein transform ko animation ke sath match rakhein */
-    transform: rotateX(25deg) rotateZ(-15deg) skewX(-5deg) scale(1);
+/* ── Form Side ── */
+.form-side {
+    flex: 1; display: flex; flex-direction: column;
+    overflow-y: auto; padding: 1.6rem 2rem;
+    max-height: 92vh;
+}
+.form-side::-webkit-scrollbar { width: 3px; }
+.form-side::-webkit-scrollbar-thumb { background: var(--sky-lt); border-radius: 2px; }
+
+.form-heading { margin-bottom: 1.2rem; }
+.form-heading h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem; font-weight: 700;
+    color: var(--gold); line-height: 1; margin-bottom: 0.2rem;
+}
+.form-heading p { font-size: 0.75rem; color: var(--sky); font-weight: 400; }
+
+/* ── Avatar ── */
+.avatar-upload { display: flex; justify-content: center; margin-bottom: 1rem; }
+.avatar-zone { position: relative; width: 70px; height: 70px; }
+.avatar-circle {
+    width: 70px; height: 70px; border-radius: 50%;
+    background: rgba(107,155,230,0.08);
+    border: 2px dashed var(--sky);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    cursor: pointer; overflow: hidden;
+    transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+}
+.avatar-circle:hover {
+    border-color: var(--cobalt);
+    background: rgba(3,40,159,0.06);
+    box-shadow: 0 0 0 4px rgba(107,155,230,0.14);
+}
+.avatar-circle img { width:100%; height:100%; object-fit:cover; border-radius:50%; display:none; }
+.upload-placeholder { display:flex; flex-direction:column; align-items:center; gap:3px; pointer-events:none; }
+.upload-placeholder span { font-size:0.52rem; color:var(--sky); font-weight:600; text-transform:uppercase; letter-spacing:0.06em; }
+.avatar-remove {
+    position: absolute; top:-3px; right:-3px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--err); border: none;
+    cursor: pointer; color: white; font-size: 9px;
+    display: none; align-items: center; justify-content: center;
+    transition: background 0.2s;
+}
+.avatar-remove.visible { display: flex; }
+.avatar-remove:hover { background: #9B2335; }
+
+/* ── Fields ── */
+.field { margin-bottom: 0.75rem; position: relative; }
+.field label {
+    display: block; font-size: 0.62rem; font-weight: 600;
+    color: var(--cobalt); letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 0.28rem;
+}
+.input-wrap { position: relative; display: flex; align-items: center; }
+.input-icon {
+    position: absolute; left: 10px;
+    color: var(--sky); pointer-events: none; display: flex;
+    transition: color 0.2s;
+}
+.input-wrap:focus-within .input-icon { color: var(--cobalt); }
+
+.field input,
+.field select {
+    width: 100%; height: 40px;
+    background: rgba(255,255,255,0.7);
+    border: 1.5px solid rgba(107,155,230,0.25);
+    border-radius: 10px;
+    padding: 0 2.2rem 0 2.4rem;
+    font-family: 'Jost', sans-serif; font-size: 0.82rem;
+    color: var(--ink); outline: none;
+    transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+    -webkit-appearance: none;
+}
+.field input::placeholder { color: rgba(107,155,230,0.5); }
+.field input:focus, .field select:focus {
+    border-color: var(--cobalt);
+    background: var(--white);
+    box-shadow: 0 0 0 3.5px rgba(3,40,159,0.10);
+}
+.field input.is-invalid, .field select.is-invalid {
+    border-color: var(--err);
+    background: rgba(192,57,43,0.05);
+}
+.field input.is-valid, .field select.is-valid { border-color: var(--ok); }
+
+.select-wrap::after {
+    content: '';
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    width: 0; height: 0;
+    border-left: 4px solid transparent; border-right: 4px solid transparent;
+    border-top: 5px solid var(--sky); pointer-events: none;
+}
+.select-wrap select { padding-right: 1.8rem; cursor: pointer; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+
+.field-error {
+    display: none; align-items: center; gap: 4px;
+    font-size: 0.63rem; color: var(--err);
+    margin-top: 0.2rem; font-weight: 500;
+    animation: errIn 0.18s ease-out;
+}
+.field-error.visible { display: flex; }
+@@keyframes errIn {
+    from { opacity:0; transform: translateY(-3px); }
+    to   { opacity:1; transform: translateY(0); }
 }
 
-    /* Glass Card for Register Form */
-    .auth-container {
-        position: relative;
-        z-index: 10;
-        display: flex;
-        justify-content: flex-end; /* Card ko right side rakhne ke liye */
-        align-items: center;
-        min-height: 100vh;
-        padding-right: 10%; /* Image 3 jaisa look */
-    }
-    .grid-reveal {
-        opacity: 0.6 !important; /* Visible and store background */
-    }
-    .art-tile {
-    margin: -0.5px;
-    outline: 1px solid transparent; /* Anti-aliasing lines fix karne ke liye */
+.pass-toggle-btn {
+    position: absolute; right: 8px;
+    background: none; border: none; cursor: pointer;
+    color: var(--sky); display: flex; padding: 0;
+    transition: color 0.2s;
 }
-    
-    @@keyframes background-zoom {
+.pass-toggle-btn:hover { color: var(--cobalt); }
 
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.1); } /* Zoom in */
-    }
-
-    @@keyframes background-browse-up {
-    0% {
-        /* Start position: Thoda upar */
-        transform: rotateX(25deg) rotateZ(-15deg) skewX(-10deg) translateY(0%);
-    }
-    100% {
-        /* End position: Thoda niche move ho jaye 'translateY' badhakar */
-        transform: rotateX(25deg) rotateZ(-15deg) skewX(-10deg) translateY(20%);
-    }
+.pass-strength-bar {
+    height: 2px; background: rgba(107,155,230,0.15);
+    border-radius: 2px; margin-top: 0.25rem; overflow: hidden;
 }
-@@keyframes browse-pan {
-    0% { transform: rotateX(25deg) rotateZ(-15deg) skewX(-5deg) translateY(0%); }
-    100% { transform: rotateX(25deg) rotateZ(-15deg) skewX(-5deg) translateY(20%); }
+.pass-strength-fill {
+    height: 100%; width: 0%;
+    border-radius: 2px; transition: width 0.3s, background 0.3s;
+}
+.pass-hint { font-size: 0.6rem; color: rgba(107,155,230,0.7); margin-top: 0.2rem; }
+
+/* ── Submit ── */
+.btn-primary {
+    width: 100%; height: 44px;
+    background: linear-gradient(130deg, var(--cobalt-lt) 0%, var(--cobalt) 55%, var(--cobalt-dk) 100%);
+    color: var(--white);
+    font-family: 'Jost', sans-serif; font-size: 0.875rem; font-weight: 600;
+    border: none; border-radius: 10px; cursor: pointer;
+    letter-spacing: 0.06em;
+    transition: transform 0.2s, box-shadow 0.25s, filter 0.2s;
+    box-shadow: 0 6px 22px rgba(3,40,159,0.28);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-top: 0.9rem; position: relative; overflow: hidden;
+}
+.btn-primary::before {
+    content: '';
+    position: absolute; top:0; left:-100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent);
+    transform: skewX(-18deg); transition: left 0.5s ease;
+}
+.btn-primary:hover::before { left: 160%; }
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 32px rgba(3,40,159,0.38);
+    filter: brightness(1.08);
+}
+.btn-primary:active:not(:disabled) { transform: translateY(0) scale(0.99); }
+.btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.btn-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--gold); flex-shrink: 0;
+    box-shadow: 0 0 8px rgba(237,163,18,0.7);
 }
 
-    /* ── Animations ── */
-    @@keyframes float {
-        0%, 100% { transform: translateY(0px); }
-        50%       { transform: translateY(-6px); }
-    }
+.auth-footer-text {
+    text-align: center; font-size: 0.75rem;
+    color: rgba(107,155,230,0.75); margin-top: 1rem;
+}
+.auth-footer-text a {
+    color: var(--cobalt); font-weight: 700; text-decoration: none;
+    border-bottom: 1px solid rgba(3,40,159,0.3);
+    transition: color 0.2s, border-color 0.2s;
+}
+.auth-footer-text a:hover { color: var(--gold); border-color: var(--gold); }
 
-    @@keyframes bgPan {
-        0%   { transform: scale(1.15) translate(0%, 0%); }
-        25%  { transform: scale(1.20) translate(-2%, -1%); }
-        50%  { transform: scale(1.15) translate(-1%, 1%); }
-        75%  { transform: scale(1.20) translate(1%, -1%); }
-        100% { transform: scale(1.15) translate(0%, 0%); }
-    }
+.spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.25);
+    border-top-color: white;
+    border-radius: 50%; animation: spin 0.7s linear infinite;
+}
+@@keyframes spin { to { transform: rotate(360deg); } }
 
-    @@keyframes scaleIn {
-        from { opacity: 0; transform: scale(0.96); }
-        to   { opacity: 1; transform: scale(1); }
-    }
+.section-divider {
+    display: flex; align-items: center; gap: 0.6rem;
+    margin: 0.7rem 0 0.5rem;
+}
+.section-divider::before, .section-divider::after {
+    content: ''; flex: 1; height: 1px;
+    background: rgba(107,155,230,0.2);
+}
+.section-divider span {
+    font-size: 0.58rem; color: var(--sky); font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap;
+}
+
+@@media (max-width: 680px) {
+    .art-side { display: none; }
+    .glass-card { max-width: 420px; }
+    .form-side { padding: 1.4rem 1.2rem; }
+    .form-row { grid-template-columns: 1fr; }
+}
 </style>
 
-<div class="auth-page">
-    @* <img class="auth-bg-img"
-         src="https://images.unsplashr5om/photo-1578926375605-eaf7559b1458?w=1920&q=80"
-         alt="Art gallery background" />
-    <div class="auth-bg-overlay"></div> *@
+<!-- ── Marquee Background ── -->
+<div class="marquee-bg" id="marqueeBg">
+    <!-- rows injected by JS -->
+    <div class="marquee-veil"></div>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+</div>
 
-      <div class="netflix-bg-wrapper">
-            <div class="art-mosaic-grid" id="artGrid"></div>
-            <div class="netflix-overlay"></div>
+<!-- ── Auth Stage + Glass Card (100% original HTML, untouched) ── -->
+<div class="auth-stage">
+    <div class="glass-card">
+
+        <!-- Art Side -->
+        <div class="art-side">
+            <div class="art-side-grid" id="artSideGrid"></div>
+            <div class="art-side-overlay"></div>
+            <div class="art-side-brand">
+                <div class="logo-icon" style="width: 58px; height: 58px; border-radius: 18px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #0b0c10; box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24); margin-right: 14px;">
+                    <img src="/Images/Artify-Logos.png" alt="" aria-hidden="true" style="width: 100%; height: 100%; object-fit: cover; transform: scale(2.65) translateX(3%);" />
+                </div>
+                <span class="art-side-name">Artify</span>
+            </div>
+            <div class="art-side-tagline">
+                <h2>Collect<br><span>Original</span><br>Art</h2>
+                <p>Join thousands of collectors discovering extraordinary works from global artists.</p>
+            </div>
         </div>
 
-    <div class="auth-wrapper">
-        <div class="glass-card">
+        <!-- Form Side -->
+        <div class="form-side">
+            <div class="form-heading">
+                <h1>Create Account</h1>
+                <p>Join the Artify community — free forever</p>
+            </div>
 
-            @* <img class="logo-float"
-                 src="~MVC/wwwroot/images/artify-logo.png"
-                 onerror="this.style.display='none'"
-                 alt="Artify" /> *@
-            <h1 class="auth-title">Create Account</h1>
-            <p class="auth-subtitle">Join the Artify community</p>
-
-            <!-- Kendo Notification container -->
-            <span id="kNotification"></span>
-
-            <!-- FORM — no asp-action, AJAX submit karega -->
-            <form id="registerForm" novalidate="novalidate">
-
-                <!-- Profile Image -->
-                <div style="text-align:center">
-                    <input type="file"
-                           id="profileImageFile"
-                           name="profileImageFile"
-                           accept="image/*"
-                           style="display:none"
-                           onchange="onImageSelected(this)" />
-
-                    <div id="preview-wrap" class="profile-preview-wrap" style="display:none">
-                        <img id="preview-img" src="" alt="Profile preview" />
-                        <button type="button" class="remove-img-btn"
-                                onclick="removeImage()" title="Remove image">
-                            &#x2715;
-                        </button>
-                    </div>
-
-                    <div id="upload-zone" class="upload-zone"
+            <!-- Avatar upload -->
+            <div class="avatar-upload">
+                <div class="avatar-zone">
+                    <div class="avatar-circle" id="avatarCircle"
                          onclick="document.getElementById('profileImageFile').click()">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
-                             fill="none" viewBox="0 0 24 24"
-                             stroke="hsl(25,15%,40%)" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1
-                                     m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                        </svg>
-                        <span>Upload Photo</span>
+                        <img id="avatarPreview" src="" alt="Preview" />
+                        <div class="upload-placeholder" id="uploadPlaceholder">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B9BE6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            <span>Photo</span>
+                        </div>
                     </div>
+                    <button type="button" class="avatar-remove" id="avatarRemoveBtn" onclick="removeImage()">&#x2715;</button>
                 </div>
+            </div>
+            <div class="field-error" id="err-avatar" style="justify-content:center; margin-top:-0.4rem; margin-bottom:0.5rem;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>Please upload a profile photo</span>
+            </div>
+
+            <input type="file" id="profileImageFile" name="profileImageFile" accept="image/*" style="display:none" onchange="onImageSelected(this)">
+
+            <form id="registerForm" novalidate>
+
+                <div class="section-divider"><span>Personal Info</span></div>
 
                 <!-- Full Name + Username -->
-                <div class="form-grid-2">
-                    <div class="form-group">
-                        <label class="form-label" for="c_FullName">Full Name</label>
-                        <input id="c_FullName" name="c_FullName"
-                               type="text" placeholder="John Doe"
-                               data-required-msg="Full Name is required"
-                               data-pattern="^[a-zA-Z\s]+$"
-                               data-pattern-msg="Only letters and spaces allowed"
-                               class="k-textbox" />
+                <div class="form-row">
+                    <div class="field">
+                        <label for="c_FullName">Full Name</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </span>
+                            <input id="c_FullName" name="c_FullName" type="text" placeholder="John Doe" autocomplete="name" />
+                        </div>
+                        <div class="field-error" id="err-fullname">
+                            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            <span id="err-fullname-text"></span>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label" for="c_UserName">Username</label>
-                        <input id="c_UserName" name="c_UserName"
-                               type="text" placeholder="johndoe99"
-                               data-required-msg="Username is required"
-                               data-minlength="3"
-                               data-minlength-msg="Min 3 characters"
-                               class="k-textbox" />
+                    <div class="field">
+                        <label for="c_UserName">Username</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </span>
+                            <input id="c_UserName" name="c_UserName" type="text" placeholder="johndoe99" />
+                        </div>
+                        <div class="field-error" id="err-username">
+                            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            <span id="err-username-text"></span>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Email -->
-                <div class="form-group">
-                    <label class="form-label" for="c_Email">Email</label>
-                    <input id="c_Email" name="c_Email"
-                           type="email" placeholder="your@email.com"
-                           data-required-msg="Email is required"
-                           data-email-msg="Invalid email format"
-                           class="k-textbox" />
+                <div class="field">
+                    <label for="c_Email">Email Address</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        </span>
+                        <input id="c_Email" name="c_Email" type="email" placeholder="your@email.com" autocomplete="email" />
+                    </div>
+                    <div class="field-error" id="err-email">
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <span id="err-email-text"></span>
+                    </div>
                 </div>
 
                 <!-- Gender + Mobile -->
-                <div class="form-grid-2">
-                    <div class="form-group">
-                        <label class="form-label" for="c_Gender">Gender</label>
-                        <!--
-                            Kendo DropDownList — select element
-                            kendoDropDownList() JS mein call hoga
-                        -->
-                        <select id="c_Gender" name="c_Gender"
-                                data-required-msg="Gender is required">
-                            <option value="">Select Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                        </select>
+                <div class="form-row">
+                    <div class="field">
+                        <label for="c_Gender">Gender</label>
+                        <div class="input-wrap select-wrap">
+                            <span class="input-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                            </span>
+                            <select id="c_Gender" name="c_Gender">
+                                <option value="">Select</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="field-error" id="err-gender">
+                            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            <span>Please select gender</span>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label" for="c_Mobile">Mobile</label>
-                        <!--
-                            Kendo MaskedTextBox — sirf digits, exactly 10
-                            mask: "0000000000" = 10 digits
-                        -->
-                        <input id="c_Mobile" name="c_Mobile"
-                               placeholder="1234567890" />
+                    <div class="field">
+                        <label for="c_Mobile">Mobile Number</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                            </span>
+                            <input id="c_Mobile" name="c_Mobile" type="tel" placeholder="1234567890" maxlength="10" inputmode="numeric" />
+                        </div>
+                        <div class="field-error" id="err-mobile">
+                            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            <span id="err-mobile-text"></span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Password + Confirm Password -->
-                <div class="form-grid-2">
-                    <div class="form-group">
-                        <label class="form-label" for="c_Password">Password</label>
-                        <div class="pass-wrapper">
-                            <input id="c_Password" name="c_Password"
-                                   type="password" placeholder="••••••••"
-                                   data-required-msg="Password is required"
-                                   class="k-textbox" />
-                            <button type="button" class="pass-toggle"
-                                    onclick="togglePass('c_Password','eye-pass')">
-                                <svg id="eye-pass" xmlns="http://www.w3.org/2000/svg"
-                                     width="15" height="15" fill="none"
-                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <div class="section-divider"><span>Security</span></div>
+
+                <!-- Password + Confirm -->
+                <div class="form-row">
+                    <div class="field">
+                        <label for="c_Password">Password</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                            </span>
+                            <input id="c_Password" name="c_Password" type="password" placeholder="••••••••" autocomplete="new-password" />
+                            <button type="button" class="pass-toggle-btn" onclick="togglePass('c_Password','eye-pass')">
+                                <svg id="eye-pass" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                                     <circle cx="12" cy="12" r="3"/>
                                 </svg>
                             </button>
                         </div>
+                        <div class="pass-strength-bar">
+                            <div class="pass-strength-fill" id="strengthFill"></div>
+                        </div>
+                        <div class="field-error" id="err-password">
+                            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            <span id="err-password-text"></span>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label" for="c_ConfirmPassword">Confirm Password</label>
-                        <div class="pass-wrapper">
-                            <input id="c_ConfirmPassword" name="c_ConfirmPassword"
-                                   type="password" placeholder="••••••••"
-                                   data-required-msg="Please confirm password"
-                                   class="k-textbox" />
-                            <button type="button" class="pass-toggle"
-                                    onclick="togglePass('c_ConfirmPassword','eye-conf')">
-                                <svg id="eye-conf" xmlns="http://www.w3.org/2000/svg"
-                                     width="15" height="15" fill="none"
-                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <div class="field">
+                        <label for="c_ConfirmPassword">Confirm Password</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                            </span>
+                            <input id="c_ConfirmPassword" name="c_ConfirmPassword" type="password" placeholder="••••••••" autocomplete="new-password" />
+                            <button type="button" class="pass-toggle-btn" onclick="togglePass('c_ConfirmPassword','eye-conf')">
+                                <svg id="eye-conf" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                                     <circle cx="12" cy="12" r="3"/>
                                 </svg>
                             </button>
                         </div>
-                    </div>      
+                        <div class="field-error" id="err-confirm">
+                            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            <span id="err-confirm-text"></span>
+                        </div>
+                    </div>
                 </div>
 
-                <p class="pass-hint">
-                    Min 6 chars &middot; uppercase &middot; lowercase
-                    &middot; number &middot; special char (@@$!%*?&amp;)
-                </p>
+                <p class="pass-hint">Min 6 chars · uppercase · lowercase · number · special char (@@$!%*?&)</p>
 
-                <button type="submit" class="btn-gold" id="registerBtn">
+                <button type="submit" class="btn-primary" id="registerBtn">
+                    <span class="btn-dot"></span>
                     Create Account
                 </button>
+
             </form>
 
-            <p class="auth-footer">
-                Already have an account?
-                <a asp-action="UserLogin" asp-controller="Auth">Sign In</a>
+            <p class="auth-footer-text">
+                Already have an account? <a asp-action="UserLogin" asp-controller="Auth">Sign In</a>
             </p>
         </div>
+
     </div>
 </div>
 
@@ -721,338 +629,324 @@
 <script>
 $(function () {
 
-     // 1. Base URL and Constants
-    var API_BASE = 'http://localhost:5183';
-    var CACHE_KEY = 'unsplash_art_images';
+    var API_BASE       = 'http://localhost:5183';
+    var CACHE_KEY      = 'unsplash_art_images';
     var CACHE_TIME_KEY = 'unsplash_last_fetch';
-    var ONE_HOUR = 3600000;
+    var ONE_HOUR       = 3600000;
 
-    // 2. Render Images Function (Fix: Added fragment definition)
-    async function renderImages(images) {
-        console.log("Starting to render images...", images.length);
-        const grid = document.getElementById('artGrid');
-        if (!grid) {
-            console.error("artGrid element not found!");
-            return;
+    /* ─────────────────────────────────────────
+       SHARED MARQUEE BUILDER (same as Login)
+    ───────────────────────────────────────── */
+    var NUM_ROWS   = 4;
+    var GAP        = 5;
+    var ROW_SPEEDS = [32, 44, 26, 38];
+
+    var SEEDS = [
+        10,11,15,20,22,24,25,26,27,28,30,31,32,37,40,42,43,44,45,48,
+        50,52,55,56,57,58,60,64,65,67,70,72,74,75,76,77,79,80,82,83,
+        84,85,86,87,90,91,92,94,95,96,97,99,100,101,102,103,104,106,107,108,
+        110,112,114,115,116,118,119,120,121,122,123,124,125,126,127,128
+    ];
+
+    var bgEl = document.getElementById('marqueeBg');
+
+    function shuffle(arr) {
+        var a = arr.slice();
+        for (var i = a.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
         }
+        return a;
+    }
 
-        grid.innerHTML = '';
-        const fragment = document.createDocumentFragment(); // FIXED: Was missing before
+    function buildMarquee() {
+        bgEl.querySelectorAll('.marquee-row').forEach(function(el) { el.remove(); });
+        var vw = window.innerWidth, vh = window.innerHeight;
+        var tileH = Math.floor((vh - GAP * (NUM_ROWS + 1)) / NUM_ROWS);
+        var tileW = Math.round(tileH * 1.45);
+        var tilesPerCopy = Math.ceil(vw / (tileW + GAP)) + 2;
+        var shuffled = shuffle(SEEDS);
+        var veil = bgEl.querySelector('.marquee-veil');
 
-        const imageLoadPromises = images.map((item, index) => {
-            return new Promise((resolve) => {
-                const tile = document.createElement('div');
+        for (var r = 0; r < NUM_ROWS; r++) {
+            var row   = document.createElement('div'); row.className = 'marquee-row';
+            var strip = document.createElement('div'); strip.className = 'marquee-strip';
+            strip.style.animationDuration = ROW_SPEEDS[r] + 's';
+            var totalTiles = tilesPerCopy * 2;
+            for (var t = 0; t < totalTiles; t++) {
+                var seed = shuffled[(r * 17 + (t % tilesPerCopy)) % shuffled.length];
+                var tile = document.createElement('div');
                 tile.className = 'art-tile';
-                tile.style.setProperty('--tile-index', index);
-
-                // Handle both Unsplash object and direct string URLs
-                const url = item.urls ? item.urls.regular : (typeof item === 'string' ? item : '');
-                
-                if (!url) {
-                    resolve();
-                    return;
-                }
-
-                const img = new Image();
-                img.src = url;
-                img.onload = () => {
-                    tile.style.backgroundImage = `url('${url}')`;
-                    fragment.appendChild(tile);
-                    resolve();
-                };
-                img.onerror = () => {
-                    console.warn("Failed to load image:", url);
-                    resolve();
-                };
-            });
-        });
-
-        await Promise.all(imageLoadPromises);
-        grid.appendChild(fragment);
-        
-        // Final reveal
-        setTimeout(() => {
-            grid.style.opacity = '1';
-            grid.classList.add('grid-reveal');
-            console.log("Grid revealed successfully");
-        }, 100);
+                tile.style.width = tile.style.minWidth = tileW + 'px';
+                var img = new Image();
+                img.src = 'https://picsum.photos/seed/art' + seed + 'r' + r + '/' + tileW + '/' + tileH;
+                img.alt = ''; img.loading = 'lazy'; img.draggable = false;
+                tile.appendChild(img); strip.appendChild(tile);
+            }
+            row.appendChild(strip); bgEl.insertBefore(row, veil);
+        }
     }
 
-    // 3. Load Logic (Fix: Proper error handling and logging)
-    async function loadMosaicBackground() {
-        console.log("Initializing Mosaic Background...");
-        const cachedData = localStorage.getItem(CACHE_KEY);
-        const lastFetch = localStorage.getItem(CACHE_TIME_KEY);
-        const now = Date.now();
+    buildMarquee();
 
-        if (cachedData && lastFetch && (now - lastFetch < ONE_HOUR)) {
-            console.log("Loading from LocalStorage...");
-            await renderImages(JSON.parse(cachedData));
+    // Swap in real art from your API if available
+    async function tryLoadArtApi() {
+        try {
+            var res = await fetch(API_BASE + '/api/ImageApi/art-background?count=80');
+            if (!res.ok) return;
+            var data = await res.json();
+            var urls = data.map(function(d) { return d.urls ? d.urls.regular : d; }).filter(Boolean);
+            if (urls.length < 8) return;
+            bgEl.querySelectorAll('.marquee-row').forEach(function(el) { el.remove(); });
+            var veil = bgEl.querySelector('.marquee-veil');
+            var vw = window.innerWidth, vh = window.innerHeight;
+            var tileH = Math.floor((vh - GAP * (NUM_ROWS + 1)) / NUM_ROWS);
+            var tileW = Math.round(tileH * 1.45);
+            var tilesPerCopy = Math.ceil(vw / (tileW + GAP)) + 2;
+            for (var r = 0; r < NUM_ROWS; r++) {
+                var row = document.createElement('div'); row.className = 'marquee-row';
+                var strip = document.createElement('div'); strip.className = 'marquee-strip';
+                strip.style.animationDuration = ROW_SPEEDS[r] + 's';
+                var totalTiles = tilesPerCopy * 2;
+                for (var t = 0; t < totalTiles; t++) {
+                    var url = urls[(r * 19 + (t % tilesPerCopy)) % urls.length];
+                    var tile = document.createElement('div');
+                    tile.className = 'art-tile';
+                    tile.style.width = tile.style.minWidth = tileW + 'px';
+                    var img = new Image(); img.src = url; img.alt = ''; img.loading = 'lazy'; img.draggable = false;
+                    tile.appendChild(img); strip.appendChild(tile);
+                }
+                row.appendChild(strip); bgEl.insertBefore(row, veil);
+            }
+        } catch(e) {}
+    }
+    tryLoadArtApi();
+
+    var resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(buildMarquee, 200);
+    });
+
+    /* ─────────────────────────────────────────
+       ORIGINAL BACKEND LOGIC (unchanged)
+    ───────────────────────────────────────── */
+
+    function swalSuccess(msg) {
+        Swal.fire({
+            icon: 'success', title: 'Account Created!', text: msg,
+            confirmButtonColor: '#03289F', background: '#DFE6E9', color: '#0A1628',
+            timer: 2500, timerProgressBar: true, showConfirmButton: false, toast: true, position: 'top-end'
+        });
+    }
+    function swalError(msg) {
+        Swal.fire({
+            icon: 'error', title: 'Registration Failed', text: msg,
+            confirmButtonColor: '#03289F', background: '#DFE6E9', color: '#0A1628'
+        });
+    }
+    function swalWarning(msg) {
+        Swal.fire({
+            icon: 'warning', title: 'Heads up', text: msg,
+            confirmButtonColor: '#03289F', background: '#DFE6E9', color: '#0A1628',
+            toast: true, position: 'top-end', timer: 3500, timerProgressBar: true, showConfirmButton: false
+        });
+    }
+
+    $('#c_Mobile').on('input', function() {
+        this.value = this.value.replace(/\D/g, '').slice(0, 10);
+    });
+
+    $('#c_Password').on('input', function() {
+        var val = $(this).val();
+        var score = 0;
+        if (val.length >= 6)               score++;
+        if (/[A-Z]/.test(val))             score++;
+        if (/[a-z]/.test(val))             score++;
+        if (/\d/.test(val))                score++;
+        if (/[@@$!%*?&]/.test(val))         score++;
+        var fill  = document.getElementById('strengthFill');
+        var pct   = (score / 5) * 100;
+        var color = score <= 1 ? '#C0392B' : score <= 3 ? '#EDA312' : '#27AE60';
+        fill.style.width = pct + '%';
+        fill.style.background = color;
+    });
+
+    function setErr(inputId, errId, textId, msg) {
+        var inp = document.getElementById(inputId);
+        if (inp) { inp.classList.add('is-invalid'); inp.classList.remove('is-valid'); }
+        var err = document.getElementById(errId);
+        if (err) err.classList.add('visible');
+        var txt = document.getElementById(textId);
+        if (txt) txt.textContent = msg;
+    }
+    function clearErr(inputId, errId) {
+        var inp = document.getElementById(inputId);
+        if (inp) { inp.classList.remove('is-invalid'); inp.classList.add('is-valid'); }
+        var err = document.getElementById(errId);
+        if (err) err.classList.remove('visible');
+    }
+
+    $('#c_FullName').on('blur', function() {
+        var v = $(this).val().trim();
+        if (!v) { setErr('c_FullName','err-fullname','err-fullname-text','Full name is required'); return; }
+        if (!/^[a-zA-Z\s]+$/.test(v)) { setErr('c_FullName','err-fullname','err-fullname-text','Only letters and spaces allowed'); return; }
+        clearErr('c_FullName','err-fullname');
+    });
+    $('#c_UserName').on('blur', function() {
+        var v = $(this).val().trim();
+        if (!v) { setErr('c_UserName','err-username','err-username-text','Username is required'); return; }
+        if (v.length < 3) { setErr('c_UserName','err-username','err-username-text','Min 3 characters'); return; }
+        clearErr('c_UserName','err-username');
+    });
+    $('#c_Email').on('blur', function() {
+        var v = $(this).val().trim();
+        if (!v) { setErr('c_Email','err-email','err-email-text','Email is required'); return; }
+        var emailPattern = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+        if (emailPattern.test(v)) {
+            setErr('c_Email','err-email','err-email-text','Invalid email format');
             return;
         }
-
-        try {
-            console.log("Fetching from API:", API_BASE + '/api/ImageApi/art-background');
-            const response = await fetch(API_BASE + '/api/ImageApi/art-background?count=100');
-            
-            if (response.ok) {
-                const data = await response.json();
-                console.log("API Success:", data);
-                localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-                localStorage.setItem(CACHE_TIME_KEY, now.toString());
-                await renderImages(data);
-            } else {
-                throw new Error("API Response not OK: " + response.status);
-            }
-        } catch (error) {
-            console.error("Critical Error during fetch:", error);
-            if (cachedData) {
-                console.log("Falling back to old cache...");
-                await renderImages(JSON.parse(cachedData));
-            }
+        clearErr('c_Email','err-email');
+    });
+    $('#c_Gender').on('change', function() {
+        if (!$(this).val()) {
+            $(this).addClass('is-invalid').removeClass('is-valid');
+            $('#err-gender').addClass('visible');
+        } else {
+            $(this).removeClass('is-invalid').addClass('is-valid');
+            $('#err-gender').removeClass('visible');
         }
-    }
-
-    // 4. Start the process
-    loadMosaicBackground();
-
-
-    // ════════════════════════════════════════════════
-    // 1. KENDO NOTIFICATION
-    //    Top-center mein dikhega — success green, error red
-    // ════════════════════════════════════════════════
-    var notification = $("#kNotification").kendoNotification({
-        position: { pinned: true, top: 20, right: 20 },
-        autoHideAfter: 4000,      // 4 sec baad hide
-        stacking: "down",
-        templates: [
-            {
-                type: "success",
-                template: "<div style='padding:6px 4px;font-family:Inter,sans-serif'>" +
-                        "<strong>✔ Success</strong> &nbsp; #: message #</div>"
-            },
-            {
-                type: "error",
-                template: "<div style='padding:6px 4px;font-family:Inter,sans-serif'>" +
-                        "<strong>✖ Error</strong> &nbsp; #: message #</div>"
-            },
-            {
-                type: "warning",
-                template: "<div style='padding:6px 4px;font-family:Inter,sans-serif'>" +
-                        "<strong>⚠ Warning</strong> &nbsp; #: message #</div>"
-            }
-        ]
-    }).data("kendoNotification");
-
-    // Helper functions — show karna easy
-    function showSuccess(msg) { notification.show({ message: msg }, "success"); }
-    function showError(msg)   { notification.show({ message: msg }, "error");   }
-    function showWarning(msg) { notification.show({ message: msg }, "warning"); }
-
-
-    // ════════════════════════════════════════════════
-    // 2. KENDO TEXTBOX — sab inputs init
-    // ════════════════════════════════════════════════
-    $("#c_FullName").kendoTextBox();
-    $("#c_UserName").kendoTextBox();
-    $("#c_Email").kendoTextBox();
-    $("#c_Password").kendoTextBox({clearButton: false});
-    $("#c_ConfirmPassword").kendoTextBox({clearButton: false});
-
-
-    // ════════════════════════════════════════════════
-    // 3. KENDO DROPDOWNLIST — Gender
-    // ════════════════════════════════════════════════
-    $("#c_Gender").kendoDropDownList({
-        optionLabel: "Select Gender"
+    });
+    $('#c_Mobile').on('blur', function() {
+        var v = $(this).val().replace(/\D/g,'');
+        if (!v) { setErr('c_Mobile','err-mobile','err-mobile-text','Mobile number is required'); return; }
+        if (v.length !== 10) { setErr('c_Mobile','err-mobile','err-mobile-text','Must be exactly 10 digits'); return; }
+        clearErr('c_Mobile','err-mobile');
+    });
+    $('#c_Password').on('blur', function() {
+        var v = $(this).val();
+        if (!v) { setErr('c_Password','err-password','err-password-text','Password is required'); return; }
+        if (!/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@@$!%*?&]).{6,}$/.test(v)) {
+            setErr('c_Password','err-password','err-password-text','Min 6 chars, A-Z, a-z, 0-9, special char'); return;
+        }
+        clearErr('c_Password','err-password');
+    });
+    $('#c_ConfirmPassword').on('blur', function() {
+        var v = $(this).val();
+        if (!v) { setErr('c_ConfirmPassword','err-confirm','err-confirm-text','Please confirm your password'); return; }
+        if (v !== $('#c_Password').val()) { setErr('c_ConfirmPassword','err-confirm','err-confirm-text','Passwords do not match'); return; }
+        clearErr('c_ConfirmPassword','err-confirm');
     });
 
-
-    // ════════════════════════════════════════════════
-    // 4. KENDO MASKEDTEXTBOX — Mobile (sirf 10 digits)
-    //    mask "0000000000" = exactly 10 numeric digits
-    // ════════════════════════════════════════════════
-    $("#c_Mobile").kendoMaskedTextBox({
-        mask: "0000000000",
-        promptChar: "_"
-    });
-
-
-    // ════════════════════════════════════════════════
-    // 5. KENDO VALIDATOR
-    //    Custom rules — password strength + confirm match
-    // ════════════════════════════════════════════════
-    var validator = $("#registerForm").kendoValidator({ 
-        rules: {
-            // Custom rule: password strong hona chahiye
-            passwordStrength: function (input) {
-                if (input.is("[name='c_Password']")) {
-                    var val = input.val().trim();
-
-                    if (val.length === 0) return true; // required rule handle karega
-                    return /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@@$!%*?&]).{6,}$/.test(val);
-            }
-                return true;
-            },
-            // Custom rule: confirm password match karna chahiye
-            passwordMatch: function (input) {
-                if (input.is("[name='c_ConfirmPassword']")) {
-                    return input.val() === $("#c_Password").val();
-                }
-                return true;
-            },
-            // Custom rule: gender select hona chahiye
-            genderRequired: function (input) {
-                if (input.is("[name='c_Gender']")) {
-                    return $("#c_Gender").data("kendoDropDownList").value() !== "";
-                }
-                return true;
-            }
-        },
-        messages: {
-            passwordStrength: "Min 6 chars, uppercase, lowercase, number and special char",
-            passwordMatch:    "Passwords do not match",
-            genderRequired:   "Please select a gender",
-            required:         "#= message #",   // data-required-msg use karega
-            email:            "#= message #",
-            pattern:          "#= message #",
-            minlength:        "#= message #"
-        }
-    }).data("kendoValidator");
-
-
-    // ════════════════════════════════════════════════
-    // 6. PROFILE IMAGE — preview + remove
-    // ════════════════════════════════════════════════
-    window.onImageSelected = function (input) {
+    window.onImageSelected = function(input) {
         var file = input.files[0];
         if (!file) return;
-
-        if (file.size > 5 * 1024 * 1024) {
-            showWarning("Image must be under 5MB");
-            input.value = "";
-            return;
-        }
-
+        if (file.size > 5 * 1024 * 1024) { swalWarning('Image must be under 5MB'); input.value = ''; return; }
+        document.getElementById('err-avatar').classList.remove('visible');
         var reader = new FileReader();
-        reader.onload = function (e) {
-            $("#preview-img").attr("src", e.target.result);
-            $("#preview-wrap").show();
-            $("#upload-zone").hide();
+        reader.onload = function(e) {
+            var img = document.getElementById('avatarPreview');
+            img.src = e.target.result;
+            img.style.display = 'block';
+            document.getElementById('uploadPlaceholder').style.display = 'none';
+            document.getElementById('avatarRemoveBtn').classList.add('visible');
         };
         reader.readAsDataURL(file);
     };
-
-    window.removeImage = function () {
-        $("#profileImageFile").val("");
-        $("#preview-img").attr("src", "");
-        $("#preview-wrap").hide();
-        $("#upload-zone").show();
+    window.removeImage = function() {
+        document.getElementById('profileImageFile').value = '';
+        var img = document.getElementById('avatarPreview');
+        img.src = ''; img.style.display = 'none';
+        document.getElementById('uploadPlaceholder').style.display = 'flex';
+        document.getElementById('avatarRemoveBtn').classList.remove('visible');
     };
 
-
-    // ════════════════════════════════════════════════
-    // 7. TOGGLE PASSWORD VISIBILITY
-    // ════════════════════════════════════════════════
-    window.togglePass = function (inputId, iconId) {
+    window.togglePass = function(inputId, iconId) {
         var inp = document.getElementById(inputId);
-        var isText = inp.type === "text";
-        inp.type = isText ? "password" : "text";
+        var isText = inp.type === 'text';
+        inp.type = isText ? 'password' : 'text';
         document.getElementById(iconId).innerHTML = isText
-            ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>' +
-              '<circle cx="12" cy="12" r="3"/>'
-            : '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8' +
-              'a18.45 18.45 0 015.06-5.94"/>' +
-              '<path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8' +
-              'a18.5 18.5 0 01-2.16 3.19"/>' +
-              '<line x1="1" y1="1" x2="23" y2="23"/>';
+            ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+            : '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
     };
 
-
-    // ════════════════════════════════════════════════
-    // 8. AJAX SUBMIT
-    //    Kendo Validator → pass hone ke baad FormData build → API call
-    // ════════════════════════════════════════════════
-    $("#registerForm").on("submit", function (e) {
-        e.preventDefault();
-
-        // Profile image check — Kendo Validator se bahar hai
-        var fileInput = document.getElementById("profileImageFile");
+    function validateAll() {
+        var ok = true;
+        var fileInput = document.getElementById('profileImageFile');
         if (!fileInput.files || fileInput.files.length === 0) {
-            showWarning("Please upload a profile image");
-            return;
+            document.getElementById('err-avatar').classList.add('visible'); ok = false;
+        } else {
+            document.getElementById('err-avatar').classList.remove('visible');
         }
-
-        // Kendo Validator run karo
-        if (!validator.validate()) {
-            showError("Please fix the errors before submitting");
-            return;
+        var fn = $('#c_FullName').val().trim();
+        if (!fn) { setErr('c_FullName','err-fullname','err-fullname-text','Full name is required'); ok = false; }
+        else if (!/^[a-zA-Z\s]+$/.test(fn)) { setErr('c_FullName','err-fullname','err-fullname-text','Only letters and spaces'); ok = false; }
+        else clearErr('c_FullName','err-fullname');
+        var un = $('#c_UserName').val().trim();
+        if (!un) { setErr('c_UserName','err-username','err-username-text','Username is required'); ok = false; }
+        else if (un.length < 3) { setErr('c_UserName','err-username','err-username-text','Min 3 characters'); ok = false; }
+        else clearErr('c_UserName','err-username');
+        var em = $('#c_Email').val().trim();
+        if (!em) { setErr('c_Email','err-email','err-email-text','Email is required'); ok = false; }
+        else if (!/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(em)) { setErr('c_Email','err-email','err-email-text','Invalid email format'); ok = false; }
+        else clearErr('c_Email','err-email');
+        var gen = $('#c_Gender').val();
+        if (!gen) {
+            $('#c_Gender').addClass('is-invalid').removeClass('is-valid');
+            $('#err-gender').addClass('visible'); ok = false;
+        } else {
+            $('#c_Gender').removeClass('is-invalid').addClass('is-valid');
+            $('#err-gender').removeClass('visible');
         }
+        var mob = $('#c_Mobile').val().replace(/\D/g,'');
+        if (!mob) { setErr('c_Mobile','err-mobile','err-mobile-text','Mobile number is required'); ok = false; }
+        else if (mob.length !== 10) { setErr('c_Mobile','err-mobile','err-mobile-text','Must be exactly 10 digits'); ok = false; }
+        else clearErr('c_Mobile','err-mobile');
+        var pw = $('#c_Password').val();
+        if (!pw) { setErr('c_Password','err-password','err-password-text','Password is required'); ok = false; }
+        else if (!/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@@$!%*?&]).{6,}$/.test(pw)) {
+            setErr('c_Password','err-password','err-password-text','Min 6 chars, A-Z, a-z, 0-9, special char'); ok = false;
+        } else clearErr('c_Password','err-password');
+        var cpw = $('#c_ConfirmPassword').val();
+        if (!cpw) { setErr('c_ConfirmPassword','err-confirm','err-confirm-text','Please confirm password'); ok = false; }
+        else if (cpw !== pw) { setErr('c_ConfirmPassword','err-confirm','err-confirm-text','Passwords do not match'); ok = false; }
+        else clearErr('c_ConfirmPassword','err-confirm');
+        return ok;
+    }
 
-        // Mobile value — Kendo MaskedTextBox se lena
-        // .unmaskedValue() = sirf digits, underscores nahi
-        var mobileVal = $("#c_Mobile").data("kendoMaskedTextBox").value();
-        // underscores hata do (incomplete input case)
-        mobileVal = mobileVal.replace(/_/g, "");
-        if (mobileVal.length !== 10) {
-            showWarning("Enter valid 10 digit mobile number");
-            return;
-        }
-
-        // FormData build karo
-        var formData = new FormData();
-        formData.append("c_FullName",        $("#c_FullName").val().trim());
-        formData.append("c_UserName",        $("#c_UserName").val().trim());
-        formData.append("c_Email",           $("#c_Email").val().trim());
-        formData.append("c_Password",       $("#c_Password").data("kendoTextBox").value());
-        formData.append("c_ConfirmPassword", $("#c_ConfirmPassword").data("kendoTextBox").value());
-        formData.append("c_Gender",          $("#c_Gender").data("kendoDropDownList").value());
-        formData.append("c_Mobile",          mobileVal);
-        formData.append("profileImageFile",  fileInput.files[0]);
-
-        // Button loading state
-        var btn = $("#registerBtn");
-        btn.prop("disabled", true).text("Creating Account...");
-
+    $('#registerForm').on('submit', function(e) {
+        e.preventDefault();
+        if (!validateAll()) { swalWarning('Please fix the highlighted errors.'); return; }
+        var fileInput = document.getElementById('profileImageFile');
+        var formData  = new FormData();
+        formData.append('c_FullName',        $('#c_FullName').val().trim());
+        formData.append('c_UserName',        $('#c_UserName').val().trim());
+        formData.append('c_Email',           $('#c_Email').val().trim());
+        formData.append('c_Password',        $('#c_Password').val());
+        formData.append('c_ConfirmPassword', $('#c_ConfirmPassword').val());
+        formData.append('c_Gender',          $('#c_Gender').val());
+        formData.append('c_Mobile',          $('#c_Mobile').val().replace(/\D/g,''));
+        formData.append('profileImageFile',  fileInput.files[0]);
+        var btn = $('#registerBtn');
+        btn.prop('disabled', true).html('<span class="spinner"></span> Creating...');
         $.ajax({
-            url: "http://localhost:5183/api/AuthApi/UserRegister/",
-            type: "POST",
-            data: formData,
-            processData: false,   // FormData ko jQuery process mat kare
-            contentType: false,   // boundary browser set kare
-            success: function (res) {
-                btn.prop("disabled", false).text("Create Account");
-
-                // Kendo Notification — success
-                showSuccess(res.message || "Registration successful!");
-
-                // Form reset
-                $("#registerForm")[0].reset();
-                removeImage();
-                $("#c_Gender").data("kendoDropDownList").value("");
-                $("#c_Mobile").data("kendoMaskedTextBox").value("");
-
-                // 2 sec baad login page pe redirect
-                setTimeout(function () {
-                    window.location.href = "/Auth/UserLogin";
-                }, 2000);
+            url: API_BASE + '/api/AuthApi/UserRegister/',
+            type: 'POST', data: formData, processData: false, contentType: false,
+            success: function(res) {
+                btn.prop('disabled', false).html('<span class="btn-dot"></span> Create Account');
+                swalSuccess(res.message || 'Registration successful!');
+                setTimeout(function() { window.location.href = '/Auth/UserLogin'; }, 2000);
             },
-            error: function (err) {
-                console.log(err);                 // FULL object
-                console.log(err.responseText);    // raw response
-                console.log(err.responseJSON);    // parsed JSON
-
-                var msg = "Something went wrong";
-
-                if (err.responseJSON && err.responseJSON.message) {
-                    msg = err.responseJSON.message;
-                }
-
-                showError(msg);
+            error: function(err) {
+                btn.prop('disabled', false).html('<span class="btn-dot"></span> Create Account');
+                var msg = 'Something went wrong';
+                if (err.responseJSON && err.responseJSON.message) msg = err.responseJSON.message;
+                swalError(msg);
             }
         });
     });
 
-}); // end document.ready
+}); // end ready
 </script>
 }

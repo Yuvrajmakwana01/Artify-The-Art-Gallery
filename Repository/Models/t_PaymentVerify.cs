@@ -7,13 +7,19 @@ namespace Repository.Models
 {
     public class t_PaymentVerify
     {
-        public string PaypalOrderId { get; set; }
+        public string? PaypalOrderId { get; set; }      // nullable — not present on create-order call
 
-    public string? CaptureId { get; set; } 
+        public string? CaptureId { get; set; }
 
-    public string Currency { get; set; }
+        public string? Currency { get; set; }           // nullable — safe fallback to "USD"
 
-    public List<t_CartItem> Cart { get; set; }
+        public decimal Subtotal { get; set; }
+
+        public decimal CommissionAmount { get; set; }
+
+        public decimal TotalAmount { get; set; }
+
+        public List<t_CartItem> Cart { get; set; } = new();
     }
 
     public class PaymentVerifyWrapper

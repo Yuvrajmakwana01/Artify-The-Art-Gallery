@@ -1,148 +1,558 @@
+
 @{
-    ViewData["Title"] = "Sales History";
-    Layout = "~/Views/Shared/_ArtistLayout.cshtml";
+    Layout = "~/Views/Artist/_ArtistLayout.cshtml";
+    ViewData["Title"] = "Sales";
+    ViewData["Active"] = "Sales";
 }
 
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
-<link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.common.min.css" rel="stylesheet" />
-<link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.default-v2.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
-
+@section HeadStyles {
 <style>
-    :root{--navy:#14122a;--gold:#a0692a;--gold-dim:rgba(160,105,42,.1);
-          --paper:#faf8f5;--white:#fff;--border:rgba(0,0,0,.08);
-          --text:#1a1612;--text-2:#6b6057;--text-3:#a89e94;--radius:16px;}
-    body{font-family:'Outfit',sans-serif;background:var(--paper);}
+    /* ── Summary KPI strip ── */
+    .sales-kpi-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        margin-bottom: 28px;
+    }
 
-    .pg-title{font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:700;color:var(--navy);margin:0 0 1.5rem;}
+    .sales-kpi-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(3,40,159,.05);
+        padding: 22px 24px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: box-shadow var(--transition), transform var(--transition);
+    }
+    .sales-kpi-card:hover {
+        box-shadow: var(--shadow-hover);
+        transform: translateY(-2px);
+    }
 
-    /* Summary strip */
-    .summary-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;}
-    .s-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;}
-    .s-card .lbl{font-size:.68rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;}
-    .s-card .val{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:var(--navy);}
+    .kpi-icon-box {
+        width: 48px; height: 48px;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.3rem;
+        flex-shrink: 0;
+    }
 
-    /* Kendo Grid panel */
-    .grid-panel{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;}
-    .grid-panel h4{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.1rem;}
-    .k-grid{border:1px solid var(--border)!important;border-radius:12px!important;}
-    .k-grid th{background:var(--paper)!important;font-size:.7rem;font-weight:600;letter-spacing:1px;
-               text-transform:uppercase;color:var(--text-3);border-color:var(--border)!important;}
-    .k-grid td{font-size:.85rem;border-color:var(--border)!important;vertical-align:middle;}
-    .badge-status{padding:4px 12px;border-radius:100px;font-size:.67rem;font-weight:700;
-                  text-transform:uppercase;letter-spacing:.4px;border:1px solid;display:inline-block;}
-    .b-completed{background:#dcfce7;color:#166534;border-color:#86efac;}
-    .b-processing{background:#fffbeb;color:#92400e;border-color:#fcd34d;}
-    .b-pending{background:#fffbeb;color:#92400e;border-color:#fcd34d;}
+    .kpi-val {
+        font-size: 1.5rem;
+        font-weight: 800;
+        font-family: Times New Roman, serif;
+        color: var(--text);
+        line-height: 1;
+    }
+    .kpi-label {
+        font-size: .72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--muted);
+        margin-bottom: 4px;
+    }
+    .kpi-sub {
+        font-size: .75rem;
+        color: var(--muted);
+        margin-top: 4px;
+    }
 
-    @@media(max-width:640px){.summary-strip{grid-template-columns:1fr}}
+    /* ── Charts row ── */
+    .charts-row {
+        display: grid;
+        grid-template-columns: 1fr 420px;
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+
+    .chart-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(3,40,159,.05);
+        padding: 28px;
+    }
+
+    .chart-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+    }
+
+    .chart-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .chart-subtitle {
+        font-size: .75rem;
+        color: var(--muted);
+        margin-top: 2px;
+    }
+
+    /* ── Legend ── */
+    .pie-legend {
+        list-style: none;
+        margin: 0; padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 20px;
+    }
+
+    .pie-legend li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: .8rem;
+        color: var(--text);
+    }
+
+    .legend-dot {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .legend-pct {
+        margin-left: auto;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    /* ── Sales table ── */
+    .sales-table-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(3,40,159,.05);
+        padding: 28px;
+    }
+
+    .table-artify {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table-artify th {
+        font-size: .72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--muted);
+        padding: 0 16px 14px;
+        text-align: left;
+        border-bottom: 1px solid rgba(3,40,159,.07);
+    }
+
+    .table-artify td {
+        padding: 14px 16px;
+        font-size: .85rem;
+        color: var(--text);
+        border-bottom: 1px solid rgba(3,40,159,.04);
+        vertical-align: middle;
+    }
+
+    .table-artify tr:last-child td { border-bottom: none; }
+    .table-artify tr:hover td { background: #f7f9ff; }
+
+    .revenue-bar-wrap {
+        width: 120px;
+        height: 6px;
+        background: rgba(3,40,159,.1);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    .revenue-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+    }
+
+    @@media (max-width: 991px) {
+        .sales-kpi-row   { grid-template-columns: repeat(2, 1fr); }
+        .charts-row      { grid-template-columns: 1fr; }
+    }
+    @@media (max-width: 576px) {
+        .sales-kpi-row   { grid-template-columns: 1fr; }
+    }
 </style>
+}
 
-<h1 class="pg-title">Sales History</h1>
-
-<!-- Summary strip -->
-<div class="summary-strip">
-    <div class="s-card">
-        <div class="lbl">Total Earnings</div>
-        <div class="val" id="sumEarnings">$—</div>
+<!-- ── KPI Strip ── -->
+<div class="sales-kpi-row">
+    <div class="sales-kpi-card">
+        <div class="kpi-icon-box" style="background:rgba(3,40,159,.1);">
+            <i class="bi bi-bag-check-fill" style="color:var(--primary)"></i>
+        </div>
+        <div>
+            <div class="kpi-label">Total Sales</div>
+            <div class="kpi-val" id="statTotalSales">—</div>
+            <div class="kpi-sub">All time</div>
+        </div>
     </div>
-    <div class="s-card">
-        <div class="lbl">Total Sales</div>
-        <div class="val" id="sumSales">—</div>
+    <div class="sales-kpi-card">
+        <div class="kpi-icon-box" style="background:rgba(16,185,129,.1);">
+            <i class="bi bi-cash-stack" style="color:#10b981"></i>
+        </div>
+        <div>
+            <div class="kpi-label">Total Revenue</div>
+            <div class="kpi-val" id="statRevenue">—</div>
+            <div class="kpi-sub">All time</div>
+        </div>
     </div>
-    <div class="s-card">
-        <div class="lbl">Artworks Sold</div>
-        <div class="val" id="sumArtworks">—</div>
+    <div class="sales-kpi-card">
+        <div class="kpi-icon-box" style="background:rgba(237,163,18,.1);">
+            <i class="bi bi-graph-up-arrow" style="color:var(--gold)"></i>
+        </div>
+        <div>
+            <div class="kpi-label">This Month</div>
+            <div class="kpi-val" id="statThisMonth">—</div>
+            <div class="kpi-sub">Revenue</div>
+        </div>
+    </div>
+    <div class="sales-kpi-card">
+        <div class="kpi-icon-box" style="background:rgba(107,155,230,.1);">
+            <i class="bi bi-trophy-fill" style="color:var(--accent)"></i>
+        </div>
+        <div>
+            <div class="kpi-label">Best Month</div>
+            <div class="kpi-val" id="statBestMonth">—</div>
+            <div class="kpi-sub" id="statBestMonthLabel">Revenue</div>
+        </div>
     </div>
 </div>
 
-<!-- Sales grid (Kendo) -->
-<div class="grid-panel">
-    <h4>Transaction History</h4>
-    <div id="salesGrid"></div>
+<!-- ── Charts Row ── -->
+<div class="charts-row">
+
+    <!-- Revenue Line Chart (Chart.js) -->
+    <div class="chart-card">
+        <div class="chart-card-header">
+            <div>
+                <div class="chart-title">Revenue — Last 12 Months</div>
+                <div class="chart-subtitle">Monthly earnings from artwork sales</div>
+            </div>
+            <span id="revenueChartTotal" style="font-size:.82rem;font-weight:700;color:var(--primary);"></span>
+        </div>
+        <canvas id="revenueChart" height="260"></canvas>
+    </div>
+
+    <!-- Category Pie Chart (Kendo UI) -->
+    <div class="chart-card">
+        <div class="chart-card-header">
+            <div>
+                <div class="chart-title">Sales by Category</div>
+                <div class="chart-subtitle">Revenue share per category</div>
+            </div>
+        </div>
+        <div id="categoryPieChart" style="height:220px;"></div>
+        <ul class="pie-legend" id="pieLegend"></ul>
+    </div>
+
+</div>
+
+<!-- ── Monthly Breakdown Table ── -->
+<div class="sales-table-card">
+    <div class="chart-card-header" style="margin-bottom:16px;">
+        <div>
+            <div class="chart-title">Monthly Breakdown</div>
+            <div class="chart-subtitle">Revenue and sales count for the last 12 months</div>
+        </div>
+    </div>
+    <table class="table-artify">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Sales</th>
+                <th>Revenue</th>
+                <th>Share</th>
+            </tr>
+        </thead>
+        <tbody id="monthlyTableBody">
+            <tr><td colspan="4" class="text-center text-muted py-4">Loading…</td></tr>
+        </tbody>
+    </table>
 </div>
 
 @section Scripts {
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!-- ★ Auth helper ★ -->
-<script src="/js/authHelper.js"></script>
+<!-- Chart.js CDN (handles both revenue line+bar AND category pie) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
 <script>
-$(function () {
-    if (!AuthHelper.requireAuth()) return;
+    const API_BASE  = 'http://localhost:5183/api/ArtistApi';
+    const artistId  = @(Context.Session.GetInt32("ArtistId") ?? 0);
 
-    var BASE = "http://localhost:5183/api/ArtistApi";
+    const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-    // ── Dashboard data for summary strip ──────────────────
-    $.ajax({
-        url: BASE + "/dashboard", type: "GET",
-        success: function (data) {
-            var earn = parseFloat(data.c_TotalEarning || 0);
-            $("#sumEarnings").text("$" + earn.toLocaleString("en-US", { minimumFractionDigits: 2 }));
-            $("#sumSales").text(data.c_TotalSellCount || 0);
-            $("#sumArtworks").text(data.c_TotalArtworkCount || 0);
+    // ── Palette ────────────────────────────────────────────────────────────
+    const PIE_COLORS = [
+        '#03289F','#EDA312','#6B9BE6','#10b981',
+        '#f59e0b','#ef4444','#8b5cf6','#06b6d4',
+        '#ec4899','#84cc16','#f97316','#14b8a6'
+    ];
+
+    // ── INR formatter ───────────────────────────────────────────────────────
+    function inr(v) {
+        return '$' + parseFloat(v || 0).toLocaleString('en-IN', { minimumFractionDigits: 0 });
+    }
+
+    // ── Fetch both endpoints in parallel ───────────────────────────────────
+    (async function() {
+        try {
+            const [revRes, catRes] = await Promise.all([
+                fetch(`${API_BASE}/revenue`,        { credentials: 'include' }),
+                fetch(`${API_BASE}/category-sales`, { credentials: 'include' })
+            ]);
+
+            const revJson = revRes.ok ? await revRes.json() : null;
+            const catJson = catRes.ok ? await catRes.json() : null;
+
+            const revenueData = Array.isArray(revJson)
+                ? revJson
+                : (revJson?.data || revJson?.monthlyData || []);
+
+            const catData = Array.isArray(catJson)
+                ? catJson
+                : (catJson?.data || catJson?.categoryData || []);
+
+            buildRevenueChart(revenueData);
+            buildCategoryPie(catData);
+            buildTable(revenueData);
+            buildKPIs(revenueData);
+
+        } catch(e) {
+            console.error('Sales data fetch failed', e);
+            // Render empty state gracefully
+            buildRevenueChart([]);
+            buildCategoryPie([]);
         }
-    });
+    })();
 
-    // ── Sales Kendo Grid ───────────────────────────────────
-    // Pulls the artist's artworks and displays sell stats
-    $.ajax({
-        url: BASE + "/GetMyArtworks", type: "GET",
-        success: function (res) {
-            var rows = (res.data || []).filter(function (a) { return a.c_sell_count > 0; });
+    // ── KPI Strip ──────────────────────────────────────────────────────────
+    function buildKPIs(data) {
+        const totalRev   = data.reduce((s, m) => s + parseFloat(m.totalRevenue || m.revenue || 0), 0);
+        const totalSales = data.reduce((s, m) => s + parseInt(m.salesCount || m.count || 0), 0);
 
-            if (!rows.length) {
-                $("#salesGrid").html(
-                    '<div style="text-align:center;padding:3rem;color:var(--text-3);font-size:.88rem;">'
-                    + '<i class="bi bi-bag-x" style="font-size:1.8rem;display:block;margin-bottom:.6rem;opacity:.4;"></i>'
-                    + 'No sales recorded yet.</div>');
-                return;
-            }
+        const now        = new Date();
+        const thisMonthM = now.getMonth() + 1;
+        const thisYearM  = now.getFullYear();
 
-            $("#salesGrid").kendoGrid({
-                dataSource: {
-                    data:     rows,
-                    pageSize: 10,
-                    schema: {
-                        model: {
-                            fields: {
-                                c_title:            { type: "string"  },
-                                CategoryName:       { type: "string"  },
-                                c_price:            { type: "number"  },
-                                c_sell_count:       { type: "number"  },
-                                c_approval_status:  { type: "string"  }
-                            }
+        const thisMonth  = data.find(m => {
+            const d = m.month ? new Date(m.month) : null;
+            return d && d.getMonth() + 1 === thisMonthM && d.getFullYear() === thisYearM;
+        });
+
+        let bestMonth = data.reduce((best, m) =>
+            parseFloat(m.totalRevenue || m.revenue || 0) > parseFloat(best.totalRevenue || best.revenue || 0)
+            ? m : best, data[0] || {});
+
+        document.getElementById('statRevenue').textContent   = inr(totalRev);
+        document.getElementById('statTotalSales').textContent = totalSales.toLocaleString();
+        document.getElementById('statThisMonth').textContent = thisMonth
+            ? inr(thisMonth.totalRevenue || thisMonth.revenue || 0) : '$0';
+
+        if (bestMonth?.month) {
+            const bd = new Date(bestMonth.month);
+            document.getElementById('statBestMonth').textContent = inr(bestMonth.totalRevenue || bestMonth.revenue || 0);
+            document.getElementById('statBestMonthLabel').textContent =
+                `${MONTH_NAMES[bd.getMonth()]} ${bd.getFullYear()}`;
+        }
+    }
+
+    // ── Revenue Bar/Line Chart (Chart.js) ──────────────────────────────────
+    function buildRevenueChart(data) {
+        // Generate last 12 months if no data
+        const now = new Date();
+        const months = [];
+        for (let i = 11; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            months.push({ label: `${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`, date: d });
+        }
+
+        const revenues = months.map(m => {
+            const match = data.find(r => {
+                if (!r.month) return false;
+                const rd = new Date(r.month);
+                return rd.getMonth() === m.date.getMonth() && rd.getFullYear() === m.date.getFullYear();
+            });
+            return match ? parseFloat(match.totalRevenue || match.revenue || 0) : 0;
+        });
+
+        const maxRev = Math.max(...revenues, 1);
+        document.getElementById('revenueChartTotal').textContent =
+            inr(revenues.reduce((s, v) => s + v, 0)) + ' total';
+
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+
+        // Gradient fill
+        const grad = ctx.createLinearGradient(0, 0, 0, 260);
+        grad.addColorStop(0, 'rgba(3,40,159,0.22)');
+        grad.addColorStop(1, 'rgba(3,40,159,0)');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: months.map(m => m.label),
+                datasets: [
+                    {
+                        type: 'line',
+                        label: 'Revenue ($)',
+                        data: revenues,
+                        borderColor: '#03289F',
+                        backgroundColor: grad,
+                        borderWidth: 2.5,
+                        pointBackgroundColor: '#03289F',
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        tension: 0.4,
+                        fill: true,
+                        yAxisID: 'y'
+                    },
+                    {
+                        type: 'bar',
+                        label: 'Revenue bars',
+                        data: revenues,
+                        backgroundColor: revenues.map(v =>
+                            v === maxRev
+                            ? 'rgba(237,163,18,0.75)'
+                            : 'rgba(3,40,159,0.12)'
+                        ),
+                        borderRadius: 6,
+                        yAxisID: 'y'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ' ' + inr(ctx.raw)
                         }
                     }
                 },
-                pageable: { buttonCount: 5 },
-                sortable: true,
-                filterable: { mode: "row" },
-                columns: [
-                    { field: "c_title",      title: "Artwork",   width: 200 },
-                    { field: "CategoryName", title: "Category",  width: 130 },
-                    { field: "c_price",      title: "Price",     width: 100,
-                      template: "$#= parseFloat(c_price).toFixed(2) #" },
-                    { field: "c_sell_count", title: "Units Sold",width: 110 },
-                    { title: "Revenue", width: 120,
-                      template: function (d) {
-                          return "$" + (parseFloat(d.c_price) * d.c_sell_count).toFixed(2);
-                      }},
-                    { field: "c_approval_status", title: "Status", width: 120,
-                      template: function (d) {
-                          var s  = d.c_approval_status || "Pending";
-                          var cl = s === "Approved" ? "b-completed" : s === "Rejected" ? "" : "b-pending";
-                          return '<span class="badge-status ' + cl + '">' + s + '</span>';
-                      }}
-                ]
-            });
-        },
-        error: function () {
-            Swal.fire({ icon: "error", title: "Could not load sales", confirmButtonColor: "#14122a" });
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 11 }, color: '#718096' }
+                    },
+                    y: {
+                        grid: { color: 'rgba(3,40,159,.05)' },
+                        ticks: {
+                            callback: v => inr(v),
+                            font: { size: 11 }, color: '#718096'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // ── Category Pie Chart (Chart.js doughnut — no license needed) ──────────
+    function buildCategoryPie(data) {
+        const container = document.getElementById('categoryPieChart');
+        if (!data || data.length === 0) {
+            container.innerHTML =
+                '<p class="text-center text-muted py-5" style="font-size:.85rem;">No category data available.</p>';
+            return;
         }
-    });
-});
+
+        const labels = data.map((c, i) => c.categoryName || c.category || `Cat ${i + 1}`);
+        const values = data.map(c  => parseFloat(c.totalRevenue || c.revenue || 0));
+        const total  = values.reduce((s, v) => s + v, 0);
+        const colors = data.map((_, i) => PIE_COLORS[i % PIE_COLORS.length]);
+
+        // Create canvas inside container
+        container.innerHTML = '<canvas id="pieCvs"></canvas>';
+        const ctx = document.getElementById('pieCvs').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels,
+                datasets: [{
+                    data:            values,
+                    backgroundColor: colors,
+                    borderColor:     '#fff',
+                    borderWidth:     3,
+                    hoverOffset:     10
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '62%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ` ${ctx.label}: ${inr(ctx.raw)}`
+                        }
+                    }
+                }
+            }
+        });
+
+        // Build custom legend
+        document.getElementById('pieLegend').innerHTML = data.map((d, i) => {
+            const pct = total > 0 ? ((values[i] / total) * 100).toFixed(1) : 0;
+            return `<li>
+                <span class="legend-dot" style="background:${colors[i]}"></span>
+                <span>${labels[i]}</span>
+                <span class="legend-pct">${pct}%</span>
+            </li>`;
+        }).join('');
+    }
+
+    // ── Monthly Table ──────────────────────────────────────────────────────
+    function buildTable(data) {
+        const tbody = document.getElementById('monthlyTableBody');
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4" style="font-size:.83rem;">No sales data yet.</td></tr>';
+            return;
+        }
+
+        const maxRev = Math.max(...data.map(m => parseFloat(m.totalRevenue || m.revenue || 0)), 1);
+
+        // Sort by month descending
+        const sorted = [...data].sort((a, b) => new Date(b.month) - new Date(a.month));
+
+        tbody.innerHTML = sorted.map(m => {
+            const d      = new Date(m.month);
+            const label  = `${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
+            const rev    = parseFloat(m.totalRevenue || m.revenue || 0);
+            const cnt    = parseInt(m.salesCount || m.count || 0);
+            const pct    = ((rev / maxRev) * 100).toFixed(0);
+            const share  = (data.reduce((s, x) => s + parseFloat(x.totalRevenue || x.revenue || 0), 0));
+            const sharePct = share > 0 ? ((rev / share) * 100).toFixed(1) + '%' : '—';
+
+            return `<tr>
+                <td>
+                    <span style="font-weight:600;">${label}</span>
+                </td>
+                <td>
+                    <span style="font-weight:700;color:var(--primary);">${cnt}</span>
+                    <span style="font-size:.75rem;color:var(--muted);"> sales</span>
+                </td>
+                <td><strong>${inr(rev)}</strong></td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <div class="revenue-bar-wrap">
+                            <div class="revenue-bar-fill" style="width:${pct}%"></div>
+                        </div>
+                        <span style="font-size:.78rem;color:var(--muted);min-width:36px;">${sharePct}</span>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+    }
 </script>
 }

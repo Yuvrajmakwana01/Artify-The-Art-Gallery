@@ -1,135 +1,848 @@
 ﻿@{
-    ViewData["Title"] = "Sign In";
-    Layout = null;
+    ViewData["Title"] = "Artify Login";
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Artify — Sign In</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <title>Artify — Login</title>
+    
+    <!-- Fonts & Libraries -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
     <link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.common.min.css" rel="stylesheet" />
     <link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.default-v2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    
     <style>
-        :root{--navy:#14122a;--gold:#c9a96e;--paper:#faf8f5;--text:#1a1612;--muted:#6b6057;--border:rgba(0,0,0,.09)}
-        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:'DM Sans',sans-serif;background:var(--paper);min-height:100vh;
-             display:flex;align-items:center;justify-content:center;padding:2rem 1rem;}
-        body::before{content:'';position:fixed;inset:0;pointer-events:none;
-            background:radial-gradient(ellipse 60% 55% at 8% 15%,rgba(201,169,110,.08) 0%,transparent 70%),
-                        radial-gradient(ellipse 55% 65% at 92% 85%,rgba(20,18,42,.07) 0%,transparent 70%);}
-        .wrap{width:100%;max-width:430px;position:relative;z-index:1;}
-        .brand{display:flex;align-items:center;gap:10px;margin-bottom:1.75rem;justify-content:center;}
-        .brand-dot{width:30px;height:30px;border-radius:8px;background:var(--navy);display:flex;align-items:center;justify-content:center;}
-        .brand-dot span{width:9px;height:9px;border-radius:50%;background:var(--gold);display:block;}
-        .brand-name{font-family:'Syne',sans-serif;font-size:.78rem;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--text);}
-        .card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:2.5rem;box-shadow:0 2px 20px rgba(0,0,0,.06);}
-        .card h1{font-family:'Syne',sans-serif;font-size:1.65rem;font-weight:800;color:var(--navy);margin-bottom:4px;}
-        .card .sub{font-size:.88rem;color:var(--muted);margin-bottom:2rem;}
-        .field{display:flex;flex-direction:column;gap:6px;margin-bottom:1.1rem;}
-        .field label{font-size:.73rem;font-weight:600;color:var(--muted);letter-spacing:.3px;}
-        .k-textbox{background:#faf8f5!important;border:1px solid var(--border)!important;border-radius:10px!important;
-                   padding:12px 14px!important;width:100%!important;font-family:'DM Sans',sans-serif!important;
-                   font-size:.9rem!important;color:var(--text)!important;transition:border-color .18s,box-shadow .18s!important;}
-        .k-textbox:focus{border-color:var(--gold)!important;box-shadow:0 0 0 3px rgba(201,169,110,.2)!important;}
-        .k-callout{display:none!important}
-        .k-tooltip-validation{background:transparent!important;color:#c0392b!important;box-shadow:none!important;
-                               border:none!important;font-size:.72rem!important;padding:4px 0 0!important;}
-        .pw-wrap{position:relative;}
-        .pw-wrap .k-textbox{padding-right:56px!important;}
-        .pw-toggle{position:absolute;right:0;top:0;bottom:0;width:46px;display:flex;align-items:center;
-                   justify-content:center;background:none;border:none;cursor:pointer;color:var(--muted);
-                   font-size:.72rem;font-weight:600;font-family:'DM Sans',sans-serif;letter-spacing:.3px;}
-        .pw-toggle:hover{color:var(--navy);}
-        .btn-login{width:100%;height:50px;border-radius:12px;border:none;background:var(--navy);color:#fff;
-                   font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;letter-spacing:1px;
-                   text-transform:uppercase;cursor:pointer;margin-top:.5rem;transition:all .2s;
-                   display:flex;align-items:center;justify-content:center;gap:8px;}
-        .btn-login:hover{background:#1e1b38;transform:translateY(-1px);box-shadow:0 6px 22px rgba(20,18,42,.3);}
-        .btn-login:disabled{opacity:.6;transform:none;cursor:not-allowed;}
-        .gold-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;}
-        .pending-banner{display:none;background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;
-                         padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.85rem;color:#92400e;}
-        .pending-banner strong{display:block;margin-bottom:3px;font-size:.88rem;}
-        .divider{display:flex;align-items:center;gap:12px;margin:1.5rem 0;}
-        .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
-        .divider span{font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:600;}
-        .footer-note{text-align:center;font-size:.85rem;color:var(--muted);}
-        .footer-note a{color:#8a5e1a;font-weight:600;text-decoration:none;}
-        .footer-note a:hover{text-decoration:underline;}
+        /* ----- RESET & GLOBAL (LIGHT THEME OVERRIDE) ----- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fe 0%, #eef2fa 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated gradient background overlay */
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.03) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+            animation: slowPulse 8s ease-in-out infinite;
+        }
+
+        @@keyframes slowPulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.05); }
+        }
+
+        /* subtle light grain / texture */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(circle at 10% 20%, rgba(0,0,0,0.02) 1px, transparent 1px);
+            background-size: 24px 24px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* floating soft orbs with slow drift animation */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.35;
+            z-index: 0;
+            pointer-events: none;
+            animation: floatOrb 20s ease-in-out infinite;
+        }
+        .orb-1 { 
+            width: 55vw; height: 55vw; background: #c7d9ff; top: -20vh; right: -15vw;
+            animation-delay: 0s;
+        }
+        .orb-2 { 
+            width: 45vw; height: 45vw; background: #f1f6f8; bottom: -15vh; left: -10vw;
+            animation-delay: -5s;
+        }
+        .orb-3 { 
+            width: 35vw; height: 35vw; background: #d9e6ff; bottom: 20vh; right: 5vw; opacity: 0.3;
+            animation-delay: -10s;
+        }
+
+        @@keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(3%, -2%) scale(1.02); }
+            66% { transform: translate(-2%, 3%) scale(0.98); }
+        }
+
+        /* main container - glass card with light shadow */
+        .mission-container {
+            max-width: 1320px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(2px);
+            border-radius: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03), 0 0 0 1px rgba(255, 255, 255, 0.6);
+            transition: all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            animation: containerGlow 3s ease-in-out infinite;
+            position: relative;
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        @@keyframes containerGlow {
+            0%, 100% { box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.6); }
+            50% { box-shadow: 0 25px 50px rgba(99, 102, 241, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.8); }
+        }
+
+        .mission-container:hover {
+            box-shadow: 0 28px 48px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.8);
+            transform: translateY(-4px);
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+        }
+
+        /* split grid */
+        .login-grid {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* LEFT SIDE — Spline 3D Scene */
+        .hero-visual {
+            flex: 7;
+            position: relative;
+            min-height: 560px;
+            background: #ffffff;
+            border-radius: 1.5rem 0 0 1.5rem;
+            overflow: hidden;
+            animation: heroFadeIn 0.8s cubic-bezier(0.2,0.9,0.4,1.1) both;
+        }
+        @@keyframes heroFadeIn {
+            from { opacity: 0; transform: translateX(-30px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Right-edge blend into form panel */
+        .hero-visual::before {
+            content: '';
+            position: absolute;
+            right: 0; top: 0; bottom: 0;
+            width: 60px;
+            background: linear-gradient(to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .spline-login-wrap {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .spline-login-wrap iframe {
+            width: 100%; height: 100%;
+            border: none; display: block;
+        }
+
+        /* Hide Spline watermark (bottom-right) */
+        .spline-wm-cover {
+            position: absolute;
+            bottom: 0; right: 0;
+            width: 210px; height: 58px;
+            /* background: linear-gradient(to left, #ffffff 55%, #e3e3e3 100%); */
+            /* background-color: #e3e3e3;   */
+            background: linear-gradient(to right, #e3e3e3 70%, #fff 100%);
+
+            z-index: 99;
+            pointer-events: none;
+        }
+
+        /* RIGHT PANEL — clean light glass (30%) */
+        .form-panel {
+            flex: 3;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border-radius: 0 1.5rem 1.5rem 0;
+            padding: 2.2rem 2rem;
+            border-left: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: -4px 0 12px rgba(0,0,0,0.02);
+            animation: panelFadeIn 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1) 0.1s both;
+        }
+
+        @@keyframes panelFadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .form-panel:hover {
+            background: rgba(255, 255, 255, 0.96);
+            transition: all 0.3s ease;
+        }
+
+        /* brand mini (light refinement) */
+        .brand-artify {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1.6rem;
+            animation: brandSlide 0.6s ease-out;
+        }
+
+        @@keyframes brandSlide {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .brand-dot-glass {
+            width: 34px;
+            height: 34px;
+            background: rgba(200, 170, 110, 0.2);
+            backdrop-filter: blur(4px);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(170, 140, 85, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .brand-dot-glass:hover {
+            transform: rotate(90deg);
+            background: rgba(200, 170, 110, 0.4);
+        }
+
+        .brand-dot-glass span {
+            width: 10px;
+            height: 10px;
+            background: #b3863c;
+            border-radius: 50%;
+            display: block;
+            box-shadow: 0 0 4px #e0b36a;
+            transition: all 0.3s ease;
+        }
+
+        .brand-dot-glass:hover span {
+            transform: scale(1.3);
+            box-shadow: 0 0 8px #e0b36a;
+        }
+
+        .brand-name-glass {
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: 800;
+            font-size: 1.9rem;
+            letter-spacing: 1px;
+            color: #2c2a3a;
+            text-transform: uppercase;
+            transition: letter-spacing 0.3s ease;
+        }
+
+        .brand-name-glass:hover {
+            letter-spacing: 6px;
+        }
+
+        /* form title (light mode colors) */
+        .form-panel h1 {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.9rem;
+            font-weight: 900;
+            color: #1f1b2e;
+            margin-bottom: 0.4rem;
+            letter-spacing: -0.3px;
+            animation: titleReveal 0.5s ease-out 0.2s both;
+        }
+
+        @@keyframes titleReveal {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .greeting {
+            color: #5f5b72;
+            font-size: 0.85rem;
+            margin-bottom: 1.8rem;
+            border-left: 2px solid #c9a96e;
+            padding-left: 10px;
+            font-weight: 500;
+            animation: greetingFade 0.5s ease-out 0.3s both;
+        }
+
+        @@keyframes greetingFade {
+            from {
+                opacity: 0;
+                transform: translateX(-15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* pending banner (light style) */
+        .pending-banner {
+            display: none;
+            background: rgba(250, 235, 190, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(220, 180, 80, 0.5);
+            border-radius: 14px;
+            padding: 0.9rem 1rem;
+            margin-bottom: 1.4rem;
+            font-size: 0.8rem;
+            color: #7a621f;
+            animation: bannerSlideDown 0.4s ease-out;
+        }
+
+        @@keyframes bannerSlideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pending-banner strong {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+            color: #aa8036;
+        }
+
+        /* field styles with validation message (light theme) */
+        .field {
+            margin-bottom: 1.3rem;
+            position: relative;
+            animation: fieldFadeIn 0.4s ease-out backwards;
+        }
+
+        .field:nth-child(1) { animation-delay: 0.1s; }
+        .field:nth-child(2) { animation-delay: 0.2s; }
+
+        @@keyframes fieldFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .field label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #5e5a73;
+            display: block;
+            margin-bottom: 6px;
+            transition: color 0.2s ease;
+        }
+        
+        /* Native input styling light mode */
+        .field input {
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid #e2e0e8;
+            border-radius: 14px;
+            padding: 13px 16px;
+            font-size: 0.9rem;
+            color: #1e1b2c;
+            font-family: 'Inter', monospace;
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            outline: none;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        
+        .field input:focus {
+            border-color: #c9a96e;
+            box-shadow: 0 0 0 4px rgba(201, 169, 110, 0.15), 0 0 0 2px rgba(201, 169, 110, 0.2);
+            background: #fffef7;
+            transform: translateY(-1px);
+        }
+        
+        .field input.error {
+            border-color: #e07c6c;
+            background: #fff6f5;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @@keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        /* Validation error message styling (soft red) */
+        .error-message {
+            color: #cf6b5b;
+            font-size: 0.7rem;
+            margin-top: 5px;
+            display: block;
+            font-weight: 500;
+            padding-left: 5px;
+            animation: fadeSlideDown 0.25s ease-out;
+        }
+
+        @@keyframes fadeSlideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Kendo styles override for light theme */
+        .k-textbox {
+            background: #ffffff !important;
+            border: 1px solid #e2e0e8 !important;
+            border-radius: 14px !important;
+            padding: 13px 16px !important;
+            font-size: 0.9rem !important;
+            color: #1e1b2c !important;
+            font-family: 'Inter', monospace !important;
+            transition: all 0.3s ease !important;
+            width: 100% !important;
+        }
+        .k-textbox:focus {
+            border-color: #c9a96e !important;
+            box-shadow: 0 0 0 4px rgba(201, 169, 110, 0.15) !important;
+            background: #fffef7 !important;
+        }
+        .k-tooltip-validation {
+            display: none !important;
+        }
+        .k-callout {
+            display: none !important;
+        }
+
+        /* password toggle custom (light) */
+        .pw-wrap {
+            position: relative;
+        }
+        .pw-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: #7e7b96;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.5px;
+            padding: 4px 8px;
+            border-radius: 30px;
+            transition: all 0.2s ease;
+            z-index: 3;
+        }
+        .pw-toggle:hover {
+            color: #b47c2e;
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        /* LOGIN NOW button (premium gradient for light theme) */
+        .btn-login {
+            width: 100%;
+            background: linear-gradient(95deg, #03289f, #03289f);
+            border: none;
+            padding: 14px 0;
+            border-radius: 40px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 1.5px;
+            color: white;
+            margin-top: 0.7rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(108, 123, 207, 0.2);
+            position: relative;
+            overflow: hidden;
+            animation: buttonPulse 2s ease-in-out infinite;
+        }
+
+        @@keyframes buttonPulse {
+            0%, 100% { box-shadow: 0 4px 12px rgba(108, 123, 207, 0.2); }
+            50% { box-shadow: 0 6px 20px rgba(108, 123, 207, 0.35); }
+        }
+
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-login:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-login:hover {
+            transform: scale(1.02) translateY(-3px);
+            background: linear-gradient(95deg, #5a68c5, #6c72db);
+            box-shadow: 0 12px 28px rgba(108, 123, 207, 0.3);
+            letter-spacing: 2px;
+        }
+        
+        .btn-login:disabled {
+            opacity: 0.7;
+            transform: none;
+            cursor: not-allowed;
+        }
+        
+        .gold-dot {
+            width: 8px;
+            height: 8px;
+            background: #e6f0c4;
+            border-radius: 50%;
+            box-shadow: 0 0 4px #f3ffbf;
+            transition: all 0.3s ease;
+        }
+
+        .btn-login:hover .gold-dot {
+            transform: scale(1.5);
+            box-shadow: 0 0 12px #f3ffbf;
+        }
+
+
+        .footer-note {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.75rem;
+            color: #6f6b88;
+            animation: footerFade 0.5s ease-out 0.6s both;
+        }
+
+        @@keyframes footerFade {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .footer-note a {
+            color: #7c6c48;
+            font-weight: 700;
+            text-decoration: none;
+            border-bottom: 1px dotted #dac29c;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .footer-note a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #c9a96e;
+            transition: width 0.3s ease;
+        }
+
+        .footer-note a:hover::after {
+            width: 100%;
+        }
+
+        .footer-note a:hover {
+            color: #b2813b;
+            transform: translateX(3px);
+            display: inline-block;
+        }
+
+        /* Loading animation for button */
+        @@keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-login.loading .gold-dot {
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* ----- RESPONSIVE (mobile: stack) ----- */
+        @@media (max-width: 880px) {
+            .login-grid { flex-direction: column; }
+            .hero-visual {
+                flex: auto;
+                min-height: 280px;
+                border-radius: 1.5rem 1.5rem 0 0;
+            }
+            .form-panel {
+                border-radius: 0 0 1.5rem 1.5rem;
+                border-left: none;
+                border-top: 1px solid rgba(0,0,0,0.05);
+                padding: 2rem 1.5rem;
+            }
+        }
+        @@media (max-width: 480px) {
+            .mission-container { margin: 0; }
+            .form-panel { padding: 1.5rem; }
+        }
     </style>
 </head>
 <body>
-<div class="wrap">
-    <div class="brand">
-        <div class="brand-dot"><span></span></div>
-        <span class="brand-name">Artify</span>
-    </div>
 
-    <div class="card">
-        <h1>Welcome back</h1>
-        <p class="sub">Sign in to your creative studio.</p>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
 
-        <!-- Shown when account is pending approval -->
-        <div class="pending-banner" id="pendingBanner">
-            <strong>⏳ Account Pending Approval</strong>
-            Your registration is under review. You will receive access once an admin approves your account.
+<div class="mission-container">
+    <div class="login-grid">
+        <!-- LEFT SIDE: Spline 3D Interactive Scene -->
+        <div class="hero-visual">
+            <div class="spline-login-wrap">
+                <iframe src='https://my.spline.design/nexbotrobotcharacterconcept-M8ggBB3PxdFjoE3XXtQG5wOn/' frameborder='0' width='100%' height='100%'></iframe>
+            </div>
+            <div class="spline-wm-cover"></div>
         </div>
 
-        <form id="loginForm" novalidate>
-            <div class="field">
-                <label for="txtEmail">Email Address</label>
-                <input id="txtEmail" name="c_Email" type="email" required
-                       placeholder="artist@example.com"
-                       data-email-msg="Please enter a valid email"
-                       data-required-msg="Email is required" />
+        <!-- RIGHT SIDE: light glass login panel -->
+        <div class="form-panel">
+            <div class="brand-artify">
+                <div class="brand-dot-glass"><img src="/Images/bob-logo.png" alt="Logo" style="width: 40px; height: 40px; border-radius: 10%;" ></div>
+                <div class="brand-name-glass">ARTIFY</div>
             </div>
-            <div class="field">
-                <label for="txtPassword">Password</label>
-                <div class="pw-wrap">
-                    <input id="txtPassword" name="c_Password" type="password" required
-                           placeholder="••••••••"
-                           data-required-msg="Password is required" />
-                    <button type="button" class="pw-toggle" id="togglePw">Show</button>
-                </div>
-            </div>
-            <button type="button" class="btn-login" id="btnLogin">
-                <div class="gold-dot"></div>
-                <span id="btnText">Sign In</span>
-            </button>
-        </form>
 
-        <div class="divider"><span>New here?</span></div>
-        <p class="footer-note">
-            Don't have an account? <a href="/Artist/Register">Create one</a>
-        </p>
+            <h1>Login</h1>
+            <div class="greeting">Glad to see you again, creator.</div>
+
+            <!-- pending approval banner -->
+            <div class="pending-banner" id="pendingBanner">
+                <strong>⏳ Account Pending Approval</strong>
+                Your registration is under review. You will receive access once an admin approves your account.
+            </div>
+
+            <form id="loginForm" novalidate>
+                <div class="field" id="emailField">
+                    <label for="txtEmail"><i class="far fa-envelope" style="margin-right: 6px;"></i> Email Address</label>
+                    <div class="pw-wrap">
+                        <input id="txtEmail" name="c_Email" type="email" required
+                               placeholder="artist@artify.space"
+                               data-email-msg="Please enter a valid email"
+                               data-required-msg="Email is required" />
+                    </div>
+                    <div class="error-message" id="emailError"></div>
+                </div>
+                
+                <div class="field" id="passwordField">
+                    <label for="txtPassword"><i class="fas fa-lock" style="margin-right: 6px;"></i> Password</label>
+                    <div class="pw-wrap">
+                        <input id="txtPassword" name="c_Password" type="password" required
+                               placeholder="••••••••"
+                               data-required-msg="Password is required" />
+                        <button type="button" class="pw-toggle" id="togglePw">Show</button>
+                    </div>
+                    <div class="error-message" id="passwordError"></div>
+                </div>
+                
+                <button type="button" class="btn-login" id="btnLogin">
+                    <div class="gold-dot"></div>
+                    <span id="btnText">Login Now</span>
+                </button>
+            </form>
+
+            <div class="footer-note">
+                Not on Artify yet? <a href="/Artist/Register">Create account</a>
+            </div>
+        </div>
     </div>
 </div>
 
+<!-- scripts with proper load order -->
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 $(function () {
-
-    $("#txtEmail,#txtPassword").kendoTextBox();
-
-    // Password show / hide
+    // Clear error messages function
+    function clearErrors() {
+        $("#emailError").empty();
+        $("#passwordError").empty();
+        $("#txtEmail").removeClass('error');
+        $("#txtPassword").removeClass('error');
+    }
+    
+    // Show error message function
+    function showError(fieldId, message) {
+        if (fieldId === 'txtEmail') {
+            $("#emailError").text(message);
+            $("#txtEmail").addClass('error');
+        } else if (fieldId === 'txtPassword') {
+            $("#passwordError").text(message);
+            $("#txtPassword").addClass('error');
+        }
+    }
+    
+    // Validation function (returns true if valid, false otherwise)
+    function validateForm() {
+        clearErrors();
+        var isValid = true;
+        var email = $("#txtEmail").val().trim();
+        var password = $("#txtPassword").val();
+        
+        // Email validation
+        if (!email) {
+            showError('txtEmail', 'Email is required');
+            isValid = false;
+        } else if (!email.match(/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/)) {
+            showError('txtEmail', 'Please enter a valid email address');
+            isValid = false;
+        }
+        
+        // Password validation
+        if (!password) {
+            showError('txtPassword', 'Password is required');
+            isValid = false;
+        } else if (password.length < 3) {
+            showError('txtPassword', 'Password must be at least 3 characters');
+            isValid = false;
+        }
+        
+        return isValid;
+    }
+    
+    // Real-time validation on input
+    $("#txtEmail").on('input', function() {
+        var email = $(this).val().trim();
+        if (email && email.match(/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/)) {
+            $("#emailError").empty();
+            $(this).removeClass('error');
+        } else if (email && !email.match(/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/)) {
+            $("#emailError").text('Please enter a valid email address');
+            $(this).addClass('error');
+        } else if (!email) {
+            $("#emailError").text('Email is required');
+            $(this).addClass('error');
+        } else {
+            $("#emailError").empty();
+            $(this).removeClass('error');
+        }
+    });
+    
+    $("#txtPassword").on('input', function() {
+        var password = $(this).val();
+        if (!password) {
+            $("#passwordError").text('Password is required');
+            $(this).addClass('error');
+        } else if (password.length < 6) {
+            $("#passwordError").text('Password must be at least 6 characters');
+            $(this).addClass('error');
+        } else {
+            $("#passwordError").empty();
+            $(this).removeClass('error');
+        }
+    });
+    
+    // Remove error on focus
+    $("#txtEmail, #txtPassword").on('focus', function() {
+        var fieldId = $(this).attr('id');
+        if (fieldId === 'txtEmail') {
+            $("#emailError").empty();
+        } else {
+            $("#passwordError").empty();
+        }
+        $(this).removeClass('error');
+    });
+    
+    // Password show/hide toggle
     $("#togglePw").on("click", function () {
         var inp = $("#txtPassword")[0];
-        if (inp.type === "password") { inp.type = "text";     $(this).text("Hide"); }
-        else                         { inp.type = "password"; $(this).text("Show"); }
+        if (inp.type === "password") { 
+            inp.type = "text"; 
+            $(this).text("Hide"); 
+        } else { 
+            inp.type = "password"; 
+            $(this).text("Show"); 
+        }
     });
-
-    var validator = $("#loginForm").kendoValidator().data("kendoValidator");
-
+    
+    // Initialize Kendo controls gracefully
+    function initKendoControls() {
+        try {
+            if (typeof $.fn.kendoTextBox === 'function') {
+                $("#txtEmail, #txtPassword").kendoTextBox();
+            }
+        } catch(e) { console.warn("Kendo init skipped"); }
+    }
+    setTimeout(initKendoControls, 100);
+    
+    // Login button click - using custom validation
     $("#btnLogin").on("click", function () {
-        if (!validator.validate()) return;
+        if (!validateForm()) {
+            var firstError = $(".error-message:not(:empty)").first();
+            if (firstError.length) {
+                $('html, body').animate({
+                    scrollTop: firstError.closest('.field').offset().top - 100
+                }, 300);
+            }
+            return;
+        }
 
         var btn = $(this);
         btn.prop("disabled", true);
+        btn.addClass('loading');
         $("#btnText").text("Signing in…");
         $("#pendingBanner").hide();
 
@@ -139,71 +852,110 @@ $(function () {
             data:        new FormData($("#loginForm")[0]),
             contentType: false,
             processData: false,
-            // ─────────────────────────────────────────────────
-            // withCredentials:true is set HERE and ONLY here.
-            // This is the only call that needs to receive the
-            // Set-Cookie header from the API. Setting it globally
-            // via $.ajaxSetup would conflict with CORS on other
-            // endpoints that use a different policy (wildcard).
-            // ─────────────────────────────────────────────────
             xhrFields: { withCredentials: true },
             success: function (res) {
-    btn.prop("disabled", false);
-    $("#btnText").text("Sign In");
+                btn.prop("disabled", false);
+                btn.removeClass('loading');
+                $("#btnText").text("Login Now");
 
-    if (res.success) {
-        localStorage.setItem("authToken", res.token);
-        localStorage.setItem("userData", JSON.stringify(res.userData));
+                if (res.success) {
+                    // ── Clear ALL previous user's client-side state ─────────────
+                    sessionStorage.clear();
+                    localStorage.clear();
+                    // ────────────────────────────────────────────────────────────
 
-        // ✅ NEW: Write session on the MVC server before redirecting
-        $.ajax({
-            url: "/Artist/SetSession",
-            type: "POST",
-            contentType: "application/json",
-            data: JSON.stringify({
-                artistId: res.userData.c_User_Id,
-                token: res.token
-            }),
-            success: function () {
-                Swal.fire({
-                    icon: "success",
-                    title: "Welcome!",
-                    showConfirmButton: false,
-                    timer: 1100
-                }).then(function () {
-                    window.location.href = "/Artist/DashBoard";
-                });
-            },
-            error: function () {
-                Swal.fire({ icon: "error", title: "Session error", text: "Could not establish session." });
-            }
-        });
+                    localStorage.setItem("authToken", res.token);
+                    localStorage.setItem("userData", JSON.stringify(res.userData));
 
+                    // Store name immediately so the dashboard avatar is correct
+                    const displayName = res.userData.c_Full_Name
+                                     || res.userData.c_UserName
+                                     || res.userData.c_full_name
+                                     || 'Artist';
+                    sessionStorage.setItem('artistName', displayName);
+                    sessionStorage.setItem('artistId',  res.userData.c_User_Id || '');
+
+                    $.ajax({
+                        url: "/Artist/SetSession",
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify({
+                            artistId: res.userData.c_User_Id,
+                            token: res.token
+                        }),
+                        success: function () {
+                            Swal.fire({
+                                icon: "success",
+                                title: "Welcome!",
+                                text: "Access granted. Opening your creative studio.",
+                                background: "#ffffff",
+                                color: "#2d2a45",
+                                confirmButtonColor: "#6c7bcf",
+                                timer: 1300,
+                                showConfirmButton: false,
+                                showClass: {
+                                    popup: 'animate__animated animate__fadeInUp'
+                                }
+                            }).then(function () {
+                                window.location.href = "/Artist/DashBoard";
+                            });
+                        },
+                        error: function () {
+                            Swal.fire({ 
+                                icon: "error", 
+                                title: "Session error", 
+                                text: "Could not establish session.", 
+                                background: "#ffffff", 
+                                confirmButtonColor: "#c9a96e" 
+                            });
+                            btn.prop("disabled", false);
+                            btn.removeClass('loading');
+                            $("#btnText").text("Login Now");
+                        }
+                    });
                 } else if (res.inactive) {
-                    $("#pendingBanner").slideDown(200);
-
+                    $("#pendingBanner").slideDown(280);
+                    btn.prop("disabled", false);
+                    btn.removeClass('loading');
+                    $("#btnText").text("Login Now");
                 } else {
                     Swal.fire({
-                        icon:             "error",
-                        title:            "Sign-in failed",
-                        text:             res.message || "Invalid email or password.",
-                        confirmButtonColor: "#14122a"
+                        icon: "error",
+                        title: "Sign-in failed",
+                        text: res.message || "Invalid email or password.",
+                        background: "#ffffff",
+                        color: "#2e2b3c",
+                        confirmButtonColor: "#c9a96e"
                     });
+                    btn.prop("disabled", false);
+                    btn.removeClass('loading');
+                    $("#btnText").text("Login Now");
                 }
             },
             error: function (xhr) {
                 btn.prop("disabled", false);
-                $("#btnText").text("Sign In");
-                var msg = (xhr.responseJSON && xhr.responseJSON.message) || "Could not reach the server.";
-                Swal.fire({ icon: "warning", title: "Connection error", text: msg, confirmButtonColor: "#14122a" });
+                btn.removeClass('loading');
+                $("#btnText").text("Login Now");
+                var msg = (xhr.responseJSON && xhr.responseJSON.message) || "Could not reach the server. Check connection.";
+                Swal.fire({ 
+                    icon: "warning", 
+                    title: "Connection error", 
+                    text: msg, 
+                    background: "#ffffff", 
+                    confirmButtonColor: "#c9a96e" 
+                });
             }
         });
     });
 
-    // Allow Enter key to submit
+    // Enter key submission
     $(document).on("keypress", function (e) {
-        if (e.key === "Enter") $("#btnLogin").trigger("click");
+        if (e.key === "Enter") {
+            e.preventDefault();
+            $("#btnLogin").trigger("click");
+        }
     });
+
 });
 </script>
 </body>

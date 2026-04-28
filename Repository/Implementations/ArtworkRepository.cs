@@ -185,11 +185,20 @@ namespace Repository.Implementations
         public async Task<int> DeleteArtwork(int artworkId)
         {
             string sql = "DELETE FROM t_artwork WHERE c_artwork_id = @id";
-            await _conn.OpenAsync();
-            using (var cmd = new NpgsqlCommand(sql, _conn))
+            try
             {
-                cmd.Parameters.AddWithValue("id", artworkId);
-                return await cmd.ExecuteNonQueryAsync();
+                if (_conn.State != System.Data.ConnectionState.Open)
+                    await _conn.OpenAsync();
+
+                using (var cmd = new NpgsqlCommand(sql, _conn))
+                {
+                    cmd.Parameters.AddWithValue("id", artworkId);
+                    return await cmd.ExecuteNonQueryAsync();
+                }
+            }
+            finally
+            {
+                await _conn.CloseAsync();
             }
         }
 

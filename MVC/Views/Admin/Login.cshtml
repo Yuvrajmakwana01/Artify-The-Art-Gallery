@@ -8,9 +8,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Artify – Admin Login</title>
+    <title>Artify — Admin</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.common.min.css" rel="stylesheet" />
     <link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.default-v2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
@@ -18,468 +18,830 @@
 
     <style>
         :root {
-            --accent: #ff7e5f;
-            --accent-hover: #ff6a4a;
-            --text-main: #1a1a1a;
-            --text-muted: #666666;
-            --glass-card: rgba(255, 255, 255, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.6);
+            --sand-0:    #FDFAF6;
+            --sand-1:    #F5EFE6;
+            --sand-2:    #EDE3D5;
+            --sand-3:    #D8CCBA;
+            --sand-4:    #B8A898;
+            --terra:     #C17B4E;
+            --terra-dk:  #9B5E35;
+            --terra-lt:  rgba(193,123,78,0.12);
+            --forest:    #6B9BE6;
+            --ink:       #1C1512;
+            --ink-mid:   #5A4E44;
+            --ink-lo:    #9A8E84;
+            --white:     #FFFFFF;
+            --err:       #D94F4F;
         }
 
-        /* RESET */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* BODY */
-        body {
-            height: 100vh;
+        html, body {
+            width: 100%; height: 100%;
             overflow: hidden;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Outfit', sans-serif;
+            background: var(--sand-0);
         }
 
-                /* 🔥 PREMIUM BACKGROUND */
-        .animated-bg {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            
+        /* ══ Background ══ */
+        .bg-layer {
+            position: fixed; inset: 0; z-index: 0;
+        }
+        .bg-layer::before {
+            content: '';
+            position: absolute; inset: 0;
             background:
-                radial-gradient(circle at 20% 30%, rgba(255,126,95,0.25), transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(255,180,120,0.25), transparent 40%),
-                radial-gradient(circle at 50% 50%, rgba(255,220,180,0.2), transparent 60%),
-                linear-gradient(120deg, #fff8f3, #ffe9d6, #ffd8c2);
-
-            background-blend-mode: screen;
-            animation: gradientMove 18s ease infinite;
+                radial-gradient(ellipse 65% 55% at 10% 15%, rgba(193,123,78,0.14) 0%, transparent 65%),
+                radial-gradient(ellipse 55% 45% at 90% 85%, rgba(61,107,79,0.09) 0%, transparent 60%),
+                radial-gradient(ellipse 80% 80% at 50% 50%, #DFE6E9 30%, var(--sand-1) 100%);
+        }
+        .bg-layer::after {
+            content: '';
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(193,123,78,0.055) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(193,123,78,0.055) 1px, transparent 1px);
+            background-size: 52px 52px;
+            animation: gridDrift 55s linear infinite;
+        }
+        @@keyframes gridDrift {
+            from { background-position: 0 0; }
+            to   { background-position: 52px 52px; }
         }
 
-        /* ✨ Add subtle noise texture */
-        .animated-bg::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background-image: url("https://www.transparenttextures.com/patterns/noise.png");
-            opacity: 0.15;
-            mix-blend-mode: overlay;
+        /* Floating accent shapes */
+        .shape { position: fixed; pointer-events: none; z-index: 1; }
+
+        .sh-blob-1 {
+            width: 380px; height: 380px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(193,123,78,0.10) 0%, transparent 70%);
+            top: -100px; right: -60px;
+            animation: blobA 18s ease-in-out infinite;
+        }
+        .sh-blob-2 {
+            width: 300px; height: 300px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(61,107,79,0.08) 0%, transparent 70%);
+            bottom: -80px; left: -50px;
+            animation: blobB 22s ease-in-out infinite;
+        }
+        .sh-ring-1 {
+            width: 190px; height: 190px; border-radius: 50%;
+            border: 1px solid rgba(193,123,78,0.14);
+            top: 8%; right: 5%;
+            animation: spinRing 42s linear infinite;
+        }
+        .sh-ring-2 {
+            width: 110px; height: 110px; border-radius: 50%;
+            border: 1px solid rgba(193,123,78,0.10);
+            bottom: 16%; left: 4%;
+            animation: spinRing 28s linear infinite reverse;
+        }
+        .sh-dots {
+            top: 22%; left: 3.5%;
+            display: grid; grid-template-columns: repeat(5,1fr); gap: 10px;
+            animation: blobA 20s ease-in-out infinite;
+        }
+        .sh-dots-2 {
+            bottom: 14%; right: 3.5%;
+            display: grid; grid-template-columns: repeat(4,1fr); gap: 9px;
+            animation: blobB 24s ease-in-out infinite;
+        }
+        .dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(193,123,78,0.22); }
+
+        @@keyframes blobA {
+            0%,100% { transform: translateY(0) scale(1); }
+            50%      { transform: translateY(-22px) scale(1.04); }
+        }
+        @@keyframes blobB {
+            0%,100% { transform: translateY(0) scale(1); }
+            50%      { transform: translateY(18px) scale(1.03); }
+        }
+        @@keyframes spinRing { to { transform: rotate(360deg); } }
+
+        /* ══ Shell ══ */
+        .shell {
+            position: fixed; inset: 0; z-index: 10;
+            display: flex; align-items: center; justify-content: center;
+            padding: 1.5rem;
         }
 
-        /* Smooth movement */
-        @@keyframes gradientMove {
-            0% { transform: scale(1) translate(0, 0); }
-            50% { transform: scale(1.1) translate(-20px, 20px); }
-            100% { transform: scale(1) translate(0, 0); }
-        }
-
-        @@keyframes gradientMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* GLOW SHAPES */
-        .bg-shapes {
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-        }
-
-        .shape {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(100px);
-            opacity: 0.35;
-            animation: float 10s ease-in-out infinite;
-        }
-
-        .shape1 {
-            width: 300px;
-            height: 300px;
-            background: #ffb347;
-            top: 10%;
-            left: 10%;
-        }
-
-        .shape2 {
-            width: 400px;
-            height: 400px;
-            background: #ff7e5f;
-            bottom: 10%;
-            right: 10%;
-        }
-
-        @@keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-30px); }
-        }
-
-        /* VIEWPORT */
-        .viewport {
-            position: fixed;
-            inset: 0;
-            z-index: 2;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* CARD */
+        /* ══ Card ══ */
         .card {
-            width: 100%;
-            max-width: 420px;
-            background: var(--glass-card);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-            text-align: center;
-        }
-
-        /* TITLE */
-        .card-title {
-            font-family: 'Syne', sans-serif;
-            font-size: 2.3rem;
-            font-weight: 800;
-            color: var(--text-main);
-            margin-bottom: 5px;
-        }
-
-        .admin-badge {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 10px;
-        }
-
-        .card-sub {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-bottom: 25px;
-        }
-
-        /* FIELDS */
-        .field-group {
-            text-align: left;
-            margin-bottom: 18px;
-        }
-
-        .field-group label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 6px;
-            display: block;
-        }
-
-        /* INPUT */
-        .k-textbox {
-            width: 100% !important;
-            padding: 12px 14px !important;
-            border-radius: 12px !important;
-            border: 1px solid #ddd !important;
-            font-size: 0.9rem !important;
-            transition: 0.2s;
-        }
-
-        .k-textbox:focus {
-            border-color: var(--accent) !important;
-            box-shadow: 0 0 0 3px rgba(255,126,95,0.15) !important;
-        }
-
-        /* PASSWORD */
-        .pass-wrapper {
             position: relative;
+            width: 100%; max-width: 880px;
+            background: var(--white);
+            border-radius: 24px;
+            box-shadow:
+                0 2px 8px rgba(28,21,18,0.04),
+                0 12px 40px rgba(28,21,18,0.10),
+                0 32px 80px rgba(28,21,18,0.10);
+            display: flex;
+            min-height: 530px;
+            overflow: hidden;
+            animation: cardIn 0.75s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        @@keyframes cardIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0)   scale(1); }
         }
 
-        .pass-toggle {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            border: none;
-            background: none;
-            cursor: pointer;
+        /* ══ Left Art Panel ══ */
+        .card-art {
+            width: 44%; flex-shrink: 0;
+            position: relative;
+            background: linear-gradient(150deg, #3B4A37 0%, #283325 45%, #1A2419 100%);
+            display: flex; flex-direction: column;
+            justify-content: space-between;
+            padding: 2.4rem 2.2rem;
+            overflow: hidden;
         }
 
-        /* BUTTON */
-        .btn-enter {
-            width: 100%;
-            padding: 13px;
-            margin-top: 10px;
-            border: none;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #ff7e5f, #ff9966);
-            color: white;
-            font-weight: 700;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn-enter:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 20px rgba(255,126,95,0.4);
-        }
-
-        .btn-enter:disabled {
-            opacity: 0.6;
-        }
-
-        /* ERROR */
-        .field-error {
-            font-size: 0.75rem;
-            color: #ff4d4f;
-            margin-top: 4px;
-            display: block;
-        }
-        
-        /* 🔥 MOUSE LIGHT EFFECT */
-        .mouse-light {
-            position: fixed;
-            width: 300px;
-            height: 300px;
+        /* Art panel glow layer */
+        .card-art::before {
+            content: '';
+            position: absolute; inset: 0;
+            background:
+                radial-gradient(ellipse 75% 55% at 25% 15%, rgba(193,123,78,0.28) 0%, transparent 60%),
+                radial-gradient(ellipse 55% 70% at 85% 95%, rgba(61,107,79,0.30) 0%, transparent 60%);
             pointer-events: none;
-            z-index: 1;
-
-            background: radial-gradient(circle, rgba(255,126,95,0.25) 0%, transparent 70%);
-            filter: blur(40px);
-
-            transform: translate(-50%, -50%);
-        }
-        
-        .swal2-popup {
-            border-radius: 20px !important;
-            backdrop-filter: blur(20px);
-            font-family: 'Inter', sans-serif;
         }
 
-        .swal2-title {
-            font-weight: 700;
+        /* Animated shimmer lines */
+        .art-shimmer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+        .shimmer-line {
+            position: absolute; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent);
+            animation: shimmerSlide 7s ease-in-out infinite;
+        }
+        .shimmer-line:nth-child(1) { top: 22%; width: 90%; animation-delay: 0s; }
+        .shimmer-line:nth-child(2) { top: 48%; width: 65%; left: 20%; animation-delay: 2.5s; }
+        .shimmer-line:nth-child(3) { top: 75%; width: 80%; animation-delay: 5s; }
+        @@keyframes shimmerSlide {
+            0%,100% { opacity: 0; transform: translateX(-10px); }
+            50%      { opacity: 1; transform: translateX(0); }
         }
 
-        .swal2-confirm {
+        /* Circle decorations */
+        .ac { position: absolute; border-radius: 50%; border: 1px solid rgba(255,255,255,0.07); }
+        .ac-1 { width: 200px; height: 200px; top: -55px; right: -55px; animation: spinRing 38s linear infinite; }
+        .ac-2 { width: 110px; height: 110px; bottom: 55px; left: -28px; animation: spinRing 26s linear infinite reverse; }
+        .ac-3 { width: 50px;  height: 50px;  top: 52%; right: 28px; animation: blobA 9s ease-in-out infinite; }
+
+        /* Brand */
+        .art-brand { position: relative; z-index: 2; animation: fadeUp 0.7s 0.2s both; }
+        .logo-row { display: flex; align-items: center; gap: 10px; }
+        .logo-icon {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--terra), #E8956A);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .logo-icon svg { width: 18px; height: 18px; }
+        .logo-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.55rem; font-weight: 900;
+            color: #fff; letter-spacing: 0.02em;
+        }
+        .logo-sub {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.58rem; color: rgba(255,255,255,0.35);
+            letter-spacing: 0.22em; text-transform: uppercase;
+            margin-top: 4px; margin-left: 46px;
+        }
+
+        /* Illustration */
+        .art-illo {
+            position: relative; z-index: 2;
+            flex: 1; display: flex;
+            align-items: center; justify-content: center;
+        }
+        .illo-frame {
+            position: relative; width: 155px; height: 155px;
+        }
+        .illo-inner {
+            width: 100%; height: 100%; border-radius: 20px;
+            background: linear-gradient(135deg, rgba(193,123,78,0.28), rgba(61,107,79,0.18));
+            border: 1px solid rgba(255,255,255,0.10);
+            display: flex; align-items: center; justify-content: center;
+            animation: framePulse 5s ease-in-out infinite;
+        }
+        @@keyframes framePulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(193,123,78,0); }
+            50%      { box-shadow: 0 0 28px 5px rgba(193,123,78,0.20); }
+        }
+        .illo-inner svg { width: 68px; height: 68px; }
+
+        /* Corner marks */
+        .cm { position: absolute; width: 15px; height: 15px; }
+        .cm-tl { top: -5px; left: -5px; border-top: 2px solid var(--terra); border-left: 2px solid var(--terra); }
+        .cm-tr { top: -5px; right: -5px; border-top: 2px solid var(--terra); border-right: 2px solid var(--terra); }
+        .cm-bl { bottom: -5px; left: -5px; border-bottom: 2px solid rgba(255,255,255,0.25); border-left: 2px solid rgba(255,255,255,0.25); }
+        .cm-br { bottom: -5px; right: -5px; border-bottom: 2px solid rgba(255,255,255,0.25); border-right: 2px solid rgba(255,255,255,0.25); }
+
+        /* Tagline */
+        .art-tagline { position: relative; z-index: 2; animation: fadeUp 0.7s 0.4s both; }
+        .art-tagline h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.55rem; font-weight: 700; color: #fff;
+            line-height: 1.2; margin-bottom: 0.45rem;
+        }
+        .art-tagline h2 em { font-style: italic; color: rgba(193,123,78,0.95); }
+        .art-tagline p {
+            font-size: 0.74rem; color: rgba(255,255,255,0.40);
+            font-weight: 300; line-height: 1.65;
+        }
+        .status-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.10);
+            border-radius: 20px; padding: 4px 12px 4px 8px;
+            margin-top: 0.9rem;
+        }
+        .status-dot {
+            width: 6px; height: 6px; background: #4ade80; border-radius: 50%;
+            box-shadow: 0 0 8px rgba(74,222,128,0.8);
+            animation: dotPulse 2.5s ease-in-out infinite;
+        }
+        @@keyframes dotPulse {
+            0%,100% { box-shadow: 0 0 8px rgba(74,222,128,0.8); }
+            50%      { box-shadow: 0 0 4px rgba(74,222,128,0.3); }
+        }
+        .status-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.58rem; color: rgba(255,255,255,0.45);
+            letter-spacing: 0.12em; text-transform: uppercase;
+        }
+
+        @@keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ══ Right Form Panel ══ */
+        .card-form {
+            flex: 1;
+            display: flex; flex-direction: column; justify-content: center;
+            padding: 2.8rem 3rem 2.2rem;
+            background: var(--white);
+            position: relative; overflow: hidden;
+        }
+        .card-form::before {
+            content: '';
+            position: absolute; top: -70px; right: -70px;
+            width: 200px; height: 200px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(193,123,78,0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Heading */
+        .form-heading { margin-bottom: 2rem; animation: fadeUp 0.6s 0.1s both; }
+
+        .eyebrow-row {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 0.65rem;
+        }
+        .eyebrow-pip { width: 22px; height: 2px; background: var(--terra); border-radius: 1px; }
+        .eyebrow-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.62rem; color: var(--terra);
+            letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500;
+        }
+        .form-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem; font-weight: 900;
+            color: var(--ink); line-height: 1.05; margin-bottom: 0.4rem;
+        }
+        .form-title em { font-style: italic; color: #EDA312; }
+        .form-sub { font-size: 0.82rem; color: var(--ink-lo); font-weight: 400; }
+
+        /* Fields */
+        .field-group { margin-bottom: 1.25rem; }
+        .field-group:nth-child(1) { animation: fadeUp 0.6s 0.25s both; }
+        .field-group:nth-child(2) { animation: fadeUp 0.6s 0.35s both; }
+
+        .field-label {
+            display: block;
+            font-size: 0.74rem; font-weight: 600;
+            color: var(--ink-mid); letter-spacing: 0.03em;
+            margin-bottom: 0.42rem;
+        }
+
+        .input-shell {
+            position: relative; display: flex; align-items: center;
+        }
+        .i-icon {
+            position: absolute; left: 13px;
+            color: var(--sand-3); pointer-events: none; display: flex;
+            transition: color 0.25s;
+        }
+        .input-shell:focus-within .i-icon { color: var(--terra); }
+
+        /* Override Kendo */
+        .k-textbox, input.k-textbox {
+            width: 100% !important;
+            height: 48px !important;
+            background: var(--sand-0) !important;
+            border: 1.5px solid var(--sand-2) !important;
             border-radius: 12px !important;
-            padding: 10px 20px !important;
+            padding: 0 12px 0 42px !important;
+            font-family: 'Outfit', sans-serif !important;
+            font-size: 0.875rem !important;
+            color: var(--ink) !important;
+            transition: border-color 0.25s, box-shadow 0.25s, background 0.25s !important;
+            outline: none !important;
+            -webkit-appearance: none !important;
+        }
+        .k-textbox::placeholder { color: var(--sand-3) !important; }
+        .k-textbox:focus {
+            border-color: var(--terra) !important;
+            background: var(--white) !important;
+            box-shadow: 0 0 0 3.5px rgba(193,123,78,0.13) !important;
+        }
+        .k-textbox.is-invalid {
+            border-color: var(--err) !important;
+            background: #FFF6F6 !important;
+            box-shadow: 0 0 0 3px rgba(217,79,79,0.10) !important;
+        }
+
+        /* Inline error */
+        .field-error {
+            display: none; align-items: center; gap: 5px;
+            font-size: 0.70rem; color: var(--err);
+            margin-top: 0.3rem; font-weight: 500;
+            animation: errIn 0.2s ease-out;
+        }
+        .field-error.visible { display: flex; }
+        @@keyframes errIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Pass toggle */
+        .pass-toggle {
+            position: absolute; right: 12px;
+            background: none; border: none; cursor: pointer;
+            color: var(--sand-3); display: flex; padding: 4px;
+            transition: color 0.2s;
+        }
+        .pass-toggle:hover { color: var(--terra); }
+
+        /* Submit */
+        .btn-enter {
+            position: relative; width: 100%; height: 50px;
+            background: linear-gradient(130deg, #03289F 0%, #03287F 100%);
+            border: none; border-radius: 12px;
+            color: #fff; font-family: 'Outfit', sans-serif;
+            font-size: 0.92rem; font-weight: 700; letter-spacing: 0.05em;
+            cursor: pointer; overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.3s;
+            box-shadow: 0 6px 22px rgba(193,123,78,0.32);
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            margin-top: 0.4rem;
+            animation: fadeUp 0.6s 0.45s both;
+        }
+        .btn-enter::after {
+            content: '';
+            position: absolute; top: 0; left: -100%;
+            width: 55%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+            transform: skewX(-18deg);
+            transition: left 0.55s ease;
+        }
+        .btn-enter:hover::after { left: 145%; }
+        .btn-enter:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(193,123,78,0.42);
+        }
+        .btn-enter:active:not(:disabled) { transform: translateY(0); }
+        .btn-enter:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .spin-icon {
+            width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white; border-radius: 50%;
+            animation: spin 0.7s linear infinite; display: none;
+        }
+        @@keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Footer strip */
+        .form-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-top: 1.5rem; padding-top: 1.2rem;
+            border-top: 1px solid var(--sand-1);
+            animation: fadeUp 0.6s 0.55s both;
+        }
+        .footer-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.58rem; color: var(--sand-3); letter-spacing: 0.08em;
+        }
+        .footer-badge {
+            display: flex; align-items: center; gap: 6px;
+            background: var(--sand-1); border-radius: 20px;
+            padding: 3px 11px 3px 7px;
+        }
+        .badge-dot {
+            width: 14px; height: 14px;
+            background: linear-gradient(135deg, var(--terra), var(--terra-dk));
+            border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .badge-dot svg { width: 8px; height: 8px; }
+        .badge-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.58rem; color: var(--ink-mid);
+            letter-spacing: 0.07em; font-weight: 500;
+        }
+
+        /* Notification */
+        #kNotification { position: fixed; top: 0; right: 0; z-index: 9990; }
+
+        /* SweetAlert */
+        .swal2-popup {
+            border-radius: 18px !important;
+            font-family: 'Outfit', sans-serif !important;
+        }
+        .swal2-title {
+            font-family: 'Playfair Display', serif !important;
+            color: var(--ink) !important;
+        }
+        .swal2-html-container { color: var(--ink-mid) !important; }
+        .swal2-confirm {
+            border-radius: 10px !important;
+            background: linear-gradient(135deg, var(--terra), var(--terra-dk)) !important;
+            font-family: 'Outfit', sans-serif !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.04em !important;
+        }
+
+        @@media (max-width: 640px) {
+            .card { flex-direction: column; }
+            .card-art { width: 100%; min-height: 160px; padding: 1.5rem; }
+            .art-illo { display: none; }
+            .card-form { padding: 2rem 1.6rem 1.5rem; }
         }
     </style>
-
 </head>
 <body>
+
+    <!-- BG layers -->
+    <div class="bg-layer"></div>
+    <div class="shape sh-blob-1"></div>
+    <div class="shape sh-blob-2"></div>
+    <div class="shape sh-ring-1"></div>
+    <div class="shape sh-ring-2"></div>
+    <div class="shape sh-dots">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+    <div class="shape sh-dots-2">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+
     <div id="kNotification"></div>
 
-    <div class="mouse-light"></div>
-     <!-- ✅ Animated Background -->
-    <div class="animated-bg"></div>
+    <div class="shell">
+        <div class="card">
 
-    <!-- ✅ Glow Shapes -->
-    <div class="bg-shapes">
-        <div class="shape shape1"></div>
-        <div class="shape shape2"></div>
-    </div>
+            <!-- ═══ LEFT: Art Panel ═══ -->
+            <div class="card-art">
+                <div class="art-shimmer">
+                    <div class="shimmer-line"></div>
+                    <div class="shimmer-line"></div>
+                    <div class="shimmer-line"></div>
+                </div>
+                <div class="ac ac-1"></div>
+                <div class="ac ac-2"></div>
+                <div class="ac ac-3"></div>
 
-    <!-- ✅ MAIN CONTENT -->
-    <div class="viewport">
-        <div class="card animate__animated animate__fadeInUp">
+                <!-- Brand -->
+                <div class="art-brand">
+                    <div class="logo-row">
+                        <div class="logo-icon" style="overflow: hidden; background: #0b0c10; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.24);">
+                            <img src="/Images/Artify-Logos.png" alt="" aria-hidden="true" style="width: 100%; height: 100%; object-fit: cover; transform: scale(2.65) translateX(3%);" />
+                        </div>
+                        <span class="logo-name">Artify</span>
+                    </div>
+                    <div class="logo-sub">Admin Portal</div>
+                </div>
 
-            <h2 class="card-title">Artify</h2>
+                <!-- Illustration -->
+                <div class="art-illo">
+                    <div class="illo-frame">
+                        <div class="cm cm-tl"></div><div class="cm cm-tr"></div>
+                        <div class="cm cm-bl"></div><div class="cm cm-br"></div>
+                        <div class="illo-inner">
+                            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="32" cy="32" r="27" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                                <path d="M20 44 L32 18 L44 44" stroke="rgba(193,123,78,0.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M23.5 37.5 h17" stroke="rgba(193,123,78,0.5)" stroke-width="2" stroke-linecap="round"/>
+                                <circle cx="32" cy="18" r="3.5" fill="rgba(193,123,78,0.9)"/>
+                                <circle cx="20" cy="44" r="3" fill="rgba(255,255,255,0.35)"/>
+                                <circle cx="44" cy="44" r="3" fill="rgba(255,255,255,0.35)"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="admin-badge">
-                ★ Admin Portal
+                <!-- Tagline -->
+                <div class="art-tagline">
+                    <h2>Control the<br><em>Canvas</em></h2>
+                    <p>Manage your art marketplace<br>with precision and ease.</p>
+                    <div class="status-pill">
+                        <div class="status-dot"></div>
+                        <span class="status-text">All systems operational</span>
+                    </div>
+                </div>
             </div>
 
-            <p class="card-sub">Sign in to your admin workspace</p>
+            <!-- ═══ RIGHT: Form Panel ═══ -->
+            <div class="card-form">
 
-            <form id="loginForm">
-
-                <div class="field-group">
-                    <label>Email</label>
-                    <input id="c_Email" name="c_Email" class="k-textbox" required/>
-                    <span class="field-error" data-for="c_Email"></span>
-                </div>
-
-                <div class="field-group">
-                    <label>Password</label>
-                    <div class="pass-wrapper">
-                        <input id="c_Password" name="c_Password" type="password" class="k-textbox" required/>
-
-                        <button type="button" class="pass-toggle"
-                                onclick="togglePass('c_Password', 'eyeIcon')">
-                            👁
-                        </button>
+                <div class="form-heading">
+                    <div class="eyebrow-row">
+                        <div class="eyebrow-pip"></div>
+                        <span class="eyebrow-label">Admin Sign-In</span>
                     </div>
-                    <span class="field-error" data-for="c_Password"></span>
+                    <h1 class="form-title">Welcome <em>back</em></h1>
+                    <p class="form-sub">Enter your credentials to access the admin workspace</p>
                 </div>
 
-                <button type="submit" id="loginBtn" class="btn-enter">SIGN IN</button>
+                <form id="loginForm" novalidate>
 
-            </form>
+                    <!-- Email -->
+                    <div class="field-group" id="fg-email">
+                        <label class="field-label" for="c_Email">Email Address</label>
+                        <div class="input-shell">
+                            <span class="i-icon">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                    <polyline points="22,6 12,13 2,6"/>
+                                </svg>
+                            </span>
+                            <input id="c_Email" name="c_Email"
+                                   type="email" placeholder="admin@artify.com"
+                                   class="k-textbox" autocomplete="email"  />
+                        </div>
+                        <div class="field-error" id="err-email" data-for="c_Email">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            <span id="err-email-text"></span>
+                        </div>
+                    </div>
 
-        </div>
-    </div>
+                    <!-- Password -->
+                    <div class="field-group" id="fg-password">
+                        <label class="field-label" for="c_Password">Password</label>
+                        <div class="input-shell">
+                            <span class="i-icon">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                    <path d="M7 11V7a5 5 0 0110 0v4"/>
+                                </svg>
+                            </span>
+                            <input id="c_Password" name="c_Password"
+                                   type="password" placeholder="••••••••••"
+                                   class="k-textbox" autocomplete="current-password"  />
+                            <button type="button" class="pass-toggle"
+                                    onclick="togglePass('c_Password','eyeIcon')">
+                                <svg id="eyeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="field-error" id="err-password" data-for="c_Password">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            <span id="err-password-text"></span>
+                        </div>
+                    </div>
 
+                    <!-- Submit -->
+                    <button type="submit" id="loginBtn" class="btn-enter">
+                        <div class="spin-icon" id="btnSpinner"></div>
+                        <span id="btnText">Sign In to Dashboard</span>
+                        <svg id="btnArrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.3s">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    </button>
+
+                </form>
+
+                <!-- Footer -->
+                <div class="form-footer">
+                    <span class="footer-meta">ARTIFY ADMIN </span>
+                    <div class="footer-badge">
+                        <div class="badge-dot">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+                            </svg>
+                        </div>
+                        <span class="badge-label">SECURED</span>
+                    </div>
+                </div>
+
+            </div><!-- /card-form -->
+        </div><!-- /card -->
+    </div><!-- /shell -->
 
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        $(function () {
+    $(function () {
 
-            var notification = $("#kNotification").kendoNotification({
-                position: { pinned: true, top: 20, right: 20 },
-                autoHideAfter: 4000,
-                stacking: "down",
-                templates: [
-                    { type: "success", template: "<div style='padding:6px 4px;font-family:Inter,sans-serif'><strong>✔ Success</strong> &nbsp; #: message #</div>" },
-                    { type: "error",   template: "<div style='padding:6px 4px;font-family:Inter,sans-serif'><strong>✖ Error</strong> &nbsp; #: message #</div>" }
-                ]
-            }).data("kendoNotification");
-            
-            function showFieldErrors(errors) {
-                $(".field-error").text("");
-                $(".k-textbox").css("border-color", "#ddd");
+        /* ── Kendo Notification ── */
+        var notification = $("#kNotification").kendoNotification({
+            position: { pinned: true, top: 20, right: 20 },
+            autoHideAfter: 4000,
+            stacking: "down",
+            templates: [
+                { type: "success", template: "<div style='padding:6px 4px;font-family:Outfit,sans-serif'><strong>✔ Success</strong> &nbsp; #: message #</div>" },
+                { type: "error",   template: "<div style='padding:6px 4px;font-family:Outfit,sans-serif'><strong>✖ Error</strong> &nbsp; #: message #</div>" }
+            ]
+        }).data("kendoNotification");
 
-                Object.keys(errors).forEach(field => {
-                    const messages = errors[field];
+        function showSuccess(msg) { notification.show({ message: msg }, "success"); }
+        function showError(msg)   { notification.show({ message: msg }, "error"); }
 
-                    const el = $(`.field-error[data-for='${field}']`);
-                    const input = $(`[name='${field}']`);
+        /* ── Inline error helpers ── */
+        function setErr(inputId, errId, textId, msg) {
+            var inp = document.getElementById(inputId);
+            if (inp) { inp.classList.add('is-invalid'); }
+            var el = document.getElementById(errId);
+            if (el) el.classList.add('visible');
+            var tx = document.getElementById(textId);
+            if (tx) tx.textContent = msg;
+        }
 
-                    if (el.length) {
-                        el.text(messages[0]);
-                    }
+        function clearErr(inputId, errId) {
+            var inp = document.getElementById(inputId);
+            if (inp) { inp.classList.remove('is-invalid'); }
+            var el = document.getElementById(errId);
+            if (el) el.classList.remove('visible');
+        }
 
-                    if (input.length) {
-                        input.css("border-color", "#ff4d4f"); // 🔴 highlight
-                    }
-                });
+        function showFieldErrors(errors) {
+            clearErr('c_Email', 'err-email');
+            clearErr('c_Password', 'err-password');
+            Object.keys(errors).forEach(function (field) {
+                var msg = Array.isArray(errors[field]) ? errors[field][0] : errors[field];
+                if (field === 'c_Email')    setErr('c_Email',    'err-email',    'err-email-text',    msg);
+                if (field === 'c_Password') setErr('c_Password', 'err-password', 'err-password-text', msg);
+            });
+        }
+
+        /* ── Live blur validation ── */
+        $('#c_Email').on('blur', function () {
+            var v = $(this).val().trim();
+            if (!v)                                          setErr('c_Email', 'err-email', 'err-email-text', 'Email is required');
+            else if (!/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(v)) setErr('c_Email', 'err-email', 'err-email-text', 'Enter a valid email address');
+            else                                             clearErr('c_Email', 'err-email');
+        });
+
+        $('#c_Password').on('blur', function () {
+            if (!$(this).val()) setErr('c_Password', 'err-password', 'err-password-text', 'Password is required');
+            else                clearErr('c_Password', 'err-password');
+        });
+
+        /* ── Kendo Validator ── */
+        var validator = $("#loginForm").kendoValidator({
+            messages: {
+                required: function (input) {
+                    if (input.attr("name") === "c_Email")    return "Email is required";
+                    if (input.attr("name") === "c_Password") return "Password is required";
+                    return "This field is required";
+                }
+            }
+        }).data("kendoValidator");
+
+        /* ── Password toggle ── */
+        window.togglePass = function (inputId, iconId) {
+            var inp = document.getElementById(inputId);
+            var isText = inp.type === "text";
+            inp.type = isText ? "password" : "text";
+            document.getElementById(iconId).innerHTML = isText
+                ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+                : '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>' +
+                  '<path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>' +
+                  '<line x1="1" y1="1" x2="23" y2="23"/>';
+        };
+
+        /* ── Client-side validation ── */
+        function validateForm() {
+            var ok = true;
+            var email = $('#c_Email').val().trim();
+            if (!email) {
+                setErr('c_Email', 'err-email', 'err-email-text', 'Email is required'); ok = false;
+            } else if (!/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(email)) {
+                setErr('c_Email', 'err-email', 'err-email-text', 'Enter a valid email address'); ok = false;
+            } else {
+                clearErr('c_Email', 'err-email');
+            }
+            var pass = $('#c_Password').val();
+            if (!pass) {
+                setErr('c_Password', 'err-password', 'err-password-text', 'Password is required'); ok = false;
+            } else {
+                clearErr('c_Password', 'err-password');
+            }
+            return ok;
+        }
+
+        /* ── Form submit (original backend logic preserved) ── */
+        $("#loginForm").on("submit", function (e) {
+            e.preventDefault();
+
+            if (!validateForm()) {
+                showError("Please fix the errors before submitting.");
+                return;
             }
 
-            function showSuccess(msg) { notification.show({ message: msg }, "success"); }
-            function showError(msg)   { notification.show({ message: msg }, "error");   }
+            var btn     = $("#loginBtn");
+            var spinner = $("#btnSpinner");
+            var btnText = $("#btnText");
+            var btnArrow = $("#btnArrow");
 
-            var validator = $("#loginForm").kendoValidator({
-                messages: {
-                    required: function(input) {
-                        if (input.attr("name") === "c_Email") {
-                            return "Email is required";
-                        }
-                        if (input.attr("name") === "c_Password") {
-                            return "Password is required";
-                        }
-                        return "This field is required";
-                    }
-                }
-            }).data("kendoValidator");
+            btn.prop("disabled", true);
+            spinner.show();
+            btnText.text("Signing In...");
+            btnArrow.hide();
 
-            window.togglePass = function (inputId, iconId) {
-                var inp    = document.getElementById(inputId);
-                var isText = inp.type === "text";
-                inp.type   = isText ? "password" : "text";
-                document.getElementById(iconId).innerHTML = isText
-                    ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
-                    : '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>' +
-                      '<path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>' +
-                      '<line x1="1" y1="1" x2="23" y2="23"/>';
-            };
+            $.ajax({
+                url:         "http://localhost:5183/api/AdminApi/login",
+                type:        "POST",
+                data:        new FormData($("#loginForm")[0]),
+                contentType: false,
+                processData: false,
 
-            $("#loginForm").on("submit", function (e) {
-                e.preventDefault();
-
-                if (!validator.validate()) {
-                    showError("Please fix the errors before submitting.");
-                    return;
-                }
-
-                var btn = $("#loginBtn");
-                btn.prop("disabled", true).text("Checking...");
-
-                // ── Step 1: Verify credentials with the API ────────────────────
-                $.ajax({
-                    url:         "http://localhost:5183/api/AdminApi/login",
-                    type:        "POST",
-                    data:        new FormData($("#loginForm")[0]),
-                    contentType: false,
-                    processData: false,
-                    success: function (res) {
-                        if (!res.success) {
-
-                            if (res.errors) {
-                                showFieldErrors(res.errors);   // 🔥 show field-wise errors
-                            } else {
-                                Swal.fire({
-                                    icon: "error",
-                                    title: "Access Denied",
-                                    text: res.message || "Invalid email or password",
-                                    background: "rgba(255,255,255,0.85)",
-                                    backdrop: `
-                                        rgba(0,0,0,0.4)
-                                        url("https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif")
-                                        left top
-                                        no-repeat
-                                    `,
-                                    color: "#1a1a1a",
-                                    confirmButtonText: "Try Again",
-                                    confirmButtonColor: "#ff7e5f",
-                                    showClass: {
-                                        popup: "animate__animated animate__shakeX"
-                                    }
-                                });
-                            }
-
-                            btn.prop("disabled", false).text("SIGN IN");
-                            return;
-                        }
-
-                        if (res.success) {
-
-                            const token = res.token;
-
-                            // decode JWT
-                            const payload = JSON.parse(atob(token.split('.')[1]));
-
-                            localStorage.setItem("adminToken", token);
-                            localStorage.setItem("adminExpiry", payload.exp); 
-                            localStorage.setItem("adminData", JSON.stringify(res.Admin));
-
-                            window.location.href = "/Admin/Index";
-                        }
-
-                    },
-                    error: function (xhr) {
-                        btn.prop("disabled", false).text("SIGN IN");
-
-                        if (xhr.status === 400) {
-                            const res = xhr.responseJSON;
-
-                            if (res?.errors) {
-                                showFieldErrors(res.errors);
-                            } else {
-                                showError(res?.message || "Validation error.");
-                            }
-                        }
-                        else if (xhr.status === 401) {
+                success: function (res) {
+                    if (!res.success) {
+                        btn.prop("disabled", false);
+                        spinner.hide(); btnText.text("Sign In to Dashboard"); btnArrow.show();
+                        if (res.errors) {
+                            showFieldErrors(res.errors);
+                        } else {
                             Swal.fire({
                                 icon: "error",
-                                title: "Invalid Credentials",
-                                text: "Email or password is incorrect",
-                                confirmButtonColor: "#ff7e5f",
-                                background: "rgba(255,255,255,0.9)",
-                                showClass: {
-                                    popup: "animate__animated animate__shakeX"
-                                }
+                                title: "Access Denied",
+                                text: res.message || "Invalid email or password",
+                                confirmButtonText: "Try Again",
+                                confirmButtonColor: "#C17B4E",
+                                showClass: { popup: "animate__animated animate__shakeX" }
                             });
                         }
-                        else {
-                            showError("Server error. Try again.");
-                        }
+                        return;
                     }
-                });
-            });
 
+                    if (res.success) {
+                        const token   = res.token;
+                        const payload = JSON.parse(atob(token.split('.')[1]));
+
+                        localStorage.setItem("adminToken",  token);
+                        localStorage.setItem("adminExpiry", payload.exp);
+                        localStorage.setItem("adminData",   JSON.stringify(res.Admin));
+
+                        Swal.fire({
+                            icon: "success",
+                            title: "Welcome back!",
+                            text: "Redirecting to your dashboard...",
+                            timer: 1400,
+                            timerProgressBar: true,
+                            showConfirmButton: false,
+                            confirmButtonColor: "#C17B4E"
+                        }).then(function () {
+                            window.location.href = "/Admin/Index";
+                        });
+                    }
+                },
+
+                error: function (xhr) {
+                    btn.prop("disabled", false);
+                    spinner.hide(); btnText.text("Sign In to Dashboard"); btnArrow.show();
+
+                    if (xhr.status === 400) {
+                        const res = xhr.responseJSON;
+                        if (res?.errors) showFieldErrors(res.errors);
+                        else showError(res?.message || "Validation error.");
+                    } else if (xhr.status === 401) {
+                        Swal.fire({
+                            icon:  "error",
+                            title: "Invalid Credentials",
+                            text:  "The email or password you entered is incorrect.",
+                            confirmButtonColor: "#C17B4E",
+                            showClass: { popup: "animate__animated animate__shakeX" }
+                        });
+                    } else {
+                        showError("Server error. Please try again.");
+                    }
+                }
+            });
         });
+
+    });
     </script>
 </body>
 </html>

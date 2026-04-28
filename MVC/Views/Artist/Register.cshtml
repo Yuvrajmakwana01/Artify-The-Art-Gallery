@@ -7,254 +7,521 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Join the Studio — Artify</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Artify — Join the Creative Studio</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    
+    <!-- Kendo & SweetAlert -->
     <link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.common.min.css" rel="stylesheet" />
     <link href="https://kendo.cdn.telerik.com/2021.3.1207/styles/kendo.bootstrap-v4.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
 
     <style>
-        :root { 
-            --glass-bg: rgba(255, 255, 255, 0.9);
-            --accent-sage: #7d8c7d;
-            --text-main: #2c2c2c;
-            --soft-border: #e2e8f0;
-            --input-focus: #af9462;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        body, html { 
-            margin: 0; padding: 0; height: 100%; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: #f8f9fa; 
-            color: var(--text-main);
+        body, html {
+            height: 100%;
+            width: 100%;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
         }
 
-        /* ── LIGHT MASONRY BACKGROUND ── */
-        .bg-canvas { 
-            position: fixed; inset: 0; display: flex; gap: 15px; padding: 15px; z-index: 1; opacity: 0.4; pointer-events: none;
-        }
-        .column { display: flex; flex-direction: column; gap: 15px; flex: 1; }
-        .scroll-up { animation: slideUp 80s linear infinite; }
-        .scroll-down { animation: slideDown 80s linear infinite; }
-        .art-item img { width: 100%; border-radius: 12px; filter: sepia(20%); }
-
-        @@keyframes slideUp { from { transform: translateY(0); } to { transform: translateY(-50%); } }
-        @@keyframes slideDown { from { transform: translateY(-50%); } to { transform: translateY(0); } }
-
-        /* ── CENTERED FORM ── */
-        .main-wrapper { 
-            position: relative; z-index: 10; height: 100vh; display: flex; 
-            align-items: center; justify-content: center; overflow-y: auto; padding: 40px 0;
+        body {
+            background: linear-gradient(135deg, #f5f7fe 0%, #eef2fa 100%);
+            position: relative;
         }
 
-        .studio-card { 
-            background: var(--glass-bg); 
-            backdrop-filter: blur(20px); 
-            width: 100%; max-width: 520px; 
-            padding: 50px; border-radius: 24px; 
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
-            border: 1px solid white;
+        /* animated gradient background overlay */
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.03) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+            animation: slowPulse 8s ease-in-out infinite;
         }
 
-        .header-section { text-align: center; margin-bottom: 35px; }
-        .header-section h1 { font-family: 'Cormorant Garamond', serif; font-size: 2.4rem; margin: 0; font-weight: 600; }
-        .tagline { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 4px; color: var(--accent-sage); font-weight: 700; }
-
-        /* ── KENDO OVERRIDES ── */
-        .k-textbox, .k-numerictextbox { 
-            width: 100% !important; border-radius: 8px !important; 
-            margin-bottom: 15px; border: 1px solid var(--soft-border) !important;
-            padding: 12px 15px !important; font-size: 0.9rem !important;
-            transition: all 0.3s !important; background: white !important;
+        @@keyframes slowPulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.05); }
         }
-        .k-state-focused { border-color: var(--input-focus) !important; box-shadow: 0 0 0 3px rgba(175, 148, 98, 0.1) !important; }
 
-        /* ── PROFILE UPLOAD ── */
-        .upload-box { 
-            display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; 
+        /* floating soft orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.35;
+            z-index: 0;
+            pointer-events: none;
+            animation: floatOrb 20s ease-in-out infinite;
         }
-        .preview-circle { 
+        .orb-1 { width: 55vw; height: 55vw; background: #c7d9ff; top: -20vh; right: -15vw; animation-delay: 0s; }
+        .orb-2 { width: 45vw; height: 45vw; background: #ffe0c0; bottom: -15vh; left: -10vw; animation-delay: -5s; }
+        .orb-3 { width: 35vw; height: 35vw; background: #d9e6ff; bottom: 20vh; right: 5vw; opacity: 0.3; animation-delay: -10s; }
+
+        @@keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(3%, -2%) scale(1.02); }
+            66% { transform: translate(-2%, 3%) scale(0.98); }
+        }
+
+        /* main split layout */
+        .register-container {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* LEFT SIDE - glass form */
+        .form-section {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow-y: auto;
+            animation: sectionFadeIn 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1) both;
+        }
+
+        @@keyframes sectionFadeIn {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .form-wrapper {
+            max-width: 480px;
+            width: 100%;
+        }
+
+        /* logo + header (light theme) */
+        .logo-area { margin-bottom: 2rem; animation: logoSlide 0.6s ease-out; }
+        @@keyframes logoSlide {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .logo { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
+        .logo-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .logo-icon:hover { transform: rotate(90deg); }
+        .logo-icon i { font-size: 1.4rem; color: white; }
+        .logo-text {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 2rem; font-weight: 800;
+            background: linear-gradient(135deg, #313131ff, #14111aff);
+            -webkit-background-clip: text; background-clip: text;
+            color: transparent;
+            transition: letter-spacing 0.3s ease;
+        }
+        .logo-text:hover { letter-spacing: 2px; }
+
+        .form-header { margin-bottom: 2rem; animation: headerReveal 0.5s ease-out 0.1s both; }
+        @@keyframes headerReveal {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .form-header h1 { font-size: 2.2rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem; letter-spacing: -0.02em;
+        font-family: 'Times New Roman', Times, serif;
+         }
+        .form-header p { color: #64748b; font-size: 0.9rem; }
+
+        /* step indicator */
+        .step-indicator {
+            display: flex; justify-content: space-between; margin-bottom: 2rem;
+            position: relative; padding: 0 0.5rem;
+        }
+        .step-indicator::before {
+            content: ''; position: absolute; top: 20px; left: 15%; right: 15%;
+            height: 2px; background: #e2e8f0; z-index: 0;
+        }
+        .step { text-align: center; position: relative; z-index: 1; flex: 1; cursor: pointer; transition: transform 0.2s; }
+        .step:hover { transform: translateY(-3px); }
+        .step-number {
+            width: 40px; height: 40px; background: #f1f5f9; border: 2px solid #cbd5e1;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 8px; font-weight: 600; color: #64748b;
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+        }
+        .step.active .step-number {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-color: #6366f1; color: white; box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+            transform: scale(1.1);
+        }
+        .step.completed .step-number {
+            background: #10b981; border-color: #10b981; color: white;
+            animation: checkPop 0.4s cubic-bezier(0.2,0.9,0.4,1.2);
+        }
+        @@keyframes checkPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .step-label { font-size: 0.7rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+        .step.active .step-label { color: #6366f1; font-weight: 700; }
+
+        /* form fields */
+        .form-step { display: none; animation: stepFadeIn 0.5s cubic-bezier(0.2,0.9,0.4,1.1); }
+        .form-step.active-step { display: block; }
+        @@keyframes stepFadeIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .form-group { margin-bottom: 1.2rem; animation: fieldFadeUp 0.4s ease-out backwards; }
+        .form-group:nth-child(1) { animation-delay: 0.05s; }
+        .form-group:nth-child(2) { animation-delay: 0.1s; }
+        .form-group:nth-child(3) { animation-delay: 0.15s; }
+        @@keyframes fieldFadeUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .form-group label {
+            display: block; font-size: 0.75rem; font-weight: 600; margin-left: 5px;
+            text-transform: uppercase; letter-spacing: 0.5px; color: #475569;
+            margin-bottom: 0.5rem;
+        }
+        .k-textbox {
+            width: 100% !important; border-radius: 10px !important;
+            border: 1.5px solid #e2e8f0 !important; padding: 20px 14px !important;
+            font-size: 0.9rem !important; font-family: 'Inter', sans-serif !important;
+            transition: all 0.3s cubic-bezier(0.2,0.9,0.4,1.1) !important;
+            background: #ffffff !important; color: #1e293b !important;
+        }
+        .k-textbox:focus {
+            border-color: #c9a96e !important;
+            box-shadow: 0 0 0 4px rgba(201,169,110,0.15) !important;
+            transform: translateY(-1px);
+        }
+        .password-wrapper { position: relative; }
+        .password-toggle {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; color: #94a3b8; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .password-toggle:hover { color: #c9a96e; transform: translateY(-50%) scale(1.1); }
+
+        /* upload & gender */
+        .upload-box { text-align: center; margin-bottom: 1.5rem; animation: uploadFloat 0.5s ease-out;
+        
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center; }
+        @@keyframes uploadFloat { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .preview-circle {
             width: 90px; height: 90px; border-radius: 50%; object-fit: cover;
-            border: 3px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 10px;
+            border: 3px solid #c9a96e; box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            margin-bottom: 0.8rem; background: #f8fafc;
+            transition: all 0.3s;
         }
-
-        /* ── GENDER PILLS ── */
-        .gender-container { display: flex; gap: 10px; margin-top: 5px; }
+        .preview-circle:hover { transform: scale(1.05); }
+        .upload-label {
+            display: inline-flex; align-items: center; gap: 8px; padding: 8px 30px;
+            background: #f1f5f9; border: 1.5px solid #e2e8f0; border-radius: 40px;
+            font-size: 0.75rem; font-weight: 600; color: #475569; cursor: pointer;
+            transition: all 0.3s;
+        }
+        .upload-label:hover { border-color: #c9a96e; color: #c9a96e; transform: translateY(-2px); }
+        .gender-group { display: flex; gap: 1rem; margin-top: 0.5rem; }
         .gender-option { flex: 1; position: relative; }
         .gender-option input { position: absolute; opacity: 0; }
-        .gender-option label { 
-            display: block; padding: 10px; text-align: center; background: white;
-            border: 1px solid var(--soft-border); border-radius: 8px; font-size: 0.8rem;
-            cursor: pointer; transition: 0.2s; font-weight: 500;
+        .gender-option label {
+            display: block; padding: 10px; text-align: center; background: #f8fafc;
+            border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 0.85rem;
+            font-weight: 500; cursor: pointer; transition: all 0.3s; color: #475569;
         }
-        .gender-option input:checked + label { 
-            background: var(--text-main); color: white; border-color: var(--text-main); 
+        .gender-option input:checked + label {
+            background: linear-gradient(135deg, #3f46beff, #223278ff);
+            border-color: #c9a96e; color: white; transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(201,169,110,0.3);
+        }
+        .security-note {
+            background: #f8fafc; padding: 12px; border-radius: 12px;
+            font-size: 0.75rem; color: #475569; border: 1px solid #e2e8f0;
+            transition: all 0.3s;
+        }
+        .security-note:hover { border-color: #c9a96e; background: #fffef7; }
+
+        /* buttons */
+        .btn-group { display: flex; gap: 1rem; margin-top: 1.5rem; animation: btnFadeUp 0.5s ease-out 0.2s both; }
+        @@keyframes btnFadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .btn-prev {
+            flex: 1; padding: 12px; background: #f1f5f9; border: 1.5px solid #e2e8f0;
+            border-radius: 40px; font-weight: 600; color: #475569; cursor: pointer;
+            transition: all 0.3s; position: relative; overflow: hidden;
+        }
+        .btn-prev:hover { border-color: #c9a96e; color: #c9a96e; transform: translateX(-3px); background: #f8fafc; }
+        .btn-next, .btn-submit {
+            flex: 2; padding: 15px 12px; background: linear-gradient(95deg, #44679fff, #03289F);
+            border: none; border-radius: 40px; font-weight: 600; color: white;
+            font-size: 15px;
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.2,0.9,0.4,1.2);
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            position: relative; overflow: hidden;
+        }
+        .btn-next:hover, .btn-submit:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 12px 28px rgba(108,123,207,0.3); }
+        .footer-link {
+            text-align: center; margin-top: 2rem; padding-top: 1rem;
+            border-top: 1px solid #e2e8f0; font-size: 0.85rem; color: #64748b;
+            animation: footerFade 0.5s ease-out 0.3s both;
+        }
+        @@keyframes footerFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .footer-link a { color: #7c6c48; font-weight: 700; text-decoration: none; border-bottom: 1px dotted #dac29c; transition: all 0.3s; position: relative; }
+        .footer-link a::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 2px; background: #c9a96e; transition: width 0.3s; }
+        .footer-link a:hover::after { width: 100%; }
+        .footer-link a:hover { color: #b2813b; transform: translateX(3px); display: inline-block; }
+
+        /* ========== RIGHT SIDE: Spline 3D Scene ========== */
+        .visual-section {
+            flex: 1;
+            background: #ffffff;          /* matches Spline scene's white bg */
+            position: relative;
+            display: flex;
+            align-items: stretch;
+            overflow: hidden;
+            min-height: 100vh;
+            animation: visualFadeIn 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1) 0.1s both;
+        }
+        @@keyframes visualFadeIn {
+            from { opacity: 0; transform: translateX(30px); }
+            to   { opacity: 1; transform: translateX(0); }
         }
 
-        .btn-submit { 
-            background: var(--text-main) !important; color: white !important; 
-            width: 100% !important; padding: 16px !important; border-radius: 8px !important;
-            border: none !important; font-weight: 600; margin-top: 20px;
-            letter-spacing: 1px; transition: 0.3s; cursor: pointer;
+        /* Left-edge blend — form white fades seamlessly into Spline */
+        .visual-section::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 60px;
+            background: linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+            z-index: 10;
+            pointer-events: none;
         }
-        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
 
-        .k-invalid-msg { color: #d9534f !important; font-size: 0.75rem !important; margin: -10px 0 10px 5px; display: block; }
+        /* Spline iframe fills the full right panel */
+        .spline-wrapper {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .spline-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        /* ── Hide Spline watermark (bottom-RIGHT) ── */
+        .spline-watermark-cover {
+            position: absolute;
+            bottom: 0; right: 0;       /* ← corrected from left to right */
+            width: 210px; height: 58px;
+            background: #e3e3e3;
+            z-index: 99;
+            pointer-events: none;
+        }
+
+        /* loading state for submit */
+        .btn-submit.loading i { animation: spin 0.8s linear infinite; }
+        @@keyframes spin { to { transform: rotate(360deg); } }
+
+        @@media (max-width: 768px) {
+            .register-container { flex-direction: column; }
+            .form-section, .visual-section { flex: auto; min-height: auto; }
+            .visual-section { min-height: 420px; }
+            .step-indicator::before { left: 10%; right: 10%; }
+            .visual-section::before { width: 30px; }
+        }
+
     </style>
 </head>
 <body>
 
-    <div class="bg-canvas">
-        <div class="column scroll-up">
-            <div class="art-item"><img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400"></div>
-            <div class="art-item"><img src="https://images.unsplash.com/photo-1549490349-8643362247b5?w=400"></div>
-        </div>
-        <div class="column scroll-down">
-            <div class="art-item"><img src="https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=400"></div>
-            <div class="art-item"><img src="https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=400"></div>
-        </div>
-        <div class="column scroll-up">
-            <div class="art-item"><img src="https://images.unsplash.com/photo-1576132710321-70529d201d4a?w=400"></div>
-            <div class="art-item"><img src="https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=400"></div>
-        </div>
-    </div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
 
-    <div class="main-wrapper">
-        <div class="studio-card animate__animated animate__fadeIn">
-            <div class="header-section">
-                <span class="tagline">Artist Registration</span>
-                <h1>Create Your Studio</h1>
+<div class="register-container">
+    <!-- LEFT SIDE: Registration Form (light glass) -->
+    <div class="form-section">
+        <div class="form-wrapper">
+            <div class="logo-area">
+                <a href="/" class="logo">
+                    <div class="logo-icon"><img src="/Images/bob-logo.png" alt="artify logo" style="height: 40px; width: 40px; border-radius: 10px;" ></div>
+                    <span class="logo-text">ARTIFY</span>
+                </a>
+            </div>
+            <div class="form-header">
+                <h1>Create your account</h1>
+                <p>Join the creative revolution. Start your artistic journey today.</p>
+            </div>
+
+            <div class="step-indicator">
+                <div class="step active" data-step="1"><div class="step-number">1</div><div class="step-label">Account</div></div>
+                <div class="step" data-step="2"><div class="step-number">2</div><div class="step-label">Profile</div></div>
+                <div class="step" data-step="3"><div class="step-number">3</div><div class="step-label">Details</div></div>
             </div>
 
             <form id="regForm">
-                <div class="upload-box">
-                    <img id="imgPreview" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="preview-circle" />
-                    <input type="file" id="fProfile" name="ProfilePicture" style="display:none" accept="image/*" />
-                    <label for="fProfile" style="cursor:pointer; font-size:0.75rem; color:var(--accent-sage); font-weight:600">
-                        <i class="bi bi-plus-circle me-1"></i> Upload Portrait
-                    </label>
+                <div class="form-step active-step" data-step="1">
+                    <div class="form-group"><label><i class="bi bi-person"></i> Full Name</label><input id="txtFullName" name="c_Full_Name" required validationMessage="Please enter full name" placeholder="e.g., Sarah Johnson" /></div>
+                    <div class="form-group"><label><i class="bi bi-at"></i> Username</label><input id="txtUserName" name="c_UserName" required validationMessage="Please enter username" placeholder="e.g., sarah.art" /></div>
+                    <div class="form-group"><label><i class="bi bi-envelope"></i> Email Address</label><input id="txtEmail" name="c_Email" type="email" required data-email-msg="Invalid email address" placeholder="hello@artify.com" /></div>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <input id="txtFullName" name="c_Full_Name" required validationMessage="Enter full name" placeholder="Full Name" />
+                <div class="form-step" data-step="2">
+                    <div class="upload-box">
+                        <img id="imgPreview" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="preview-circle" />
+                        <input type="file" id="fProfile" name="ProfilePicture" style="display:none" accept="image/*" />
+                        <label for="fProfile" class="upload-label"><i class="bi bi-cloud-upload"></i> Upload Portrait</label>
                     </div>
-                    <div class="col-md-6">
-                        <input id="txtUserName" name="c_UserName" required validationMessage="Choose a handle" placeholder="Username" />
-                    </div>
-                </div>
-
-                <input id="txtEmail" name="c_Email" type="email" required data-email-msg="Invalid email address" placeholder="Email Address" />
-                
-                <input id="txtMobile" name="c_Mobile" required validationMessage="Enter mobile number" placeholder="Mobile Number" />
-
-                <input id="txtPass" name="c_Password" type="password" required 
-                       data-passwordComplexity-msg="Need 8+ chars, 1 number & 1 symbol" placeholder="Security Password" />
-
-                <label class="tagline" style="margin-top:10px; display:block">Gender</label>
-                <div class="gender-container">
-                    <div class="gender-option">
-                        <input type="radio" id="m" name="c_Gender" value="Male" checked>
-                        <label for="m">Male</label>
-                    </div>
-                    <div class="gender-option">
-                        <input type="radio" id="f" name="c_Gender" value="Female">
-                        <label for="f">Female</label>
+                    <div class="form-group"><label><i class="bi bi-phone"></i> Mobile Number</label><input id="txtMobile" name="c_Mobile" required validationMessage="Please enter mobile number" placeholder="+1 234 567 8900" /></div>
+                    <div class="form-group"><label><i class="bi bi-gender-ambiguous"></i> Gender</label>
+                        <div class="gender-group">
+                            <div class="gender-option"><input type="radio" id="genderMale" name="c_Gender" value="Male" checked><label for="genderMale">Male</label></div>
+                            <div class="gender-option"><input type="radio" id="genderFemale" name="c_Gender" value="Female"><label for="genderFemale">Female</label></div>
+                        </div>
                     </div>
                 </div>
 
-                <button type="button" id="btnGo" class="btn-submit">Initialize Account</button>
+                <div class="form-step" data-step="3">
+                    <div class="form-group"><label><i class="bi bi-lock"></i> Password</label>
+                        <div class="password-wrapper">
+                            <input id="txtPass" name="c_Password" type="password" required data-passwordComplexity-msg="Need 8+ chars, 1 number & 1 symbol" placeholder="Create a strong password" />
+                            <button type="button" class="password-toggle" onclick="togglePassword('txtPass', this)"><i class="bi bi-eye"></i></button>
+                        </div>
+                    </div>
+                    <div class="form-group"><label><i class="bi bi-shield-check"></i> Security Note</label>
+                        <div class="security-note"><i class="bi bi-info-circle"></i> Password must contain at least 8 characters, 1 number, and 1 special character.</div>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn-prev" id="prevBtn" style="display: none;"><i class="bi bi-arrow-left"></i> Back</button>
+                    <button type="button" class="btn-next" id="nextBtn">Continue <i class="bi bi-arrow-right"></i></button>
+                    <button type="button" id="btnGo" class="btn-submit" style="display: none;">Initialize Account <i class="bi bi-check-lg"></i></button>
+                </div>
             </form>
-
-            <div style="text-align:center; margin-top:25px; font-size:0.85rem">
-                <span style="color:#94a3b8">Already have an account?</span> 
-                <a href="/Artist/Login" style="color:var(--text-main); font-weight:700; text-decoration:none; margin-left:5px">Sign In</a>
-            </div>
+            <div class="footer-link">Already have an account? <a href="/Artist/Login">Sign In</a></div>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- RIGHT SIDE: Spline 3D Interactive Scene -->
+    <div class="visual-section">
+        <div class="spline-wrapper">
+            <!-- <iframe
+                src='https://my.spline.design/robots-luRuB2VGkSlawhc4AFJMk6ID/'
+                frameborder='0'
+                width='100%'
+                height='100%'
+                loading='lazy'
+                title='Artify 3D Scene'>
+            </iframe> -->
+            <iframe src='https://my.spline.design/nexbotrobotcharacterconcept-V6spkxf76eC0DVqSTI0BKqYl/' frameborder='0' width='100%' height='100%'></iframe>
+        </div>
+        <!-- Hides the Spline watermark at bottom-left -->
+        <div class="spline-watermark-cover"></div>
+    </div>
+</div>
 
-    <script>
-        $(document).ready(function () {
-            // Initialize Kendo Inputs
-            $("#txtFullName, #txtUserName, #txtEmail, #txtPass, #txtMobile").kendoTextBox();
-            
-            // Image Preview
-            $("#fProfile").change(function(){
-                if (this.files && this.files[0]) {
-                    let reader = new FileReader();
-                    reader.onload = e => $('#imgPreview').attr('src', e.target.result);
-                    reader.readAsDataURL(this.files[0]);
-                }
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2021.3.1207/js/kendo.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    let currentStep = 1;
+    const totalSteps = 3;
+    function togglePassword(fieldId, btn) {
+        const field = document.getElementById(fieldId);
+        const icon = btn.querySelector('i');
+        if (field.type === 'password') { field.type = 'text'; icon.classList.remove('bi-eye'); icon.classList.add('bi-eye-slash'); }
+        else { field.type = 'password'; icon.classList.remove('bi-eye-slash'); icon.classList.add('bi-eye'); }
+    }
+
+    $(document).ready(function () {
+        $("#txtFullName, #txtUserName, #txtEmail, #txtPass, #txtMobile").kendoTextBox();
+        $("#fProfile").change(function(){ if(this.files && this.files[0]){ let reader = new FileReader(); reader.onload = e => $('#imgPreview').attr('src', e.target.result); reader.readAsDataURL(this.files[0]); } });
+
+        var validator = $("#regForm").kendoValidator({
+            rules: {
+                passwordComplexity: function (input) { if(input.is("[name=c_Password]")){ return /^(?=.*[0-9])(?=.*[!@@#$%^&*])[a-zA-Z0-9!@@#$%^&*]{8,}$/.test(input.val()); } return true; },
+                mobileLength: function(input) { if(input.is("[name=c_Mobile]")){ return input.val().length >= 10; } return true; }
+            },
+            messages: { passwordComplexity: "8+ chars, 1 number, 1 symbol required", mobileLength: "Enter a valid 10-digit number" }
+        }).data("kendoValidator");
+
+        function updateStepUI() {
+            $('.form-step').removeClass('active-step');
+            $(`.form-step[data-step="${currentStep}"]`).addClass('active-step');
+            $('.step').removeClass('active completed');
+            for(let i=1;i<=totalSteps;i++){
+                if(i<currentStep){ $(`.step[data-step="${i}"]`).addClass('completed'); $(`.step[data-step="${i}"] .step-number`).html('<i class="bi bi-check-lg"></i>'); }
+                else if(i===currentStep){ $(`.step[data-step="${i}"]`).addClass('active'); $(`.step[data-step="${i}"] .step-number`).html(i); }
+                else { $(`.step[data-step="${i}"] .step-number`).html(i); }
+            }
+            if(currentStep===1){ $('#prevBtn').hide(); $('#nextBtn').show(); $('#btnGo').hide(); }
+            else if(currentStep===totalSteps){ $('#prevBtn').show(); $('#nextBtn').hide(); $('#btnGo').show(); }
+            else { $('#prevBtn').show(); $('#nextBtn').show(); $('#btnGo').hide(); }
+        }
+
+        function validateCurrentStep(){
+            let currentStepFields = $(`.form-step[data-step="${currentStep}"] input[required], .form-step[data-step="${currentStep}"] [required]`);
+            let isValid=true;
+            currentStepFields.each(function(){
+                if($(this).attr('type')==='radio'){ if($(`input[name="${$(this).attr('name')}"]:checked`).length===0) isValid=false; }
+                else { if(!validator.validateInput($(this))) isValid=false; }
             });
+            return isValid;
+        }
 
-            // Validator with Password Complexity
-            var validator = $("#regForm").kendoValidator({
-                rules: {
-                    passwordComplexity: function (input) {
-                        if (input.is("[name=c_Password]")) {
-                            var val = input.val();
-                            // 8 chars, 1 number, 1 special char
-                            return /^(?=.*[0-9])(?=.*[!@@#$%^&*])[a-zA-Z0-9!@@#$%^&*]{8,}$/.test(val);
-                        }
-                        return true;
+        $('#nextBtn').click(function(){ if(validateCurrentStep()){ if(currentStep<totalSteps){ currentStep++; updateStepUI(); } } else { validator.validate(); } });
+        $('#prevBtn').click(function(){ if(currentStep>1){ currentStep--; updateStepUI(); } });
+
+        $("#btnGo").click(function () {
+            if(validator.validate()){
+                var formData = new FormData($("#regForm")[0]);
+                var btn = $(this); btn.addClass('loading');
+                kendo.ui.progress($(".form-wrapper"), true);
+                $.ajax({
+                    url: 'http://localhost:5183/api/ArtistApi/Register', type: 'POST', data: formData, contentType: false, processData: false,
+                    success: function (res) {
+                        kendo.ui.progress($(".form-wrapper"), false); btn.removeClass('loading');
+                        if(res.success){
+                            Swal.fire({ icon:'success', title:'Welcome to the Studio!', text:res.message || 'Your account has been created successfully.', background:'#ffffff', color:'#1e293b', confirmButtonColor:'#c9a96e', timer:2000, showConfirmButton:false }).then(()=> window.location.href="/Artist/Login");
+                        } else { Swal.fire({ icon:'error', title:'Registration Failed', text:res.message || 'Unable to create account.', background:'#ffffff', confirmButtonColor:'#c9a96e' }); }
                     },
-                    mobileLength: function(input) {
-                        if (input.is("[name=c_Mobile]")) {
-                            return input.val().length >= 10;
-                        }
-                        return true;
+                    error: function (xhr) {
+                        kendo.ui.progress($(".form-wrapper"), false); btn.removeClass('loading');
+                        let msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : "Registration failed. Please try again.";
+                        Swal.fire({ icon:'error', title:'Registration Denied', text:msg, background:'#ffffff', confirmButtonColor:'#c9a96e' });
                     }
-                },
-                messages: {
-                    passwordComplexity: "8+ chars, 1 number, 1 symbol required",
-                    mobileLength: "Enter a valid 10-digit number"
-                }
-            }).data("kendoValidator");
-
-            // Submit Logic
-            $("#btnGo").click(function () {
-                if (validator.validate()) {
-                    var formData = new FormData($("#regForm")[0]);
-                    kendo.ui.progress($(".studio-card"), true);
-
-                    $.ajax({
-                        url: 'http://localhost:5183/api/ArtistApi/Register',
-                        type: 'POST',
-                        data: formData,
-                        contentType: false, 
-                        processData: false,
-                        success: function (res) {
-                            kendo.ui.progress($(".studio-card"), false);
-                            if (res.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Welcome to the Studio',
-                                    text: res.message,
-                                    confirmButtonColor: '#2c2c2c'
-                                }).then(() => window.location.href = "/Artist/Login");
-                            }
-                        },
-                        error: function (xhr) {
-                            kendo.ui.progress($(".studio-card"), false);
-                            let msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : "Registration failed";
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Registration Denied',
-                                text: msg,
-                                confirmButtonColor: '#2c2c2c'
-                            });
-                        }
-                    });
-                }
-            });
+                });
+            }
         });
-    </script>
+        updateStepUI();
+    });
+</script>
 </body>
 </html>
+
+
+
+
+

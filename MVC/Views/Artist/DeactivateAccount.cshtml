@@ -1,0 +1,285 @@
+@{
+    Layout = "~/Views/Artist/_ArtistLayout.cshtml";
+    ViewData["Title"] = "Deactivate Account";
+    ViewData["Active"] = "Settings";
+}
+
+@section HeadStyles {
+<style>
+    .deactivate-wrapper {
+        max-width: 620px;
+        margin: 40px auto;
+    }
+
+    .breadcrumb-artify {
+        display: flex; align-items: center; gap: 8px;
+        font-size: .82rem; color: var(--muted); margin-bottom: 28px;
+    }
+    .breadcrumb-artify a {
+        color: var(--primary); text-decoration: none; font-weight: 600;
+    }
+    .breadcrumb-artify a:hover { text-decoration: underline; }
+
+    /* Warning header card */
+    .warn-header {
+        background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+        border-radius: var(--radius) var(--radius) 0 0;
+        padding: 32px 36px 28px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .warn-header::before {
+        content: '';
+        position: absolute; inset: 0;
+        background: radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.08) 0%, transparent 70%);
+    }
+    .warn-icon-ring {
+        width: 72px; height: 72px; border-radius: 50%;
+        background: rgba(255,255,255,.12);
+        border: 2px solid rgba(255,255,255,.2);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 16px;
+        font-size: 1.8rem; color: #fff;
+        animation: pulseRing 2s ease-in-out infinite;
+    }
+    @@keyframes pulseRing {
+        0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,.2); }
+        50%      { box-shadow: 0 0 0 12px rgba(255,255,255,0); }
+    }
+    .warn-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem; font-weight: 700; color: #fff;
+        margin-bottom: 8px;
+    }
+    .warn-subtitle {
+        font-size: .85rem; color: rgba(255,255,255,.75);
+    }
+
+    /* Body card */
+    .deactivate-body {
+        background: var(--card-bg);
+        border-radius: 0 0 var(--radius) var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(3,40,159,.05);
+        border-top: none;
+        padding: 32px 36px;
+    }
+
+    /* What happens list */
+    .impact-list {
+        list-style: none; padding: 0; margin: 0 0 28px;
+        display: flex; flex-direction: column; gap: 12px;
+    }
+    .impact-list li {
+        display: flex; align-items: flex-start; gap: 12px;
+        padding: 12px 14px;
+        background: #fff5f5;
+        border: 1px solid #fecaca;
+        border-radius: 10px;
+        font-size: .85rem; color: #7f1d1d;
+    }
+    .impact-list li i {
+        font-size: 1rem; color: #ef4444; margin-top: 1px; flex-shrink: 0;
+    }
+
+    /* Type confirm */
+    .confirm-section {
+        background: rgba(127,29,29,.04);
+        border: 1.5px solid #fca5a5;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+    .confirm-label {
+        font-size: .78rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: .8px;
+        color: #991b1b; margin-bottom: 8px; display: block;
+    }
+    .confirm-input {
+        width: 100%; padding: 11px 14px;
+        border-radius: 10px;
+        border: 1.5px solid #fca5a5;
+        background: #fff;
+        font-size: .9rem; font-family: 'DM Sans', sans-serif;
+        color: var(--text); outline: none;
+        transition: border-color .2s, box-shadow .2s;
+    }
+    .confirm-input:focus {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239,68,68,.12);
+    }
+    .confirm-hint {
+        font-size: .74rem; color: var(--muted); margin-top: 6px;
+    }
+
+    /* Feedback */
+    .feedback-bar {
+        padding: 12px 16px; border-radius: 10px;
+        font-size: .85rem; font-weight: 600;
+        margin-bottom: 16px; display: none;
+    }
+    .feedback-error   { background: #fee2e2; color: #991b1b; }
+    .feedback-success { background: #d1fae5; color: #065f46; }
+
+    /* Buttons */
+    .action-row {
+        display: flex; gap: 12px; flex-wrap: wrap;
+    }
+    .btn-deactivate {
+        flex: 1; min-width: 160px;
+        height: 44px; border-radius: 10px;
+        background: #7f1d1d; color: #fff;
+        border: none; cursor: pointer;
+        font-size: .88rem; font-weight: 700;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        transition: background .2s, opacity .2s;
+    }
+    .btn-deactivate:hover:not(:disabled) { background: #991b1b; }
+    .btn-deactivate:disabled { opacity: .5; cursor: not-allowed; }
+
+    @@media(max-width:576px){
+        .warn-header  { padding: 24px 20px 20px; }
+        .deactivate-body { padding: 24px 20px; }
+        .deactivate-wrapper { margin: 20px auto; }
+    }
+</style>
+}
+
+<!-- Breadcrumb -->
+<div class="deactivate-wrapper">
+    <div class="breadcrumb-artify">
+        <a href="/Artist/Settings"><i class="bi bi-arrow-left me-1"></i>Back to Settings</a>
+        <i class="bi bi-chevron-right" style="font-size:.65rem;"></i>
+        <span>Deactivate Account</span>
+    </div>
+
+    <!-- Warning header -->
+    <div class="warn-header">
+        <div class="warn-icon-ring">
+            <i class="bi bi-slash-circle-fill"></i>
+        </div>
+        <div class="warn-title">Deactivate Your Account</div>
+        <div class="warn-subtitle">This action is permanent and takes effect immediately.</div>
+    </div>
+
+    <!-- Body -->
+    <div class="deactivate-body">
+
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:20px;line-height:1.6;">
+            Before you proceed, please understand what will happen when you deactivate your account:
+        </p>
+
+        <ul class="impact-list">
+            <li>
+                <i class="bi bi-eye-slash-fill"></i>
+                <span>Your artist profile and all artwork listings will be <strong>immediately hidden</strong> from the public gallery.</span>
+            </li>
+            <li>
+                <i class="bi bi-box-arrow-right"></i>
+                <span>You will be <strong>logged out immediately</strong> and will not be able to log back in until reactivated by support.</span>
+            </li>
+            <li>
+                <i class="bi bi-database-fill-x"></i>
+                <span>Your data, artworks, and earnings history will be <strong>preserved</strong> — nothing is deleted.</span>
+            </li>
+            <li>
+                <i class="bi bi-headset"></i>
+                <span>To reactivate, you must <strong>contact Artify support</strong> with your registered email address.</span>
+            </li>
+        </ul>
+
+        <!-- Typed confirmation -->
+        <div class="confirm-section">
+            <span class="confirm-label">Confirm your decision</span>
+            <input type="text" id="confirmInput" class="confirm-input"
+                   placeholder='Type "DEACTIVATE" to unlock the button'
+                   oninput="onConfirmType(this)" autocomplete="off" />
+            <div class="confirm-hint">
+                <i class="bi bi-shield-lock me-1"></i>
+                Type <strong>DEACTIVATE</strong> exactly (all caps) to enable the button.
+            </div>
+        </div>
+
+        <!-- Feedback bar -->
+        <div class="feedback-bar" id="feedbackBar"></div>
+
+        <!-- Actions -->
+        <div class="action-row">
+            <a href="/Artist/Settings" class="btn-artify btn-artify-ghost" style="flex:1;min-width:140px;text-decoration:none;height:44px;display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-arrow-left me-1"></i> Cancel
+            </a>
+            <button id="deactivateBtn" class="btn-deactivate" disabled onclick="doDeactivate()">
+                <i class="bi bi-slash-circle-fill"></i>
+                <span id="btnText">Deactivate My Account</span>
+            </button>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const API_BASE = 'http://localhost:5183/api/ArtistApi';
+    const artistId = @(Context.Session.GetInt32("ArtistId") ?? 0);
+
+    function onConfirmType(input) {
+        document.getElementById('deactivateBtn').disabled =
+            input.value.trim() !== 'DEACTIVATE';
+    }
+
+    async function doDeactivate() {
+        const btn  = document.getElementById('deactivateBtn');
+        const text = document.getElementById('btnText');
+
+        btn.disabled = true;
+        text.textContent = 'Deactivating…';
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Deactivating…';
+
+        try {
+            const res  = await fetch(`${API_BASE}/deactivate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ c_artist_id: artistId })
+            });
+            const data = await res.json();
+
+            if (data.success || res.ok) {
+                showFeedback('success',
+                    '<i class="bi bi-check-circle-fill me-1"></i>Account deactivated. Logging you out…');
+
+                // Wait 1.5s then do a full logout (clears cookies + redirects to login)
+                setTimeout(async () => {
+                    try { sessionStorage.clear(); localStorage.clear(); } catch(e) {}
+                    try {
+                        await fetch('http://localhost:5183/api/ArtistApi/Logout', {
+                            method: 'POST', credentials: 'include'
+                        });
+                    } catch(e) {}
+                    window.location.href = '/Artist/Logout';
+                }, 1500);
+            } else {
+                showFeedback('error',
+                    '<i class="bi bi-exclamation-triangle-fill me-1"></i>' +
+                    (data.message || 'Deactivation failed. Please try again.'));
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-slash-circle-fill"></i> Deactivate My Account';
+            }
+        } catch(e) {
+            showFeedback('error',
+                '<i class="bi bi-exclamation-triangle-fill me-1"></i>Server error. Please try again.');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-slash-circle-fill"></i> Deactivate My Account';
+        }
+    }
+
+    function showFeedback(type, html) {
+        const el = document.getElementById('feedbackBar');
+        el.className = `feedback-bar feedback-${type}`;
+        el.innerHTML = html;
+        el.style.display = 'block';
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+</script>
+}

@@ -2,233 +2,267 @@
 @{
     Layout = "_AuthLayout";
     ViewData["Title"] = "Verify OTP";
-    @* var email = Request.Query["email"].ToString(); *@
-    
     var displayEmail = Model?.c_Email ?? Context.Request.Query["email"].ToString();
 }
 
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <style>
-    .auth-page {
-        position: relative;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-    }
-    .auth-bg-img {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        animation: bgPan 25s ease-in-out infinite;
-    }
-    .auth-bg-overlay {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(180deg,
-            hsl(25 20% 8% / 0.70) 0%,
-            hsl(25 20% 8% / 0.50) 50%,
-            hsl(25 20% 8% / 0.75) 100%);
-    }
-    .auth-wrapper {
-        position: relative;
-        z-index: 10;
-        width: 100%;
-        max-width: 440px;
-        margin: 24px 16px;
-        animation: scaleIn 0.4s ease-out;
-    }
-    .glass-card {
-        background: hsl(35 30% 92% / 0.88);
-        backdrop-filter: blur(24px);
-        border: 1px solid hsl(30 15% 82% / 0.35);
-        border-radius: 1.25rem;
-        padding: 2rem;
-        box-shadow: 0 8px 32px -8px hsl(25 20% 10% / 0.40),
-                    inset 0 1px 0 hsl(35 30% 97% / 0.18);
-    }
-    .btn-back {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: hsl(22, 50%, 38%);
-        font-size: 0.82rem;
-        font-weight: 600;
-        font-family: 'Inter', sans-serif;
-        padding: 0;
-        margin-bottom: 1rem;
-        text-decoration: none;
-        transition: color 0.2s;
-    }
-    .btn-back:hover { color: hsl(28, 60%, 45%); }
-    .auth-title {
-        font-family: 'Playfair Display', serif;
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: hsl(25, 30%, 10%);
-        text-align: center;
-        margin: 0;
-    }
-    .auth-subtitle {
-        font-size: 0.8rem;
-        color: hsl(25, 15%, 35%);
-        text-align: center;
-        margin: 0.25rem 0 0;
-    }
-    /* OTP boxes */
-    .otp-row {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-        margin: 1.2rem 0 0.5rem;
-    }
-    .otp-box {
-        width: 46px;
-        height: 52px;
-        text-align: center;
-        font-size: 1.3rem;
-        font-weight: 700;
-        font-family: 'Inter', sans-serif;
-        border: 1.5px solid hsl(30, 15%, 75%);
-        border-radius: 0.6rem;
-        background: hsl(32, 18%, 88%);
-        color: hsl(25, 30%, 10%);
-        transition: border-color 0.2s, box-shadow 0.2s;
-        outline: none;
-    }
-    .otp-box:focus {
-        border-color: hsl(28, 60%, 45%);
-        box-shadow: 0 0 0 3px hsl(28 60% 45% / 0.15);
-    }
-    .otp-error {
-        font-size: 0.72rem;
-        color: hsl(0, 65%, 48%);
-        text-align: center;
-        display: block;
-        margin-top: 0.3rem;
-        min-height: 1rem;
-    }
-    .btn-gold {
-        display: block;
-        width: 100%;
-        height: 42px;
-        background: linear-gradient(135deg, hsl(28,60%,45%), hsl(18,70%,38%));
-        color: hsl(35, 30%, 97%);
-        font-family: 'Inter', sans-serif;
-        font-size: 0.875rem;
-        font-weight: 600;
-        border: none;
-        border-radius: 0.65rem;
-        cursor: pointer;
-        margin-top: 1rem;
-        transition: filter 0.25s, box-shadow 0.25s;
-        box-shadow: 0 4px 14px hsl(28 60% 45% / 0.32);
-    }
-    .btn-gold:hover:not(:disabled) {
-        filter: brightness(1.08);
-        box-shadow: 0 6px 20px hsl(28 60% 45% / 0.42);
-    }
-    .btn-gold:disabled { opacity: 0.55; cursor: not-allowed; }
-    .resend-row {
-        text-align: center;
-        font-size: 0.78rem;
-        color: hsl(25, 15%, 40%);
-        margin-top: 1rem;
-    }
-    .resend-row a {
-        color: hsl(22, 50%, 38%);
-        font-weight: 600;
-        text-decoration: underline;
-        text-underline-offset: 2px;
-        cursor: pointer;
-    }
-    .resend-row a:hover { color: hsl(28, 60%, 45%); }
-    @@keyframes bgPan {
-        0%   { transform: scale(1.15) translate(0%, 0%); }
-        25%  { transform: scale(1.20) translate(-2%, -1%); }
-        50%  { transform: scale(1.15) translate(-1%, 1%); }
-        75%  { transform: scale(1.20) translate(1%, -1%); }
-        100% { transform: scale(1.15) translate(0%, 0%); }
-    }
-    @@keyframes scaleIn {
-        from { opacity: 0; transform: scale(0.96); }
-        to   { opacity: 1; transform: scale(1); }
-    }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg:       #DFE6E9;
+    --cobalt:   #03289F;
+    --cobalt-dk:#021A6E;
+    --cobalt-lt:#1A3DB5;
+    --gold:     #EDA312;
+    --gold-lt:  #F5C84A;
+    --sky:      #6B9BE6;
+    --sky-lt:   #A8C4F0;
+    --ink:      #0A1628;
+    --white:    #FFFFFF;
+    --err:      #D63031;
+}
+
+html, body {
+    height: 100%; font-family: 'Jost', sans-serif;
+    background: var(--bg); overflow: hidden;
+}
+
+/* ── Mosaic BG (shared pattern) ── */
+.bg-stage { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: var(--bg); }
+.mosaic-grid {
+    position: absolute; display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 3px; width: 210%; height: 210%;
+    top: -55%; left: -55%; opacity: 0;
+    transform: rotateX(14deg) rotateZ(8deg) skewX(3deg);
+    @* animation: mosaicDrift 5s linear infinite; transition: opacity 1.8s ease; *@
+}
+.mosaic-grid.alive { opacity: 1; }
+.mosaic-tile {
+    width: 100%; height: 200px;
+    background-size: cover; background-position: center; border-radius: 4px;
+    animation: tilePulse 20s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.12s);
+}
+@@keyframes mosaicDrift {
+    0%   { transform: rotateX(14deg) rotateZ(8deg) skewX(3deg) translateY(0%); }
+    100% { transform: rotateX(14deg) rotateZ(8deg) skewX(3deg) translateY(14%); }
+}
+@@keyframes tilePulse { 0%,100%{filter:brightness(0.92) saturate(0.85);} 50%{filter:brightness(1.05) saturate(1.05);} }
+.bg-veil { position: absolute; inset: 0; z-index: 1; background: linear-gradient(135deg, rgba(223,230,233,0.80) 0%, rgba(223,230,233,0.50) 50%, rgba(223,230,233,0.78) 100%); }
+.orb { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 1; }
+.orb-a { width: 450px; height: 450px; background: radial-gradient(circle, rgba(107,155,230,0.20) 0%, transparent 70%); top: -10%; right: -5%; animation: orbDrift 22s ease-in-out infinite; }
+.orb-b { width: 320px; height: 320px; background: radial-gradient(circle, rgba(237,163,18,0.12) 0%, transparent 70%); bottom: -10%; left: -5%; animation: orbDrift 28s ease-in-out infinite; animation-delay: -10s; }
+@@keyframes orbDrift { 0%,100%{transform:translate(0,0);} 50%{transform:translate(-18px,14px);} }
+.bg-grid { position: absolute; inset: 0; z-index: 1; background-image: linear-gradient(rgba(107,155,230,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(107,155,230,0.04) 1px, transparent 1px); background-size: 44px 44px; animation: gridShift 70s linear infinite; }
+@@keyframes gridShift { from{background-position:0 0;} to{background-position:44px 44px;} }
+
+/* ── Shell ── */
+.auth-shell { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+
+/* ── Glass Card ── */
+.glass-card {
+    position: relative; width: 100%; max-width: 420px;
+    background: rgba(255,255,255,0.72);
+    backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(107,155,230,0.25);
+    border-radius: 24px; padding: 2.4rem 2.2rem 2rem;
+    box-shadow: 0 2px 0 rgba(255,255,255,0.9) inset, 0 0 0 1px rgba(255,255,255,0.4), 0 24px 64px rgba(3,40,159,0.12), 0 4px 16px rgba(107,155,230,0.10);
+    animation: cardReveal 0.7s cubic-bezier(0.16,1,0.3,1) both; overflow: hidden;
+}
+.glass-card::before {
+    content: ''; position: absolute; top:0; left:0; right:0; height: 2px;
+    background: linear-gradient(90deg, transparent 0%, var(--sky) 30%, var(--gold) 65%, transparent 100%); z-index: 2;
+}
+@@keyframes cardReveal { from{opacity:0;transform:translateY(28px) scale(0.97);} to{opacity:1;transform:translateY(0) scale(1);} }
+
+/* ── Brand ── */
+.card-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 1.4rem; animation: fadeUp 0.5s 0.1s both; }
+.brand-gem { width: 32px; height: 32px; background: linear-gradient(135deg, var(--cobalt), var(--cobalt-lt)); border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(3,40,159,0.28); }
+.brand-gem svg { width: 15px; height: 15px; }
+.brand-name { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: var(--cobalt); letter-spacing: 0.03em; }
+
+/* ── Back ── */
+.btn-back { display: inline-flex; align-items: center; gap: 5px; background: none; border: none; cursor: pointer; color: var(--cobalt); font-size: 0.75rem; font-weight: 600; font-family: 'Jost', sans-serif; padding: 0; margin-bottom: 1.2rem; text-decoration: none; transition: color 0.2s; animation: fadeUp 0.5s 0.05s both; }
+.btn-back:hover { color: var(--gold); }
+
+/* ── Icon circle ── */
+.icon-circle { width: 58px; height: 58px; border-radius: 50%; background: rgba(3,40,159,0.08); border: 2px solid rgba(107,155,230,0.25); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; animation: fadeUp 0.5s 0.16s both; box-shadow: 0 0 0 6px rgba(107,155,230,0.07); }
+
+/* ── Heading ── */
+.card-heading { text-align: center; margin-bottom: 1.4rem; animation: fadeUp 0.5s 0.22s both; }
+.card-heading h1 { font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 700; color: var(--gold); line-height: 1.1; margin-bottom: 0.3rem; }
+.card-heading p { font-size: 0.76rem; color: var(--sky); font-weight: 400; }
+.card-heading p strong { color: var(--ink); font-weight: 600; }
+
+/* ── OTP boxes ── */
+.otp-row {
+    display: flex; gap: 8px; justify-content: center;
+    margin: 0 0 0.6rem;
+    animation: fadeUp 0.5s 0.28s both;
+}
+.otp-box {
+    width: 48px; height: 56px;
+    text-align: center; font-size: 1.4rem; font-weight: 700;
+    font-family: 'Playfair Display', serif;
+    border: 1.5px solid rgba(107,155,230,0.25);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.65);
+    color: var(--ink);
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    outline: none; cursor: text;
+}
+.otp-box:focus {
+    border-color: var(--cobalt);
+    background: var(--white);
+    box-shadow: 0 0 0 3.5px rgba(3,40,159,0.10);
+}
+.otp-box.filled {
+    border-color: var(--gold);
+    background: rgba(237,163,18,0.06);
+}
+
+.otp-error {
+    font-size: 0.68rem; color: var(--err);
+    text-align: center; display: block;
+    min-height: 1rem; margin-bottom: 0.4rem;
+    font-weight: 500;
+    animation: errIn 0.2s ease-out;
+}
+@@keyframes errIn { from{opacity:0;transform:translateY(-3px);} to{opacity:1;transform:translateY(0);} }
+
+/* ── Timer ── */
+.timer-row {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-bottom: 0.8rem; font-size: 0.8rem;
+    color: var(--cobalt); font-weight: 600;
+    animation: fadeUp 0.5s 0.34s both;
+}
+.timer-badge {
+    background: rgba(3,40,159,0.08);
+    border: 1px solid rgba(107,155,230,0.22);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.9rem; color: var(--cobalt);
+    transition: background 0.3s, color 0.3s;
+}
+.timer-badge.expired {
+    background: rgba(214,48,49,0.08);
+    border-color: rgba(214,48,49,0.25);
+    color: var(--err);
+}
+
+/* ── Submit ── */
+.btn-verify {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; height: 50px;
+    background: linear-gradient(130deg, var(--cobalt-lt) 0%, var(--cobalt) 55%, var(--cobalt-dk) 100%);
+    color: var(--white); font-family: 'Jost', sans-serif; font-size: 0.9rem; font-weight: 600;
+    border: 1px solid rgba(107,155,230,0.20); border-radius: 12px; cursor: pointer;
+    letter-spacing: 0.06em;
+    transition: transform 0.2s, box-shadow 0.3s, filter 0.2s;
+    box-shadow: 0 6px 24px rgba(3,40,159,0.25);
+    position: relative; overflow: hidden;
+    animation: fadeUp 0.5s 0.40s both;
+}
+.btn-verify::before {
+    content: ''; position: absolute; top:0; left:-100%; width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+    transform: skewX(-18deg); transition: left 0.5s ease;
+}
+.btn-verify:hover::before { left: 160%; }
+.btn-verify:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(3,40,159,0.35); filter: brightness(1.08); }
+.btn-verify:active:not(:disabled) { transform: translateY(0); }
+.btn-verify:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.btn-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); flex-shrink: 0; box-shadow: 0 0 8px rgba(237,163,18,0.7); }
+
+/* ── Resend ── */
+.resend-row { text-align: center; font-size: 0.75rem; color: var(--sky); margin-top: 1rem; animation: fadeUp 0.5s 0.46s both; }
+.resend-row a { color: var(--cobalt); font-weight: 700; text-decoration: none; border-bottom: 1px solid rgba(3,40,159,0.3); transition: color 0.2s, border-color 0.2s; cursor: pointer; }
+.resend-row a:hover { color: var(--gold); border-color: var(--gold); }
+
+.spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.25); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+@@keyframes spin { to { transform: rotate(360deg); } }
+@@keyframes fadeUp { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:translateY(0);} }
 </style>
 
-<div class="auth-page">
-    <img class="auth-bg-img"
-         src="https://images.unsplash.com/photo-1578926375605-eaf7559b1458?w=1920&q=80"
-         alt="Art gallery" />
-    <div class="auth-bg-overlay"></div>
+<div class="bg-stage">
+    <div class="mosaic-grid" id="artGrid"></div>
+    <div class="bg-veil"></div>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="bg-grid"></div>
+</div>
 
-    <div class="auth-wrapper">
-        <div class="glass-card">
+<div class="auth-shell">
+    <div class="glass-card">
 
-            <a href="/Auth/UserForgotPassword" class="btn-back">
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
-                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-                </svg>
-                Back
-            </a>
+        <div class="card-brand">
+            <div class="brand-gem">
+                @* <svg viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                </svg> *@
+                <img src="/Images/bob-logo.png" alt="Artify" style="width: 35px; height:35px; ">
 
-            <!-- Envelope icon -->
-            <div style="width:52px;height:52px;border-radius:50%;
-                        background:hsl(28 60% 45%/0.15);
-                        display:flex;align-items:center;justify-content:center;margin:0 auto 0.75rem">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
-                     fill="none" viewBox="0 0 24 24" stroke="hsl(28,60%,45%)" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8
-                             M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5
-                             a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                </svg>
             </div>
-
-            <h1 class="auth-title">Enter OTP</h1>
-            <p class="auth-subtitle">
-                6-digit OTP sent to
-                <strong style="color:hsl(25,30%,10%)">@displayEmail</strong>
-            </p>
-
-            <!-- Kendo Notification -->
-            <span id="kNotify"></span>
-
-            <!-- Hidden email for submit -->
-            <input type="hidden" id="hiddenEmail" value="@displayEmail" />
-
-            <!-- 6 OTP boxes -->
-            <div class="otp-row">
-                <input class="otp-box" id="otp0" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
-                <input class="otp-box" id="otp1" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
-                <input class="otp-box" id="otp2" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
-                <input class="otp-box" id="otp3" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
-                <input class="otp-box" id="otp4" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
-                <input class="otp-box" id="otp5" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
-            </div>
-            <span class="otp-error" id="otpError"></span>
-        
-            <button class="btn-gold" id="verifyBtn">Verify OTP</button>
-
-             <div id="timerContainer" style="text-align:center; margin-top:0.5rem; font-family:'Inter',sans-serif; font-weight:600; color:hsl(28, 60%, 45%); font-size:0.9rem;">
-                Expires in: <span id="timerDisplay">02:00</span>
-            </div>
-
-            <p class="resend-row">
-                Didn't receive it? 
-                <span id="resendWrapper" style="display:none;">
-                    <a id="resendLink">Resend OTP</a>
-                </span>
-                <span id="waitText">Please wait...</span>
-            </p>
-
+            <span class="brand-name">Artify</span>
         </div>
+
+        <a href="/Auth/UserForgotPassword" class="btn-back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Back
+        </a>
+
+        <div class="icon-circle">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" style="color: var(--cobalt)">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+        </div>
+
+        <div class="card-heading">
+            <h1>Verify OTP</h1>
+            <p>6-digit code sent to <strong>@displayEmail</strong></p>
+        </div>
+
+        <span id="kNotify"></span>
+        <input type="hidden" id="hiddenEmail" value="@displayEmail" />
+
+        <div class="otp-row">
+            <input class="otp-box" id="otp0" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
+            <input class="otp-box" id="otp1" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
+            <input class="otp-box" id="otp2" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
+            <input class="otp-box" id="otp3" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
+            <input class="otp-box" id="otp4" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
+            <input class="otp-box" id="otp5" type="text" maxlength="1" inputmode="numeric" autocomplete="off" />
+        </div>
+        <span class="otp-error" id="otpError"></span>
+
+        <div class="timer-row">
+            <span>Expires in</span>
+            <span class="timer-badge" id="timerBadge">02:00</span>
+        </div>
+
+        <button class="btn-verify" id="verifyBtn">
+            <span class="btn-dot"></span>
+            Verify OTP
+        </button>
+
+        <p class="resend-row">
+            Didn't receive it?
+            <span id="resendWrapper" style="display:none;">
+                <a id="resendLink">Resend OTP</a>
+            </span>
+            <span id="waitText">Please wait...</span>
+        </p>
+
     </div>
 </div>
 
@@ -237,171 +271,170 @@
 <script>
 $(function () {
 
+    var API_BASE       = 'http://localhost:5183';
+    var CACHE_KEY      = 'unsplash_art_images';
+    var CACHE_TIME_KEY = 'unsplash_last_fetch';
+    var ONE_HOUR       = 3600000;
+
+    /* Mosaic background */
+    @* async function renderImages(images) {
+        var grid = document.getElementById('artGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        var frag = document.createDocumentFragment();
+        var promises = images.map(function(item, index) {
+            return new Promise(function(resolve) {
+                var tile = document.createElement('div');
+                tile.className = 'mosaic-tile';
+                tile.style.setProperty('--i', index);
+                var url = item.urls ? item.urls.regular : (typeof item === 'string' ? item : '');
+                if (!url) { resolve(); return; }
+                var img = new Image();
+                img.src = url;
+                img.onload = function() { tile.style.backgroundImage = "url('" + url + "')"; frag.appendChild(tile); resolve(); };
+                img.onerror = function() { resolve(); };
+            });
+        });
+        await Promise.all(promises);
+        grid.appendChild(frag);
+        setTimeout(function() { grid.classList.add('alive'); }, 100);
+    }
+    async function loadMosaicBackground() {
+        var cachedData = localStorage.getItem(CACHE_KEY);
+        var lastFetch  = localStorage.getItem(CACHE_TIME_KEY);
+        var now        = Date.now();
+        if (cachedData && lastFetch && (now - lastFetch < ONE_HOUR)) { await renderImages(JSON.parse(cachedData)); return; }
+        try {
+            var res = await fetch(API_BASE + '/api/ImageApi/art-background?count=100');
+            if (res.ok) {
+                var data = await res.json();
+                localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+                localStorage.setItem(CACHE_TIME_KEY, now.toString());
+                await renderImages(data);
+            } else { throw new Error('not ok'); }
+        } catch(e) { if (cachedData) await renderImages(JSON.parse(cachedData)); }
+    }
+    loadMosaicBackground(); *@
+
     // Kendo Notification
     var notify = $("#kNotify").kendoNotification({
         position: { pinned: true, top: 20, right: 20 },
-        autoHideAfter: 3500,
-        stacking: "down"
+        autoHideAfter: 3500, stacking: "down"
     }).data("kendoNotification");
 
     var boxes = $(".otp-box");
-
-    var timeLeft = 120; // 2 minutes in seconds
+    var timeLeft = 120;
     var timerId = setInterval(countdown, 1000);
 
     function startTimer() {
         timeLeft = 120;
         $("#resendWrapper").hide();
         $("#waitText").show();
-        $("#verifyBtn").prop("disabled", false).text("Verify OTP");
-        
-        clearInterval(timerId); // Purana timer clear karein
+        $("#verifyBtn").prop("disabled", false).html('<span class="btn-dot"></span> Verify OTP');
+        $("#timerBadge").removeClass("expired").text("02:00");
+        clearInterval(timerId);
         timerId = setInterval(countdown, 1000);
     }
 
     function countdown() {
         if (timeLeft <= 0) {
             clearInterval(timerId);
-            $("#timerDisplay").html("00:00");
-            $("#timerContainer").css("color", "red").html("OTP Expired!");
-            
-            // UI changes on expiry
+            $("#timerBadge").addClass("expired").text("Expired");
             $("#resendWrapper").show();
             $("#waitText").hide();
-            $("#verifyBtn").prop("disabled", true).text("OTP Expired");
+            $("#verifyBtn").prop("disabled", true).html('<span style="font-size:0.8rem">OTP Expired</span>');
         } else {
             var minutes = Math.floor(timeLeft / 60);
             var seconds = timeLeft % 60;
-            $("#timerDisplay").html(
-                (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds
-            );
+            $("#timerBadge").text((minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds);
             timeLeft--;
         }
     }
-    // Timer shuru karein page load par
     startTimer();
 
-    // Auto advance — next box pe focus
+    // OTP box interactions
     boxes.on("input", function () {
         this.value = this.value.replace(/\D/g, "");
+        $(this).toggleClass("filled", this.value !== "");
         var idx = boxes.index(this);
-        if (this.value && idx < 5)
-            boxes.eq(idx + 1).focus();
+        if (this.value && idx < 5) boxes.eq(idx + 1).focus();
     });
-
-    // Backspace — previous box pe
     boxes.on("keydown", function (e) {
         var idx = boxes.index(this);
-        if (e.key === "Backspace" && !this.value && idx > 0)
-            boxes.eq(idx - 1).focus();
+        if (e.key === "Backspace" && !this.value && idx > 0) {
+            boxes.eq(idx - 1).removeClass("filled").focus();
+        }
     });
-
-    // Paste — 6 digit paste support
     boxes.on("paste", function (e) {
         e.preventDefault();
         var text = (e.originalEvent.clipboardData || window.clipboardData)
                     .getData("text").replace(/\D/g, "").slice(0, 6);
         $.each(text.split(""), function (i, ch) {
-            if (boxes[i]) boxes[i].value = ch;
+            if (boxes[i]) { boxes[i].value = ch; $(boxes[i]).addClass("filled"); }
         });
         boxes.eq(Math.min(text.length, 5)).focus();
     });
 
-    // Get assembled OTP
     function getOtp() {
         return boxes.map(function () { return this.value; }).get().join("");
     }
 
-    // Verify button click
+    // Verify
     $("#verifyBtn").on("click", function () {
-
         if (timeLeft <= 0) {
-            Swal.fire({ icon: "warning", title: "Expired", text: "Please resend OTP." });
+            Swal.fire({ icon: "warning", title: "Expired", text: "Please resend OTP.", confirmButtonColor: "#03289F", background: "#DFE6E9", color: "#0A1628" });
             return;
         }
-
         var otp   = getOtp();
         var email = $("#hiddenEmail").val();
         $("#otpError").text("");
-
-        if (otp.length < 6) {
-            $("#otpError").text("Please enter all 6 digits");
-            return;
-        }
-
+        if (otp.length < 6) { $("#otpError").text("Please enter all 6 digits"); return; }
         var btn = $(this);
-        btn.prop("disabled", true).text("Verifying...");
-
+        btn.prop("disabled", true).html('<span class="spinner"></span> Verifying...');
         $.ajax({
             url:  "http://localhost:5183/api/AuthApi/UserVerifyOtp/",
-            type: "POST",
-            contentType: "application/json",
+            type: "POST", contentType: "application/json",
             data: JSON.stringify({ c_Email: email, c_Otp: otp }),
             success: function (res) {
-                btn.prop("disabled", false).text("Verify OTP");
+                btn.prop("disabled", false).html('<span class="btn-dot"></span> Verify OTP');
                 Swal.fire({
-                    icon: "success",
-                    title: "OTP Verified!",
+                    icon: "success", title: "OTP Verified!",
                     text: "Now set your new password.",
-                    confirmButtonColor: "hsl(28,60%,45%)",
+                    confirmButtonColor: "#03289F", background: "#DFE6E9", color: "#0A1628",
                     confirmButtonText: "Continue"
                 }).then(function () {
-                    // Reset password page pe redirect
-                    window.location.href = "/Auth/UserResetPassword?email="
-                        + encodeURIComponent(email)
-                        + "&otp=" + encodeURIComponent(otp);
+                    window.location.href = "/Auth/UserResetPassword?email=" + encodeURIComponent(email) + "&otp=" + encodeURIComponent(otp);
                 });
             },
             error: function (err) {
-                btn.prop("disabled", false).text("Verify OTP");
+                btn.prop("disabled", false).html('<span class="btn-dot"></span> Verify OTP');
                 var msg = "Invalid or expired OTP.";
-                if (err.responseJSON && err.responseJSON.message)
-                    msg = err.responseJSON.message;
-                Swal.fire({
-                    icon: "error",
-                    title: "Verification Failed",
-                    text: msg,
-                    confirmButtonColor: "hsl(28,60%,45%)"
-                });
-                // Boxes clear karo
-                boxes.val("").first().focus();
+                if (err.responseJSON && err.responseJSON.message) msg = err.responseJSON.message;
+                Swal.fire({ icon: "error", title: "Verification Failed", text: msg, confirmButtonColor: "#03289F", background: "#DFE6E9", color: "#0A1628" });
+                boxes.val("").removeClass("filled").first().focus();
             }
         });
     });
 
-    // Resend OTP
+    // Resend
     $("#resendLink").on("click", function () {
         var email = $("#hiddenEmail").val().trim().toLowerCase();
         notify.show({ message: "Sending new OTP..." }, "info");
-
         $.ajax({
-            url:  "http://localhost:5183/api/AuthApi/UserForgotPassword/", 
-            type: "POST",
-            contentType: "application/json",
-            data: JSON.stringify({ c_Email: email.trim().toLowerCase()}),
+            url:  "http://localhost:5183/api/AuthApi/UserForgotPassword/",
+            type: "POST", contentType: "application/json",
+            data: JSON.stringify({ c_Email: email.trim().toLowerCase() }),
             success: function () {
-                Swal.fire({
-                    icon: "success",
-                    title: "OTP Resent!",
-                    text: "Please check your email.",
-                    confirmButtonColor: "hsl(28,60%,45%)"
-                });
-                boxes.val("").first().focus();
-                $("#timerContainer").css("color", "hsl(28, 60%, 45%)").html('Expires in: <span id="timerDisplay">02:00</span>');
-                startTimer(); // Timer restart karein
+                Swal.fire({ icon: "success", title: "OTP Resent!", text: "Please check your email.", confirmButtonColor: "#03289F", background: "#DFE6E9", color: "#0A1628" });
+                boxes.val("").removeClass("filled").first().focus();
+                startTimer();
             },
             error: function () {
-                Swal.fire({
-                    icon: "error",
-                    title: "Failed",
-                    text: "Could not resend OTP.",
-                    confirmButtonColor: "hsl(28,60%,45%)"
-                });
+                Swal.fire({ icon: "error", title: "Failed", text: "Could not resend OTP.", confirmButtonColor: "#03289F", background: "#DFE6E9", color: "#0A1628" });
             }
         });
     });
 
-    // First box pe focus
     boxes.first().focus();
 });
 </script>

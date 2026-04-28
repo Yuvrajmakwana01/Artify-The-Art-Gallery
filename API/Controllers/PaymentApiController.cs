@@ -17,7 +17,7 @@ public class PaymentApiController : ControllerBase
     private readonly IPaymentInterface _paymentRepo;
     private readonly IOrderInterface _orderRepo;
     private readonly InvoiceService _invoiceService;
-    private readonly EmailServices _emailService;
+    private readonly EmailService _emailService;
     private readonly RabbitService _rabbit;
     private readonly ILogger<PaymentApiController> _logger;
     private readonly IWebHostEnvironment _env;
@@ -28,7 +28,7 @@ public class PaymentApiController : ControllerBase
         IPaymentInterface paymentRepo,
         IOrderInterface orderRepo,
         InvoiceService invoiceService,
-        EmailServices emailService,
+        EmailService emailService,
         RabbitService rabbit,
         ILogger<PaymentApiController> logger)
     {
@@ -43,14 +43,19 @@ public class PaymentApiController : ControllerBase
 
     [HttpPost("create-paypal-order")]
     [HttpPost("create-order")]
-    public async Task<IActionResult> CreateOrder([FromBody] List<t_CartItem> cart)
+    public async Task<IActionResult> CreateOrder([FromBody] t_PaymentVerify request)
     {
         try
         {
-            if (cart == null || cart.Count == 0)
+            if (request?.Cart == null || request.Cart.Count == 0)
                 return BadRequest(new { success = false, message = "Cart cannot be empty." });
 
-            decimal total = cart.Sum(x => x.Price);
+            // Use TotalAmount from frontend (subtotal + 2% platform fee)
+            // Fallback to cart sum if not provided
+            decimal total = request.TotalAmount > 0
+                ? request.TotalAmount
+                : request.Cart.Sum(x => x.Price);
+
             string paypalOrderId = await _paypalService.CreateOrderAsync(total);
 
             return Ok(new { success = true, orderId = paypalOrderId, amount = total });
@@ -71,7 +76,7 @@ public class PaymentApiController : ControllerBase
             if (string.IsNullOrWhiteSpace(model.PaypalOrderId))
                 return BadRequest(new { success = false, message = "PayPal order id is required." });
 
-            bool isCaptured = await _paypalService.CaptureOrderAsync(model.PaypalOrderId);
+            bool isCaptured = await _paypalService.CaptureOrderAsync(model.PaypalOrderId!);
             Console.WriteLine(isCaptured);
 
             if (!isCaptured)
@@ -128,13 +133,13 @@ public class PaymentApiController : ControllerBase
                         _logger.LogInformation("Sending email to {Email}", orderDetail.BuyerEmail);
 
                         // Send email
-                        await _emailService.SendEmailAsync(
-                            orderDetail.BuyerEmail,
-                            "Order Confirmation - Artify Gallery",
-                            body,
-                            logoPath,
-                            pdf,
-                            $"Invoice_{orderId}.pdf");
+                        // await _emailService.SendEmailAsync(
+                        //     orderDetail.BuyerEmail,
+                        //     "Order Confirmation - Artify Gallery",
+                        //     body,
+                        //     logoPath,
+                        //     pdf,
+                        //     $"Invoice_{orderId}.pdf");
 
                         _logger.LogInformation("Email sent successfully for Order {OrderId}", orderId);
                     }

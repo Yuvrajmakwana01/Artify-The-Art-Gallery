@@ -1,0 +1,433 @@
+@{
+    ViewData["Title"] = "Virtual Exhibition";
+    Layout = "~/Views/Artist/_ArtistLayout.cshtml";
+    ViewData["Active"] = "Exhibition";
+}
+
+@section HeadStyles {
+<style>
+    /* ── Hero Banner ── */
+    .exhibition-banner {
+        background: linear-gradient(120deg, var(--primary) 0%, #1e4fc9 55%, var(--accent) 100%);
+        border-radius: var(--radius);
+        padding: 28px 32px;
+        margin-bottom: 24px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        overflow: hidden;
+        position: relative;
+    }
+    .exhibition-banner::before {
+        content: '';
+        position: absolute;
+        top: -40px; right: -40px;
+        width: 200px; height: 200px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.06);
+        pointer-events: none;
+    }
+    .exhibition-banner::after {
+        content: '';
+        position: absolute;
+        bottom: -60px; right: 80px;
+        width: 150px; height: 150px;
+        border-radius: 50%;
+        background: rgba(237,163,18,.12);
+        pointer-events: none;
+    }
+    .exhibition-banner h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+        position: relative; z-index: 1;
+    }
+    .exhibition-banner p {
+        font-size: .87rem;
+        opacity: .85;
+        margin: 0;
+        position: relative; z-index: 1;
+    }
+    .banner-badge {
+        position: relative; z-index: 1;
+        background: rgba(255,255,255,.15);
+        border: 1px solid rgba(255,255,255,.25);
+        border-radius: 30px;
+        padding: 8px 18px;
+        font-size: .78rem;
+        font-weight: 600;
+        display: flex; align-items: center; gap: 7px;
+        backdrop-filter: blur(6px);
+        flex-shrink: 0;
+    }
+    .banner-badge i { font-size: .95rem; }
+
+    /* ── Exhibition Frame Card ── */
+    .exhibition-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        border: 1px solid rgba(3,40,159,.06);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        margin-bottom: 24px;
+        animation: fadeUp .4s ease both;
+    }
+    .exhibition-header {
+        padding: 18px 24px;
+        border-bottom: 1px solid rgba(3,40,159,.06);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        background: linear-gradient(135deg, rgba(3,40,159,.02), rgba(107,155,230,.03));
+    }
+    .exhibition-title-block h5 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin: 0;
+    }
+    .exhibition-title-block span {
+        font-size: .78rem;
+        color: var(--muted);
+        margin-top: 2px;
+        display: block;
+    }
+    .exhibition-controls { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    /* ── Control Buttons ── */
+    .ctrl-btn {
+        display: inline-flex; align-items: center; gap: 7px;
+        padding: 8px 14px;
+        border-radius: 10px;
+        border: 1.5px solid rgba(3,40,159,.12);
+        background: var(--bg);
+        color: var(--text);
+        font-size: .8rem;
+        font-weight: 600;
+        font-family: 'DM Sans', sans-serif;
+        cursor: pointer;
+        transition: all var(--transition);
+    }
+    .ctrl-btn:hover {
+        background: rgba(3,40,159,.07);
+        border-color: var(--primary);
+        color: var(--primary);
+        transform: translateY(-1px);
+    }
+    .ctrl-btn.gold {
+        border-color: var(--gold);
+        color: var(--gold);
+    }
+    .ctrl-btn.gold:hover {
+        background: rgba(237,163,18,.08);
+    }
+
+    /* ── iFrame Wrapper ── */
+    .iframe-wrapper {
+        position: relative;
+        width: 100%;
+        background: #0f0f1e;
+        min-height: 580px;
+    }
+    .exhibition-iframe {
+        width: 100%; height: 580px;
+        border: none;
+        display: block;
+    }
+
+    /* ── Loading Overlay ── */
+    .load-overlay {
+        position: absolute; inset: 0;
+        background: var(--card-bg);
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        gap: 14px;
+        z-index: 10;
+        transition: opacity .35s ease;
+    }
+    .load-overlay.hide { opacity: 0; pointer-events: none; }
+    .spin-ring {
+        width: 46px; height: 46px;
+        border: 3px solid rgba(3,40,159,.1);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin .75s linear infinite;
+    }
+    .load-overlay p { font-size: .84rem; color: var(--muted); margin: 0; }
+    @@keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Fullscreen Mode ── */
+    .exhibition-card.is-fullscreen {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        border-radius: 0;
+        margin: 0;
+    }
+    .exhibition-card.is-fullscreen .exhibition-header {
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        z-index: 20;
+        background: rgba(255,255,255,.95);
+        backdrop-filter: blur(14px);
+    }
+    .exhibition-card.is-fullscreen .iframe-wrapper { height: 100%; min-height: unset; }
+    .exhibition-card.is-fullscreen .exhibition-iframe { height: 100%; }
+
+    /* ── Info Cards Grid ── */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin-bottom: 24px;
+    }
+    .info-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        border: 1px solid rgba(3,40,159,.05);
+        box-shadow: var(--shadow);
+        padding: 24px 20px;
+        text-align: center;
+        transition: all var(--transition);
+        animation: fadeUp .45s ease both;
+    }
+    .info-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+    .info-card:nth-child(1) { animation-delay: .05s; }
+    .info-card:nth-child(2) { animation-delay: .10s; }
+    .info-card:nth-child(3) { animation-delay: .15s; }
+    .info-icon {
+        width: 52px; height: 52px;
+        border-radius: 14px;
+        background: rgba(3,40,159,.08);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 14px;
+        font-size: 1.25rem;
+        color: var(--primary);
+        transition: background var(--transition);
+    }
+    .info-card:hover .info-icon { background: rgba(3,40,159,.14); }
+    .info-card h6 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 7px;
+    }
+    .info-card p {
+        font-size: .8rem;
+        color: var(--muted);
+        line-height: 1.55;
+        margin: 0;
+    }
+
+    /* ── CTA Strip ── */
+    .cta-strip {
+        background: linear-gradient(135deg, rgba(3,40,159,.04), rgba(107,155,230,.06));
+        border-radius: var(--radius);
+        border: 1px solid rgba(3,40,159,.07);
+        padding: 36px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 20px;
+        animation: fadeUp .5s ease both;
+        animation-delay: .2s;
+    }
+    .cta-strip-text h5 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 5px;
+    }
+    .cta-strip-text p { font-size: .84rem; color: var(--muted); margin: 0; }
+
+    /* ── Responsive ── */
+    @@media (max-width: 991px) {
+        .info-grid { grid-template-columns: 1fr 1fr; }
+        .exhibition-banner { flex-direction: column; align-items: flex-start; gap: 14px; }
+        .cta-strip { flex-direction: column; align-items: flex-start; }
+    }
+    @@media (max-width: 767px) {
+        .info-grid { grid-template-columns: 1fr; }
+        .exhibition-iframe { height: 420px; }
+        .iframe-wrapper { min-height: 420px; }
+        .exhibition-controls { justify-content: flex-start; }
+    }
+</style>
+}
+
+<!-- ── Banner ── -->
+<div class="exhibition-banner">
+    <div>
+        <h2><i class="bi bi-building me-2" style="opacity:.8;"></i>Virtual Exhibition</h2>
+        <p>Step into an immersive 3D gallery — explore artwork from artists around the world.</p>
+    </div>
+    <div class="banner-badge">
+        <i class="bi bi-camera-reels-fill"></i>
+        360° Experience
+    </div>
+</div>
+
+<!-- ── Exhibition Frame Card ── -->
+<div class="exhibition-card" id="exhibitionCard">
+    <div class="exhibition-header">
+        <div class="exhibition-title-block">
+            <h5><i class="bi bi-easel2-fill me-2" style="color:var(--gold);"></i>Immersive Art Space</h5>
+            <span>Navigate through the virtual gallery &nbsp;•&nbsp; Click to explore artworks</span>
+        </div>
+        <div class="exhibition-controls">
+            <button class="ctrl-btn gold" id="fsBtn">
+                <i class="bi bi-arrows-fullscreen"></i> Fullscreen
+            </button>
+            <button class="ctrl-btn" id="refreshBtn">
+                <i class="bi bi-arrow-repeat"></i> Refresh
+            </button>
+            <button class="ctrl-btn" id="newWinBtn">
+                <i class="bi bi-box-arrow-up-right"></i> New Tab
+            </button>
+        </div>
+    </div>
+
+    <div class="iframe-wrapper" id="iframeWrapper">
+        <div class="load-overlay" id="loadOverlay">
+            <div class="spin-ring"></div>
+            <p>Loading virtual exhibition…</p>
+        </div>
+        <!-- <iframe
+            id="kunstframe"
+            class="exhibition-iframe"
+            allowfullscreen="true"
+            title="Artify Virtual Exhibition"
+            frameborder="0"
+            scrolling="no"
+            src="https://art.kunstmatrix.com/apps/artspaces/?external=true&language=en&uid=143875&exhibition=15442885"
+            width="100%"
+            height="580">
+        </iframe> -->
+        <iframe src="https://galerra.art/gallery/artify-wk0d9t2t08k3tl7?embed=1" width="100%" height="580" id="kunstframe"
+            class="exhibition-iframe" allowfullscreen="true"
+            title="Artify Virtual Exhibition"
+            frameborder="0"
+            scrolling="no" ></iframe>
+    </div>
+</div>
+
+<!-- ── Info Cards ── -->
+<div class="info-grid">
+    <div class="info-card">
+        <div class="info-icon"><i class="bi bi-camera-reels-fill"></i></div>
+        <h6>360° Navigation</h6>
+        <p>Click and drag to look around. Walk through exhibition halls in a fully immersive 3D environment.</p>
+    </div>
+    <div class="info-card">
+        <div class="info-icon"><i class="bi bi-cursor-fill"></i></div>
+        <h6>Interactive Artworks</h6>
+        <p>Click any artwork to view details, artist info, and pricing. Each piece tells its own unique story.</p>
+    </div>
+    <div class="info-card">
+        <div class="info-icon"><i class="bi bi-collection-fill"></i></div>
+        <h6>Curated Collections</h6>
+        <p>Explore themed exhibitions featuring emerging and established artists from the Artify community.</p>
+    </div>
+</div>
+
+<!-- ── CTA Strip ── -->
+<div class="cta-strip">
+    <div class="cta-strip-text">
+        <h5><i class="bi bi-palette-fill me-2" style="color:var(--gold);"></i>Showcase Your Art Here</h5>
+        <p>Get your artwork featured in our immersive 3D virtual exhibition and reach a global audience.</p>
+    </div>
+    <div class="d-flex gap-3 flex-wrap">
+        <a href="/Artist/Upload" class="btn-artify">
+            <i class="bi bi-cloud-arrow-up-fill"></i> Upload Artwork
+        </a>
+        <a href="/Artist/ManageProfile" class="btn-artify btn-artify-ghost">
+            <i class="bi bi-person-fill"></i> Edit Profile
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+(function () {
+    var $card   = document.getElementById('exhibitionCard');
+    var $iframe = document.getElementById('kunstframe');
+    var $overlay = document.getElementById('loadOverlay');
+    var iframeSrc = $iframe.src;
+    var isFs = false;
+
+    /* ── Hide loader when iframe loads ── */
+    $iframe.addEventListener('load', function () {
+        setTimeout(function () { $overlay.classList.add('hide'); }, 600);
+    });
+
+    function showLoader() {
+        $overlay.classList.remove('hide');
+        setTimeout(function () { $overlay.classList.add('hide'); }, 4000);
+    }
+
+    /* ── Fullscreen ── */
+    document.getElementById('fsBtn').addEventListener('click', function () {
+        if (!isFs) {
+            $card.classList.add('is-fullscreen');
+            document.body.style.overflow = 'hidden';
+            this.innerHTML = '<i class="bi bi-fullscreen-exit"></i> Exit';
+            isFs = true;
+        } else {
+            exitFs();
+        }
+    });
+
+    function exitFs() {
+        $card.classList.remove('is-fullscreen');
+        document.body.style.overflow = '';
+        document.getElementById('fsBtn').innerHTML = '<i class="bi bi-arrows-fullscreen"></i> Fullscreen';
+        isFs = false;
+    }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && isFs) exitFs();
+    });
+
+    /* ── Refresh ── */
+    document.getElementById('refreshBtn').addEventListener('click', function () {
+        $iframe.src = '';
+        showLoader();
+        setTimeout(function () { $iframe.src = iframeSrc; }, 150);
+    });
+
+    /* ── New Tab ── */
+    document.getElementById('newWinBtn').addEventListener('click', function () {
+        window.open($iframe.src, '_blank', 'noopener,noreferrer');
+    });
+
+    /* ── First-visit tips ── */
+    if (!localStorage.getItem('artify_gallery_hint')) {
+        setTimeout(function () {
+            Swal.fire({
+                title: '✨ Gallery Navigation Tips',
+                html: '<ul style="text-align:left;margin-top:14px;line-height:2;">'
+                    + '<li>🖱️ <strong>Drag</strong> to look around the 360° space</li>'
+                    + '<li>🚶 <strong>WASD / Arrow keys</strong> to walk through halls</li>'
+                    + '<li>🖼️ <strong>Click</strong> any artwork for details &amp; pricing</li>'
+                    + '<li>🖥️ Use <strong>Fullscreen</strong> for the best experience</li>'
+                    + '</ul>',
+                icon: 'info',
+                confirmButtonColor: '#03289F',
+                confirmButtonText: 'Start Exploring →',
+                customClass: { popup: 'swal-artify' }
+            });
+            localStorage.setItem('artify_gallery_hint', '1');
+        }, 900);
+    }
+})();
+</script>
+}

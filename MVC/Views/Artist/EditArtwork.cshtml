@@ -1,0 +1,453 @@
+@{
+    Layout = "~/Views/Artist/_ArtistLayout.cshtml";
+    ViewData["Title"] = "Edit Artwork";
+    ViewData["Active"] = "Gallery";
+}
+
+@section HeadStyles {
+<style>
+    .edit-page-grid {
+        display: grid;
+        grid-template-columns: 340px 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+    .preview-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(3,40,159,.05);
+        overflow: hidden;
+        position: sticky;
+        top: 24px;
+    }
+    .preview-img-wrap {
+        height: 240px;
+        background: linear-gradient(135deg,#e8eef7,#dfe6e9);
+        position: relative;
+        overflow: hidden;
+    }
+    .preview-img-wrap img { width:100%;height:100%;object-fit:cover; }
+    .preview-img-placeholder {
+        width:100%;height:100%;
+        display:flex;flex-direction:column;
+        align-items:center;justify-content:center;
+        color:var(--muted);font-size:2.5rem;gap:6px;
+    }
+    .preview-body { padding: 20px; }
+    .preview-title {
+        font-family:'Playfair Display',serif;
+        font-size:1.1rem;font-weight:700;
+        color:var(--text);margin-bottom:6px;
+    }
+    .preview-price {
+        font-size:1.3rem;font-weight:800;
+        color:var(--primary);margin-bottom:12px;
+    }
+    .status-pill {
+        display:inline-flex;align-items:center;gap:6px;
+        padding:5px 14px;border-radius:20px;
+        font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+    }
+    .pill-Approved { background:#d1fae5;color:#065f46; }
+    .pill-Pending  { background:#fef3c7;color:#92400e; }
+    .pill-Rejected { background:#fee2e2;color:#991b1b; }
+
+    .form-card {
+        background:var(--card-bg);
+        border-radius:var(--radius);
+        box-shadow:var(--shadow);
+        border:1px solid rgba(3,40,159,.05);
+        padding:32px;
+    }
+    .section-header {
+        display:flex;align-items:center;gap:12px;
+        margin-bottom:24px;padding-bottom:16px;
+        border-bottom:1px solid rgba(3,40,159,.06);
+    }
+    .section-icon {
+        width:40px;height:40px;border-radius:10px;
+        background:rgba(3,40,159,.08);
+        display:flex;align-items:center;justify-content:center;
+        color:var(--primary);font-size:1rem;
+    }
+    .form-label-artify {
+        font-size:.75rem;font-weight:700;
+        text-transform:uppercase;letter-spacing:.8px;
+        color:var(--muted);margin-bottom:6px;display:block;
+    }
+    .input-artify {
+        width:100%;padding:11px 14px;
+        border-radius:10px;border:1.5px solid rgba(3,40,159,.12);
+        background:var(--card-bg);font-size:.88rem;
+        font-family:'DM Sans',sans-serif;color:var(--text);
+        transition:border-color .2s,box-shadow .2s;outline:none;
+    }
+    .input-artify:focus {
+        border-color:var(--accent);
+        box-shadow:0 0 0 3px rgba(107,155,230,.15);
+    }
+    .input-group-dollar .input-group-text {
+        background:rgba(3,40,159,.06);
+        border:1.5px solid rgba(3,40,159,.12);
+        border-right:none;border-radius:10px 0 0 10px;
+        color:var(--primary);font-weight:700;
+    }
+    .input-group-dollar .input-artify {
+        border-radius:0 10px 10px 0;border-left:none;
+    }
+
+    .delete-zone {
+        margin-top:28px;padding:24px;
+        border:1.5px solid #fee2e2;border-radius:var(--radius);
+        background:#fff5f5;
+    }
+    .delete-zone-title {
+        font-size:.82rem;font-weight:700;color:#991b1b;
+        text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;
+    }
+    .delete-confirm-box {
+        margin-top:16px;padding:16px;
+        background:#fee2e2;border-radius:10px;
+        display:none;
+    }
+    .breadcrumb-artify {
+        display:flex;align-items:center;gap:8px;
+        font-size:.82rem;color:var(--muted);margin-bottom:20px;
+    }
+    .breadcrumb-artify a { color:var(--primary);text-decoration:none;font-weight:600; }
+    .breadcrumb-artify a:hover { text-decoration:underline; }
+
+    .feedback-bar {
+        padding:12px 16px;border-radius:10px;
+        font-size:.85rem;font-weight:600;margin-bottom:16px;display:none;
+    }
+    .feedback-success { background:#d1fae5;color:#065f46; }
+    .feedback-error   { background:#fee2e2;color:#991b1b; }
+
+    @@media(max-width:991px){
+        .edit-page-grid { grid-template-columns:1fr; }
+        .preview-card { position:static; }
+    }
+</style>
+}
+
+<!-- Breadcrumb -->
+<div class="breadcrumb-artify">
+    <a href="/Artist/Gallery"><i class="bi bi-arrow-left me-1"></i>My Artworks</a>
+    <i class="bi bi-chevron-right" style="font-size:.65rem;"></i>
+    <span id="bcTitle">Edit Artwork</span>
+</div>
+
+<div id="pageLoading" class="text-center py-5">
+    <span class="spinner-border spinner-border-sm me-2" style="color:var(--primary);"></span>
+    <span style="color:var(--muted);font-size:.9rem;">Loading artwork…</span>
+</div>
+
+<div class="edit-page-grid" id="editPageGrid" style="display:none;">
+
+    <!-- LEFT: Live Preview Card -->
+    <div class="preview-card">
+        <div class="preview-img-wrap" id="previewImgWrap">
+            <div class="preview-img-placeholder"><i class="bi bi-image"></i><span style="font-size:.7rem;">No Preview</span></div>
+        </div>
+        <div class="preview-body">
+            <div class="preview-title" id="previewTitle">—</div>
+            <div class="preview-price" id="previewPrice">$0.00</div>
+            <span class="status-pill" id="previewStatus">—</span>
+            <div style="margin-top:14px;font-size:.78rem;color:var(--muted);" id="previewCategory"></div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Edit Form -->
+    <div>
+        <!-- Feedback bar -->
+        <div class="feedback-bar" id="feedbackBar"></div>
+
+        <div class="form-card">
+            <div class="section-header">
+                <div class="section-icon"><i class="bi bi-pencil-fill"></i></div>
+                <div>
+                    <div style="font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--text);">Edit Artwork</div>
+                    <div style="font-size:.75rem;color:var(--muted);">Changes will reset status to Pending for re-review.</div>
+                </div>
+            </div>
+
+            <form id="editForm" novalidate>
+                <input type="hidden" id="artworkId" />
+                <div class="row g-3">
+                    <!-- Title -->
+                    <div class="col-md-6">
+                        <label class="form-label-artify">Title <span class="text-danger">*</span></label>
+                        <input type="text" id="fTitle" class="input-artify" placeholder="Artwork title" oninput="syncPreview()" required />
+                    </div>
+                    <!-- Price -->
+                    <div class="col-md-3">
+                        <label class="form-label-artify">Price ($) <span class="text-danger">*</span></label>
+                        <div class="input-group input-group-dollar">
+                            <span class="input-group-text">$</span>
+                            <input type="number" id="fPrice" class="input-artify" step="0.01" min="0" placeholder="0.00" oninput="syncPreview()" required style="width: 70%;" />
+                        </div>
+                    </div>
+                    <!-- Category -->
+                    <div class="col-md-3">
+                        <label class="form-label-artify">Category <span class="text-danger">*</span></label>
+                        <select id="fCategory" class="input-artify" style="cursor:pointer;" required>
+                            <option value="">Select…</option>
+                        </select>
+                    </div>
+                    <!-- Description -->
+                    <div class="col-12">
+                        <label class="form-label-artify">Description</label>
+                        <textarea id="fDesc" class="input-artify" rows="4" placeholder="Describe your artwork, inspiration, technique…"></textarea>
+                    </div>
+                    <!-- Replace Image -->
+                    <div class="col-12">
+                        <label class="form-label-artify">Replace Image <span style="font-weight:400;font-size:.7rem;">(optional)</span></label>
+                        <input type="file" id="fFile" class="input-artify" accept="image/jpeg,image/png,image/gif,image/webp" onchange="previewNewImage(this)" />
+                        <div style="font-size:.73rem;color:var(--muted);margin-top:4px;">Leave blank to keep the current image.</div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex gap-3 mt-4 flex-wrap">
+                    <button type="button" id="saveBtn" class="btn-artify" onclick="saveArtwork()">
+                        <i class="bi bi-floppy-fill me-1"></i>Save Changes
+                    </button>
+                    <a href="/Artist/Gallery" class="btn-artify btn-artify-ghost">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Gallery
+                    </a>
+                </div>
+            </form>
+
+            <!-- Delete Zone -->
+            <div class="delete-zone" id="deleteZone">
+                <div class="delete-zone-title"><i class="bi bi-exclamation-triangle-fill me-1"></i>Danger Zone</div>
+                <p style="font-size:.83rem;color:#991b1b;margin:0 0 12px;">
+                    Permanently delete this artwork. This action cannot be undone.
+                </p>
+                <button type="button" class="btn btn-outline-danger btn-sm fw-bold" onclick="showDeleteConfirm()">
+                    <i class="bi bi-trash3-fill me-1"></i>Delete This Artwork
+                </button>
+
+                <!-- Inline confirmation -->
+                <div class="delete-confirm-box" id="deleteConfirmBox">
+                    <p style="font-size:.85rem;color:#991b1b;font-weight:600;margin:0 0 12px;">
+                        <i class="bi bi-exclamation-circle-fill me-1"></i>
+                        Are you absolutely sure? Type <strong>DELETE</strong> to confirm.
+                    </p>
+                    <input type="text" id="deleteConfirmInput" class="input-artify" placeholder="Type DELETE to confirm"
+                           style="border-color:#ef4444;margin-bottom:12px;" oninput="toggleDeleteBtn(this)" />
+                    <div class="d-flex gap-2">
+                        <button type="button" id="confirmDeleteBtn" class="btn-artify"
+                                style="background:#ef4444;border-color:#ef4444;" disabled onclick="doDelete()">
+                            <i class="bi bi-trash3-fill me-1"></i>Permanently Delete
+                        </button>
+                        <button type="button" class="btn-artify btn-artify-ghost" onclick="hideDeleteConfirm()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const API_BASE = 'http://localhost:5183/api/ArtistApi';
+    const artistId = @(Context.Session.GetInt32("ArtistId") ?? 0);
+
+    // Read ?id and ?action from URL
+    const params   = new URLSearchParams(window.location.search);
+    const artId    = parseInt(params.get('id') || '0');
+    const action   = params.get('action') || '';
+
+    if (!artId) {
+        window.location.href = '/Artist/Gallery';
+    }
+
+    // ── Boot ──────────────────────────────────────────────────────────────────
+    (async function init() {
+        try {
+            const [artRes, catRes] = await Promise.all([
+                fetch(`${API_BASE}/GetById/${artId}`,   { credentials: 'include' }),
+                fetch(`${API_BASE}/GetCategories`,       { credentials: 'include' })
+            ]);
+
+            if (!artRes.ok) throw new Error(`Artwork fetch failed: HTTP ${artRes.status}`);
+
+            const artData = await artRes.json();
+            const art     = artData.c_artwork_id ? artData : (artData.data || artData);
+
+            const cats = catRes.ok ? await catRes.json() : [];
+
+            // Populate category dropdown
+            const catSel = document.getElementById('fCategory');
+            cats.forEach(c => {
+                const o = new Option(c.name, c.id);
+                catSel.appendChild(o);
+            });
+
+            // Fill form
+            document.getElementById('artworkId').value = art.c_artwork_id;
+            document.getElementById('fTitle').value    = art.c_title || '';
+            document.getElementById('fPrice').value    = art.c_price || '';
+            document.getElementById('fDesc').value     = art.c_description || '';
+            catSel.value                               = art.c_category_id || '';
+
+            // Sync preview
+            syncPreview(art);
+
+            // Breadcrumb
+            document.getElementById('bcTitle').textContent = art.c_title || 'Edit Artwork';
+
+            // Show page
+            document.getElementById('pageLoading').style.display = 'none';
+            document.getElementById('editPageGrid').style.display = 'grid';
+
+            // If came via ?action=delete, auto-expand delete zone
+            if (action === 'delete') {
+                setTimeout(showDeleteConfirm, 400);
+                document.getElementById('deleteZone').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+        } catch(e) {
+            document.getElementById('pageLoading').innerHTML =
+                `<div class="feedback-bar feedback-error" style="display:block;max-width:480px;margin:0 auto;">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    Failed to load artwork. <a href="/Artist/Gallery" style="color:#991b1b;">Return to Gallery</a>
+                </div>`;
+        }
+    })();
+
+    // ── Preview sync ──────────────────────────────────────────────────────────
+    function syncPreview(art) {
+        const title = document.getElementById('fTitle')?.value || art?.c_title || '—';
+        const price = parseFloat(document.getElementById('fPrice')?.value || art?.c_price || 0);
+        const status = art?.c_approval_status || 'Pending';
+
+        document.getElementById('previewTitle').textContent = title || '—';
+        document.getElementById('previewPrice').textContent = '$' + price.toLocaleString('en-US', { minimumFractionDigits: 2 });
+
+        if (art) {
+            const imgWrap = document.getElementById('previewImgWrap');
+            if (art.c_preview_path) {
+                imgWrap.innerHTML = `<img src="${art.c_preview_path}" alt="${title}" onerror="this.parentElement.innerHTML='<div class=preview-img-placeholder><i class=bi bi-image></i></div>'" />`;
+            }
+            const statusEl = document.getElementById('previewStatus');
+            statusEl.textContent = status;
+            statusEl.className   = `status-pill pill-${status}`;
+
+            const catSel = document.getElementById('fCategory');
+            const catName = catSel.options[catSel.selectedIndex]?.text || '';
+            document.getElementById('previewCategory').textContent = catName ? `Category: ${catName}` : '';
+        }
+    }
+
+    // Update price/title in real time
+    document.addEventListener('input', e => {
+        if (['fTitle','fPrice'].includes(e.target.id)) syncPreview(null);
+    });
+    document.getElementById('fCategory').addEventListener('change', () => syncPreview(null));
+
+    // Preview replaced image
+    function previewNewImage(input) {
+        if (!input.files?.[0]) return;
+        const url = URL.createObjectURL(input.files[0]);
+        document.getElementById('previewImgWrap').innerHTML =
+            `<img src="${url}" alt="New preview" style="width:100%;height:100%;object-fit:cover;" />`;
+    }
+
+    // ── Save ──────────────────────────────────────────────────────────────────
+    async function saveArtwork() {
+        const btn   = document.getElementById('saveBtn');
+        const id    = document.getElementById('artworkId').value;
+        const title = document.getElementById('fTitle').value.trim();
+        const price = document.getElementById('fPrice').value;
+        const catId = document.getElementById('fCategory').value;
+
+        if (!title || !price || !catId) {
+            showFeedback('error', 'Title, price and category are required.');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Saving…';
+
+        const fd = new FormData();
+        fd.append('c_artwork_id',  id);
+        fd.append('c_artist_id',   artistId);
+        fd.append('c_category_id', catId);
+        fd.append('c_title',       title);
+        fd.append('c_price',       price);
+        fd.append('c_description', document.getElementById('fDesc').value.trim());
+        const file = document.getElementById('fFile').files[0];
+        if (file) fd.append('ArtworkFile', file);
+
+        try {
+            const res  = await fetch(`${API_BASE}/Update`, {
+                method: 'PUT', body: fd, credentials: 'include'
+            });
+            const data = await res.json();
+
+            if (data.success || res.ok) {
+                window.location.href = '/Artist/Gallery?success=updated';
+            } else {
+                showFeedback('error', data.message || 'Update failed. Please try again.');
+            }
+        } catch(e) {
+            showFeedback('error', 'Server error. Please try again.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-floppy-fill me-1"></i>Save Changes';
+        }
+    }
+
+    // ── Delete ────────────────────────────────────────────────────────────────
+    function showDeleteConfirm() {
+        const box = document.getElementById('deleteConfirmBox');
+        box.style.display = 'block';
+        document.getElementById('deleteConfirmInput').focus();
+    }
+
+    function hideDeleteConfirm() {
+        document.getElementById('deleteConfirmBox').style.display = 'none';
+        document.getElementById('deleteConfirmInput').value = '';
+        document.getElementById('confirmDeleteBtn').disabled = true;
+    }
+
+    function toggleDeleteBtn(input) {
+        document.getElementById('confirmDeleteBtn').disabled = input.value.trim() !== 'DELETE';
+    }
+
+    async function doDelete() {
+        const btn = document.getElementById('confirmDeleteBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Deleting…';
+
+        try {
+            const res = await fetch(`${API_BASE}/Delete/${artId}`, {
+                method: 'DELETE', credentials: 'include'
+            });
+            if (!res.ok) {
+                const body = await res.text();
+                console.error(`Delete HTTP ${res.status}`, body);
+                throw new Error(`HTTP ${res.status}`);
+            }
+            window.location.href = '/Artist/Gallery?success=deleted';
+        } catch(err) {
+            showFeedback('error', `Delete failed: ${err.message}`);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-trash3-fill me-1"></i>Permanently Delete';
+        }
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function showFeedback(type, msg) {
+        const el = document.getElementById('feedbackBar');
+        el.className = `feedback-bar feedback-${type}`;
+        el.innerHTML = `<i class="bi bi-${type==='success'?'check-circle-fill':'exclamation-triangle-fill'} me-1"></i>${msg}`;
+        el.style.display = 'block';
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+</script>
+}

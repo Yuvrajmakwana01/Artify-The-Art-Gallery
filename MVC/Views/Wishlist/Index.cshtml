@@ -4,101 +4,839 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
     <style>
         :root {
-            --background: hsl(36, 33%, 97%);
-            --foreground: hsl(30, 10%, 15%);
-            --card: hsl(36, 30%, 95%);
+            --bg: #DFE6E9;
+            --text-main: #1a1a1a;
+            --text-muted: #636e72;
+            --heading-blue: #6B9BE6;
+            --accent-gold: #EDA312;
+            --btn-blue: #03289F;
             --card-white: #ffffff;
-            --primary: hsl(30, 45%, 25%);
-            --primary-foreground: hsl(36, 33%, 97%);
-            --secondary: hsl(32, 25%, 88%);
-            --muted: hsl(30, 10%, 45%);
-            --accent: hsl(38, 60%, 55%);
-            --accent-foreground: hsl(30, 10%, 10%);
-            --border: hsl(32, 20%, 85%);
-            --wishlist: #DC4A4A;
+            --border: rgba(3, 40, 159, 0.08);
+            --shadow-soft: 0 15px 45px rgba(3, 40, 159, 0.06);
+            --shadow-hover: 0 20px 50px rgba(0, 0, 0, 0.08);
+            --wishlist: #ff5e57;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: var(--background); color: var(--foreground); line-height: 1.6; }
-        h1,h2,h3,h4,h5,h6 { font-family: 'Playfair Display', serif; }
 
-        .navbar { position: sticky; top: 0; z-index: 50; background: hsla(36,33%,97%,0.85); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); }
-        .navbar-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; }
-        .logo-wrap { display: flex; align-items: center; gap: 14px; }
-        .back-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); text-decoration: none; transition: all 0.2s; }
-        .back-btn:hover { background: var(--secondary); color: var(--foreground); }
-        .logo { font-family: 'Playfair Display', serif; font-size: 1.875rem; font-weight: 700; color: var(--foreground); text-decoration: none; letter-spacing: -0.025em; }
-        .logo:hover { color: var(--accent); }
-        .nav-links { display: flex; gap: 2rem; }
-        .nav-links a { font-size: 0.875rem; font-weight: 500; color: var(--muted); text-decoration: none; transition: color 0.3s; }
-        .nav-links a:hover { color: var(--foreground); }
-        .nav-actions { display: flex; align-items: center; gap: 0.75rem; }
-        .icon-btn { position: relative; width: 38px; height: 38px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); transition: all 0.2s; text-decoration: none; }
-        .icon-btn:hover { background: var(--secondary); color: var(--foreground); }
-        .badge { position: absolute; top: -2px; right: -2px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9999px; background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-        .badge.zero { display: none; }
-        .avatar-btn { width: 38px; height: 38px; border-radius: 50%; border: none; background: var(--primary); color: var(--primary-foreground); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        .page { max-width: 1200px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
-        .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 12px; }
-        .page-header h1 { font-size: 2rem; font-weight: 700; }
-        .page-header p { font-size: 14px; color: var(--muted); margin-top: 4px; }
-        .clear-btn { padding: 10px 20px; border-radius: 8px; border: 1.5px solid var(--wishlist); background: transparent; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; color: var(--wishlist); transition: all 0.2s; }
-        .clear-btn:hover { background: var(--wishlist); color: #fff; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 4rem;
+            background: rgba(223, 230, 233, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+            text-decoration: none;
+        }
+
+        .nav-logo-icon {
+            height: 40px;
+            width: 40px;
+            border-radius: 12px;
+            background: var(--btn-blue);
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+            color: #fff;
+            font-size: 1.2rem;
+        }
+
+        .nav-logo span {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -.02em;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            font-size: .88rem;
+            color: var(--text-main);
+            opacity: .7;
+            transition: opacity .2s, color .2s;
+        }
+
+        .nav-links a:hover {
+            opacity: 1;
+            color: var(--heading-blue);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-icon-btn {
+            position: relative;
+            display: grid;
+            place-items: center;
+            height: 40px;
+            width: 40px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border);
+            background: rgba(255,255,255,.5);
+            cursor: pointer;
+            color: var(--text-main);
+            transition: background .2s, border-color .2s, transform .2s;
+            text-decoration: none;
+        }
+
+        .nav-icon-btn:hover {
+            background: var(--btn-blue);
+            color: #fff;
+            border-color: var(--btn-blue);
+            transform: scale(1.08);
+        }
+
+        .nav-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            height: 16px;
+            min-width: 16px;
+            padding: 0 3px;
+            background: var(--accent-gold);
+            color: #fff;
+            border-radius: 999px;
+            font-size: .62rem;
+            font-weight: 700;
+            display: grid;
+            place-items: center;
+        }
+
+        .nav-signin {
+            font-size: .88rem;
+            color: var(--text-main);
+            text-decoration: none;
+            opacity: .8;
+            transition: opacity .2s, color .2s;
+        }
+
+        .nav-signin:hover {
+            opacity: 1;
+            color: var(--heading-blue);
+        }
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(223, 230, 233, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .navbar-inner {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 2rem;
+        }
+
+        .logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .back-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .back-btn:hover {
+            background: var(--btn-blue);
+            color: #fff;
+            border-color: var(--btn-blue);
+            transform: translateX(-4px);
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-main);
+            text-decoration: none;
+            letter-spacing: -0.01em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+        }
+
+        .nav-links a {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--btn-blue);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-main);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .icon-btn {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .icon-btn:hover {
+            background: var(--btn-blue);
+            color: #fff;
+            border-color: var(--btn-blue);
+            transform: translateY(-3px);
+        }
+
+        .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 5px;
+            border-radius: 999px;
+            background: var(--accent-gold);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+        }
+
+        .badge.zero {
+            display: none;
+        }
+
+        .avatar-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .avatar-btn:hover {
+            background: var(--btn-blue);
+            color: #fff;
+            border-color: var(--btn-blue);
+            transform: translateY(-3px);
+        }
+
+        .page {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 2.75rem 2rem 4rem;
+            min-height: 80vh;
+        }
+
+        .wishlist-shell {
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.82);
+            box-shadow: var(--shadow-soft);
+            border-radius: 30px;
+            padding: 2rem;
+            backdrop-filter: blur(18px);
+        }
+
+        .page-header {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 28px;
+            align-items: end;
+            margin-bottom: 2.3rem;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(3, 40, 159, 0.07);
+            color: var(--btn-blue);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            margin-bottom: 0.9rem;
+        }
+
+        .page-header h1 {
+            font-size: clamp(1.9rem, 3vw, 2.7rem);
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.55rem;
+            line-height: 1.08;
+        }
+
+        .page-header p {
+            max-width: 620px;
+            font-size: 0.92rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .count-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.8rem 1.05rem;
+            border-radius: 999px;
+            background: var(--card-white);
+            border: 1px solid var(--border);
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-main);
+            box-shadow: 0 10px 30px rgba(31, 41, 51, 0.05);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .clear-btn {
+            padding: 12px 20px;
+            border-radius: 99px;
+            border: 1.5px solid var(--border);
+            background: white;
+            font-size: 0.86rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            color: var(--text-main);
+            transition: all 0.3s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .clear-btn:hover {
+            background: var(--wishlist);
+            color: #fff;
+            border-color: var(--wishlist);
+            box-shadow: 0 8px 20px rgba(255, 94, 87, 0.2);
+        }
+
+        .clear-btn.secondary:hover {
+            background: var(--btn-blue);
+            border-color: var(--btn-blue);
+        }
 
         /* Loading */
-        .loading-state { text-align: center; padding: 4rem 1.5rem; color: var(--muted); }
-        .loading-spinner { display: inline-block; width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
-        @@keyframes spin { to { transform: rotate(360deg); } }
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            min-height: 320px;
+            text-align: center;
+            background: rgba(255,255,255,0.72);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            color: var(--text-muted);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(3, 40, 159, 0.12);
+            border-top-color: var(--btn-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @@keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
         /* Empty */
-        .empty-state { text-align: center; padding: 80px 24px; }
-        .empty-state svg { color: var(--muted); opacity: 0.25; margin-bottom: 20px; }
-        .empty-state h2 { font-size: 1.4rem; font-weight: 600; color: var(--muted); }
-        .empty-state p { font-size: 14px; color: var(--muted); margin-top: 8px; }
-        .empty-state a { display: inline-block; margin-top: 24px; padding: 12px 28px; border-radius: 8px; background: var(--primary); color: var(--primary-foreground); text-decoration: none; font-size: 14px; font-weight: 600; }
-        .empty-state a:hover { opacity: 0.88; }
+        .empty-state {
+            text-align: center;
+            padding: 100px 40px;
+            background: white;
+            border-radius: 3rem;
+            border: 1px solid var(--border);
+        }
+
+        .empty-state svg {
+            color: var(--heading-blue);
+            opacity: 0.5;
+            margin-bottom: 30px;
+        }
+
+        .empty-state h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-top: 12px;
+        }
+
+        .empty-state a {
+            display: inline-block;
+            margin-top: 32px;
+            padding: 16px 40px;
+            border-radius: 99px;
+            background: var(--btn-blue);
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .empty-state a:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(3, 40, 159, 0.2);
+        }
 
         /* Grid */
-        .art-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
-        .art-card { background: var(--card-white); border-radius: 1rem; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: transform 0.3s, box-shadow 0.3s; animation: fade-up 0.45s ease-out forwards; opacity: 0; }
-        .art-card:hover { transform: translateY(-5px); box-shadow: 0 16px 36px rgba(0,0,0,0.11); }
-        .card-img { position: relative; aspect-ratio: 4/5; overflow: hidden; }
-        .card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; display: block; }
-        .art-card:hover .card-img img { transform: scale(1.07); }
-        .card-img .overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.5), transparent 55%); opacity: 0; transition: opacity 0.3s; }
-        .art-card:hover .overlay { opacity: 1; }
-        .cat-badge { position: absolute; top: 12px; left: 12px; padding: 4px 12px; border-radius: 9999px; background: var(--accent); color: var(--accent-foreground); font-size: 11px; font-weight: 600; }
-        .quick-actions { position: absolute; bottom: 12px; left: 12px; right: 12px; display: flex; gap: 8px; opacity: 0; transform: translateY(10px); transition: all 0.3s; }
-        .art-card:hover .quick-actions { opacity: 1; transform: translateY(0); }
-        .quick-actions a, .quick-actions button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 8px; border-radius: 8px; border: none; font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s; text-decoration: none; }
-        .view-btn { background: rgba(255,255,255,0.93); backdrop-filter: blur(6px); color: var(--foreground); }
-        .view-btn:hover { background: white; }
-        .cart-btn { background: var(--primary); color: var(--primary-foreground); }
-        .cart-btn:hover { opacity: 0.9; }
-        .cart-btn.in-cart { opacity: 0.6; cursor: default; }
-        .card-info { padding: 16px; }
-        .card-info h3 { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .card-info .artist { font-size: 12px; color: var(--muted); margin-top: 3px; }
-        .card-info .meta { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
-        .card-info .price { font-size: 17px; font-weight: 700; }
-        .remove-btn { margin-top: 12px; width: 100%; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; transition: all 0.2s; border: 1.5px solid var(--wishlist); background: transparent; color: var(--wishlist); }
-        .remove-btn:hover { background: var(--wishlist); color: #fff; }
+        .art-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
 
-        @@keyframes fade-up { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-        @@media(max-width:1024px) { .art-grid { grid-template-columns: repeat(3, 1fr); } }
-        @@media(max-width:768px) { .art-grid { grid-template-columns: repeat(2, 1fr); } .nav-links { display: none; } }
-        @@media(max-width:480px) { .art-grid { grid-template-columns: 1fr; } }
+        .art-card {
+            background: var(--card-white);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: 148px minmax(0, 1fr);
+            gap: 22px;
+            padding: 18px;
+            transition: all 0.3s ease;
+            animation: fade-up 0.6s ease-out forwards;
+            opacity: 0;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+            min-width: 0;
+        }
+
+        .art-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+            border-color: rgba(3, 40, 159, 0.12);
+        }
+
+        .card-img {
+            position: relative;
+            height: 188px;
+            border-radius: 18px;
+            overflow: hidden;
+            background: #ebeef2;
+            display: block;
+            text-decoration: none;
+        }
+
+        .card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s;
+            display: block;
+        }
+
+        .art-card:hover .card-img img {
+            transform: scale(1.08);
+        }
+
+        .cat-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(23, 59, 122, 0.07);
+            color: var(--heading-blue);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .card-info {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        .card-top {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .card-meta .cat-badge {
+            position: static;
+        }
+
+        .saved-state {
+            color: #1d9b6c;
+            font-size: 0.84rem;
+            font-weight: 700;
+        }
+
+        .saved-state.muted {
+            color: var(--text-muted);
+        }
+
+        .card-info h3 {
+            font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+            font-weight: 700;
+            line-height: 1.15;
+            color: var(--text-main);
+            word-break: break-word;
+        }
+
+        .card-title-link {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .card-title-link:hover {
+            color: var(--heading-blue);
+        }
+
+        .card-info .artist {
+            font-size: 0.86rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .card-copy {
+            color: var(--text-muted);
+            font-size: 0.84rem;
+            max-width: 560px;
+        }
+
+        .card-info .meta {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .price-block small {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .card-info .price {
+            font-size: 1.45rem;
+            font-weight: 800;
+            font-family: 'Playfair Display', serif;
+            color: var(--text-main);
+            line-height: 1;
+        }
+
+        .item-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .view-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 18px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--text-main);
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .view-btn:hover {
+            border-color: var(--btn-blue);
+            color: var(--btn-blue);
+            transform: translateY(-2px);
+        }
+
+        .remove-btn {
+            margin-top: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 18px;
+            border-radius: 999px;
+            border: 1px solid rgba(214, 76, 65, 0.16);
+            background: rgba(214, 76, 65, 0.06);
+            color: #c44538;
+            font-size: 0.82rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .remove-btn:hover {
+            background: #d64c41;
+            color: #fff;
+            border-color: #d64c41;
+            box-shadow: 0 8px 20px rgba(214, 76, 65, 0.2);
+        }
+
+        .item-actions .clear-btn.secondary {
+            min-width: 140px;
+            justify-content: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 100px 40px;
+            background: white;
+            border-radius: 3rem;
+            border: 1px solid var(--border);
+        }
+
+        .empty-state svg {
+            color: var(--heading-blue);
+            opacity: 0.5;
+            margin-bottom: 30px;
+        }
+
+        .empty-state h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-top: 12px;
+        }
+
+        .empty-state a {
+            display: inline-block;
+            margin-top: 32px;
+            padding: 16px 40px;
+            border-radius: 99px;
+            background: var(--btn-blue);
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .empty-state a:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(3, 40, 159, 0.2);
+        }
+
+        @@keyframes fade-up {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@media(max-width:768px) {
+            nav {
+                padding: 1rem 1.25rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .page {
+                padding: 2rem 1rem 3rem;
+            }
+
+            .wishlist-shell {
+                padding: 1.2rem;
+                border-radius: 28px;
+            }
+
+            .page-header {
+                grid-template-columns: 1fr;
+                align-items: start;
+            }
+
+            .page-header h1 {
+                font-size: 2.25rem;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .art-card {
+                grid-template-columns: 1fr;
+                border-radius: 24px;
+                padding: 16px;
+            }
+
+            .card-img {
+                width: 100%;
+                height: 240px;
+            }
+
+            .card-info .meta {
+                align-items: stretch;
+            }
+
+            .item-actions .clear-btn.secondary,
+            .view-btn,
+            .remove-btn {
+                width: 100%;
+                min-width: 0;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
+
 <body>
-    @await Html.PartialAsync("_NavbarPartial")
+    @Html.Partial("_Navbar")
 
     @* <nav class="navbar">
         <div class="navbar-inner">
@@ -130,24 +868,41 @@
     </nav> *@
 
     <div class="page">
-        <div class="page-header">
-            <div>
-                <h1>My Wishlist</h1>
-                <p id="countText">Loading...</p>
+        <div class="wishlist-shell">
+            <div class="page-header">
+                <div>
+                    <span class="eyebrow">Saved Collection</span>
+                    <h1>Review your wishlist</h1>
+                    <p>Keep track of the artworks you love and move them to cart when you are ready.</p>
+                </div>
+                <div class="count-pill" id="countText">Loading...</div>
             </div>
 
-            <div style="display:flex; gap:10px;">
-                <a href="/Buyer/ExploreArt" class="clear-btn" style="text-decoration:none; display:flex; align-items:center;">
-                    Go Back to Explore Art
+            <div class="header-actions">
+                <a href="/Buyer/ExploreArt" class="clear-btn secondary">
+                    <svg style="margin-right:8px" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5">
+                        <line x1="19" y1="12" x2="5" y2="12" />
+                        <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                    Explore Art
                 </a>
-
-                <button class="clear-btn" onclick="clearAll()">Clear All</button>
+                <button class="clear-btn" onclick="clearAll()">
+                    <svg style="margin-right:8px" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        <line x1="10" y1="11" x2="10" y2="17" />
+                        <line x1="14" y1="11" x2="14" y2="17" />
+                    </svg>
+                    Clear All
+                </button>
             </div>
-        </div>
-        <div id="content">
-            <div class="loading-state">
-                <div class="loading-spinner"></div>
-                <p>Loading your wishlist...</p>
+            <div id="content">
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p>Loading your wishlist...</p>
+                </div>
             </div>
         </div>
     </div>
@@ -173,24 +928,19 @@
         }
 
         // ── localStorage helpers (same keys as ExploreArt) ───────────────────
-        function getWishlist() { try { return JSON.parse(localStorage.getItem('artify_wishlist') || '[]'); } catch(e) { return []; } }
+        function getWishlist() { try { return JSON.parse(localStorage.getItem('artify_wishlist') || '[]'); } catch (e) { return []; } }
         function saveWishlist(arr) { localStorage.setItem('artify_wishlist', JSON.stringify(arr)); }
-        function getCart() { try { return JSON.parse(localStorage.getItem('artify_cart') || '[]'); } catch(e) { return []; } }
+        function getCart() { try { return JSON.parse(localStorage.getItem('artify_cart') || '[]'); } catch (e) { return []; } }
         function saveCart(arr) { localStorage.setItem('artify_cart', JSON.stringify(arr)); }
-        function isInCart(id) { return getCart().indexOf(id) !== -1; }
+        function isInCart(id) { return getCart().some(function (x) { return x != null && x.toString() === id.toString(); }); }
 
-        function updateBadges() {
-            var wSize = getWishlist().length, cSize = getCart().length;
-            var wb = document.getElementById('wishlistBadge'), cb = document.getElementById('cartBadge');
-            wb.textContent = wSize; wb.className = 'badge' + (wSize === 0 ? ' zero' : '');
-            cb.textContent = cSize; cb.className = 'badge' + (cSize === 0 ? ' zero' : '');
-        }
+        // updateBadges handled by globalBadges.js
 
         function removeFromWishlist(artworkId) {
             var wl = getWishlist();
-            var idx = wl.indexOf(artworkId);
+            var idx = wl.findIndex(function (id) { return id != null && id.toString() === artworkId.toString(); });
             if (idx !== -1) { wl.splice(idx, 1); saveWishlist(wl); }
-            loadedItems = loadedItems.filter(function(x) { return x.artworkId !== artworkId; });
+            loadedItems = loadedItems.filter(function (x) { return x.artworkId !== artworkId; });
             updateBadges();
             render(loadedItems);
         }
@@ -226,28 +976,34 @@
             }
 
             var html = '<div class="art-grid">'
-                + items.map(function(a, i) {
+                + items.map(function (a, i) {
                     var inCart = isInCart(a.artworkId);
                     var img = imageUrl(a.previewPath);
                     var detailUrl = '/Buyer/ArtworkDetail/' + a.artworkId;
                     return '<div class="art-card" style="animation-delay:' + (i * 0.07) + 's">'
-                        + '<div class="card-img">'
+                        + '<a href="' + detailUrl + '" class="card-img">'
                         + '<img src="' + img + '" alt="' + a.title + '" loading="lazy"/>'
-                        + '<div class="overlay"></div>'
-                        + '<span class="cat-badge">' + (a.categoryName || '') + '</span>'
-                        + '<div class="quick-actions">'
-                        + '<a href="' + detailUrl + '" class="view-btn">'
-                        + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View</a>'
-                        + '<button class="cart-btn ' + (inCart ? 'in-cart' : '') + '" ' + (inCart ? 'disabled' : 'onclick="addToCart(' + a.artworkId + ')"') + '>'
-                        + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>'
-                        + (inCart ? 'In Cart' : 'Add') + '</button>'
-                        + '</div></div>'
+                        + '</a>'
                         + '<div class="card-info">'
-                        + '<h3>' + a.title + '</h3>'
+                        + '<div class="card-top">'
+                        + '<div class="card-meta">'
+                        + '<span class="cat-badge">' + (a.categoryName || 'Original Artwork') + '</span>'
+                        + (inCart ? '<span class="saved-state">Saved to cart</span>' : '<span class="saved-state muted">Ready to move</span>')
+                        + '</div>'
+                        + '<h3><a href="' + detailUrl + '" class="card-title-link">' + a.title + '</a></h3>'
                         + '<p class="artist">by ' + a.artistName + '</p>'
-                        + '<div class="meta"><span class="price">&#8377;' + Number(a.price).toLocaleString('en-IN') + '</span></div>'
-                        + '<button class="remove-btn" onclick="removeFromWishlist(' + a.artworkId + ')">'
-                        + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>Remove from Wishlist</button>'
+                        + '<p class="card-copy">Saved in your wishlist so you can revisit it anytime before checkout.</p>'
+                        + '</div>'
+                        + '<div class="meta">'
+                        + '<div class="price-block"><small>Artwork Price</small><span class="price">&#8377; ' + Number(a.price).toLocaleString('en-IN') + '</span></div>'
+                        + '<div class="item-actions">'
+                        + '<a href="' + detailUrl + '" class="view-btn">'
+                        + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View</a>'
+                        + (inCart ? '' : '<button class="clear-btn secondary" type="button" onclick="addToCart(' + a.artworkId + ')">Add to Cart</button>')
+                        + '<button class="remove-btn" type="button" onclick="removeFromWishlist(' + a.artworkId + ')">'
+                        + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>Remove</button>'
+                        + '</div>'
+                        + '</div>'
                         + '</div></div>';
                 }).join('')
                 + '</div>';
@@ -275,11 +1031,15 @@
 
                 // Keep only artworks that are in the wishlist
                 loadedItems = wishlistIds
-                    .map(function(id) { return all.find(function(a) { return a.artworkId === id; }); })
+                    .map(function (id) {
+                        return all.find(function (a) {
+                            return (a.artworkId || a.id).toString() === id.toString();
+                        });
+                    })
                     .filter(Boolean);
 
                 render(loadedItems);
-            } catch(err) {
+            } catch (err) {
                 document.getElementById('content').innerHTML =
                     '<div class="loading-state"><p>Failed to load wishlist. <a href="/Buyer/ExploreArt" style="color:var(--accent)">Continue shopping</a></p></div>';
             }
@@ -288,4 +1048,5 @@
         document.addEventListener('DOMContentLoaded', loadWishlist);
     </script>
 </body>
+
 </html>

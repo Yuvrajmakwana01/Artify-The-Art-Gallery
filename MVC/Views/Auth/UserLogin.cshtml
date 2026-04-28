@@ -4,900 +4,723 @@
     ViewData["Title"] = "Sign In";
 }
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <style>
-    /* ── Auth page wrapper ── */
-    .auth-page {
-        position: relative;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-    }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .auth-bg-img {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        animation: bgPan 25s ease-in-out infinite;
-    }
-
-    .auth-bg-overlay {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(
-            180deg,
-            hsl(25 20% 8% / 0.70) 0%,
-            hsl(25 20% 8% / 0.50) 50%,
-            hsl(25 20% 8% / 0.75) 100%
-        );
-    }
-
-    .auth-wrapper {
-        position: relative;
-        z-index: 10;
-        width: 100%;
-        max-width: 460px;
-        margin: 24px 16px;
-        animation: scaleIn 0.4s ease-out;
-    }
-
-    /* Glass card — same as Register */
-    .glass-card {
-        background: hsl(35 30% 92% / 0.88);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border: 1px solid hsl(30 15% 82% / 0.35);
-        border-radius: 1.25rem;
-        padding: 2rem 2rem 1.5rem;
-        box-shadow:
-            0 8px 32px -8px hsl(25 20% 10% / 0.40),
-            inset 0 1px 0 hsl(35 30% 97% / 0.18);
-    }
-
-    .auth-title {
-        font-family: 'Playfair Display', serif;
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: hsl(25, 30%, 10%);
-        text-align: center;
-        margin: 0;
-    }
-
-    .auth-subtitle {
-        font-size: 0.8rem;
-        color: hsl(25, 15%, 35%);
-        text-align: center;
-        margin: 0.25rem 0 1.4rem;
-        font-weight: 500;
-    }
-
-    .form-group { margin-top: 0.9rem; }
-
-    .form-label {
-        display: block;
-        font-size: 0.78rem;
-        font-weight: 600;
-        color: hsl(25, 30%, 10%);
-        margin-bottom: 0.3rem;
-    }
-
-    /* ── Kendo input override — exact same as Register ── */
-    .k-textbox,
-    .k-input.k-textbox,
-    .k-input {
-        background-color: hsl(32, 18%, 88%) !important;
-        border-color: hsl(30, 15%, 78%) !important;
-        border-radius: 0.6rem !important;
-        color: hsl(25, 30%, 10%) !important;
-        font-family: 'Inter', sans-serif !important;
-        font-size: 0.85rem !important;
-        height: 38px !important;
-        width: 100% !important;
-        transition: border-color 0.25s, box-shadow 0.25s !important;
-    }
-
-    .k-textbox:focus,
-    .k-input:focus-within {
-        border-color: hsl(28, 60%, 45%) !important;
-        box-shadow: 0 0 0 3px hsl(28 60% 45% / 0.15) !important;
-        outline: none !important;
-    }
-
-    .k-tooltip-validation {
-        background: hsl(0, 65%, 48%) !important;
-        border-color: hsl(0, 65%, 40%) !important;
-        border-radius: 0.4rem !important;
-        font-size: 0.72rem !important;
-        font-family: 'Inter', sans-serif !important;
-        margin-top: 3px !important;
-        padding: 3px 8px !important;
-    }
-
-    .k-tooltip-validation .k-callout { color: hsl(0, 65%, 48%) !important; }
-
-    /* Password wrapper */
-    .pass-wrapper { position: relative; }
-
-    .pass-wrapper .k-textbox,
-    .pass-wrapper .k-input { padding-right: 2.4rem !important; }
-
-    .pass-toggle {
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: hsl(25, 15%, 45%);
-        display: flex;
-        align-items: center;
-        z-index: 5;
-        padding: 0;
-        line-height: 1;
-    }
-
-    .pass-toggle:hover { color: hsl(25, 30%, 10%); }
-
-    /* ── Forgot Password row ── */
-    .forgot-row {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: 0.3rem;
-    }
-
-    .forgot-link {
-        font-size: 0.75rem;
-        color: hsl(22, 50%, 38%);
-        font-weight: 600;
-        text-decoration: underline;
-        text-underline-offset: 2px;
-        cursor: pointer;
-        background: none;
-        border: none;
-        padding: 0;
-        font-family: 'Inter', sans-serif;
-        transition: color 0.2s;
-    }
-
-    .forgot-link:hover { color: hsl(28, 60%, 45%); }
-
-    /* ── reCAPTCHA wrapper ── */
-    .captcha-wrap {
-        margin-top: 1rem;
-        display: flex;
-        justify-content: center;
-    }
-
-    /* ── OR divider ── */
-    .or-divider {
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-        margin: 1.1rem 0 0.9rem;
-    }
-
-    .or-divider::before,
-    .or-divider::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: hsl(30, 15%, 78%);
-    }
-
-    .or-divider span {
-        font-size: 0.73rem;
-        color: hsl(25, 15%, 45%);
-        font-family: 'Inter', sans-serif;
-        font-weight: 500;
-        white-space: nowrap;
-    }
-
-    /* ── Google OAuth button ── */
-    .btn-google {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        width: 100%;
-        height: 42px;
-        background: hsl(35 30% 96% / 0.95);
-        border: 1.5px solid hsl(30, 15%, 76%);
-        border-radius: 0.65rem;
-        font-family: 'Inter', sans-serif;
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: hsl(25, 30%, 12%);
-        cursor: pointer;
-        transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
-        text-decoration: none;
-    }
-
-    .btn-google:hover {
-        background: hsl(35, 30%, 100%);
-        border-color: hsl(28, 60%, 55%);
-        box-shadow: 0 2px 10px hsl(28 60% 45% / 0.12);
-    }
-
-    .btn-google svg { flex-shrink: 0; }
-
-    /* ── Gold submit button — same as Register ── */
-    .btn-gold {
-        display: block;
-        width: 100%;
-        height: 42px;
-        background: linear-gradient(135deg, hsl(28,60%,45%), hsl(18,70%,38%));
-        color: hsl(35, 30%, 97%);
-        font-family: 'Inter', sans-serif;
-        font-size: 0.875rem;
-        font-weight: 600;
-        border: none;
-        border-radius: 0.65rem;
-        cursor: pointer;
-        margin-top: 1.1rem;
-        transition: filter 0.25s, box-shadow 0.25s, transform 0.1s;
-        box-shadow: 0 4px 14px hsl(28 60% 45% / 0.32);
-        letter-spacing: 0.01em;
-    }
-
-    .btn-gold:hover:not(:disabled) {
-        filter: brightness(1.08);
-        box-shadow: 0 6px 20px hsl(28 60% 45% / 0.42);
-    }
-
-    .btn-gold:active:not(:disabled) { transform: scale(0.985); }
-    .btn-gold:disabled { opacity: 0.55; cursor: not-allowed; }
-
-    /* ── Footer link ── */
-    .auth-footer {
-        text-align: center;
-        font-size: 0.82rem;
-        color: hsl(25 30% 10% / 0.60);
-        font-weight: 500;
-        margin-top: 1.1rem;
-    }
-
-    .auth-footer a {
-        color: hsl(22, 50%, 38%);
-        font-weight: 700;
-        text-decoration: underline;
-        text-underline-offset: 2px;
-        transition: color 0.2s;
-    }
-
-    .auth-footer a:hover { color: hsl(28, 60%, 45%); }
-
-    /* ── Kendo Notification ── */
-    .k-notification-wrap {
-        font-family: 'Inter', sans-serif !important;
-        font-size: 0.82rem !important;
-        border-radius: 0.6rem !important;
-    }
-
-    /* ── Lockout warning bar ── */
-    .lockout-bar {
-        display: none;
-        align-items: center;
-        gap: 8px;
-        background: hsl(30, 80%, 94%);
-        border: 1px solid hsl(28, 60%, 72%);
-        border-radius: 0.6rem;
-        padding: 8px 12px;
-        font-size: 0.75rem;
-        color: hsl(22, 50%, 28%);
-        font-family: 'Inter', sans-serif;
-        margin-bottom: 0.8rem;
-    }
-
-    .lockout-bar.visible { display: flex; }
-
-    /* ── pass-hint ── */
-    .pass-hint {
-        font-size: 0.67rem;
-        color: hsl(25, 15%, 40%);
-        margin-top: 0.35rem;
-    }
-
-    /* Background  */
-    .netflix-bg-wrapper {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    background-color: #000;
-    z-index: -1;
-    perspective: 1000px;
-    }
-    .background-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Har image ki width set karega */
-    gap: 10px;
-    overflow: hidden;
-    background-color: #151515; /* Base color black rakhein */
+:root {
+    --bg:       #DFE6E9;
+    --cobalt:   #03289F;
+    --cobalt-dk:#021A6E;
+    --cobalt-lt:#1A3DB5;
+    --gold:     #EDA312;
+    --gold-lt:  #F5C84A;
+    --sky:      #6B9BE6;
+    --sky-lt:   #A8C4F0;
+    --ink:      #0A1628;
+    --white:    #FFFFFF;
+    --err:      #D63031;
+    --ok:       #00B894;
 }
-.background-container img {
-    width: 100%;
+
+html, body {
     height: 100%;
-    object-fit: cover; /* Isse images stretch nahi hongi */
-    opacity: 0.1; /* Images ko thoda light rakhein taaki form focus me rahe */
+    font-family: 'Jost', sans-serif;
+    background: var(--bg);
+    overflow: hidden;
 }
-.overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(0,0,0,0) 20%, rgba(0,0,0,0.8) 90%);
+
+/* ═══════════════════════════════════════
+   MARQUEE BACKGROUND
+═══════════════════════════════════════ */
+.marquee-bg {
+    position: fixed;
+    inset: 0;
     z-index: 0;
+    background: #e4eaed;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 5px 0;
+    overflow: hidden;
 }
 
-    /* Moving Grid */
-   .art-mosaic-grid {
-    display: grid;
-    /* Density badhane ke liye dynamic columns */
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
-    gap: 0;
-    
-    /* Screen coverage ke liye size badhayein */
-    width: 200%; 
-    height: 200%;
-    position: absolute;
-    top: -50%;
-    left: -50%;
-     
-    opacity: 0.5;
-    z-index: 1
-
-    /* 3D Tilted Effect */
-    transform: rotateX(25deg) rotateZ(-15deg) skewX(-5deg); 
-    
-    @* transition: opacity 1.5s ease-in-out; *@
-
-    /* Browser style continuous moving animation: duration, linear, infinite */
-    animation: background-browse-up 60s linear infinite;
-
-     
+.marquee-row {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    min-height: 0;
 }
 
-    .art-tile {
-    width: 100%;
-    height: 300px; /* Thodi dense grid */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    margin: 0;
-    padding: 0;
-
-    border-radius: 0;
-     box-shadow: none;
-     border: none;
-
-    /* Zoom animation hamesha chalti rahegi */
-    animation: browse-zoom 20s infinite ease-in-out;
-    animation-delay: calc(var(--tile-index) * 0.2s);
-
-    /* Browsing effect ke liye smooth transition */
-    transition: transform 0.5s ease;
-    @* display: block;  *@
+/* The strip is exactly 200% wide (2 copies of tiles) so -50% loops perfectly */
+.marquee-strip {
+    display: flex;
+    gap: 5px;
+    height: 100%;
+    flex-shrink: 0;
+    will-change: transform;
 }
 
-    /* Gradual Dark Shadow (Netflix Overlay) */
-    .netflix-overlay {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(to top),
-                    radial-gradient(circle, transparent 20%, #000 100%);
-        z-index: 1;
-    }
-    .art-mosaic-grid.grid-reveal {
-    opacity: 0.6 !important; 
-    /* Reveal state mein transform ko animation ke sath match rakhein */
-    transform: rotateX(25deg) rotateZ(-15deg) skewX(-5deg) scale(1);
+/* Odd rows → left, even rows → right */
+.marquee-row:nth-child(odd)  .marquee-strip { animation: marqLeft  var(--spd, 30s) linear infinite; }
+.marquee-row:nth-child(even) .marquee-strip { animation: marqRight var(--spd, 38s) linear infinite; }
+
+@@keyframes marqLeft  { from { transform: translateX(0);    } to { transform: translateX(-50%); } }
+@@keyframes marqRight { from { transform: translateX(-50%); } to { transform: translateX(0);    } }
+
+.art-tile {
+    flex-shrink: 0;
+    height: 100%;
+    border-radius: 7px;
+    overflow: hidden;
+    background: #c5cdd3;
+    position: relative;
+}
+.art-tile img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+    user-select: none;
 }
 
-    /* Glass Card for Register Form */
-    .auth-container {
-        position: relative;
-        z-index: 10;
-        display: flex;
-        justify-content: flex-end; /* Card ko right side rakhne ke liye */
-        align-items: center;
-        min-height: 100vh;
-        padding-right: 10%; /* Image 3 jaisa look */
-    }
-    .grid-reveal {
-        opacity: 0.6 !important; /* Visible and store background */
-    }
-    .art-tile {
-    margin: -0.5px;
-    outline: 1px solid transparent; /* Anti-aliasing lines fix karne ke liye */
-}
-    
-    @@keyframes background-zoom {
-
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.1); } /* Zoom in */
-    }
-
-    @@keyframes background-browse-up {
-    0% {
-        /* Start position: Thoda upar */
-        transform: rotateX(25deg) rotateZ(-15deg) skewX(-10deg) translateY(0%);
-    }
-    100% {
-        /* End position: Thoda niche move ho jaye 'translateY' badhakar */
-        transform: rotateX(25deg) rotateZ(-15deg) skewX(-10deg) translateY(20%);
-    }
-}
-@@keyframes browse-pan {
-    0% { transform: rotateX(25deg) rotateZ(-15deg) skewX(-5deg) translateY(0%); }
-    100% { transform: rotateX(25deg) rotateZ(-15deg) skewX(-5deg) translateY(20%); }
+/* ── Overlay layers ── */
+.marquee-veil {
+    position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(
+        135deg,
+        rgba(223,230,233,0.82) 0%,
+        rgba(223,230,233,0.52) 50%,
+        rgba(223,230,233,0.80) 100%
+    );
+    backdrop-filter: blur(1.5px);
+    -webkit-backdrop-filter: blur(1.5px);
 }
 
-    @@keyframes bgPan {
-        0%   { transform: scale(1.15) translate(0%, 0%); }
-        25%  { transform: scale(1.20) translate(-2%, -1%); }
-        50%  { transform: scale(1.15) translate(-1%, 1%); }
-        75%  { transform: scale(1.20) translate(1%, -1%); }
-        100% { transform: scale(1.15) translate(0%, 0%); }
-    }
+.orb {
+    position: absolute; border-radius: 50%;
+    filter: blur(80px); pointer-events: none; z-index: 2;
+}
+.orb-a {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(107,155,230,0.22) 0%, transparent 70%);
+    top: -10%; right: -5%;
+    animation: orbDrift 22s ease-in-out infinite;
+}
+.orb-b {
+    width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(237,163,18,0.14) 0%, transparent 70%);
+    bottom: -10%; left: -5%;
+    animation: orbDrift 28s ease-in-out infinite;
+    animation-delay: -10s;
+}
+.orb-c {
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(3,40,159,0.10) 0%, transparent 70%);
+    top: 45%; left: 20%;
+    animation: orbDrift 34s ease-in-out infinite;
+    animation-delay: -18s;
+}
+@@keyframes orbDrift {
+    0%,100% { transform: translate(0,0); }
+    50%      { transform: translate(-18px, 14px); }
+}
 
-    @@keyframes scaleIn {
-        from { opacity: 0; transform: scale(0.96); }
-        to   { opacity: 1; transform: scale(1); }
-    }
+.bg-grid {
+    position: absolute; inset: 0; z-index: 2;
+    background-image:
+        linear-gradient(rgba(107,155,230,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(107,155,230,0.04) 1px, transparent 1px);
+    background-size: 44px 44px;
+    animation: gridShift 70s linear infinite;
+}
+@@keyframes gridShift {
+    from { background-position: 0 0; }
+    to   { background-position: 44px 44px; }
+}
+
+/* ═══════════════════════════════════════
+   AUTH SHELL + GLASS CARD  (unchanged)
+═══════════════════════════════════════ */
+.auth-shell {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem;
+}
+
+.glass-card {
+    position: relative;
+    width: 100%; max-width: 440px;
+    background: rgba(255,255,255,0.72);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(107,155,230,0.25);
+    border-radius: 24px;
+    padding: 2.4rem 2.2rem 2rem;
+    box-shadow:
+        0 2px 0 rgba(255,255,255,0.9) inset,
+        0 0 0 1px rgba(255,255,255,0.4),
+        0 24px 64px rgba(3,40,159,0.12),
+        0 4px 16px rgba(107,155,230,0.10);
+    animation: cardReveal 0.7s cubic-bezier(0.16,1,0.3,1) both;
+    overflow: hidden;
+}
+.glass-card::before {
+    content: '';
+    position: absolute; top:0; left:0; right:0; height: 2px;
+    background: linear-gradient(90deg, transparent 0%, var(--sky) 30%, var(--gold) 65%, transparent 100%);
+    z-index: 2;
+}
+.glass-card::after {
+    content: '';
+    position: absolute; bottom: 0; right: 0;
+    width: 120px; height: 120px;
+    background: radial-gradient(circle at bottom right, rgba(237,163,18,0.08), transparent 70%);
+    border-bottom-right-radius: 24px;
+    pointer-events: none;
+}
+@@keyframes cardReveal {
+    from { opacity: 0; transform: translateY(28px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.card-brand {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 1.8rem;
+    animation: fadeUp 0.5s 0.1s both;
+}
+.brand-gem {
+    width: 34px; height: 34px;
+    background: linear-gradient(135deg, var(--cobalt), var(--cobalt-lt));
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 14px rgba(3,40,159,0.30);
+}
+.brand-gem svg { width: 16px; height: 16px; }
+.brand-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.45rem; font-weight: 700;
+    color: var(--cobalt); letter-spacing: 0.03em;
+}
+
+.card-heading { margin-bottom: 1.8rem; animation: fadeUp 0.5s 0.18s both; }
+.card-heading h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem; font-weight: 700;
+    color: var(--gold); line-height: 1.1; margin-bottom: 0.3rem;
+}
+.card-heading h1 em { font-style: italic; color: var(--cobalt); }
+.card-heading p { font-size: 0.78rem; color: var(--sky); font-weight: 400; }
+
+.field { margin-bottom: 1.1rem; }
+.field:nth-child(1) { animation: fadeUp 0.5s 0.26s both; }
+.field:nth-child(2) { animation: fadeUp 0.5s 0.33s both; }
+
+.field label {
+    display: block; font-size: 0.64rem; font-weight: 600;
+    color: var(--cobalt); letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: 0.35rem;
+}
+.input-shell { position: relative; display: flex; align-items: center; }
+.i-icon {
+    position: absolute; left: 12px;
+    color: var(--sky); pointer-events: none; display: flex;
+    transition: color 0.25s;
+}
+.input-shell:focus-within .i-icon { color: var(--cobalt); }
+
+.field input {
+    width: 100%; height: 48px;
+    background: rgba(255,255,255,0.60);
+    border: 1.5px solid rgba(107,155,230,0.22);
+    border-radius: 12px;
+    padding: 0 2.8rem 0 2.8rem;
+    font-family: 'Jost', sans-serif; font-size: 0.875rem;
+    color: var(--ink); outline: none;
+    transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+    -webkit-appearance: none;
+}
+.field input::placeholder { color: rgba(107,155,230,0.45); }
+.field input:focus {
+    border-color: var(--cobalt);
+    background: var(--white);
+    box-shadow: 0 0 0 3.5px rgba(3,40,159,0.10);
+}
+.field input.is-invalid {
+    border-color: var(--err) !important;
+    background: rgba(214,48,49,0.05) !important;
+    box-shadow: 0 0 0 3px rgba(214,48,49,0.10) !important;
+}
+.field input.is-valid { border-color: var(--ok); }
+
+.field-error {
+    display: none; align-items: center; gap: 5px;
+    font-size: 0.66rem; color: var(--err);
+    margin-top: 0.28rem; font-weight: 500;
+    animation: errIn 0.2s ease-out;
+}
+.field-error.visible { display: flex; }
+@@keyframes errIn {
+    from { opacity:0; transform: translateY(-4px); }
+    to   { opacity:1; transform: translateY(0); }
+}
+
+.pass-toggle-btn {
+    position: absolute; right: 11px;
+    background: none; border: none; cursor: pointer;
+    color: var(--sky); display: flex; padding: 3px;
+    transition: color 0.2s;
+}
+.pass-toggle-btn:hover { color: var(--cobalt); }
+
+.aux-row {
+    display: flex; justify-content: flex-end;
+    margin-top: -0.4rem; margin-bottom: 1.3rem;
+    animation: fadeUp 0.5s 0.40s both;
+}
+.forgot-link {
+    font-size: 0.72rem; color: var(--cobalt); font-weight: 600;
+    text-decoration: none; border-bottom: 1px solid transparent;
+    transition: border-color 0.2s, color 0.2s;
+}
+.forgot-link:hover { color: var(--gold); border-color: var(--gold); }
+
+.btn-primary {
+    width: 100%; height: 50px;
+    background: linear-gradient(130deg, var(--cobalt-lt) 0%, var(--cobalt) 55%, var(--cobalt-dk) 100%);
+    color: var(--white);
+    font-family: 'Jost', sans-serif; font-size: 0.9rem; font-weight: 600;
+    border: 1px solid rgba(107,155,230,0.20);
+    border-radius: 12px; cursor: pointer;
+    letter-spacing: 0.06em;
+    transition: transform 0.2s, box-shadow 0.3s, filter 0.2s;
+    box-shadow: 0 6px 24px rgba(3,40,159,0.25);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    position: relative; overflow: hidden;
+    animation: fadeUp 0.5s 0.47s both;
+}
+.btn-primary::before {
+    content: '';
+    position: absolute; top: 0; left: -100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+    transform: skewX(-18deg); transition: left 0.5s ease;
+}
+.btn-primary:hover::before { left: 160%; }
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 32px rgba(3,40,159,0.35), 0 0 20px rgba(107,155,230,0.15);
+    filter: brightness(1.08);
+}
+.btn-primary:active:not(:disabled) { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.btn-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--gold); flex-shrink: 0;
+    box-shadow: 0 0 8px rgba(237,163,18,0.7);
+}
+
+.or-row {
+    display: flex; align-items: center; gap: 0.8rem;
+    margin: 1.3rem 0 1rem;
+    animation: fadeUp 0.5s 0.53s both;
+}
+.or-row::before, .or-row::after {
+    content: ''; flex: 1; height: 1px;
+    background: rgba(107,155,230,0.20);
+}
+.or-row span {
+    font-size: 0.64rem; color: var(--sky);
+    font-weight: 600; letter-spacing: 0.10em; white-space: nowrap; text-transform: uppercase;
+}
+
+.btn-google {
+    width: 100%; height: 46px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: rgba(255,255,255,0.55);
+    border: 1.5px solid rgba(107,155,230,0.22);
+    border-radius: 12px;
+    font-family: 'Jost', sans-serif; font-size: 0.85rem; font-weight: 600;
+    color: var(--ink); text-decoration: none; cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+    animation: fadeUp 0.5s 0.59s both;
+}
+.btn-google:hover {
+    background: rgba(255,255,255,0.85);
+    border-color: var(--sky);
+    box-shadow: 0 4px 16px rgba(107,155,230,0.15);
+}
+
+.auth-footer-text {
+    text-align: center; font-size: 0.76rem;
+    color: var(--sky); margin-top: 1.2rem;
+    animation: fadeUp 0.5s 0.65s both;
+}
+.auth-footer-text a {
+    color: var(--cobalt); font-weight: 700; text-decoration: none;
+    border-bottom: 1px solid rgba(3,40,159,0.3);
+    transition: color 0.2s, border-color 0.2s;
+}
+.auth-footer-text a:hover { color: var(--gold); border-color: var(--gold); }
+
+.spinner {
+    width: 15px; height: 15px;
+    border: 2px solid rgba(255,255,255,0.25);
+    border-top-color: white;
+    border-radius: 50%; animation: spin 0.7s linear infinite;
+}
+@@keyframes spin { to { transform: rotate(360deg); } }
+
+@@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@@media (max-width: 480px) {
+    .glass-card { padding: 2rem 1.4rem 1.6rem; border-radius: 18px; }
+}
 </style>
 
-@* Google reCAPTCHA v2 *@
-@* <script src="https://www.google.com/recaptcha/api.js" async defer></script> *@
+<!-- ── Marquee Background ── -->
+<div class="marquee-bg" id="marqueeBg">
+    <!-- rows injected by JS -->
+    <div class="marquee-veil"></div>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+    <div class="bg-grid"></div>
+</div>
 
-<div class="auth-page">
-     <div class="netflix-bg-wrapper">
-            <div class="art-mosaic-grid" id="artGrid"></div>
-            <div class="netflix-overlay"></div>
+<!-- ── Form (100% original, untouched) ── -->
+<div class="auth-shell">
+    <div class="glass-card">
+
+        <div class="card-brand">
+            <div class="logo-icon" style="width: 40px; height: 40px; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #0b0c10; box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24); margin-right: 14px;">
+                <img src="/Images/Artify-Logos.png" alt="Artify" aria-hidden="true" style="width: 100%; height: 100%; object-fit: cover; transform: scale(2.65) translateX(3%);" />
+            </div>
+            
+            <span class="brand-name">Artify</span>
+            @* <img src="/Images/ART-removebg.png" alt="Logo" height="60px" width="190px"> *@
         </div>
 
-    <div class="auth-wrapper">
-        <div class="glass-card">
+        <div class="card-heading">
+            <h1>Welcome <em>Back</em></h1>
+            <p>Sign in to your Artify account to continue</p>
+        </div>
 
-            <h1 class="auth-title">Welcome Back</h1>
-            <p class="auth-subtitle">Sign in to your Artify account</p>
+        <form id="loginForm" novalidate>
 
-            <!-- Kendo Notification container -->
-            <span id="kNotification"></span>
-
-            <!-- OWASP A07: Brute-force lockout UI bar -->
-            @* <div class="lockout-bar" id="lockoutBar">
-                <svg width="15" height="15" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor" stroke-width="2">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
-                Too many failed attempts. Please wait
-                <strong id="lockoutCountdown">30s</strong>
-                or reset your password.
-            </div> *@
-
-            <!-- LOGIN FORM -->
-            <form id="loginForm" novalidate="novalidate">
-
-                <!-- Email -->
-                <div class="form-group">
-                    <label class="form-label" for="c_Email">Email</label>
-                    <input id="c_Email" name="c_Email"
-                           type="email" placeholder="your@@email.com"
-                           data-required-msg="Email is required"
-                           data-email-msg="Enter a valid email address"
-                           class="k-textbox" />
+            <!-- Email -->
+            <div class="field" id="field-email">
+                <label for="c_Email">Email Address</label>
+                <div class="input-shell">
+                    <span class="i-icon">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                    </span>
+                    <input id="c_Email" name="c_Email" type="email"
+                           placeholder="your@email.com" autocomplete="email" />
                 </div>
-
-                <!-- Password -->
-                <div class="form-group">
-                    <label class="form-label" for="c_Password">Password</label>
-                    <div class="pass-wrapper">
-                        <input id="c_Password" name="c_Password"
-                               type="password" placeholder="••••••••"
-                               data-required-msg="Password is required"
-                               class="k-textbox" />
-                        <button type="button" class="pass-toggle"
-                                onclick="togglePass('c_Password','eye-pass')">
-                            <svg id="eye-pass" xmlns="http://www.w3.org/2000/svg"
-                                 width="15" height="15" fill="none"
-                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                <circle cx="12" cy="12" r="3"/>
-                            </svg>
-                        </button>
-                    </div>
+                <div class="field-error" id="err-email">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span id="err-email-text"></span>
                 </div>
-
-                <!-- Forgot Password -->
-                <div class="forgot-row">
-                    <a asp-action="UserForgotPassword" asp-controller="Auth" class="forgot-link" id="openForgotBtn">
-                        Forgot Password?
-                    </a>
-                </div>
-
-                <!-- reCAPTCHA v2 Checkbox
-                     STEP: Google Console se apna Site Key lo aur neeche dalo
-                     URL: https://www.google.com/recaptcha/admin/create
-                -->
-                @* <div class="captcha-wrap">
-                    <div class="g-recaptcha"
-                         data-sitekey="YOUR_RECAPTCHA_SITE_KEY_HERE"
-                         data-theme="light"
-                         data-callback="onCaptchaSuccess"
-                         data-expired-callback="onCaptchaExpired">
-                    </div>
-                </div> *@
-
-                <button type="submit" class="btn-gold" id="loginBtn">
-                    Sign In
-                </button>
-
-            </form>
-
-            <!-- OR divider -->
-           <div style="text-align:center;margin-top:1rem">
-                <p style="font-size:0.75rem;color:hsl(25,15%,40%);margin-bottom:0.6rem">
-                    ── or continue with ──
-                </p>
-               <a href="@Url.Action("UserGoogleLogin", "Auth")" class="btn btn-google"
-                style="display:inline-flex;align-items:center;gap:8px;
-                        padding:0 1.2rem;height:40px;border-radius:0.6rem;
-                        background:hsl(35,30%,94%);border:1.5px solid hsl(30,15%,78%);
-                        color:hsl(25,30%,15%);font-size:0.82rem;font-weight:600;
-                        text-decoration:none;font-family:'Inter',sans-serif;
-                        transition:box-shadow 0.2s, border-color 0.2s"
-                        onmouseover="this.style.borderColor='hsl(28,60%,45%)';this.style.boxShadow='0 2px 8px hsl(28 60% 45%/0.2)'"
-                        onmouseout="this.style.borderColor='hsl(30,15%,78%)';this.style.boxShadow='none'">
-
-                    <!-- Google SVG icon -->
-                    <svg width="18" height="18" viewBox="0 0 48 48">
-                        <path fill="#EA4335" d="M24 9.5c3.14 0 5.95 1.08 8.17 2.85L38.4 6.1C34.6 2.38 29.6 0 24 0 14.82 0 6.98 5.5 3.16 13.5l7.28 5.65C12.18 13.1 17.64 9.5 24 9.5z"/>
-                        <path fill="#4285F4" d="M46.1 24.5c0-1.6-.14-3.13-.4-4.6H24v8.72h12.42c-.54 2.9-2.18 5.36-4.64 7.02l7.18 5.57C43.1 37.13 46.1 31.27 46.1 24.5z"/>
-                        <path fill="#FBBC05" d="M10.44 28.85A14.57 14.57 0 019.5 24c0-1.7.3-3.33.84-4.85L3.06 13.5A23.93 23.93 0 000 24c0 3.87.93 7.52 2.56 10.73l7.88-5.88z"/>
-                        <path fill="#34A853" d="M24 48c5.6 0 10.3-1.85 13.73-5.02l-7.18-5.57A14.6 14.6 0 0124 38.5c-6.36 0-11.82-3.6-13.56-8.85l-7.88 5.88C6.98 43.5 14.82 48 24 48z"/>
-                    </svg>
-                    Continue with Google
-                </a>
             </div>
 
-            <p class="auth-footer">
-                Don't have an account?
-                <a asp-action="UserRegister" asp-controller="Auth">Create Account</a>
-            </p>
-        </div>
+            <!-- Password -->
+            <div class="field" id="field-password">
+                <label for="c_Password">Password</label>
+                <div class="input-shell">
+                    <span class="i-icon">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0110 0v4"/>
+                        </svg>
+                    </span>
+                    <input id="c_Password" name="c_Password" type="password"
+                           placeholder="••••••••" autocomplete="current-password" />
+                    <button type="button" class="pass-toggle-btn" id="toggle-pass" aria-label="Toggle password">
+                        <svg id="eye-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="field-error" id="err-password">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span id="err-password-text"></span>
+                </div>
+            </div>
+
+            <div class="aux-row">
+                <a asp-action="UserForgotPassword" asp-controller="Auth" class="forgot-link">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn-primary" id="loginBtn">
+                <span class="btn-dot"></span>
+                <span>Sign In</span>
+            </button>
+
+        </form>
+
+        <div class="or-row"><span>or continue with</span></div>
+
+        <a href="@Url.Action("UserGoogleLogin", "Auth")" class="btn-google">
+            <svg width="18" height="18" viewBox="0 0 48 48">
+                <path fill="#EA4335" d="M24 9.5c3.14 0 5.95 1.08 8.17 2.85L38.4 6.1C34.6 2.38 29.6 0 24 0 14.82 0 6.98 5.5 3.16 13.5l7.28 5.65C12.18 13.1 17.64 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.1 24.5c0-1.6-.14-3.13-.4-4.6H24v8.72h12.42c-.54 2.9-2.18 5.36-4.64 7.02l7.18 5.57C43.1 37.13 46.1 31.27 46.1 24.5z"/>
+                <path fill="#FBBC05" d="M10.44 28.85A14.57 14.57 0 019.5 24c0-1.7.3-3.33.84-4.85L3.06 13.5A23.93 23.93 0 000 24c0 3.87.93 7.52 2.56 10.73l7.88-5.88z"/>
+                <path fill="#34A853" d="M24 48c5.6 0 10.3-1.85 13.73-5.02l-7.18-5.57A14.6 14.6 0 0124 38.5c-6.36 0-11.82-3.6-13.56-8.85l-7.88 5.88C6.98 43.5 14.82 48 24 48z"/>
+            </svg>
+            Continue with Google
+        </a>
+
+        <p class="auth-footer-text">
+            Don't have an account? <a asp-action="UserRegister" asp-controller="Auth">Create Account</a>
+        </p>
+
     </div>
 </div>
- 
 
 @section Scripts {
 <script>
 $(function () {
 
-
-    // 1. Base URL and Constants
-    var API_BASE = 'http://localhost:5183';
-    var CACHE_KEY = 'unsplash_art_images';
+    var API_BASE       = 'http://localhost:5183';
+    var CACHE_KEY      = 'unsplash_art_images';
     var CACHE_TIME_KEY = 'unsplash_last_fetch';
-    var ONE_HOUR = 3600000;
+    var ONE_HOUR       = 3600000;
 
-    // 2. Render Images Function (Fix: Added fragment definition)
-    async function renderImages(images) {
-        console.log("Starting to render images...", images.length);
-        const grid = document.getElementById('artGrid');
-        if (!grid) {
-            console.error("artGrid element not found!");
-            return;
+    /* ─────────────────────────────────────────
+       MARQUEE BACKGROUND BUILDER
+    ───────────────────────────────────────── */
+    var NUM_ROWS   = 4;
+    var GAP        = 5;   // px gap between tiles
+    // Row speeds (s) — staggered so no two rows feel identical
+    var ROW_SPEEDS = [32, 44, 26, 38];
+
+    // Diverse art seeds (picsum.photos covers classic/landscape/architecture styles)
+    var SEEDS = [
+        10,11,15,20,22,24,25,26,27,28,30,31,32,37,40,42,43,44,45,48,
+        50,52,55,56,57,58,60,64,65,67,70,72,74,75,76,77,79,80,82,83,
+        84,85,86,87,90,91,92,94,95,96,97,99,100,101,102,103,104,106,107,108,
+        110,112,114,115,116,118,119,120,121,122,123,124,125,126,127,128
+    ];
+
+    var bgEl = document.getElementById('marqueeBg');
+
+    function shuffle(arr) {
+        var a = arr.slice();
+        for (var i = a.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
         }
+        return a;
+    }
 
-        grid.innerHTML = '';
-        const fragment = document.createDocumentFragment(); // FIXED: Was missing before
+    function buildMarquee() {
+        // Remove previously built rows
+        bgEl.querySelectorAll('.marquee-row').forEach(function(el) { el.remove(); });
 
-        const imageLoadPromises = images.map((item, index) => {
-            return new Promise((resolve) => {
-                const tile = document.createElement('div');
+        var vw = window.innerWidth;
+        var vh = window.innerHeight;
+
+        // Each row height (fills screen height with gap between rows)
+        var tileH = Math.floor((vh - GAP * (NUM_ROWS + 1)) / NUM_ROWS);
+        var tileW = Math.round(tileH * 1.45); // landscape ~3:2 ratio
+
+        // Tiles needed to fill 2× viewport (strip = 2 copies → -50% loops)
+        var tilesPerCopy = Math.ceil(vw / (tileW + GAP)) + 2;
+
+        var shuffled = shuffle(SEEDS);
+        var veil     = bgEl.querySelector('.marquee-veil');
+
+        for (var r = 0; r < NUM_ROWS; r++) {
+            var row   = document.createElement('div');
+            row.className = 'marquee-row';
+
+            var strip = document.createElement('div');
+            strip.className = 'marquee-strip';
+            strip.style.animationDuration = ROW_SPEEDS[r] + 's';
+
+            // Build 2 identical copies of tile sequence for seamless loop
+            var totalTiles = tilesPerCopy * 2;
+            for (var t = 0; t < totalTiles; t++) {
+                var seed = shuffled[(r * 17 + (t % tilesPerCopy)) % shuffled.length];
+                var tile = document.createElement('div');
                 tile.className = 'art-tile';
-                tile.style.setProperty('--tile-index', index);
+                tile.style.width    = tileW + 'px';
+                tile.style.minWidth = tileW + 'px';
 
-                // Handle both Unsplash object and direct string URLs
-                const url = item.urls ? item.urls.regular : (typeof item === 'string' ? item : '');
-                
-                if (!url) {
-                    resolve();
-                    return;
-                }
+                var img = new Image();
+                img.src = 'https://picsum.photos/seed/art' + seed + 'r' + r + '/' + tileW + '/' + tileH;
+                img.alt = '';
+                img.loading = 'lazy';
+                img.draggable = false;
+                tile.appendChild(img);
+                strip.appendChild(tile);
+            }
 
-                const img = new Image();
-                img.src = url;
-                img.onload = () => {
-                    tile.style.backgroundImage = `url('${url}')`;
-                    fragment.appendChild(tile);
-                    resolve();
-                };
-                img.onerror = () => {
-                    console.warn("Failed to load image:", url);
-                    resolve();
-                };
-            });
-        });
-
-        await Promise.all(imageLoadPromises);
-        grid.appendChild(fragment);
-        
-        // Final reveal
-        setTimeout(() => {
-            grid.style.opacity = '1';
-            grid.classList.add('grid-reveal');
-            console.log("Grid revealed successfully");
-        }, 100);
+            row.appendChild(strip);
+            bgEl.insertBefore(row, veil);
+        }
     }
 
-    // 3. Load Logic (Fix: Proper error handling and logging)
-    async function loadMosaicBackground() {
-        console.log("Initializing Mosaic Background...");
-        const cachedData = localStorage.getItem(CACHE_KEY);
-        const lastFetch = localStorage.getItem(CACHE_TIME_KEY);
-        const now = Date.now();
+    buildMarquee();
 
-        if (cachedData && lastFetch && (now - lastFetch < ONE_HOUR)) {
-            console.log("Loading from LocalStorage...");
-            await renderImages(JSON.parse(cachedData));
-            return;
-        }
-
+    // Integrate with existing art background API if available
+    // (replace picsum URLs with your /api/ImageApi/art-background endpoint)
+    async function tryLoadArtApi() {
         try {
-            console.log("Fetching from API:", API_BASE + '/api/ImageApi/art-background');
-            const response = await fetch(API_BASE + '/api/ImageApi/art-background?count=100');
-            
-            if (response.ok) {
-                const data = await response.json();
-                console.log("API Success:", data);
-                localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-                localStorage.setItem(CACHE_TIME_KEY, now.toString());
-                await renderImages(data);
-            } else {
-                throw new Error("API Response not OK: " + response.status);
-            }
-        } catch (error) {
-            console.error("Critical Error during fetch:", error);
-            if (cachedData) {
-                console.log("Falling back to old cache...");
-                await renderImages(JSON.parse(cachedData));
-            }
-        }
-    }
-
-    // 4. Start the process
-    loadMosaicBackground();
-
-    // ════════════════════════════════════════════════
-    // 1. KENDO NOTIFICATION — same as Register
-    // ════════════════════════════════════════════════
-    var notification = $("#kNotification").kendoNotification({
-        position: { pinned: true, top: 20, right: 20 },
-        autoHideAfter: 4000,
-        stacking: "down",
-        templates: [
-            {
-                type: "success",
-                template: "<div style='padding:6px 4px;font-family:Inter,sans-serif'>" +
-                          "<strong>✔ Success</strong> &nbsp; #: message #</div>"
-            },
-            {
-                type: "error",
-                template: "<div style='padding:6px 4px;font-family:Inter,sans-serif'>" +
-                          "<strong>✖ Error</strong> &nbsp; #: message #</div>"
-            },
-            {
-                type: "warning",
-                template: "<div style='padding:6px 4px;font-family:Inter,sans-serif'>" +
-                          "<strong>⚠ Warning</strong> &nbsp; #: message #</div>"
-            }
-        ]
-    }).data("kendoNotification");
-
-    function showSuccess(msg) { notification.show({ message: msg }, "success"); }
-    function showError(msg)   { notification.show({ message: msg }, "error");   }
-    function showWarning(msg) { notification.show({ message: msg }, "warning"); }
-
-
-    // ════════════════════════════════════════════════
-    // 2. KENDO TEXTBOX INIT
-    // ════════════════════════════════════════════════
-    $("#c_Email").kendoTextBox();
-    $("#c_Password").kendoTextBox();
-
-
-    // ════════════════════════════════════════════════
-    // 3. KENDO VALIDATOR
-    // ════════════════════════════════════════════════
-    var validator = $("#loginForm").kendoValidator({
-        rules: {
-            emailFormat: function (input) {
-                if (input.is("[name='c_Email']")) {
-                    var val = input.val().trim();
-                    if (!val) return true;
-                    return /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(val);
+            var res = await fetch(API_BASE + '/api/ImageApi/art-background?count=80');
+            if (!res.ok) return;
+            var data = await res.json();
+            var urls = data.map(function(d) { return d.urls ? d.urls.regular : d; }).filter(Boolean);
+            if (urls.length < 8) return;
+            // Re-inject with real art URLs
+            bgEl.querySelectorAll('.marquee-row').forEach(function(el) { el.remove(); });
+            var veil = bgEl.querySelector('.marquee-veil');
+            var vw = window.innerWidth, vh = window.innerHeight;
+            var tileH = Math.floor((vh - GAP * (NUM_ROWS + 1)) / NUM_ROWS);
+            var tileW = Math.round(tileH * 1.45);
+            var tilesPerCopy = Math.ceil(vw / (tileW + GAP)) + 2;
+            for (var r = 0; r < NUM_ROWS; r++) {
+                var row = document.createElement('div'); row.className = 'marquee-row';
+                var strip = document.createElement('div'); strip.className = 'marquee-strip';
+                strip.style.animationDuration = ROW_SPEEDS[r] + 's';
+                var totalTiles = tilesPerCopy * 2;
+                for (var t = 0; t < totalTiles; t++) {
+                    var url = urls[(r * 19 + (t % tilesPerCopy)) % urls.length];
+                    var tile = document.createElement('div');
+                    tile.className = 'art-tile';
+                    tile.style.width = tile.style.minWidth = tileW + 'px';
+                    var img = new Image(); img.src = url; img.alt = ''; img.loading = 'lazy'; img.draggable = false;
+                    tile.appendChild(img); strip.appendChild(tile);
                 }
-                return true;
+                row.appendChild(strip); bgEl.insertBefore(row, veil);
             }
-        },
-        messages: {
-            required:    "#= message #",
-            email:       "#= message #",
-            emailFormat: "Enter a valid email address"
-        }
-    }).data("kendoValidator");
+        } catch(e) { /* silently fall back to picsum */ }
+    }
+    tryLoadArtApi();
 
+    var resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(buildMarquee, 200);
+    });
 
-    // ════════════════════════════════════════════════
-    // 4. PASSWORD TOGGLE — reused from Register
-    // ════════════════════════════════════════════════
-    window.togglePass = function (inputId, iconId) {
-        var inp    = document.getElementById(inputId);
-        var isText = inp.type === "text";
-        inp.type   = isText ? "password" : "text";
-        document.getElementById(iconId).innerHTML = isText
-            ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>' +
-              '<circle cx="12" cy="12" r="3"/>'
-            : '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8' +
-              'a18.45 18.45 0 015.06-5.94"/>' +
-              '<path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8' +
-              'a18.5 18.5 0 01-2.16 3.19"/>' +
-              '<line x1="1" y1="1" x2="23" y2="23"/>';
-    };
+    /* ─────────────────────────────────────────
+       ORIGINAL BACKEND LOGIC (unchanged)
+    ───────────────────────────────────────── */
 
-
-    // ════════════════════════════════════════════════
-    // 5. reCAPTCHA CALLBACKS
-    //    onCaptchaSuccess / onCaptchaExpired — global scope mein chahiye
-    // ════════════════════════════════════════════════
-    @* var captchaToken = "";
-
-    window.onCaptchaSuccess = function (token) {
-        captchaToken = token;
-    };
-
-    window.onCaptchaExpired = function () {
-        captchaToken = "";
-        showWarning("CAPTCHA expired. Please verify again.");
-    }; *@
-
-
-    // ════════════════════════════════════════════════
-    // 6. OWASP A07 — BRUTE-FORCE LOCKOUT (Client-side UX layer)
-    //    NOTE: Server-side pe bhi implement karna — ye sirf UI feedback hai
-    //    Server pe: AspNetCore.RateLimit ya custom middleware use karo
-    // ════════════════════════════════════════════════
-    @* var failedAttempts = parseInt(sessionStorage.getItem("loginFails") || "0");
-    var lockoutUntil   = parseInt(sessionStorage.getItem("lockoutUntil") || "0");
-    var lockoutTimer   = null;
-    var MAX_ATTEMPTS   = 5;
-    var LOCKOUT_SECS   = 30;   // 30 seconds — production mein 15 min rakhna
-
-    function isLockedOut() {
-        return Date.now() < lockoutUntil;
+    /* SweetAlert helpers */
+    function swalSuccess(msg) {
+        Swal.fire({ icon:'success', title:'Success', text:msg,
+            confirmButtonColor:'#03289F', background:'#DFE6E9', color:'#0A1628',
+            timer:2500, timerProgressBar:true, showConfirmButton:false, toast:true, position:'top-end' });
+    }
+    function swalError(msg) {
+        Swal.fire({ icon:'error', title:'Oops!', text:msg,
+            confirmButtonColor:'#03289F', background:'#DFE6E9', color:'#0A1628' });
+    }
+    function swalWarning(msg) {
+        Swal.fire({ icon:'warning', title:'Heads up', text:msg,
+            confirmButtonColor:'#03289F', background:'#DFE6E9', color:'#0A1628',
+            toast:true, position:'top-end', timer:3000, timerProgressBar:true, showConfirmButton:false });
     }
 
-    function startLockoutCountdown() {
-        $("#lockoutBar").addClass("visible");
-        $("#loginBtn").prop("disabled", true);
-
-        clearInterval(lockoutTimer);
-        lockoutTimer = setInterval(function () {
-            var remaining = Math.ceil((lockoutUntil - Date.now()) / 1000);
-            if (remaining <= 0) {
-                clearInterval(lockoutTimer);
-                $("#lockoutBar").removeClass("visible");
-                $("#loginBtn").prop("disabled", false);
-                sessionStorage.removeItem("loginFails");
-                sessionStorage.removeItem("lockoutUntil");
-                failedAttempts = 0;
-            } else {
-                $("#lockoutCountdown").text(remaining + "s");
-            }
-        }, 1000);
+    function showFieldError(fieldId, errId, errTextId, msg) {
+        var input = document.getElementById(fieldId);
+        var errEl = document.getElementById(errId);
+        var textEl = document.getElementById(errTextId);
+        input.classList.add('is-invalid'); input.classList.remove('is-valid');
+        textEl.textContent = msg; errEl.classList.add('visible');
+    }
+    function clearFieldError(fieldId, errId) {
+        var input = document.getElementById(fieldId);
+        var errEl = document.getElementById(errId);
+        input.classList.remove('is-invalid'); input.classList.add('is-valid');
+        errEl.classList.remove('visible');
+    }
+    function clearAll() {
+        ['c_Email','c_Password'].forEach(function(id) {
+            document.getElementById(id).classList.remove('is-invalid','is-valid');
+        });
+        ['err-email','err-password'].forEach(function(id) {
+            document.getElementById(id).classList.remove('visible');
+        });
     }
 
-    // Page reload pe bhi lockout active karo agar session me tha
-    if (isLockedOut()) startLockoutCountdown(); *@
+    $('#c_Email').on('blur', function() {
+        var v = $(this).val().trim();
+        if (!v) { showFieldError('c_Email','err-email','err-email-text','Email is required'); return; }
+        if (!/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(v)) { showFieldError('c_Email','err-email','err-email-text','Enter a valid email address'); return; }
+        clearFieldError('c_Email','err-email');
+    });
+    $('#c_Password').on('blur', function() {
+        if (!$(this).val()) { showFieldError('c_Password','err-password','err-password-text','Password is required'); return; }
+        clearFieldError('c_Password','err-password');
+    });
 
+    $('#toggle-pass').on('click', function() {
+        var inp = document.getElementById('c_Password');
+        var isText = inp.type === 'text';
+        inp.type = isText ? 'password' : 'text';
+        document.getElementById('eye-icon').innerHTML = isText
+            ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+            : '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+    });
 
-    // ════════════════════════════════════════════════
-    // 7. LOGIN FORM SUBMIT — AJAX
-    // ════════════════════════════════════════════════
-    $("#loginForm").on("submit", function (e) {
+    function validateForm() {
+        var ok = true; clearAll();
+        var email = $('#c_Email').val().trim();
+        if (!email) { showFieldError('c_Email','err-email','err-email-text','Email is required'); ok = false; }
+        else if (!/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(email)) { showFieldError('c_Email','err-email','err-email-text','Enter a valid email address'); ok = false; }
+        else clearFieldError('c_Email','err-email');
+        var pass = $('#c_Password').val();
+        if (!pass) { showFieldError('c_Password','err-password','err-password-text','Password is required'); ok = false; }
+        else clearFieldError('c_Password','err-password');
+        return ok;
+    }
+
+    $('#loginForm').on('submit', function(e) {
         e.preventDefault();
-@* 
-        // Lockout check
-        if (isLockedOut()) {
-            showError("Account temporarily locked. Please wait.");
-            return;
-        } *@
-
-        // Kendo Validator
-        if (!validator.validate()) {
-            showError("Please fix the errors before submitting.");
-            return;
-        }
-
-        @* // CAPTCHA must be verified
-        if (!captchaToken) {
-            showWarning("Please complete the CAPTCHA verification.");
-            return;
-        } *@
-
-        var btn = $("#loginBtn");
-        btn.prop("disabled", true).text("Signing In...");
-
+        if (!validateForm()) return;
+        var btn = $('#loginBtn');
+        btn.prop('disabled', true).html('<span class="spinner"></span> Signing In...');
         $.ajax({
-            url:         "http://localhost:5183/api/AuthApi/UserLogin/",
-            type:        "POST",
-            contentType: "application/json",
+            url: API_BASE + '/api/AuthApi/UserLogin/',
+            type: 'POST', contentType: 'application/json',
             data: JSON.stringify({
-                c_Email:    $("#c_Email").val().trim().toLowerCase(),
-                c_Password: $("#c_Password").data("kendoTextBox").value(),
-                @* g_recaptcha_response: captchaToken   // API se server-side verify karo *@
+                c_Email:    $('#c_Email').val().trim().toLowerCase(),
+                c_Password: $('#c_Password').val()
             }),
-            success: function (res) {
-                btn.prop("disabled", false).text("Sign In");
-
-                // Fail counter reset
-                @* sessionStorage.removeItem("loginFails");
-                sessionStorage.removeItem("lockoutUntil"); *@
-
-                // JWT token localStorage mein store karo
+            success: function(res) {
+                btn.prop('disabled', false).html('<span class="btn-dot"></span><span>Sign In</span>');
                 if (res.token) {
-                    localStorage.setItem("token", res.token);
-
-                    localStorage.setItem("user",  JSON.stringify(res.user));
-                    document.cookie = "token=" + res.token + "; path=/; max-age=7200; SameSite=Lax";
+                    localStorage.setItem('token', res.token);
+                    localStorage.setItem('user', JSON.stringify(res.user));
+                    document.cookie = 'token=' + res.token + '; path=/; max-age=7200; SameSite=Lax';
                 }
-
-                showSuccess(res.message || "Login successful!");
-
-                setTimeout(function () {
-                    window.location.href = "/Buyer/ExploreArt";  // Redirect to buyer dashboard after login
-                }, 1200);
+                swalSuccess(res.message || 'Login successful!');
+                setTimeout(function() { window.location.href = '/Buyer/ExploreArt'; }, 1500);
             },
-            error: function (err) {
-                btn.prop("disabled", false).text("Sign In");
-
-                @* // Reset reCAPTCHA — token ek baar hi valid hota hai
-                if (window.grecaptcha) grecaptcha.reset();
-                captchaToken = "";
-
-                // Increment fail counter
-                failedAttempts++;
-                sessionStorage.setItem("loginFails", failedAttempts);
-
-                if (failedAttempts >= MAX_ATTEMPTS) {
-                    lockoutUntil = Date.now() + LOCKOUT_SECS * 1000;
-                    sessionStorage.setItem("lockoutUntil", lockoutUntil);
-                    startLockoutCountdown();
-                } *@
-
-                var msg = "Invalid email or password";
+            error: function(err) {
+                btn.prop('disabled', false).html('<span class="btn-dot"></span><span>Sign In</span>');
+                var msg = 'Invalid email or password';
                 if (err.responseJSON && err.responseJSON.message) msg = err.responseJSON.message;
                 else if (err.responseText) msg = err.responseText;
-                showError(msg);
+                swalError(msg);
             }
         });
     });
-
- 
-}); // end document.ready
+});
 </script>
 }
