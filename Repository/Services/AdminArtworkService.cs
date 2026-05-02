@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Repository.Models;
 using Repository.Interfaces;
-using Repository.Services;
+using Repository.Models;
 
 namespace Repository.Services
 {
@@ -31,10 +30,6 @@ namespace Repository.Services
             _logger = logger;
         }
 
-        // ─────────────────────────────────────────────────────────────────
-        //  GET ARTWORKS  (Redis → PostgreSQL)
-        // ─────────────────────────────────────────────────────────────────
-
         public async Task<PagedResult<ArtworkModel>> GetArtworksAsync(
             string? status, int page, int pageSize)
         {
@@ -56,10 +51,6 @@ namespace Repository.Services
 
             return result;
         }
-
-        // ─────────────────────────────────────────────────────────────────
-        //  APPROVE
-        // ─────────────────────────────────────────────────────────────────
 
         public async Task ApproveArtworkAsync(int artworkId, string? adminNote)
         {
@@ -86,14 +77,9 @@ namespace Repository.Services
             }
             finally
             {
-                // ✅ Cache hamesha clear hoga — chahe upar kuch fail ho
                 await _redis.ClearAdminArtworkCacheAsync();
             }
         }
-
-        // ─────────────────────────────────────────────────────────────────
-        //  REJECT
-        // ─────────────────────────────────────────────────────────────────
 
         public async Task RejectArtworkAsync(int artworkId, string adminNote)
         {
@@ -105,15 +91,13 @@ namespace Repository.Services
                 await _repo.UpdateArtworkStatusAsync(artworkId, "Rejected", adminNote);
 
                 int rejectCount = await _repo.IncrementRejectedCountAsync(artwork.c_ArtistId);
-
-                // ✅ >= 3 use karo agar 3rd rejection pe block karna ho
-                bool shouldBlock = rejectCount >= 3;
+                bool shouldBlock = rejectCount > 3;
 
                 if (shouldBlock)
                     await _repo.BlockArtistAsync(artwork.c_ArtistId);
 
                 string blockWarning = shouldBlock
-                    ? " Your account has been temporarily blocked for 15 days."
+                    ? " Your account has been temporarily inactive for 5 minutes."
                     : string.Empty;
 
                 await PublishArtworkNotificationAsync(
@@ -122,7 +106,7 @@ namespace Repository.Services
                     $"Your artwork '{artwork.c_Title}' was rejected. Reason: {adminNote}.{blockWarning}");
 
                 string fullNote = shouldBlock
-                    ? $"{adminNote}\n\n⚠️ Your account has been temporarily blocked for 15 days due to multiple rejections."
+                    ? $"{adminNote}\n\nYour account has been temporarily inactive for 5 minutes due to more than 3 artwork rejections."
                     : adminNote;
 
                 await SendModerationEmailAsync(
@@ -135,14 +119,9 @@ namespace Repository.Services
             }
             finally
             {
-                // ✅ Cache hamesha clear hoga
                 await _redis.ClearAdminArtworkCacheAsync();
             }
         }
-
-        // ─────────────────────────────────────────────────────────────────
-        //  PRIVATE — fetch artist email + send moderation email
-        // ─────────────────────────────────────────────────────────────────
 
         private async Task SendModerationEmailAsync(
             int artistId,
@@ -154,13 +133,12 @@ namespace Repository.Services
         {
             try
             {
-                // Fetch artist email from DB
                 string? artistEmail = await _repo.GetArtistEmailAsync(artistId);
 
                 if (string.IsNullOrWhiteSpace(artistEmail))
                 {
                     _logger.LogWarning(
-                        "Moderation email skipped — no email found for artist {ArtistId}.", artistId);
+                        "Moderation email skipped - no email found for artist {ArtistId}.", artistId);
                     return;
                 }
 
@@ -181,7 +159,6 @@ namespace Repository.Services
             catch (Exception ex)
             {
                 // Email failure must never break the moderation workflow.
-                // Log the error and continue — DB is already updated.
                 _logger.LogError(ex,
                     "Failed to send moderation email to artist {ArtistId} for artwork '{Title}'.",
                     artistId, artworkTitle);

@@ -252,7 +252,7 @@
     <div class="kpi-card c3">
         <div class="kpi-icon"><i class="bi bi-currency-dollar"></i></div>
         <div class="kpi-label">Total Earnings</div>
-        <div class="kpi-value" id="kpiEarnings">–</div>
+        <div class="kpi-value" id="kpiEarnings"></div>
         <div class="kpi-delta up"><i class="bi bi-arrow-up-short"></i><span id="kpiEarningsDelta">Loading…</span></div>
     </div>
     <div class="kpi-card c4">
@@ -335,7 +335,7 @@
         // Map actual t_Artist_Dashboard model fields (c_ prefix, exact casing)
         document.getElementById('kpiArtworks').textContent = d.c_TotalArtworkCount ?? 0;
         document.getElementById('kpiSales').textContent    = d.c_TotalSellCount ?? 0;
-        document.getElementById('kpiEarnings').textContent = '$' + (d.c_TotalEarning ?? 0).toLocaleString('en-IN');
+        document.getElementById('kpiEarnings').textContent = '$' + (d.c_TotalEarning ?? 0).toLocaleString('en-USD');
         document.getElementById('kpiPending').textContent  = '…'; // updated after artworks load
 
         document.getElementById('kpiSalesDelta').textContent    = d.c_TotalSellCount > 0 ? `${d.c_TotalSellCount} sold` : '—';

@@ -5,11 +5,11 @@
     var navItems = new[]
     {
         new { Icon = "grid", Label = "Dashboard", Active = true, Url = Url.Action("Profile", "Buyer") },
-        new { Icon = "heart", Label = "Wishlist", Active = false, Url = Url.Action("Index", "Wishlist") },
+        new { Icon = "heart", Label = "Wishlist", Active = false, Url = Url.Action("Wishlist", "Buyer") },
         new { Icon = "shopping-bag", Label = "Orders", Active = false, Url = Url.Action("Orders", "Buyer") },
-        new { Icon = "download", Label = "Download Arts", Active = false, Url = "#" },
+        new { Icon = "download", Label = "Download Arts", Active = false, Url = Url.Action("Downloads", "Buyer") },
         new { Icon = "user", Label = "Profile Management", Active = false, Url = Url.Action("EditProfile", "Buyer") },
-        new { Icon = "settings", Label = "Settings", Active = false, Url = "#" },
+        new { Icon = "settings", Label = "Settings", Active = false, Url = Url.Action("Settings", "Buyer") },
         new { Icon = "shield", Label = "Change Password", Active = false, Url = Url.Action("ChangePassword", "Buyer") },
     };
 

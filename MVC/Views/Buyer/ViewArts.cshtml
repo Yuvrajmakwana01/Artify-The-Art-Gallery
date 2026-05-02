@@ -818,7 +818,7 @@
                 var imgSrc = imageUrl(getArtworkPreview(a));
                 var url = '/Buyer/ArtworkDetail/' + id;
 
-                var priceStr = price > 0 ? '₹' + price.toLocaleString('en-IN') : 'Price on request';
+                var priceStr = price > 0 ? '$' + price.toLocaleString('en-IN') : 'Price on request';
                 html += '<div class="trend-card art-card" data-id="' + id + '" style="animation-delay:' + (fi * 0.07) + 's">'
                     + '<div class="trend-img" onclick="window.location.href=\'' + url + '\'">'
                     + '<img src="' + imgSrc + '" alt="' + title + '" loading="lazy"/>'

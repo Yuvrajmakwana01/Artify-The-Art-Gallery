@@ -14,7 +14,7 @@ html, body { margin: 0; padding: 0; }
     --accent:    #6b9be6;
     --gold:      #EDA312;
 
-    --bg:        #f4f7ff;
+    --bg:        #DFE6E9;
     --card-bg:   #ffffff;
     --text:      #1a1a2e;
     --muted:     #6b7280;
@@ -29,7 +29,10 @@ html, body { margin: 0; padding: 0; }
 body {
     font-family: 'DM Sans', 'Segoe UI', sans-serif;
     font-size: 14px;
-    background: var(--bg);
+    background:
+        radial-gradient(circle at top right, rgba(107,155,230,.18), transparent 24%),
+        radial-gradient(circle at top left, rgba(237,163,18,.10), transparent 20%),
+        var(--bg);
     color: var(--text);
 }
 
@@ -40,7 +43,7 @@ body {
     position: fixed;
     top: 0; left: 0; bottom: 0;
     width: var(--sidebar-width);
-    background: linear-gradient(160deg, #0a0e2e 0%, #0d2282 58%, #03289F 100%);
+    background: linear-gradient(170deg, #03289F 0%, #021a6a 60%, #010e3d 100%);
     display: flex;
     flex-direction: column;
     z-index: 300;
@@ -59,17 +62,18 @@ body {
 
 .sidebar-logo {
     width: 42px; height: 42px;
-    border-radius: 12px;
-    background: rgba(255,255,255,.12);
+    border-radius: 20%;
+    background: #0b0c10;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
     flex-shrink: 0;
 }
-/* .sidebar-logo img {
-    width: 28px; height: 28px;
-    object-fit: contain;
-    filter: brightness(0) invert(1);
-} */
+.sidebar-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(2.65) translateX(3%);
+}
 
 .sidebar-brand-text { display: flex; flex-direction: column; }
 .sidebar-brand-name {
@@ -253,9 +257,22 @@ body {
    CONTENT AREA
    ═══════════════════════════════════════════════ */
 .content-area {
+    --primary: #03289F;
+    --accent: #6B9BE6;
+    --gold: #EDA312;
+    --bg: #DFE6E9;
+    --card-bg: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: rgba(3,40,159,.08);
+    --shadow: 0 4px 24px rgba(3,40,159,.08);
+    --shadow-hover: 0 8px 32px rgba(3,40,159,.16);
     flex: 1;
     padding: 28px;
-    background: var(--bg);
+    background:
+        radial-gradient(circle at top right, rgba(107,155,230,.18), transparent 24%),
+        radial-gradient(circle at top left, rgba(237,163,18,.10), transparent 20%),
+        var(--bg);
 }
 
 /* ═══════════════════════════════════════════════
@@ -324,4 +341,314 @@ body {
 @keyframes fadeUp {
     from { opacity: 0; transform: translateY(14px); }
     to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Admin content theme bridge: keeps older admin pages aligned with Buyer/Artist UI. */
+.content-area .mg-page,
+.content-area .cat-page,
+.content-area .mod-page,
+.content-area .orders-shell,
+.content-area .analytics-shell,
+.content-area .page-header,
+.content-area .page-body,
+.content-area .metrics-grid {
+    --brand: var(--primary);
+    --brand-light: rgba(107,155,230,.12);
+    --brand-dark: #021f7e;
+    --pending: var(--gold);
+    --surface: rgba(255,255,255,.96);
+    --bg: transparent;
+    --text-main: var(--text);
+    --text-muted: var(--muted);
+    --text-primary: var(--text);
+    --text-secondary: var(--muted);
+    --accent-orange: var(--gold);
+    --accent-blue: var(--primary);
+    --accent-purple: var(--accent);
+    --accent-gold: var(--gold);
+    --primary-glow: var(--accent);
+    --font-heading: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+}
+
+.content-area .mg-page,
+.content-area .cat-page,
+.content-area .mod-page,
+.content-area .orders-shell,
+.content-area .page-header,
+.content-area .page-body,
+.content-area .metrics-grid,
+.content-area .analytics-shell,
+.content-area .top-bar,
+.content-area .main-row,
+.content-area .middle-row,
+.content-area .bottom-row {
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+}
+
+.content-area h1,
+.content-area h2,
+.content-area .mg-header h1,
+.content-area .cat-header h1,
+.content-area .mod-title,
+.content-area .orders-title,
+.content-area .page-header h1,
+.content-area .analytics-title,
+.content-area .analytics-panel-title,
+.content-area .card-title,
+.content-area .mg-card-title,
+.content-area .cat-card-title,
+.content-area .section-title,
+.content-area .metric-value {
+    color: var(--primary) !important;
+    letter-spacing: 0 !important;
+}
+
+.content-area .mg-header p,
+.content-area .cat-header p,
+.content-area .mod-subtitle,
+.content-area .orders-subtitle,
+.content-area .breadcrumb,
+.content-area .metric-label,
+.content-area .metric-sub,
+.content-area .top-bar p,
+.content-area .card-sub,
+.content-area .analytics-crumbs,
+.content-area .analytics-card-label,
+.content-area .stat-label,
+.content-area .section-label {
+    color: var(--muted) !important;
+}
+
+.content-area .mg-page,
+.content-area .cat-page,
+.content-area .orders-shell {
+    padding: 0 !important;
+    background: transparent !important;
+    min-height: auto !important;
+}
+
+.content-area .mod-header {
+    background: transparent !important;
+}
+
+.content-area .card,
+.content-area .mg-card,
+.content-area .cat-card,
+.content-area .panel,
+.content-area .search-bar,
+.content-area .artwork-card,
+.content-area .metric-card,
+.content-area .page-body,
+.content-area .analytics-card,
+.content-area .analytics-chart-panel,
+.content-area .activity-panel,
+.content-area .top-artworks-panel,
+.content-area .stat-card,
+.content-area .dataTables_wrapper,
+.content-area table.dataTable,
+.content-area .modal-content {
+    background: rgba(255,255,255,.96) !important;
+    border: 1px solid rgba(3,40,159,.08) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: var(--shadow) !important;
+}
+
+.content-area .stat-card:hover,
+.content-area .card:hover,
+.content-area .mg-card:hover,
+.content-area .cat-card:hover,
+.content-area .panel:hover,
+.content-area .artwork-card:hover,
+.content-area .metric-card:hover {
+    box-shadow: var(--shadow-hover) !important;
+}
+
+.content-area .mg-toolbar,
+.content-area .mg-card-topbar,
+.content-area .cat-toolbar,
+.content-area .cat-card-topbar,
+.content-area .analytics-panel-head,
+.content-area .card-header,
+.content-area .orders-table thead th,
+.content-area table.dataTable thead th,
+.content-area .top-artworks-table th,
+.content-area .k-grid-header,
+.content-area .k-tabstrip-items,
+.content-area .k-chart .k-header {
+    background: rgba(107,155,230,.08) !important;
+    border-color: rgba(3,40,159,.08) !important;
+}
+
+.content-area .btn-export,
+.content-area .btn-add,
+.content-area .btn-add-cat,
+.content-area .btn-dlg-save,
+.content-area .filter-tab.active,
+.content-area .filter-tab:hover,
+.content-area .badge-pending,
+.content-area .page-btn.primary,
+.content-area .orders-filter-apply,
+.content-area .page-btn.primary,
+.content-area .btn-primary,
+.content-area .mg-btn-primary,
+.content-area button[type="submit"],
+.content-area .dataTables_wrapper .paginate_button.current,
+.content-area .k-button.k-primary,
+.content-area .k-tabstrip-items .k-state-active {
+    background: linear-gradient(135deg, var(--primary), var(--accent)) !important;
+    border-color: var(--primary) !important;
+    color: #fff !important;
+    box-shadow: 0 12px 24px rgba(3,40,159,.18) !important;
+}
+
+.content-area .btn-add:hover,
+.content-area .btn-add-cat:hover,
+.content-area .btn-dlg-save:hover,
+.content-area .page-btn.primary:hover,
+.content-area .btn-primary:hover {
+    background: linear-gradient(135deg, #021f7e, var(--primary)) !important;
+}
+
+.content-area .btn-date,
+.content-area .chart-period-btn,
+.content-area .growth-goal,
+.content-area .page-btn.ghost,
+.content-area .page-btn,
+.content-area .mg-search,
+.content-area .cat-search,
+.content-area .mg-status-filter,
+.content-area .cat-status-filter,
+.content-area .search-input,
+.content-area .filter-tabs,
+.content-area .orders-filter-chip,
+.content-area .btn-dlg-cancel,
+.content-area select,
+.content-area input,
+.content-area textarea {
+    background: rgba(255,255,255,.92) !important;
+    border: 1px solid rgba(3,40,159,.12) !important;
+    color: var(--text) !important;
+}
+
+.content-area .view-all,
+.content-area .top-artworks-head-right,
+.content-area a:not(.btn):not(.nav-link) {
+    color: var(--primary);
+}
+
+.content-area .stat-value,
+.content-area .analytics-card-value,
+.content-area .card-value,
+.content-area .person-name,
+.content-area .cat-name,
+.content-area .card-artwork-title,
+.content-area .orders-main-text,
+.content-area .artist-name,
+.content-area .artist-revenue {
+    color: var(--text) !important;
+}
+
+.content-area .icon-blue,
+.content-area .analytics-card-icon.blue,
+.content-area .act-blue,
+.content-area .orders-metric-icon.blue,
+.content-area .purple-icon,
+.content-area .person-avatar {
+    background: rgba(3,40,159,.10) !important;
+    color: var(--primary) !important;
+}
+
+.content-area .icon-purple,
+.content-area .analytics-card-icon.purple,
+.content-area .act-purple,
+.content-area .folder-icon {
+    background: rgba(107,155,230,.16) !important;
+    color: var(--accent) !important;
+}
+
+.content-area .icon-orange,
+.content-area .analytics-card-icon.orange,
+.content-area .act-gold,
+.content-area .act-orange,
+.content-area .orders-metric-icon.orange,
+.content-area .orders-metric-icon.gold,
+.content-area .amber-icon,
+.content-area .pill-pending,
+.content-area .search-match-pill {
+    background: rgba(237,163,18,.14) !important;
+    color: var(--gold) !important;
+    border-color: rgba(237,163,18,.24) !important;
+}
+
+.content-area .icon-green,
+.content-area .analytics-card-icon.green,
+.content-area .act-green,
+.content-area .green-icon {
+    background: rgba(16,185,129,.12) !important;
+    color: #10b981 !important;
+}
+
+.content-area .red-icon,
+.content-area .btn-icon.del {
+    background: rgba(239,68,68,.10) !important;
+    color: #dc2626 !important;
+    border-color: rgba(239,68,68,.18) !important;
+}
+
+.content-area .person-avatar,
+.content-area .artist-avatar {
+    background: linear-gradient(135deg, var(--primary), var(--accent)) !important;
+    color: #fff !important;
+}
+
+.content-area .status-toggle input:checked + .status-slider {
+    background: var(--primary) !important;
+}
+
+.content-area .artwork-card.selected {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(3,40,159,.14) !important;
+}
+
+.content-area .artwork-card.card-pending,
+.content-area .artwork-card.card-pending.selected {
+    border-left-color: var(--gold) !important;
+}
+
+.content-area .section-line,
+.content-area .search-divider {
+    background: rgba(3,40,159,.10) !important;
+}
+
+.content-area .metric-card::after {
+    background: var(--primary) !important;
+}
+
+.content-area .k-chart,
+.content-area .k-widget,
+.content-area .k-grid,
+.content-area .k-tabstrip,
+.content-area .k-content {
+    background: transparent !important;
+    color: var(--text) !important;
+}
+
+.content-area table,
+.content-area .table {
+    color: var(--text);
+    border-color: rgba(3,40,159,.08) !important;
+}
+
+.content-area table td,
+.content-area table th {
+    border-color: rgba(3,40,159,.08) !important;
+}
+
+.content-area table tbody tr:hover td,
+.content-area .orders-table tbody tr:hover td,
+.content-area #artistGridTable tbody tr:hover td,
+.content-area #userGridTable tbody tr:hover td,
+.content-area #categoryGridTable tbody tr:hover td {
+    background: rgba(107,155,230,.08) !important;
 }

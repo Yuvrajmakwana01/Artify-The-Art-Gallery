@@ -449,16 +449,18 @@
 <!-- ── Page Banner ── -->
 <div class="earnings-banner">
     <div>
-        <h2>Earnings &amp; Analytics</h2>
-        <p>Track your revenue, available balance, and payout history.</p>
+        <h2>Sales &amp; Earnings</h2>
+        <p>Track your sales transactions, approved payouts, and earnings by category.</p>
     </div>
-    <a href="/Artist/Sales" class="btn-artify btn-artify-gold" style="position:relative;z-index:2">
-        <i class="bi bi-receipt"></i> View Sales
-    </a>
+    <div style="position:relative;z-index:2;display:flex;gap:10px;">
+        <span style="background:rgba(255,255,255,.15);border-radius:8px;padding:8px 16px;font-size:.82rem;display:flex;align-items:center;gap:6px;">
+            <i class="bi bi-shield-check-fill" style="color:var(--gold)"></i> Approved Payouts Only
+        </span>
+    </div>
 </div>
 
 <!-- ── KPI Cards ── -->
-<div class="earn-kpi-grid">
+@* <div class="earn-kpi-grid">
     <!-- Available Balance -->
     <div class="earn-kpi-card c1">
         <div class="earn-kpi-icon"><i class="bi bi-wallet2"></i></div>
@@ -488,51 +490,21 @@
         </div>
         <div class="earn-kpi-sub"><i class="bi bi-bag-check-fill" style="color:var(--primary)"></i> Completed transactions</div>
     </div>
+</div> *@
+
+<!-- ── Sales by Category Chart ── -->
+<div class="card-artify p-4 chart-card" style="margin-bottom:24px;">
+    <div class="panel-heading mb-2">
+        <div class="section-title mb-0" style="font-size:1rem;">Sales by <span>Category</span></div>
+        <span class="chart-badge"><i class="bi bi-pie-chart-fill me-1"></i>Revenue Distribution</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center;">
+        <div id="categoryChart" style="height:260px;"></div>
+        <div id="categoryLegend"></div>
+    </div>
 </div>
 
-<!-- ── Analytics Charts Grid ── -->
-<div class="charts-grid">
-
-    <!-- Monthly Revenue Area Chart -->
-    <div class="card-artify p-4 chart-card">
-        <div class="panel-heading mb-2">
-            <div class="section-title mb-0" style="font-size:1rem;">Monthly <span>Revenue</span></div>
-            <span class="chart-badge"><i class="bi bi-calendar3 me-1"></i>12 months</span>
-        </div>
-        <div id="revenueChart"></div>
-    </div>
-
-    <!-- Category Donut Chart -->
-    <div class="card-artify p-4 chart-card">
-        <div class="panel-heading mb-2">
-            <div class="section-title mb-0" style="font-size:1rem;">Sales by <span>Category</span></div>
-            <span class="chart-badge"><i class="bi bi-pie-chart-fill me-1"></i>Distribution</span>
-        </div>
-        <div id="categoryChart"></div>
-    </div>
-
-    <!-- Top Artworks Bar Chart -->
-    <div class="card-artify p-4 chart-card">
-        <div class="panel-heading mb-2">
-            <div class="section-title mb-0" style="font-size:1rem;">Top <span>Artworks</span></div>
-            <span class="chart-badge"><i class="bi bi-trophy-fill me-1"></i>By revenue</span>
-        </div>
-        <div id="topArtworksChart"></div>
-    </div>
-
-    <!-- Earnings Radial Gauge -->
-    <div class="card-artify p-4 chart-card d-flex flex-column align-items-center">
-        <div class="panel-heading mb-2 w-100">
-            <div class="section-title mb-0" style="font-size:1rem;">Balance <span>Breakdown</span></div>
-            <span class="chart-badge"><i class="bi bi-speedometer2 me-1"></i>Availability</span>
-        </div>
-        <div id="earningsGauge"></div>
-        <div id="gaugeLabel" style="font-size:.8rem;color:var(--muted);margin-top:6px;text-align:center;"></div>
-    </div>
-
-</div>
-
-<!-- ── Payout Request Card ── -->
+@* <!-- ── Payout Request Card ── -->
 <div class="payout-card">
     <div class="payout-info">
         <h5><i class="bi bi-send-fill me-2" style="color:var(--gold)"></i>Request a Payout</h5>
@@ -548,75 +520,71 @@
     <button class="btn-artify btn-artify-gold" id="btnPayout" disabled style="min-width:160px; position:relative; z-index:1;">
         <i class="bi bi-cash-coin"></i> Request Payout
     </button>
-</div>
+</div> *@
 
-<!-- ── Bottom Grid: Sales Table + Payout History ── -->
+<!-- ── Bottom Grid: Transaction Logs + Payout History ── -->
 <div class="bottom-earn-grid">
 
-    <!-- Sales Table Panel -->
+    <!-- Transaction Logs Panel -->
     <div class="card-artify p-4">
         <div class="panel-heading">
-            <div class="section-title mb-0">Sales <span>Transactions</span></div>
+            <div class="section-title mb-0">Transaction <span>Logs</span></div>
             <div class="table-toolbar" style="margin-bottom:0;">
                 <div class="search-box">
                     <i class="bi bi-search"></i>
-                    <input type="text" class="search-input" id="tableSearch" placeholder="Search artworks…" oninput="filterTable()" />
+                    <input type="text" class="search-input" id="txnSearch" placeholder="Search artwork or buyer…" oninput="filterTxnTable()" />
                 </div>
-                <select class="filter-select" id="statusFilter" onchange="filterTable()">
-                    <option value="">All Status</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Rejected">Rejected</option>
-                </select>
             </div>
         </div>
 
         <div style="overflow-x:auto;">
-            <table class="artify-table" id="salesTable">
+            <table class="artify-table" id="txnTable">
                 <thead>
                     <tr>
+                        <th>Date</th>
                         <th>Artwork</th>
-                        <th>Category</th>
-                        <th>Unit Price</th>
-                        <th>Units Sold</th>
-                        <th>Revenue</th>
+                        <th>Buyer</th>
+                        <th>Amount</th>
+                        <th>Commission</th>
+                        <th>Net Payout</th>
                         <th>Status</th>
                     </tr>
                 </thead>
-                <tbody id="salesTableBody">
-                    <!-- Populated by JS -->
+                <tbody id="txnTableBody">
+                    <tr><td colspan="7" class="text-center" style="padding:32px;color:var(--muted);font-size:.85rem;">Loading…</td></tr>
                 </tbody>
             </table>
-            <div class="empty-table" id="salesEmptyState" style="display:none;">
+            <div class="empty-table" id="txnEmptyState" style="display:none;">
                 <i class="bi bi-bag-x"></i>
-                <p id="salesEmptyMsg">No sales recorded yet.</p>
+                <p id="txnEmptyMsg">No transactions found.</p>
             </div>
         </div>
 
-        <!-- Table info row -->
         <div class="d-flex align-items-center justify-content-between mt-3 pt-3" style="border-top:1px solid rgba(3,40,159,.06);">
-            <span style="font-size:.8rem;color:var(--muted);" id="tableCountInfo">Loading…</span>
-            <span style="font-size:.8rem;color:var(--muted);">Showing sold artworks only</span>
+            <span style="font-size:.8rem;color:var(--muted);" id="txnCountInfo"></span>
+            <span style="font-size:.8rem;color:var(--muted);">All buyer purchases of your artworks</span>
         </div>
     </div>
 
     <!-- Payout History Panel -->
     <div class="card-artify p-4">
         <div class="section-title">Payout <span>History</span></div>
-        <div class="payout-hist-empty">
-            <i class="bi bi-clock-history"></i>
-            <p>No payout history available yet.</p>
+        <div id="payoutHistoryContainer">
+            <div class="payout-hist-empty">
+                <i class="bi bi-clock-history"></i>
+                <p>Loading payout history…</p>
+            </div>
         </div>
-        <!-- Future: payout list rendered here -->
     </div>
 
 </div>
 
 @section Scripts {
-<!-- Kendo UI -->
-<!-- ECharts (Apache 2.0 — no license required) -->
+<!-- Kendo UI Free CDN -->
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2023.3.1114/styles/kendo.common.min.css" />
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2023.3.1114/styles/kendo.default-v2.min.css" />
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2023.3.1114/js/kendo.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/js/authHelper.js"></script>
 <script>
@@ -714,182 +682,130 @@ $(function () {
         }
     });
 
-    /* ══════════════════════════════════════════
-       ECharts Chart Builders (Apache 2.0)
-    ══════════════════════════════════════════ */
+    /* ══ Payout History ══ */
+    $.ajax({
+        url: BASE + "/my-payout-history", type: "GET",
+        success: function(data) { renderPayoutHistory(data); },
+        error: function() {
+            $("#payoutHistoryContainer").html('<div class="payout-hist-empty"><i class="bi bi-clock-history"></i><p>Unable to load payout history.</p></div>');
+        }
+    });
+
+    /* ══ Transaction Logs ══ */
+    $.ajax({
+        url: BASE + "/my-transaction-logs", type: "GET",
+        success: function(data) { renderTransactionLogs(data); },
+        error: function(xhr) {
+            $('#txnTableBody').html('<tr><td colspan="7" style="padding:32px;text-align:center;color:#ef4444;font-size:.85rem;">Failed to load transactions.</td></tr>');
+        }
+    });
+
+    /* ══ Kendo UI Chart Builders ══ */
     var COLORS = ['#03289F','#EDA312','#10b981','#6b9be6','#f59e0b','#ef4444','#8b5cf6'];
 
     function emptyChart(sel, msg) {
         $(sel).html('<div class="chart-empty"><i class="bi bi-bar-chart-line"></i><span>' + msg + '</span></div>');
     }
 
-    function buildRevenueChart(data) {
-        if (!data || !data.length) { emptyChart('#revenueChart','No revenue data yet'); return; }
-        var el = document.getElementById('revenueChart');
-        el.style.height = '230px';
-        var chart = echarts.init(el, null, { renderer:'canvas' });
-        chart.setOption({
-            backgroundColor: 'transparent',
-            grid: { left:52, right:16, top:16, bottom:48 },
-            tooltip: { trigger:'axis', formatter: function(p){ return p[0].axisValue + '<br/><b>$' + p[0].value.toFixed(2) + '</b>'; } },
-            xAxis: { type:'category',
-                data: data.map(function(d){ return d.month||d.c_Month||''; }),
-                axisLine:{ lineStyle:{ color:'rgba(3,40,159,.15)' } },
-                axisLabel:{ rotate:30, fontFamily:'DM Sans,sans-serif', fontSize:11, color:'#6b7280' },
-                axisTick:{ show:false }
-            },
-            yAxis: { type:'value',
-                axisLabel:{ formatter:'${value}', fontFamily:'DM Sans,sans-serif', fontSize:11, color:'#6b7280' },
-                splitLine:{ lineStyle:{ color:'rgba(3,40,159,.06)' } },
-                axisLine:{ show:false }, axisTick:{ show:false }
-            },
-            series:[{ type:'line', smooth:true,
-                data: data.map(function(d){ return parseFloat(d.revenue||d.c_Revenue||0); }),
-                lineStyle:{ color:'#03289F', width:2.5 },
-                itemStyle:{ color:'#03289F' },
-                areaStyle:{ color:{ type:'linear', x:0,y:0,x2:0,y2:1,
-                    colorStops:[{offset:0,color:'rgba(107,155,230,.35)'},{offset:1,color:'rgba(107,155,230,.03)'}] } },
-                symbol:'circle', symbolSize:5
-            }]
-        });
-    }
-
+    /* ── Sales by Category (Kendo Donut + custom legend) ── */
     function buildCategoryChart(data) {
-        if (!data || !data.length) { emptyChart('#categoryChart','No category data yet'); return; }
-        var el = document.getElementById('categoryChart');
-        el.style.height = '230px';
-        var chart = echarts.init(el, null, { renderer:'canvas' });
-        chart.setOption({
-            backgroundColor: 'transparent',
-            tooltip: { trigger:'item', formatter:'{b}: {c} ({d}%)' },
-            legend: { bottom:4, textStyle:{ fontFamily:'DM Sans,sans-serif', fontSize:11, color:'#6b7280' }, itemWidth:12, itemHeight:12 },
-            color: COLORS,
-            series:[{ type:'pie', radius:['42%','68%'], center:['50%','44%'],
-                data: data.map(function(d){ return { value:parseFloat(d.sales||d.c_Sales||d.count||1), name:d.category||d.c_Category||'Other' }; }),
-                label:{ show:false },
-                emphasis:{ label:{ show:true, fontSize:13, fontWeight:'bold', fontFamily:'Playfair Display,serif' } },
-                itemStyle:{ borderRadius:5, borderWidth:2, borderColor:'#fff' }
-            }]
+        if (!data || !data.length) { emptyChart('#categoryChart', 'No category data yet'); return; }
+        var total = data.reduce(function(s,d){ return s + parseFloat(d.sales || d.c_Sales || 1); }, 0);
+        $('#categoryChart').kendoChart({
+            chartArea: { background: 'transparent', height: 260 },
+            legend: { visible: false },
+            seriesColors: COLORS,
+            series: [{ type: 'donut', holeSize: 70, labels: { visible: false },
+                data: data.map(function(d) { return { category: d.category || d.c_Category || 'Other', value: parseFloat(d.sales || d.c_Sales || 1) }; }),
+                field: 'value', categoryField: 'category'
+            }],
+            tooltip: { visible: true, template: '#= category #: <b>#= value # sales</b>' }
         });
+        /* Custom legend */
+        var legend = data.map(function(d, i) {
+            var val = parseFloat(d.sales || d.c_Sales || 1);
+            var pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+            return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">'
+                 + '<span style="width:12px;height:12px;border-radius:50%;background:' + COLORS[i % COLORS.length] + ';flex-shrink:0;"></span>'
+                 + '<span style="font-size:.82rem;color:var(--text);flex:1;">' + (d.category || d.c_Category || 'Other') + '</span>'
+                 + '<span style="font-size:.8rem;font-weight:700;color:var(--primary);">' + pct + '%</span>'
+                 + '</div>';
+        }).join('');
+        $('#categoryLegend').html(legend);
     }
 
-    function buildTopArtworksChart(artworks) {
-        var top5 = artworks.slice()
-            .sort(function(a,b){ return (b.c_price*b.c_sell_count)-(a.c_price*a.c_sell_count); })
-            .slice(0,5);
-        if (!top5.length) { emptyChart('#topArtworksChart','No sold artworks yet'); return; }
-        var el = document.getElementById('topArtworksChart');
-        el.style.height = '230px';
-        var chart = echarts.init(el, null, { renderer:'canvas' });
-        var labels = top5.map(function(a){ var t=a.c_title||''; return t.length>15?t.slice(0,15)+'…':t; });
-        var revs   = top5.map(function(a){ return parseFloat((a.c_price*a.c_sell_count).toFixed(2)); });
-        chart.setOption({
-            backgroundColor: 'transparent',
-            grid: { left:10, right:24, top:10, bottom:10, containLabel:true },
-            tooltip: { trigger:'axis', axisPointer:{type:'shadow'},
-                formatter:function(p){ return '<b>'+p[0].name+'</b><br/>$'+p[0].value.toFixed(2); } },
-            xAxis: { type:'value',
-                axisLabel:{ formatter:'${value}', fontFamily:'DM Sans,sans-serif', fontSize:11, color:'#6b7280' },
-                splitLine:{ lineStyle:{ color:'rgba(3,40,159,.06)' } },
-                axisLine:{ show:false }, axisTick:{ show:false }
-            },
-            yAxis: { type:'category', data: labels,
-                axisLabel:{ fontFamily:'DM Sans,sans-serif', fontSize:11, color:'#374151' },
-                axisLine:{ show:false }, axisTick:{ show:false }
-            },
-            series:[{ type:'bar', data: revs, barMaxWidth:24,
-                itemStyle:{ borderRadius:[0,6,6,0],
-                    color:{ type:'linear', x:0,y:0,x2:1,y2:0,
-                        colorStops:[{offset:0,color:'#6b9be6'},{offset:1,color:'#03289F'}] } },
-                emphasis:{ itemStyle:{ color:{ type:'linear', x:0,y:0,x2:1,y2:0,
-                    colorStops:[{offset:0,color:'#03289F'},{offset:1,color:'#1e40af'}] } } },
-                label:{ show:true, position:'right', formatter:'${c}', fontFamily:'DM Sans,sans-serif', fontSize:10, color:'#374151' }
-            }]
-        });
-    }
-
-    function buildEarningsGauge(data) {
-        var total = parseFloat(data.revenueBalance  || 0);
-        var avail = parseFloat(data.availableBalance || 0);
-        var pct   = total > 0 ? Math.min(100, Math.round((avail/total)*100)) : 0;
-        var el = document.getElementById('earningsGauge');
-        el.style.height = '200px';
-        var chart = echarts.init(el, null, { renderer:'canvas' });
-        chart.setOption({
-            backgroundColor: 'transparent',
-            series:[{ type:'gauge', startAngle:200, endAngle:-20,
-                min:0, max:100, radius:'85%', center:['50%','55%'],
-                progress:{ show:true, width:14,
-                    itemStyle:{ color:{ type:'linear', x:0,y:0,x2:1,y2:0,
-                        colorStops:[{offset:0,color:pct<34?'#ef4444':pct<67?'#f59e0b':'#10b981'},
-                                    {offset:1,color:pct<34?'#dc2626':pct<67?'#d97706':'#059669'}] } } },
-                axisLine:{ lineStyle:{ width:14, color:[[1,'#e5e7eb']] } },
-                axisTick:{ show:false }, splitLine:{ show:false }, axisLabel:{ show:false },
-                pointer:{ show:false },
-                detail:{ valueAnimation:true, formatter:'{value}%',
-                    color:'#03289F', fontFamily:'Playfair Display,serif', fontSize:22, fontWeight:'bold', offsetCenter:[0,'0%'] },
-                title:{ offsetCenter:[0,'28%'], color:'#6b7280', fontSize:11, fontFamily:'DM Sans,sans-serif' },
-                data:[{ value:pct, name:'Available' }]
-            }]
-        });
-        $('#gaugeLabel').html('<strong>' + pct + '%</strong> available<br/>'
-            + '<span style="color:#10b981;font-weight:600;">$' + avail.toFixed(2) + '</span>'
-            + ' of $' + total.toFixed(2));
-    }
-
-    window.filterTable = function () { renderTable(); };
-
-
-    function renderTable() {
-        var query  = ($("#tableSearch").val() || "").toLowerCase();
-        var status = $("#statusFilter").val();
-
-        var list = allRows;
-
-        if (status) {
-            list = list.filter(function (r) { return (r.c_approval_status || "Pending") === status; });
-        }
-        if (query) {
-            list = list.filter(function (r) { return (r.c_title || "").toLowerCase().indexOf(query) !== -1; });
-        }
-
-        $("#tableCountInfo").text(list.length + " record" + (list.length !== 1 ? "s" : ""));
-
-        if (!list.length) {
-            $("#salesTableBody").empty();
-            $("#salesEmptyState").show();
-            $("#salesEmptyMsg").text(
-                query ? ('No results for "' + query + '"') :
-                status ? ("No " + status + " sales found.") :
-                "No sales recorded yet."
-            );
+    /* ── Payout History renderer ── */
+    function renderPayoutHistory(data) {
+        if (!data || !data.length) {
+            $('#payoutHistoryContainer').html('<div class="payout-hist-empty"><i class="bi bi-check2-circle"></i><p>No approved payouts yet.</p></div>');
             return;
         }
-
-        $("#salesEmptyState").hide();
-
-        var html = list.map(function (d) {
-            var s        = d.c_approval_status || "Pending";
-            var badgeCls = s === "Approved" ? "badge-approved" : s === "Rejected" ? "badge-rejected" : "badge-pending";
-            var revenue  = (parseFloat(d.c_price) * (d.c_sell_count || 0)).toFixed(2);
-            var cat      = d.CategoryName || "—";
-
-            return '<tr>'
-                + '<td><div class="table-artwork-title" title="' + esc(d.c_title) + '">' + esc(d.c_title) + '</div></td>'
-                + '<td><span class="table-category">' + esc(cat) + '</span></td>'
-                + '<td class="table-price">\u20B9' + parseFloat(d.c_price).toFixed(2) + '</td>'
-                + '<td class="table-units">' + d.c_sell_count + '</td>'
-                + '<td class="table-revenue">\u20B9' + revenue + '</td>'
-                + '<td><span class="' + badgeCls + '">' + s + '</span></td>'
-                + '</tr>';
-        }).join("");
-
-        $("#salesTableBody").html(html);
+        var html = data.map(function(p) {
+            var d = p.processedDate ? new Date(p.processedDate).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '\u2014';
+            return '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 4px;border-bottom:1px solid rgba(3,40,159,.06);">'
+                + '<div><div style="font-weight:600;font-size:.87rem;color:var(--text);">' + (p.requestMonth || '\u2014') + '</div>'
+                + '<div style="font-size:.74rem;color:var(--muted);margin-top:2px;">Paid: ' + d + '</div>'
+                + '<div style="font-size:.73rem;color:var(--muted);">Commission: \u20B9' + parseFloat(p.commission || 0).toFixed(2) + '</div></div>'
+                + '<div style="text-align:right;">'
+                + '<div style="font-size:1.05rem;font-weight:700;color:#10b981;">\u20B9' + parseFloat(p.netAmount || 0).toFixed(2) + '</div>'
+                + '<span class="badge-approved" style="font-size:.68rem;">' + (p.status || 'Approved') + '</span></div>'
+                + '</div>';
+        }).join('');
+        $('#payoutHistoryContainer').html('<div style="max-height:420px;overflow-y:auto;">' + html + '</div>'
+            + '<div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(3,40,159,.07);font-size:.78rem;color:var(--muted);">'
+            + data.length + ' approved payout' + (data.length !== 1 ? 's' : '') + ' total</div>');
     }
+
+    /* ── Transaction Logs ── */
+    var allTxn = [];
+
+    function renderTransactionLogs(data) {
+        allTxn = data || [];
+        filterTxnTable();
+    }
+
+    function filterTxnTable() {
+        var q = ($('#txnSearch').val() || '').toLowerCase();
+        var list = allTxn.filter(function(t) {
+            return !q
+                || (t.artworkTitle || '').toLowerCase().indexOf(q) !== -1
+                || (t.buyerName || '').toLowerCase().indexOf(q) !== -1;
+        });
+
+        $('#txnCountInfo').text(list.length + ' transaction' + (list.length !== 1 ? 's' : ''));
+
+        if (!list.length) {
+            $('#txnTableBody').empty();
+            $('#txnEmptyState').show();
+            $('#txnEmptyMsg').text(q ? 'No results for "' + q + '"' : 'No transactions recorded yet.');
+            return;
+        }
+        $('#txnEmptyState').hide();
+
+        var statusColor = { 'Completed': '#10b981', 'Pending': '#f59e0b', 'Failed': '#ef4444' };
+        var html = list.map(function(t) {
+            var dt = t.paidAt ? new Date(t.paidAt).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '\u2014';
+            var sc = statusColor[t.paymentStatus] || '#6b7280';
+            var title = (t.artworkTitle || 'Untitled').length > 22 ? (t.artworkTitle).slice(0,22) + '\u2026' : (t.artworkTitle || 'Untitled');
+            return '<tr>'
+                + '<td style="font-size:.8rem;color:var(--muted);">' + dt + '</td>'
+                + '<td><div style="font-weight:600;font-size:.85rem;">' + esc(title) + '</div></td>'
+                + '<td style="font-size:.84rem;">' + esc(t.buyerName || 'Unknown') + '</td>'
+                + '<td style="font-weight:700;color:var(--primary);">\u20B9' + parseFloat(t.amountPaid || 0).toFixed(2) + '</td>'
+                + '<td style="font-size:.82rem;color:#f59e0b;">\u20B9' + parseFloat(t.commission || 0).toFixed(2) + '</td>'
+                + '<td style="font-weight:700;color:#10b981;">\u20B9' + parseFloat(t.netPayout || 0).toFixed(2) + '</td>'
+                + '<td><span style="font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:20px;background:' + sc + '20;color:' + sc + ';">' + esc(t.paymentStatus || 'Completed') + '</span></td>'
+                + '</tr>';
+        }).join('');
+        $('#txnTableBody').html(html);
+    }
+
+    window.filterTxnTable = filterTxnTable;
 
     function esc(t) {
-        return (t || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        return (t || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
+
 });
 </script>
 }

@@ -1304,7 +1304,7 @@
             const artist = a.artistName || a.c_artist_name || 'Unknown Artist';
             const price = parseFloat(a.price || a.c_price || 0);
             const img = imageUrl(a.previewPath || a.originalPath || a.c_preview_path || a.c_original_path);
-            const priceStr = price > 0 ? '₹' + price.toLocaleString('en-IN') : 'Price on request';
+            const priceStr = price > 0 ? '$' + price.toLocaleString('en-US') : 'Price on request';
 
             grid.innerHTML += `
                 <div class="drop-card">
@@ -1426,7 +1426,7 @@
             <div>
                 <div class="footer-brand">
                     <div class="logo-icon" style="width: 58px; height: 58px; border-radius: 18px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #0b0c10; box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24); margin-right: 14px;">
-                <img src="Images/Artify-Logos.png" alt="" aria-hidden="true" style="width: 100%; height: 100%; object-fit: cover; transform: scale(2.65) translateX(3%);" />
+                <img src="/Images/Artify-Logos.png" alt="" aria-hidden="true" style="width: 100%; height: 100%; object-fit: cover; transform: scale(2.65) translateX(3%);" />
             </div>
                     <span class="footer-brand-name">Artify</span>
                 </div>

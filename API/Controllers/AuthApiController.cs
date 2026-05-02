@@ -16,7 +16,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Repository.Services;
 
-
 namespace API.Controllers
 {
     [ApiController]
@@ -29,7 +28,6 @@ namespace API.Controllers
         private readonly RedisService _redis;
         private readonly RabbitService _rabbit;
         private readonly ILogger<AuthApiController> _logger;
-        // private readonly IWebHostEnvironment _env;
 
         public AuthApiController(
             IAuthInterface auth,
@@ -52,16 +50,27 @@ namespace API.Controllers
         {
             if (model == null || string.IsNullOrEmpty(model.c_Email))
                 return BadRequest("Invalid Google data");
+            
             var existingUser = await _auth.GetUserByEmail(model.c_Email);
 
             if (existingUser != null)
             {
-                // ✅ User pehle se hai! Seedha Token generate karke return karein
                 var token = GenerateJwtToken(existingUser);
-                return Ok(new { token = token, message = "Welcome back!" });
+                return Ok(new
+                {
+                    token,
+                    message = "Welcome back!",
+                    user = new
+                    {
+                        existingUser.c_UserId,
+                        existingUser.c_FullName,
+                        existingUser.c_UserName,
+                        existingUser.c_Email,
+                        existingUser.c_ProfileImage
+                    }
+                });
             }
 
-            // 2. Agar user nahi hai, tabhi register karein
             var newUser = new t_UserRegister
             {
                 c_FullName = model.c_FullName,
@@ -69,8 +78,6 @@ namespace API.Controllers
                 c_UserName = model.c_Email.Split('@')[0],
                 c_PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.c_GoogleId),
                 c_Gender = "Other",
-                // c_Password = "GoogleUser@123", // Validation pass karne ke liye
-                // c_ConfirmPassword = "GoogleUser@123"
             };
 
             int result = await _auth.UserRegister(newUser);
@@ -93,13 +100,49 @@ namespace API.Controllers
                     _logger.LogError(ex, "Failed to publish user register notification for {Email}.", model.c_Email);
                 }
 
+                // Send welcome email for Google users too
+                try
+                {
+                    string loginUrl = _config["AppBaseUrl"] + "/Auth/UserLogin";
+                    string logoPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "MVC", "wwwroot", "images", "Artify-Logos.png");
+
+                    var placeholders = new Dictionary<string, string>
+                    {
+                        { "UserName", registeredUser.c_FullName ?? registeredUser.c_UserName },
+                        { "LoginUrl", loginUrl }
+                    };
+
+                    await _emailService.SendEmailAsync(
+                        toEmail: registeredUser.c_Email,
+                        subject: "Welcome to Artify Gallery!",
+                        templateFile: "UserRegisterEmail.html",
+                        placeholders: placeholders,
+                        logoPath: logoPath
+                    );
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to send welcome email to Google user {Email}", model.c_Email);
+                }
+
                 var token = GenerateJwtToken(registeredUser);
-                return Ok(new { token = token, message = "Registration & Login Successful" });
+                return Ok(new
+                {
+                    token,
+                    message = "Registration & Login Successful",
+                    user = new
+                    {
+                        registeredUser.c_UserId,
+                        registeredUser.c_FullName,
+                        registeredUser.c_UserName,
+                        registeredUser.c_Email,
+                        registeredUser.c_ProfileImage
+                    }
+                });
             }
 
             return StatusCode(500, "Error registering new user");
         }
-
 
         // ================= REGISTER =================
         [HttpPost("UserRegister")]
@@ -112,9 +155,8 @@ namespace API.Controllers
             {
                 return BadRequest("Password is missing from request");
             }
-            // 🔥 PASSWORD HASH HERE
-            model.c_PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.c_Password);
 
+            model.c_PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.c_Password);
 
             if (profileImageFile != null && profileImageFile.Length > 0)
             {
@@ -127,7 +169,6 @@ namespace API.Controllers
                     Directory.CreateDirectory(uploadsFolder);
                 }
 
-                // Use profileImageFile here
                 string fileName = Guid.NewGuid().ToString() + Path.GetExtension(profileImageFile.FileName);
                 string filePath = Path.Combine(uploadsFolder, fileName);
 
@@ -139,42 +180,38 @@ namespace API.Controllers
                 model.c_ProfileImage = fileName;
             }
 
-
             int result = await _auth.UserRegister(model);
             if (result > 0)
             {
+                // Send welcome email using the correct template
                 try
                 {
                     string loginUrl = _config["AppBaseUrl"] + "/Auth/UserLogin";
-                    string logoPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "mvc", "wwwroot", "images", "Logo.jpeg"));
+                    string logoPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "MVC", "wwwroot", "images", "Artify-Logos.png"));
 
-                    // Use placeholders dictionary
                     var placeholders = new Dictionary<string, string>
-            {
-                { "UserName", model.c_FullName ?? model.c_UserName },
-                { "UserEmail", model.c_Email },
-                { "LoginUrl", loginUrl },
-                { "RegisterDate", DateTime.Now.ToString("MMMM dd, yyyy") }
-            };
+                    {
+                        { "UserName", model.c_FullName ?? model.c_UserName },
+                        { "LoginUrl", loginUrl }
+                    };
 
                     await _emailService.SendEmailAsync(
                         toEmail: model.c_Email,
                         subject: "Welcome to Artify Gallery!",
-                        templateFile: "WelcomeBuyerTemplate.html",
+                        templateFile: "UserRegisterEmail.html",
                         placeholders: placeholders,
                         logoPath: logoPath
                     );
 
-                    Console.WriteLine($"Welcome email sent successfully to {model.c_Email}");
+                    _logger.LogInformation("Welcome email sent successfully to {Email}", model.c_Email);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Welcome email failed: {ex.Message}");
-                    Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                    _logger.LogError(ex, "Welcome email failed for {Email}", model.c_Email);
+                    // Don't fail registration if email fails
                 }
 
                 return Ok(new { message = "Registration successful" });
-
             }
             return result switch
             {
@@ -192,25 +229,13 @@ namespace API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-
-            // ── STEP 2: reCAPTCHA server-side verify ──
-            // if (string.IsNullOrWhiteSpace(model.c_CaptchaToken))
-            //     return BadRequest(new { message = "CAPTCHA verification is required." });
-
-            // bool captchaValid = await VerifyRecaptchaAsync(model.c_CaptchaToken);
-            // if (!captchaValid)
-            //     return BadRequest(new { message = "CAPTCHA verification failed. Please try again." });
-
-
             var user = await _auth.UserLogin(model);
 
             if (user == null)
                 return Unauthorized("Invalid email or password");
 
-
             HttpContext.Session.SetString("UserEmail", user.c_Email);
             HttpContext.Session.SetString("UserName", user.c_UserName);
-
 
             if (string.IsNullOrEmpty(user.c_PasswordHash))
                 return StatusCode(500, "Password hash missing in DB");
@@ -220,7 +245,6 @@ namespace API.Controllers
             if (!isValid)
                 return Unauthorized("Invalid password");
 
-            // 🔹 Generate JWT Token
             var token = GenerateJwtToken(user);
 
             return Ok(new
@@ -236,7 +260,6 @@ namespace API.Controllers
                     user.c_ProfileImage
                 }
             });
-
         }
 
         [HttpPost("UserForgotPassword")]
@@ -250,43 +273,32 @@ namespace API.Controllers
                 return NotFound("User not found");
 
             var otp = new Random().Next(100000, 999999).ToString();
-            var expiryTime = DateTime.UtcNow.AddMinutes(5);
-
             await _redis.SetOtpAsync(model.c_Email.ToLower().Trim(), otp);
 
             try
             {
-                string resetUrl = _config["AppBaseUrl"] + "/Auth/UserResetPassword?email=" + Uri.EscapeDataString(model.c_Email);
-                string logoPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "mvc", "wwwroot", "images", "Logo.jpeg"));
-
-                string roleName = "Art Collector / Buyer";
-                string roleClass = "buyer";
+                string logoPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "MVC", "wwwroot", "images", "Artify-Logos.png"));
 
                 var placeholders = new Dictionary<string, string>
-        {
-            { "UserName", user.c_FullName ?? user.c_UserName },
-            { "UserEmail", user.c_Email },
-            { "OTP_CODE", otp },
-            { "ResetUrl", resetUrl },
-            { "RequestTime", DateTime.Now.ToString("MMMM dd, yyyy, HH:mm UTC") },
-            { "RoleName", roleName },
-            { "RoleClass", roleClass }
-        };
+                {
+                    { "UserName", user.c_FullName ?? user.c_UserName },
+                    { "OTP", otp }
+                };
 
                 await _emailService.SendEmailAsync(
                     toEmail: user.c_Email,
-                    subject: "Artify Password Reset OTP",
-                    templateFile: "ResetPasswordOtp.html",
+                    subject: "Artify - Password Reset OTP",
+                    templateFile: "UserOtpTemplate.html",
                     placeholders: placeholders,
                     logoPath: logoPath
                 );
 
-                Console.WriteLine($"OTP email sent to {user.c_Email}");
+                _logger.LogInformation("OTP email sent to {Email}", user.c_Email);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"OTP email failed: {ex.Message}");
-                return StatusCode(500, "Error: " + ex.Message);
+                _logger.LogError(ex, "OTP email failed for {Email}", user.c_Email);
+                return StatusCode(500, "Failed to send OTP email. Please try again.");
             }
 
             return Ok(new
@@ -298,7 +310,6 @@ namespace API.Controllers
         [HttpPost("UserVerifyOtp")]
         public async Task<IActionResult> UserVerifyOtpAsync([FromBody] t_VerifyOtp model)
         {
-
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -307,17 +318,12 @@ namespace API.Controllers
             var savedOtp = await _redis.GetOtpAsync(email);
 
             if (string.IsNullOrEmpty(savedOtp))
-                return BadRequest("OTP not found. Please request OTP again.");
+                return BadRequest("OTP expired or not found. Please request a new OTP.");
 
             if (savedOtp != model.c_Otp)
-                return BadRequest("Invalid OTP");
+                return BadRequest("Invalid OTP. Please try again.");
 
-            // Success hone par ye line ADD karein:
             await _redis.SetOtpVerifiedAsync(email);
-
-            // // ✅ OTP Verified flag set karo
-            // HttpContext.Session.SetString("OtpVerified", "true");
-
 
             return Ok(new { message = "OTP verified successfully" });
         }
@@ -328,55 +334,51 @@ namespace API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-
             var email = model.c_Email.ToLower().Trim();
 
-            // ✅ Check verified
             var isVerified = await _redis.IsOtpVerifiedAsync(email);
 
             if (!isVerified)
-                return BadRequest("OTP not verified");
+                return BadRequest("OTP not verified. Please verify OTP first.");
 
-            // model.c_NewPassword ko hash karein
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.c_NewPassword);
 
-            // Ab hashed password ko bhejien na ki plain password ko
             var result = await _auth.UpdatePassword(model.c_Email, hashedPassword);
 
             if (result > 0)
             {
-                // 1. Template Path
-                string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "UserPasswordChange.html");
-                string body = await System.IO.File.ReadAllTextAsync(templatePath);
+                // Send password change confirmation email
+                try
+                {
+                    string loginUrl = _config["AppBaseUrl"] + "/Auth/UserLogin";
+                    string logoPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "MVC", "wwwroot", "images", "Artify-Logos.png"));
 
-                // 2. Placeholder replacement
-                // Note: LoginUrl ko aap apne MVC login page ka absolute URL dein
-                string loginUrl = " http://localhost:5092/Auth/UserLogin";
+                    var placeholders = new Dictionary<string, string>
+                    {
+                        { "UserName", email },
+                        { "LoginUrl", loginUrl }
+                    };
 
-                body = body.Replace("{{UserName}}", model.c_Email) // Aap user object se name le sakte hain
-                           .Replace("{{LoginUrl}}", loginUrl);
+                    await _emailService.SendEmailAsync(
+                        toEmail: email,
+                        subject: "Security Alert: Password Changed Successfully",
+                        templateFile: "UserPasswordChange.html",
+                        placeholders: placeholders,
+                        logoPath: logoPath
+                    );
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to send password change confirmation to {Email}", email);
+                }
 
-                // 3. Dynamic Logo Path (Git-friendly)
-                string logoPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "mvc", "wwwroot", "images", "Logo.jpeg"));
-
-                // 4. Send Success Email
-                await _emailService.SendEmailAsync(model.c_Email, "Security Alert: Password Changed", body, logoPath);
-
-                // ✅ Cleanup after success
                 await _redis.DeleteOtpAsync(email);
                 await _redis.DeleteVerifiedFlagAsync(email);
 
-
-                // Clear Sessions...
                 return Ok(new { message = "Password updated successfully" });
             }
-            if (result <= 0)
-                return StatusCode(500, "Password reset failed");
-
-            return Ok(new
-            {
-                message = "Password updated successfully"
-            });
+            
+            return StatusCode(500, "Password reset failed");
         }
 
         // ================= JWT TOKEN =================
@@ -384,12 +386,12 @@ namespace API.Controllers
         {
             var claims = new[]
             {
-                new Claim("user_id", user.c_UserId.ToString()), // ✅ ADD
+                new Claim("user_id", user.c_UserId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.c_Email),
                 new Claim(ClaimTypes.NameIdentifier, user.c_UserId.ToString()),
                 new Claim(ClaimTypes.Name, user.c_UserName),
                 new Claim(ClaimTypes.Email, user.c_Email),
-                new Claim(ClaimTypes.Role, "User") // 🔥 Role fix
+                new Claim(ClaimTypes.Role, "User")
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
@@ -405,6 +407,5 @@ namespace API.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-
     }
 }

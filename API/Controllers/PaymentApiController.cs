@@ -128,7 +128,7 @@ public class PaymentApiController : ControllerBase
                             "mvc",
                             "wwwroot",
                             "images",
-                            "Logo.jpeg"));
+                            "Artify-Logos.png"));
 
                         _logger.LogInformation("Sending email to {Email}", orderDetail.BuyerEmail);
 

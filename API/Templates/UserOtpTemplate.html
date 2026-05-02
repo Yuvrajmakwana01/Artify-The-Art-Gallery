@@ -7,8 +7,9 @@
         body { margin: 0; padding: 0; background-color: #faf7f2; font-family: "Plus Jakarta Sans", Helvetica, Arial, sans-serif; }
         .container { max-width: 600px; margin: 40px auto; background-color: #ffffff; border: 1px solid #e0d6c8; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(28, 23, 17, 0.05); }
         .header { background-color: #1c1711; padding: 30px; text-align: center; }
-        /* Logo Fix */
-        .logo-img { max-height: 50px; }
+        .brand-lockup { display: inline-block; white-space: nowrap; }
+        .logo-img { width: 40px; height: 40px; border-radius: 12px; object-fit: cover; vertical-align: middle; }
+        .brand-text { display: inline-block; margin-left: 8px; color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: 1px; vertical-align: middle; }
         .content { padding: 40px; text-align: center; color: #1c1711; }
         h1 { font-family: "Cormorant Garamond", serif; font-size: 28px; font-weight: 600; margin-bottom: 10px; font-style: italic; }
         p { font-size: 16px; line-height: 1.6; color: #8a7d6e; margin-bottom: 25px; }
@@ -37,7 +38,10 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="cid:logo" alt="ARTIFY" class="logo-img" />
+            <div class="brand-lockup">
+                <img src="cid:logo" alt="Artify" class="logo-img" />
+                <span class="brand-text">ARTIFY</span>
+            </div>
         </div>
 
         <div class="content">

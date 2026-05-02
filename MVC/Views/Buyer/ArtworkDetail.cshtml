@@ -118,7 +118,8 @@
         .thumb { width: 84px; height: 84px; border-radius: 14px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s; flex-shrink: 0; box-shadow: 0 8px 18px rgba(15,23,42,.05); }
         .thumb.active { border-color: var(--accent); }
         .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; user-select: none; -webkit-user-drag: none; }
-        #ss-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; opacity: 0; z-index: 999999; pointer-events: none; transition: opacity 0.05s ease; }
+        #ss-overlay { position: fixed; inset: 0; width: 100vw; height: 100vh; background: #000; opacity: 0; visibility: hidden; z-index: 2147483647; pointer-events: none; transition: opacity 0.04s linear, visibility 0.04s linear; }
+        #ss-overlay.is-active { opacity: 1; visibility: visible; }
 
         /* Product Info */
         .product-info { position: sticky; top: 92px; background: rgba(255,255,255,0.86); border: 1px solid var(--border); border-radius: 28px; padding: 1.75rem; box-shadow: 0 10px 24px rgba(15,23,42,.05); }
@@ -286,7 +287,7 @@
                     <span id="wishlistBtnText">Save to Wishlist</span>
                 </button>
 
-                <div class="trust-badges">
+                @* <div class="trust-badges">
                     <div class="trust-item">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
                         Secure Payment
@@ -299,9 +300,9 @@
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
                         Fast Delivery
                     </div>
-                </div>
+                </div> *@
 
-                <div class="accordion">
+                @* <div class="accordion">
                     <div class="accordion-item">
                         <button class="accordion-header open" onclick="toggleAccordion(this)">Product Highlights <span class="acc-icon">−</span></button>
                         <div class="accordion-body open"><p>High-definition printing with the latest technology delivers sharp, vibrant results that instantly bring life and character to your walls.</p></div>
@@ -314,7 +315,7 @@
                         <button class="accordion-header" onclick="toggleAccordion(this)">Shipping &amp; Returns <span class="acc-icon">+</span></button>
                         <div class="accordion-body"><p>✓ Free shipping across India<br/>✓ Premium packaging<br/>✓ Delivery within 5–7 business days<br/>✓ 30-day return policy<br/>✓ Certificate of authenticity</p></div>
                     </div>
-                </div>
+                </div> *@
             </div>
         </div>
         </div>
@@ -338,6 +339,11 @@
         var currentArtworkId = null;
         var inCartFlag     = false;
         var protectionTimer = null;
+        var focusProtectionTimer = null;
+        var protectionHoldUntil = 0;
+        var lastViewportWidth = window.innerWidth;
+        var lastViewportHeight = window.innerHeight;
+        var snipKeyState = { metaAt: 0, shiftAt: 0, sAt: 0 };
         var protectionInitialized = false;
         var zoomInitialized = false;
         var allowClipboardWrite = false;
@@ -538,7 +544,7 @@
                 return;
             }
 
-            overlay.style.opacity = visible ? '1' : '0';
+            overlay.classList.toggle('is-active', !!visible);
         }
 
         function hideProtectionOverlay() {
@@ -548,9 +554,29 @@
             }
 
             setProtectionOverlay(false);
+            protectionHoldUntil = 0;
         }
 
-        function clearClipboard() {
+        function makeBlackCanvasBlob(callback) {
+            var canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, window.innerWidth || screen.width || 1920);
+            canvas.height = Math.max(1, window.innerHeight || screen.height || 1080);
+
+            var ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (canvas.toBlob) {
+                canvas.toBlob(function(blob) {
+                    callback(blob);
+                }, 'image/png');
+                return;
+            }
+
+            callback(null);
+        }
+
+        function writeBlackClipboard() {
             function fallbackClipboardWrite() {
                 var clipboardCleaner = document.createElement('textarea');
                 var blackHtml = '<div style="width:100vw;height:100vh;background:#000;color:#000;">BLACK SCREEN</div>';
@@ -588,7 +614,40 @@
                 clipboardCleaner.remove();
             }
 
+            if (
+                navigator.clipboard &&
+                window.ClipboardItem &&
+                typeof navigator.clipboard.write === 'function' &&
+                window.isSecureContext
+            ) {
+                makeBlackCanvasBlob(function(blob) {
+                    if (!blob) {
+                        fallbackClipboardWrite();
+                        return;
+                    }
+
+                    navigator.clipboard.write([
+                        new ClipboardItem({
+                            'image/png': blob,
+                            'text/plain': new Blob(['BLACK SCREEN'], { type: 'text/plain' })
+                        })
+                    ]).catch(fallbackClipboardWrite);
+                });
+                return;
+            }
+
             fallbackClipboardWrite();
+        }
+
+        function scheduleBlackClipboardWrites(duration) {
+            var delays = [0, 80, 180, 350, 700, 1200, 2000, 3200, 5000, 8000];
+            var maxDuration = typeof duration === 'number' ? duration : 8500;
+
+            delays.forEach(function(delay) {
+                if (delay <= maxDuration) {
+                    setTimeout(writeBlackClipboard, delay);
+                }
+            });
         }
 
         function flashProtectionOverlay(duration) {
@@ -599,24 +658,77 @@
             }
 
             if (duration === 0) {
+                protectionHoldUntil = Number.POSITIVE_INFINITY;
                 return;
             }
 
+            protectionHoldUntil = Date.now() + (typeof duration === 'number' ? duration : 2500);
             protectionTimer = setTimeout(function() {
                 setProtectionOverlay(false);
                 protectionTimer = null;
-            }, typeof duration === 'number' ? duration : 200);
+                protectionHoldUntil = 0;
+            }, typeof duration === 'number' ? duration : 2500);
         }
 
         function isProtectionShortcut(event) {
             var key = (event.key || '').toLowerCase();
             var code = event.code || '';
+            var ctrlOrMeta = event.ctrlKey || event.metaKey;
+            var isSnipS = key === 's' || code === 'KeyS';
 
             return (
                 key === 'printscreen' ||
                 code === 'PrintScreen' ||
-                ((event.ctrlKey || event.metaKey) && ['s', 'u', 'i', 'p'].indexOf(key) !== -1) ||
-                (event.shiftKey && (event.ctrlKey || event.metaKey) && key === 's')
+                key === 'meta' ||
+                code === 'MetaLeft' ||
+                code === 'MetaRight' ||
+                key === 'f12' ||
+                code === 'F12' ||
+                (event.shiftKey && isSnipS) ||
+                (ctrlOrMeta && ['c', 's', 'u', 'p'].indexOf(key) !== -1) ||
+                (ctrlOrMeta && event.shiftKey && ['s', 'i', 'j', 'c'].indexOf(key) !== -1)
+            );
+        }
+
+        function isLikelySnippingShortcut(event) {
+            var now = Date.now();
+            var key = (event.key || '').toLowerCase();
+            var code = event.code || '';
+
+            if (key === 'meta' || code === 'MetaLeft' || code === 'MetaRight' || event.metaKey) {
+                snipKeyState.metaAt = now;
+            }
+
+            if (key === 'shift' || code === 'ShiftLeft' || code === 'ShiftRight' || event.shiftKey) {
+                snipKeyState.shiftAt = now;
+            }
+
+            if (key === 's' || code === 'KeyS') {
+                snipKeyState.sAt = now;
+            }
+
+            var recentMeta = now - snipKeyState.metaAt < 1500;
+            var recentShift = now - snipKeyState.shiftAt < 1500;
+            var recentS = now - snipKeyState.sAt < 1500;
+
+            return (
+                (recentMeta && recentShift) ||
+                (recentShift && recentS) ||
+                (event.metaKey && event.shiftKey) ||
+                (event.shiftKey && (key === 's' || code === 'KeyS'))
+            );
+        }
+
+        function shouldBlockShortcut(event) {
+            var key = (event.key || '').toLowerCase();
+            var code = event.code || '';
+            var ctrlOrMeta = event.ctrlKey || event.metaKey;
+
+            return (
+                key === 'f12' ||
+                code === 'F12' ||
+                (ctrlOrMeta && ['c', 'u'].indexOf(key) !== -1) ||
+                (ctrlOrMeta && event.shiftKey && ['s', 'i', 'j', 'c'].indexOf(key) !== -1)
             );
         }
 
@@ -672,61 +784,45 @@
                 e.preventDefault();
             }, true);
 
-            document.addEventListener('keydown', function(e) {
-                var key = (e.key || '').toLowerCase();
+            function handleProtectionKeydown(e) {
+                var isSnipping = isLikelySnippingShortcut(e);
 
-                if ((e.ctrlKey || e.metaKey) && ['s', 'u', 'i'].indexOf(key) !== -1) {
+                if (shouldBlockShortcut(e) || isProtectionShortcut(e) || isSnipping) {
                     e.preventDefault();
-                    flashProtectionOverlay(220);
-                    clearClipboard();
+                    flashProtectionOverlay(isSnipping ? 8500 : 3200);
                 }
 
-                if (e.key === 'PrintScreen' || e.code === 'PrintScreen') {
-                    flashProtectionOverlay(0);
+                if (e.key === 'PrintScreen' || e.code === 'PrintScreen' || isSnipping) {
+                    scheduleBlackClipboardWrites(isSnipping ? 8500 : 1200);
                 }
-            }, true);
+            }
 
-            document.addEventListener('keyup', function(e) {
-                if (!isProtectionShortcut(e)) {
+            function handleProtectionKeyup(e) {
+                var isSnipping = isLikelySnippingShortcut(e);
+
+                if (!isProtectionShortcut(e) && !isSnipping) {
                     return;
                 }
 
                 e.preventDefault();
-                flashProtectionOverlay(200);
-                clearClipboard();
-                setTimeout(clearClipboard, 100);
-                setTimeout(clearClipboard, 500);
-            }, true);
-
-            window.addEventListener('blur', function() {
-                flashProtectionOverlay(300);
-            });
-
-            document.addEventListener('visibilitychange', function() {
-                if (document.hidden) {
-                    flashProtectionOverlay(0);
-                } else {
-                    hideProtectionOverlay();
+                flashProtectionOverlay(isSnipping ? 8500 : 3200);
+                if (e.key === 'PrintScreen' || e.code === 'PrintScreen' || isSnipping) {
+                    scheduleBlackClipboardWrites(isSnipping ? 8500 : 1200);
                 }
-            });
+            }
+
+            document.addEventListener('keydown', handleProtectionKeydown, true);
+            window.addEventListener('keydown', handleProtectionKeydown, true);
+            document.addEventListener('keyup', handleProtectionKeyup, true);
+            window.addEventListener('keyup', handleProtectionKeyup, true);
 
             window.addEventListener('focus', function() {
-                hideProtectionOverlay();
-                clearClipboard();
-                setTimeout(clearClipboard, 100);
-            });
-
-            setInterval(function() {
-                var devtoolsOpen =
-                    window.outerWidth - window.innerWidth > 120 ||
-                    window.outerHeight - window.innerHeight > 120;
-
-                if (devtoolsOpen) {
-                    flashProtectionOverlay(0);
-                } else if (!document.hidden && document.hasFocus()) {
-                    hideProtectionOverlay();
+                if (focusProtectionTimer) {
+                    clearTimeout(focusProtectionTimer);
+                    focusProtectionTimer = null;
                 }
-            }, 500);
+                hideProtectionOverlay();
+            });
         }
 
         // ── Accordion ─────────────────────────────────────────────────────

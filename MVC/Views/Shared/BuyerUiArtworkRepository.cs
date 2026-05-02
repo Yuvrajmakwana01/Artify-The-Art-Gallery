@@ -76,6 +76,35 @@ public class BuyerUiArtworkRepository : IBuyerUiArtworkInterface
     }
 
     // ── GET BY ID ─────────────────────────────────────────────────────────
+    public async Task<List<t_BuyerUiArtwork>> SearchArtworks(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+            return await GetAllApprovedAsync();
+
+        var list = new List<t_BuyerUiArtwork>();
+
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        await using var cmd = new NpgsqlCommand(
+            SelectColumns + @"
+            WHERE a.c_approval_status = 'Approved'
+              AND (
+                  a.c_title ILIKE @query
+                  OR COALESCE(a.c_description, '') ILIKE @query
+                  OR ap.c_artist_name ILIKE @query
+              )
+            ORDER BY a.c_created_at DESC",
+            conn);
+        cmd.Parameters.Add("@query", NpgsqlDbType.Text).Value = $"%{query.Trim()}%";
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+            list.Add(MapRow(reader));
+
+        return list;
+    }
+
     public async Task<t_BuyerUiArtwork?> GetByIdAsync(int artworkId)
     {
         await using var conn = new NpgsqlConnection(_connectionString);

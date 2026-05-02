@@ -191,6 +191,16 @@ public class AdminArtistRepository : IAdminArtistInterface
         {
             var (isVerified, isActive, rejectedCount) = MapStatusToArtistFlags(request.Status);
             var email = request.ArtistEmail.Trim();
+            string? currentArtistEmail = null;
+
+            await using (var currentArtistCmd = new NpgsqlCommand(@"
+                SELECT c_artist_email
+                FROM t_artist_profile
+                WHERE c_artist_id = @artistId;", _connection, tx))
+            {
+                currentArtistCmd.Parameters.AddWithValue("artistId", artistId);
+                currentArtistEmail = (await currentArtistCmd.ExecuteScalarAsync()) as string;
+            }
 
             await using var artistCmd = new NpgsqlCommand(@"
                 UPDATE t_artist_profile
@@ -226,7 +236,8 @@ public class AdminArtistRepository : IAdminArtistInterface
                     c_mobile = @mobile,
                     c_profile_image = @profileImage,
                     c_gender = @gender
-                WHERE c_user_id = @artistId;", _connection, tx);
+                WHERE c_user_id = @artistId
+                  AND LOWER(c_email) = LOWER(@currentArtistEmail);", _connection, tx);
 
             var resolvedFullName = string.IsNullOrWhiteSpace(request.FullName) ? request.ArtistName : request.FullName.Trim();
             userCmd.Parameters.AddWithValue("email", email);
@@ -235,6 +246,7 @@ public class AdminArtistRepository : IAdminArtistInterface
             userCmd.Parameters.AddWithValue("profileImage", (object?)request.ProfileImage ?? DBNull.Value);
             userCmd.Parameters.AddWithValue("gender", request.Gender);
             userCmd.Parameters.AddWithValue("artistId", artistId);
+            userCmd.Parameters.AddWithValue("currentArtistEmail", (object?)currentArtistEmail ?? DBNull.Value);
 
             await userCmd.ExecuteNonQueryAsync();
 

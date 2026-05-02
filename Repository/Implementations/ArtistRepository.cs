@@ -144,7 +144,11 @@ namespace Repository.Implementations
                     c_password, 
                     c_artist_name, 
                     c_profile_image, 
-                    c_is_active 
+                    c_is_active,
+                    CASE
+                        WHEN c_blocked_until IS NOT NULL AND c_blocked_until > NOW() THEN TRUE
+                        ELSE FALSE
+                    END AS c_is_blocked
                 FROM t_artist_profile 
                 WHERE c_artist_email = @email";
 
@@ -175,7 +179,8 @@ namespace Repository.Implementations
                             c_Profile_Image = reader["c_profile_image"]?.ToString(),
                             
                             // Map the boolean status for the "Awaiting Approval" check
-                            c_Is_Active = !reader.IsDBNull(reader.GetOrdinal("c_is_active")) && reader.GetBoolean(reader.GetOrdinal("c_is_active"))
+                            c_Is_Active = !reader.IsDBNull(reader.GetOrdinal("c_is_active")) && reader.GetBoolean(reader.GetOrdinal("c_is_active")),
+                            c_Is_Blocked = !reader.IsDBNull(reader.GetOrdinal("c_is_blocked")) && reader.GetBoolean(reader.GetOrdinal("c_is_blocked"))
                         };
                     }
                 }
@@ -567,6 +572,120 @@ namespace Repository.Implementations
                 if (_conn.State == System.Data.ConnectionState.Open)
                     await _conn.CloseAsync();
             }
+        }
+
+        public async Task<List<t_ArtistPayoutHistory>> GetApprovedPayoutHistory(int artistId)
+        {
+            var result = new List<t_ArtistPayoutHistory>();
+            try
+            {
+                if (_conn.State != System.Data.ConnectionState.Open)
+                    await _conn.OpenAsync();
+
+                const string sql = @"
+                    SELECT
+                        MIN(c_payout_id)                          AS id,
+                        TO_CHAR(DATE_TRUNC('month', c_paid_at), 'Mon YYYY') AS request_month,
+                        SUM(c_gross_amount)                        AS gross_amount,
+                        SUM(c_commission)                          AS commission,
+                        SUM(c_net_amount)                          AS net_amount,
+                        c_status,
+                        MAX(c_paid_at)                             AS processed_date
+                    FROM t_payout
+                    WHERE c_artist_id = @artistId
+                      AND c_status = 'Approved'
+                    GROUP BY DATE_TRUNC('month', c_paid_at), c_status
+                    ORDER BY MAX(c_paid_at) DESC NULLS LAST;";
+
+                using var cmd = new NpgsqlCommand(sql, _conn);
+                cmd.Parameters.AddWithValue("@artistId", artistId);
+
+                using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    result.Add(new t_ArtistPayoutHistory
+                    {
+                        Id            = reader.GetInt32(0),
+                        RequestMonth  = reader.IsDBNull(1) ? "—" : reader.GetString(1),
+                        GrossAmount   = reader.IsDBNull(2) ? 0 : reader.GetDecimal(2),
+                        Commission    = reader.IsDBNull(3) ? 0 : reader.GetDecimal(3),
+                        NetAmount     = reader.IsDBNull(4) ? 0 : reader.GetDecimal(4),
+                        Status        = reader.IsDBNull(5) ? "Approved" : reader.GetString(5),
+                        ProcessedDate = reader.IsDBNull(6) ? null : reader.GetDateTime(6)
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"GetApprovedPayoutHistory ERROR: {ex.Message}");
+            }
+            finally
+            {
+                if (_conn.State == System.Data.ConnectionState.Open)
+                    await _conn.CloseAsync();
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns every buyer purchase transaction for the given artist's artworks, newest first.
+        /// </summary>
+        public async Task<List<t_ArtistTransactionLog>> GetTransactionLogs(int artistId)
+        {
+            var result = new List<t_ArtistTransactionLog>();
+            try
+            {
+                if (_conn.State != System.Data.ConnectionState.Open)
+                    await _conn.OpenAsync();
+
+                const string sql = @"
+                    SELECT
+                        p.c_payment_id,
+                        COALESCE(NULLIF(aw.c_title,''), 'Untitled')           AS artwork_title,
+                        COALESCE(NULLIF(u.c_full_name,''), NULLIF(u.c_username,''), u.c_email, 'Unknown') AS buyer_name,
+                        COALESCE(p.c_amount_paid, 0)                          AS amount_paid,
+                        COALESCE(p.c_commission_deducted, 0)                  AS commission,
+                        COALESCE(p.c_artist_payout_amount,
+                                 p.c_amount_paid - p.c_commission_deducted, 0) AS net_payout,
+                        COALESCE(NULLIF(p.c_payment_status,''), 'Completed')  AS payment_status,
+                        p.c_paid_at
+                    FROM t_payment p
+                    JOIN t_order      o  ON o.c_order_id    = p.c_order_id
+                    JOIN t_order_item oi ON oi.c_order_id   = p.c_order_id
+                    JOIN t_artwork    aw ON aw.c_artwork_id  = oi.c_artwork_id
+                    JOIN t_user       u  ON u.c_user_id      = o.c_buyer_id
+                    WHERE aw.c_artist_id = @artistId
+                    ORDER BY p.c_paid_at DESC NULLS LAST, p.c_payment_id DESC;";
+
+                using var cmd = new NpgsqlCommand(sql, _conn);
+                cmd.Parameters.AddWithValue("@artistId", artistId);
+
+                using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    result.Add(new t_ArtistTransactionLog
+                    {
+                        PaymentId     = reader.GetInt32(0),
+                        ArtworkTitle  = reader.IsDBNull(1) ? "Untitled"  : reader.GetString(1),
+                        BuyerName     = reader.IsDBNull(2) ? "Unknown"   : reader.GetString(2),
+                        AmountPaid    = reader.IsDBNull(3) ? 0 : reader.GetDecimal(3),
+                        Commission    = reader.IsDBNull(4) ? 0 : reader.GetDecimal(4),
+                        NetPayout     = reader.IsDBNull(5) ? 0 : reader.GetDecimal(5),
+                        PaymentStatus = reader.IsDBNull(6) ? "Completed" : reader.GetString(6),
+                        PaidAt        = reader.IsDBNull(7) ? null : reader.GetDateTime(7)
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"GetTransactionLogs ERROR: {ex.Message}");
+            }
+            finally
+            {
+                if (_conn.State == System.Data.ConnectionState.Open)
+                    await _conn.CloseAsync();
+            }
+            return result;
         }
     }
 }

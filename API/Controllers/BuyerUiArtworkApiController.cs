@@ -40,6 +40,31 @@ public class BuyerUiArtworkApiController : ControllerBase
         }
     }
 
+    // GET api/artwork/search?query=...
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] string query)
+    {
+        try
+        {
+            var artworks = await _artworkRepo.SearchArtworks(query);
+
+            return Ok(new
+            {
+                success = true,
+                count = artworks.Count,
+                data = artworks
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                success = false,
+                message = ex.Message
+            });
+        }
+    }
+
     // GET api/artwork/5
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
