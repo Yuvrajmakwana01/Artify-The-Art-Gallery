@@ -36,6 +36,29 @@
             text-transform: uppercase;
         }
 
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            object-fit: cover;
+            vertical-align: middle;
+        }
+
+        .brand-lockup {
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .brand-text {
+            display: inline-block;
+            margin-left: 8px;
+            color: #ffffff;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            vertical-align: middle;
+        }
+
         .content {
             padding: 40px;
             text-align: center;
@@ -98,7 +121,10 @@
 <body>
     <div class="container">
          <div class="header">
-            <img src="cid:logo" alt="ARTIFY" class="logo-img" />
+            <div class="brand-lockup">
+                <img src="cid:logo" alt="Artify" class="logo-img" />
+                <span class="brand-text">ARTIFY</span>
+            </div>
         </div>
 
         <div class="content">

@@ -10,7 +10,9 @@
     .wrapper { width:100%; background:#f0f0f0; padding:40px 0; }
     .container { max-width:600px; margin:0 auto; background:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.08); }
     .header { background:linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%); padding:36px 40px; text-align:center; }
-    .header img { height:48px; }
+    .brand-lockup { display:inline-block; white-space:nowrap; }
+    .header img { width:40px; height:40px; border-radius:12px; object-fit:cover; vertical-align:middle; }
+    .brand-text { display:inline-block; margin-left:8px; color:#ffffff; font-size:22px; font-weight:800; letter-spacing:1px; vertical-align:middle; }
     .header h1 { color:#ffffff; font-size:22px; font-weight:700; margin:16px 0 0; letter-spacing:0.5px; }
     .status-badge { display:inline-block; margin:28px auto 0; padding:10px 28px; border-radius:50px; font-size:14px; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
     .badge-approved { background:#d1fae5; color:#065f46; }
@@ -40,7 +42,10 @@
 
       <!-- HEADER -->
       <div class="header">
-        <img src="{{Logo}}" alt="Artify Logo" />
+        <div class="brand-lockup">
+          <img src="{{Logo}}" alt="Artify" />
+          <span class="brand-text">ARTIFY</span>
+        </div>
         <h1>Artwork Moderation Update</h1>
         <div class="status-badge {{BadgeClass}}">{{StatusLabel}}</div>
       </div>

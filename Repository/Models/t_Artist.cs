@@ -48,6 +48,8 @@ namespace Repository.Models
 
         public bool c_Is_Active { get; set; } = false;
 
+        public bool c_Is_Blocked { get; set; } = false;
+
         public IFormFile? ProfilePicture { get; set; }
 
         public IFormFile? CoverPicture { get; set; }

@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Repository.Interfaces;
 using Npgsql;
 using Repository.Models;
+using Repository.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Repository.Implementations
 {
@@ -16,10 +18,17 @@ namespace Repository.Implementations
     public class AdminArtworkRepository : IAdminArtworkInterface
     {
         private readonly NpgsqlConnection _conn;
+        private readonly ElasticService _elasticService;
+        private readonly ILogger<AdminArtworkRepository> _logger;
 
-        public AdminArtworkRepository(NpgsqlConnection conn)
+        public AdminArtworkRepository(
+            NpgsqlConnection conn,
+            ElasticService elasticService,
+            ILogger<AdminArtworkRepository> logger)
         {
             _conn = conn;
+            _elasticService = elasticService;
+            _logger = logger;
         }
 
         private async Task EnsureOpenAsync()
@@ -169,11 +178,41 @@ namespace Repository.Implementations
             cmd.Parameters.AddWithValue("@artworkId", artworkId);
 
             await cmd.ExecuteNonQueryAsync();
+
+            if (status.Equals("Approved", StringComparison.OrdinalIgnoreCase))
+            {
+                await IndexApprovedArtworkAsync(artworkId);
+            }
         }
 
         // ─────────────────────────────────────────────────────────────────
         //  RESET REJECTED COUNT
         // ─────────────────────────────────────────────────────────────────
+
+        private async Task IndexApprovedArtworkAsync(int artworkId)
+        {
+            try
+            {
+                var artwork = await GetArtworkByIdAsync(artworkId);
+                if (artwork is null ||
+                    !artwork.c_ApprovalStatus.Equals("Approved", StringComparison.OrdinalIgnoreCase))
+                {
+                    return;
+                }
+
+                await _elasticService.IndexArtworkAsync(new ArtworkSearchDocument
+                {
+                    Id = artwork.c_ArtworkId,
+                    Title = artwork.c_Title,
+                    Description = artwork.c_Description,
+                    ArtistName = artwork.c_ArtistName
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Artwork {ArtworkId} was approved in PostgreSQL but failed to index in Elasticsearch.", artworkId);
+            }
+        }
 
         public async Task ResetRejectedCountAsync(int artistId)
         {
@@ -212,7 +251,7 @@ namespace Repository.Implementations
         }
 
         // ─────────────────────────────────────────────────────────────────
-        //  BLOCK ARTIST for 15 days
+        //  BLOCK ARTIST for 5 minutes
         // ─────────────────────────────────────────────────────────────────
 
         public async Task BlockArtistAsync(int artistId)
@@ -221,7 +260,7 @@ namespace Repository.Implementations
 
             const string sql = @"
             UPDATE t_artist_profile
-            SET    c_blocked_until = NOW() + INTERVAL '15 days'
+            SET    c_blocked_until = NOW() + INTERVAL '1 days'
             WHERE  c_artist_id = @artistId";
 
             await using var cmd = new NpgsqlCommand(sql, _conn);

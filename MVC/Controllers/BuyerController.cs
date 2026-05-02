@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace MVC.Controllers
 {
     // [Route("[controller]")]
-    // [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     // [SessionAuthorize]
     public class BuyerController : Controller
     {
@@ -47,7 +47,9 @@ namespace MVC.Controllers
 
         public IActionResult Profile()
         {
-            return View();
+            ViewData["InitialSection"] = "profile";
+            ViewData["Title"] = "Profile";
+            return View("Dashboard");
         }
         public IActionResult EditProfile()
         {
@@ -56,8 +58,32 @@ namespace MVC.Controllers
 
         public IActionResult Orders()
         {
-            return View();
+            ViewData["InitialSection"] = "orders";
+            ViewData["Title"] = "Order History";
+            return View("Dashboard");
         }
+
+        public IActionResult Wishlist()
+        {
+            ViewData["InitialSection"] = "wishlist";
+            ViewData["Title"] = "Wishlist";
+            return View("Dashboard");
+        }
+
+        public IActionResult Downloads()
+        {
+            ViewData["InitialSection"] = "downloads";
+            ViewData["Title"] = "Download Arts";
+            return View("Dashboard");
+        }
+
+        public IActionResult Settings()
+        {
+            ViewData["InitialSection"] = "settings";
+            ViewData["Title"] = "Settings";
+            return View("Dashboard");
+        }
+
         public ActionResult OrderDetail(string id)
         {
             return View();
@@ -73,7 +99,7 @@ namespace MVC.Controllers
         }
 
         // [HttpGet("/Buyer/ExploreArt")]
-        public IActionResult ExploreArt()
+        public IActionResult ExploreArt([FromQuery] string? query)
         {
             // var token = HttpContext.Request.Cookies["token"]; // OR check localStorage via JS
 
@@ -82,6 +108,7 @@ namespace MVC.Controllers
             //     return RedirectToAction("UserLogin", "Auth");
             // }
 
+            ViewData["SearchQuery"] = query ?? string.Empty;
             return View();
         }
         public IActionResult Index()

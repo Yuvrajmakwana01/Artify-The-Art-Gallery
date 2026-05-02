@@ -400,9 +400,9 @@
         <a href="/Artist/Sales_Earnings" class="sidebar-link @(ViewData["Active"]?.ToString()=="Earnings"?"active":"")">
             <i class="bi bi-bar-chart-line-fill"></i> Earnings & Analytics
         </a>
-        <a href="/Artist/Sales" class="sidebar-link @(ViewData["Active"]?.ToString()=="Sales"?"active":"")">
+        @* <a href="/Artist/Sales" class="sidebar-link @(ViewData["Active"]?.ToString()=="Sales"?"active":"")">
             <i class="bi bi-receipt"></i> Sales
-        </a>
+        </a> *@
 
         <div class="nav-label">Account</div>
         <a href="/Artist/ManageProfile" class="sidebar-link @(ViewData["Active"]?.ToString()=="Profile"?"active":"")">

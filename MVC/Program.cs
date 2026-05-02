@@ -112,6 +112,53 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.Use(async (context, next) =>
+{
+    var originalBody = context.Response.Body;
+
+    await using var buffer = new MemoryStream();
+    context.Response.Body = buffer;
+
+    await next();
+
+    context.Response.Body = originalBody;
+
+    var contentType = context.Response.ContentType ?? string.Empty;
+    var isHtmlResponse = context.Response.StatusCode == StatusCodes.Status200OK
+        && contentType.Contains("text/html", StringComparison.OrdinalIgnoreCase);
+
+    if (!isHtmlResponse)
+    {
+        buffer.Position = 0;
+        await buffer.CopyToAsync(originalBody);
+        return;
+    }
+
+    buffer.Position = 0;
+    using var reader = new StreamReader(buffer);
+    var html = await reader.ReadToEndAsync();
+
+    if (!html.Contains("content-protection.js", StringComparison.OrdinalIgnoreCase))
+    {
+        const string protectionAssets =
+            "<link rel=\"stylesheet\" href=\"/css/content-protection.css\" />" +
+            "<script src=\"/js/content-protection.js\" defer></script>";
+
+        var headIndex = html.IndexOf("</head>", StringComparison.OrdinalIgnoreCase);
+        if (headIndex >= 0)
+        {
+            html = html.Insert(headIndex, protectionAssets);
+        }
+        else
+        {
+            html += protectionAssets;
+        }
+    }
+
+    context.Response.Headers.Remove("Content-Length");
+    await context.Response.WriteAsync(html);
+});
+
 app.UseRouting();
 
 

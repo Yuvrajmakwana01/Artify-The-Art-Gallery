@@ -5,6 +5,7 @@ using MimeKit.Utils;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Repository.Services
 {
@@ -26,7 +27,6 @@ namespace Repository.Services
 
             // Get the correct template path - looking for Templates folder in API project
             var apiPath = AppDomain.CurrentDomain.BaseDirectory;
-            // Go up to the API project root (since bin/Debug/net8.0/ is the current directory)
             var apiRoot = Directory.GetParent(apiPath)?.Parent?.Parent?.Parent?.FullName;
             _templateBasePath = Path.Combine(apiRoot ?? Directory.GetCurrentDirectory(), "Templates");
             
@@ -67,8 +67,8 @@ namespace Repository.Services
             {
                 foreach (var (key, value) in placeholders)
                 {
+                    // Replace both {{key}} and {key} patterns
                     htmlBody = htmlBody.Replace($"{{{{{key}}}}}", value ?? string.Empty);
-                    // Also handle {key} without double braces
                     htmlBody = htmlBody.Replace($"{{{key}}}", value ?? string.Empty);
                 }
             }
@@ -82,18 +82,24 @@ namespace Repository.Services
             var builder = new BodyBuilder();
 
             // ── 4. Handle logo embedding ─────────────────────────────────
-            string resolvedLogo = logoPath ?? Path.Combine(_templateBasePath, "logo.png");
+            string templateLogo = Path.Combine(_templateBasePath, "logo.png");
+            string resolvedLogo = File.Exists(templateLogo) ? templateLogo : logoPath ?? templateLogo;
             if (File.Exists(resolvedLogo))
             {
                 var image = builder.LinkedResources.Add(resolvedLogo);
                 image.ContentId = MimeUtils.GenerateMessageId();
+                // Replace all possible logo placeholder patterns
                 htmlBody = htmlBody.Replace("{{Logo}}", $"cid:{image.ContentId}");
                 htmlBody = htmlBody.Replace("{Logo}", $"cid:{image.ContentId}");
+                htmlBody = htmlBody.Replace("cid:logo", $"cid:{image.ContentId}");
             }
             else
             {
+                // Remove logo placeholders if no logo file exists
                 htmlBody = htmlBody.Replace("{{Logo}}", string.Empty);
                 htmlBody = htmlBody.Replace("{Logo}", string.Empty);
+                // If template uses cid:logo but no logo file, just show alt text
+                htmlBody = htmlBody.Replace("cid:logo", "");
             }
 
             // IMPORTANT: Set the HTML body with proper content type

@@ -269,6 +269,7 @@ builder.Services.AddScoped<IBuyerOrderInterface, BuyerOrderRepository>();
 // =========================
 builder.Services.AddScoped<AdminArtworkService>();
 builder.Services.AddScoped<EmailService>();
+builder.Services.AddSingleton<ElasticService>();
 
 // =========================
 // Redis
@@ -446,6 +447,12 @@ var app = builder.Build();
 var rabbitService = app.Services.GetRequiredService<RabbitService>();
 
 _ = rabbitService.RunConsumerLoopAsync(app.Lifetime.ApplicationStopping);
+
+using (var scope = app.Services.CreateScope())
+{
+    var elasticService = scope.ServiceProvider.GetRequiredService<ElasticService>();
+    await elasticService.EnsureArtworkIndexAsync();
+}
 
 // =========================
 // Middleware Pipeline

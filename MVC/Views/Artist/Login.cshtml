@@ -6,6 +6,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=202605010115" />
     <title>Artify — Login</title>
     
     <!-- Fonts & Libraries -->
@@ -77,7 +78,7 @@
             animation-delay: 0s;
         }
         .orb-2 { 
-            width: 45vw; height: 45vw; background: #f1f6f8; bottom: -15vh; left: -10vw;
+            width: 45vw; height: 45vw; background: #ffe0c0; bottom: -15vh; left: -10vw;
             animation-delay: -5s;
         }
         .orb-3 { 
@@ -123,54 +124,111 @@
             flex-wrap: wrap;
         }
 
-        /* LEFT SIDE — Spline 3D Scene */
+        /* LEFT SIDE — cinematic image + overlay (light overlay) */
         .hero-visual {
             flex: 7;
             position: relative;
             min-height: 560px;
-            background: #ffffff;
+            background: url('https://tint.creativemarket.com/LtvW_6VWx_lpgtOim9S3Q7gWfN_Jny14lFkFEm7Akns/width:1200/height:800/gravity:nowe/rt:fill-down/el:1/czM6Ly9maWxlcy5jcmVhdGl2ZW1hcmtldC5jb20vaW1hZ2VzL3NjcmVlbnNob3RzL3Byb2R1Y3RzLzUzNDcvNTM0NzkvNTM0Nzk5MTMvNC1vLmpwZyMxNzQ3Mzc0MDI3?1747374027') center/cover no-repeat;
             border-radius: 1.5rem 0 0 1.5rem;
             overflow: hidden;
-            animation: heroFadeIn 0.8s cubic-bezier(0.2,0.9,0.4,1.1) both;
-        }
-        @@keyframes heroFadeIn {
-            from { opacity: 0; transform: translateX(-30px); }
-            to   { opacity: 1; transform: translateX(0); }
+            transition: transform 0.5s ease;
         }
 
-        /* Right-edge blend into form panel */
+        /* zoom effect on hover */
+        .hero-visual:hover {
+            transform: scale(1.02);
+            transition: transform 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        /* warm gradient overlay for light theme */
         .hero-visual::before {
-            content: '';
-            position: absolute;
-            right: 0; top: 0; bottom: 0;
-            width: 60px;
-            background: linear-gradient(to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
-            z-index: 10;
-            pointer-events: none;
-        }
-
-        .spline-login-wrap {
+            content: "";
             position: absolute;
             inset: 0;
+            background: linear-gradient(105deg, rgba(255,248,235,0.35) 0%, rgba(245,240,255,0.2) 60%, rgba(255,245,225,0.4) 100%);
             z-index: 1;
-            overflow: hidden;
-        }
-        .spline-login-wrap iframe {
-            width: 100%; height: 100%;
-            border: none; display: block;
+            transition: opacity 0.4s ease;
         }
 
-        /* Hide Spline watermark (bottom-right) */
-        .spline-wm-cover {
+        .hero-visual::after {
+            content: "";
             position: absolute;
-            bottom: 0; right: 0;
-            width: 210px; height: 58px;
-            /* background: linear-gradient(to left, #ffffff 55%, #e3e3e3 100%); */
-            /* background-color: #e3e3e3;   */
-            background: linear-gradient(to right, #e3e3e3 70%, #fff 100%);
-
-            z-index: 99;
+            inset: 0;
+            background: radial-gradient(ellipse at 30% 45%, rgba(255,215,140,0.1) 0%, transparent 70%);
             pointer-events: none;
+            z-index: 1;
+            animation: softPulse 4s ease-in-out infinite;
+        }
+
+        @@keyframes softPulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .hero-text {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 2rem;
+            z-index: 2;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            animation: slideUpFade 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1) 0.2s both;
+        }
+
+        @@keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-text .private-badge {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.85rem;
+            letter-spacing: 4px;
+            font-weight: 700;
+            color: #2c2a3a;
+            background: rgba(255, 250, 240, 0.85);
+            backdrop-filter: blur(8px);
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            margin-bottom: 0.7rem;
+            border: 0.5px solid rgba(140, 110, 70, 0.25);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            transition: all 0.3s ease;
+        }
+
+        .hero-text .private-badge:hover {
+            transform: translateX(5px);
+            background: rgba(255, 250, 240, 0.95);
+        }
+
+        .hero-text h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: #1c1a2a;
+            line-height: 1.1;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+            animation: textGlow 2s ease-in-out infinite;
+        }
+
+        @@keyframes textGlow {
+            0%, 100% { text-shadow: 0 0 0px rgba(99,102,241,0); }
+            50% { text-shadow: 0 0 10px rgba(99,102,241,0.2); }
+        }
+
+        .hero-text p {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #2e2b3c;
+            letter-spacing: 0.5px;
         }
 
         /* RIGHT PANEL — clean light glass (30%) */
@@ -561,6 +619,113 @@
             box-shadow: 0 0 12px #f3ffbf;
         }
 
+        /* divider + social buttons (light) */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 2rem 0 1rem;
+            animation: dividerFade 0.5s ease-out 0.4s both;
+        }
+
+        @@keyframes dividerFade {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #dddae8;
+            transition: all 0.3s ease;
+        }
+
+        .divider:hover::before,
+        .divider:hover::after {
+            background: #c9a96e;
+        }
+
+        .divider span {
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            color: #8b87a3;
+        }
+
+        .social-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 0.3rem;
+            animation: socialFade 0.5s ease-out 0.5s both;
+        }
+
+        @@keyframes socialFade {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .social-btn {
+            background: #fefcf7;
+            backdrop-filter: blur(8px);
+            border: 1px solid #e9e5f0;
+            border-radius: 40px;
+            padding: 0.6rem 1.2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #3e3a55;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            width: auto;
+            flex: 1;
+            justify-content: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .social-btn:hover::before {
+            left: 100%;
+        }
+
+        .social-btn i {
+            font-size: 1rem;
+            color: #5f5b78;
+            transition: transform 0.3s ease;
+        }
+
+        .social-btn:hover {
+            background: #ffffff;
+            border-color: #c9b28b;
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        .social-btn:hover i {
+            transform: scale(1.2);
+            color: #6366f1;
+        }
 
         .footer-note {
             text-align: center;
@@ -622,7 +787,9 @@
 
         /* ----- RESPONSIVE (mobile: stack) ----- */
         @@media (max-width: 880px) {
-            .login-grid { flex-direction: column; }
+            .login-grid {
+                flex-direction: column;
+            }
             .hero-visual {
                 flex: auto;
                 min-height: 280px;
@@ -634,10 +801,26 @@
                 border-top: 1px solid rgba(0,0,0,0.05);
                 padding: 2rem 1.5rem;
             }
+            .hero-text h2 {
+                font-size: 2rem;
+            }
+            .hero-text {
+                bottom: 1.2rem;
+                left: 1.2rem;
+            }
         }
+
         @@media (max-width: 480px) {
-            .mission-container { margin: 0; }
-            .form-panel { padding: 1.5rem; }
+            .mission-container {
+                margin: 0;
+            }
+            .form-panel {
+                padding: 1.5rem;
+            }
+            .social-btn {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.7rem;
+            }
         }
     </style>
 </head>
@@ -649,12 +832,11 @@
 
 <div class="mission-container">
     <div class="login-grid">
-        <!-- LEFT SIDE: Spline 3D Interactive Scene -->
+        <!-- LEFT SIDE: cinematic visual (light friendly) -->
         <div class="hero-visual">
-            <div class="spline-login-wrap">
-                <iframe src='https://my.spline.design/nexbotrobotcharacterconcept-M8ggBB3PxdFjoE3XXtQG5wOn/' frameborder='0' width='100%' height='100%'></iframe>
+            <div class="hero-text">
+                <div class="private-badge">✦ ARTIFY ✦</div>
             </div>
-            <div class="spline-wm-cover"></div>
         </div>
 
         <!-- RIGHT SIDE: light glass login panel -->
@@ -702,6 +884,11 @@
                 </button>
             </form>
 
+            <div class="divider"><span>Login with Others</span></div>
+            @* <div class="social-group">
+                <div class="social-btn" id="mockGoogleBtn"><i class="fab fa-google"></i> Google</div>
+                <div class="social-btn" id="mockFacebookBtn"><i class="fab fa-facebook-f"></i> Facebook</div>
+            </div> *@
             <div class="footer-note">
                 Not on Artify yet? <a href="/Artist/Register">Create account</a>
             </div>
@@ -956,6 +1143,16 @@ $(function () {
         }
     });
 
+    // Social buttons demo (light theme sweetalert)
+    $("#mockGoogleBtn, #mockFacebookBtn").on("click", function() {
+        Swal.fire({
+            icon: "info",
+            title: "Social login",
+            text: "This is a demo UI enhancement. Backend social auth not configured.",
+            background: "#ffffff",
+            confirmButtonColor: "#6c7bcf"
+        });
+    });
 });
 </script>
 </body>

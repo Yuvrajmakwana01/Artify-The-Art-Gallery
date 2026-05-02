@@ -13,6 +13,7 @@ using Repository.Models;
 
 namespace MVC.Controllers
 {
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public class AuthController : Controller
     {
         private readonly ILogger<AuthController> _logger;
@@ -122,7 +123,36 @@ namespace MVC.Controllers
                         if (!string.IsNullOrEmpty(token))
                         {
                             HttpContext.Session.SetString("JWToken", token);
-                            return RedirectToAction("ExploreArt", "Buyer");
+
+                            Response.Cookies.Append("token", token, new CookieOptions
+                            {
+                                Path = "/",
+                                MaxAge = TimeSpan.FromHours(2),
+                                SameSite = SameSiteMode.Lax,
+                                Secure = Request.IsHttps,
+                                HttpOnly = false
+                            });
+
+                            var userJson = apiResult.TryGetProperty("user", out var userElement)
+                                ? userElement.GetRawText()
+                                : "null";
+                            var tokenJson = JsonSerializer.Serialize(token);
+
+                            return Content($$"""
+                                <!doctype html>
+                                <html>
+                                <head><meta charset="utf-8"><title>Signing in...</title></head>
+                                <body>
+                                <script>
+                                    localStorage.setItem('token', {{tokenJson}});
+                                    if ({{userJson}}) {
+                                        localStorage.setItem('user', JSON.stringify({{userJson}}));
+                                    }
+                                    window.location.replace('/Buyer/ExploreArt');
+                                </script>
+                                </body>
+                                </html>
+                                """, "text/html");
                         }
                     }
                 }

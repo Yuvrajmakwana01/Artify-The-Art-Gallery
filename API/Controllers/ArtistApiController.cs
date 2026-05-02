@@ -70,34 +70,35 @@ public class ArtistApiController : ControllerBase
 
         var rows = await _repo.Register(user);
 
+        // In the Register method, replace the email section with:
+
         if (rows > 0)
         {
             try
             {
-                string activationUrl = _config["AppBaseUrl"] + "/Artist/Login";
-                string logoPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "mvc", "wwwroot", "images", "Logo.jpeg"));
+                string loginUrl = _config["AppBaseUrl"] + "/Artist/Login";
+                string logoPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "MVC", "wwwroot", "images", "Artify-Logos.png"));
 
                 var placeholders = new Dictionary<string, string>
-            {
-                { "ArtistName", user.c_Full_Name ?? user.c_UserName },
-                { "ArtistEmail", user.c_Email },
-                { "ActivationUrl", activationUrl },
-                { "RegisterDate", DateTime.Now.ToString("MMMM dd, yyyy") }
-            };
+                {
+                    { "ArtistName", user.c_Full_Name ?? user.c_UserName },
+                    { "LoginUrl", loginUrl }
+                };
 
                 await _emailService.SendEmailAsync(
                     toEmail: user.c_Email,
                     subject: "Welcome to Artify - Artist Registration Received",
-                    templateFile: "WelcomeArtistTemplate.html",
+                    templateFile: "RegisterEmail.html",  // Use the existing template
                     placeholders: placeholders,
                     logoPath: logoPath
                 );
 
-                Console.WriteLine($"Welcome email sent successfully to {user.c_Email}");
+                _logger.LogInformation("Welcome email sent successfully to {Email}", user.c_Email);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Artist welcome email failed: {ex.Message}");
+                _logger.LogError(ex, "Artist welcome email failed for {Email}", user.c_Email);
+                // Don't fail registration if email fails
             }
 
             return Ok(new { success = true, message = "Registered! Awaiting admin approval." });
@@ -116,6 +117,14 @@ public class ArtistApiController : ControllerBase
 
         if (user == null)
             return Ok(new { success = false, message = "Invalid email or password." });
+
+        if (user.c_Is_Blocked)
+            return Ok(new
+            {
+                success = false,
+                blocked = true,
+                message = "Your account is temporarily inactive for 1 day because more than 3 artworks were rejected."
+            });
 
         if (!user.c_Is_Active)
             return Ok(new
@@ -600,5 +609,27 @@ public class ArtistApiController : ControllerBase
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    // ── ARTIST PAYOUT HISTORY (approved only) ─────────────────
+    [Authorize]
+    [HttpGet("my-payout-history")]
+    public async Task<IActionResult> GetMyPayoutHistory()
+    {
+        var id = GetArtistIdFromToken();
+        if (id == 0) return Unauthorized(new { message = "Invalid token." });
+        var data = await _repo.GetApprovedPayoutHistory(id);
+        return Ok(data);
+    }
+
+    // ── ARTIST TRANSACTION LOGS (all buyer purchases) ──────────
+    [Authorize]
+    [HttpGet("my-transaction-logs")]
+    public async Task<IActionResult> GetMyTransactionLogs()
+    {
+        var id = GetArtistIdFromToken();
+        if (id == 0) return Unauthorized(new { message = "Invalid token." });
+        var data = await _repo.GetTransactionLogs(id);
+        return Ok(data);
     }
 }

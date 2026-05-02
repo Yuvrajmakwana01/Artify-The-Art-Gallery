@@ -29,5 +29,11 @@ namespace Repository.Interfaces
         Task<int> DeactivateAccount(int artistId);
 
         public Task<t_Artist_EarningsSummary> GetEarningsSummary(int artistId);
+
+        /// <summary>Returns approved payout records for the given artist (newest first).</summary>
+        Task<List<t_ArtistPayoutHistory>> GetApprovedPayoutHistory(int artistId);
+
+        /// <summary>Returns every buyer purchase transaction for the given artist's artworks (newest first).</summary>
+        Task<List<t_ArtistTransactionLog>> GetTransactionLogs(int artistId);
     }
 }

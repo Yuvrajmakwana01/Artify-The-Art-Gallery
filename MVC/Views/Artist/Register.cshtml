@@ -8,6 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=202605010115" />
     <title>Artify — Join the Creative Studio</title>
 
     <!-- Fonts -->
@@ -247,7 +248,7 @@
             font-weight: 500; cursor: pointer; transition: all 0.3s; color: #475569;
         }
         .gender-option input:checked + label {
-            background: linear-gradient(135deg, #3f46beff, #223278ff);
+            background: linear-gradient(135deg, #c9a96e, #b3863c);
             border-color: #c9a96e; color: white; transform: scale(1.02);
             box-shadow: 0 4px 12px rgba(201,169,110,0.3);
         }
@@ -287,55 +288,169 @@
         .footer-link a:hover::after { width: 100%; }
         .footer-link a:hover { color: #b2813b; transform: translateX(3px); display: inline-block; }
 
-        /* ========== RIGHT SIDE: Spline 3D Scene ========== */
+        /* ========== RIGHT SIDE: PREMIUM GALLERY (CLEAR, VIBRANT, POPUP ONE BY ONE) ========== */
         .visual-section {
             flex: 1;
-            background: #ffffff;          /* matches Spline scene's white bg */
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
             position: relative;
             display: flex;
-            align-items: stretch;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
-            min-height: 100vh;
             animation: visualFadeIn 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1) 0.1s both;
         }
         @@keyframes visualFadeIn {
             from { opacity: 0; transform: translateX(30px); }
-            to   { opacity: 1; transform: translateX(0); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
-        /* Left-edge blend — form white fades seamlessly into Spline */
-        .visual-section::before {
-            content: '';
-            position: absolute;
-            left: 0; top: 0; bottom: 0;
-            width: 60px;
-            background: linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
-            z-index: 10;
-            pointer-events: none;
-        }
-
-        /* Spline iframe fills the full right panel */
-        .spline-wrapper {
+        /* Art Gallery Grid — each image will pop with its own animation, full opacity, vivid colors */
+        .art-gallery {
             position: absolute;
             inset: 0;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 12px;
+            padding: 24px;
             z-index: 1;
-            overflow: hidden;
-        }
-        .spline-wrapper iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
+            background: radial-gradient(circle at 30% 20%, rgba(0,0,0,0.2) 0%, transparent 70%);
         }
 
-        /* ── Hide Spline watermark (bottom-RIGHT) ── */
-        .spline-watermark-cover {
-            position: absolute;
-            bottom: 0; right: 0;       /* ← corrected from left to right */
-            width: 210px; height: 58px;
-            background: #e3e3e3;
-            z-index: 99;
-            pointer-events: none;
+        .art-item {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 20px 50px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+            transition: all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+            opacity: 0;  /* initially hidden, revealed via animation */
+            transform: scale(0.92) translateY(12px);
+            filter: brightness(1) saturate(1.05);
+            border: 2px solid rgba(255,255,220,0.2);
+        }
+
+        /* each image gets its own pop-up animation with vibrant colors */
+        .art-item:nth-child(1) { background-image: url('https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=500&h=500&fit=crop'); animation: popUpGlow 0.6s ease-out 0.10s forwards; }
+        .art-item:nth-child(2) { background-image: url('https://images.unsplash.com/photo-1549490349-8643362247b5?w=500&h=500&fit=crop'); animation: popUpGlow 0.6s ease-out 0.15s forwards; }
+        .art-item:nth-child(3) { background-image: url('https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=500&h=500&fit=crop'); animation: popUpGlow 0.6s ease-out 0.25s forwards; }
+        .art-item:nth-child(4) { background-image: url('https://tse2.mm.bing.net/th/id/OIP.e6hfYPbHCp0e0MVicbuhOwHaJ4?rs=1&pid=ImgDetMain&o=7&rm=3'); animation: popUpGlow 0.6s ease-out 0.35s forwards; }
+        .art-item:nth-child(5) { background-image: url('https://images.unsplash.com/photo-1576132710321-70529d201d4a?w=500&h=500&fit=crop'); animation: popUpGlow 0.6s ease-out 0.45s forwards; }
+        .art-item:nth-child(6) { background-image: url('https://tse2.mm.bing.net/th/id/OIP.uTVoQZUAImqhbWFGMKcqpQAAAA?rs=1&pid=ImgDetMain&o=7&rm=3'); animation: popUpGlow 0.6s ease-out 0.55s forwards; }
+        .art-item:nth-child(7) { background-image: url('https://tse1.mm.bing.net/th/id/OIP.Dcji971luYBhHpqg7jZ3jgHaJo?w=481&h=626&rs=1&pid=ImgDetMain&o=7&rm=3'); animation: popUpGlow 0.6s ease-out 0.65s forwards; }
+        .art-item:nth-child(8) { background-image: url('https://img.freepik.com/free-photo/3d-rendering-colorful-floral-arrangement_23-2150850823.jpg'); animation: popUpGlow 0.6s ease-out 0.75s forwards; }
+        .art-item:nth-child(9) { background-image: url('https://imgv3.fotor.com/images/gallery/beautiful-machine-girl-with-blue-eyes-created-by-Fotor-ai-art-creator.jpg'); animation: popUpGlow 0.6s ease-out 0.85s forwards; }
+
+        /* keyframe: pop-up + slight rotation + clear vivid effect */
+        @@keyframes popUpGlow {
+            0% {
+                opacity: 0;
+                transform: scale(0.7) translateY(20px);
+                filter: blur(4px) brightness(0.9);
+            }
+            60% {
+                opacity: 0.9;
+                transform: scale(1.02) translateY(-3px);
+                filter: blur(0) brightness(1.05);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+                filter: blur(0) brightness(1);
+                box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(255,215,140,0.3);
+            }
+        }
+
+        /* hover effect: each artwork lifts and reveals a subtle golden glow */
+        .art-item:hover {
+            transform: scale(1.05) translateY(-6px);
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.4), 0 0 0 3px rgba(201,169,110,0.6);
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+            filter: brightness(1.03) saturate(1.08);
+            z-index: 5;
+        }
+
+        /* main visual card overlay (floating testimonial) — semi-transparent but readable */
+        .visual-content {
+            position: relative;
+            z-index: 10;
+            padding: 2rem;
+            text-align: center;
+            width: 100%;
+            pointer-events: none; /* so gallery hover still works */
+        }
+        .visual-card {
+            background: rgba(20, 18, 35, 0.75);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
+            padding: 1.8rem;
+            border: 1px solid rgba(255,215,140,0.35);
+            animation: floatCard 6s ease-in-out infinite;
+            max-width: 380px;
+            margin: 0 auto;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.25);
+            pointer-events: auto;
+            transition: all 0.3s;
+        }
+        .visual-card:hover {
+            background: rgba(25, 22, 45, 0.85);
+            transform: translateY(-4px);
+        }
+        @@keyframes floatCard {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+        }
+        .visual-card h2 {
+            font-size: 1.9rem; font-weight: 700; color: #fef7e0;
+            margin-bottom: 0.8rem; line-height: 1.2;
+        }
+        .visual-card h2 span {
+            background: linear-gradient(135deg, #f5d98f, #e7bc6e);
+            -webkit-background-clip: text; background-clip: text;
+            color: transparent;
+        }
+        .visual-card p { color: #d4d0e6; font-size: 0.85rem; line-height: 1.5; margin-bottom: 1.2rem; }
+        .featured-badge {
+            display: inline-block; background: rgba(201,169,110,0.2);
+            backdrop-filter: blur(8px); padding: 5px 14px; border-radius: 40px;
+            font-size: 0.7rem; color: #f5dc9a; margin-bottom: 1rem;
+            font-weight: 600; border: 1px solid rgba(201,169,110,0.4);
+        }
+        .artist-spotlight {
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(15, 14, 30, 0.7); border-radius: 20px;
+            padding: 10px; margin-top: 1rem; text-align: left;
+            border: 1px solid rgba(201,169,110,0.25);
+            transition: all 0.3s;
+            backdrop-filter: blur(4px);
+        }
+        .artist-spotlight:hover { background: rgba(30, 27, 55, 0.85); transform: translateX(5px); }
+        .artist-avatar {
+            width: 46px; height: 46px; border-radius: 50%;
+            background: linear-gradient(135deg, #c9a96e, #e7bc6e);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: #1e1b2e;
+            padding: 5px 12px;
+        }
+        .artist-info h4 { color: #fcf3df; font-size: 0.85rem; margin-bottom: 4px; }
+        .artist-info p { color: #bbb3d1; font-size: 0.7rem; margin: 0; }
+
+        /* glowing orbs behind gallery for depth */
+        .glow-orb {
+            position: absolute; width: 280px; height: 280px;
+            background: radial-gradient(circle, rgba(201,169,110,0.2), transparent);
+            border-radius: 50%; top: -80px; right: -80px;
+            animation: pulseGlow 6s ease-in-out infinite; z-index: 0;
+        }
+        .glow-orb-2 {
+            position: absolute; width: 220px; height: 220px;
+            background: radial-gradient(circle, rgba(99,102,241,0.18), transparent);
+            border-radius: 50%; bottom: -60px; left: -60px;
+            animation: pulseGlow 7s ease-in-out infinite reverse; z-index: 0;
+        }
+        @@keyframes pulseGlow {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.15); }
         }
 
         /* loading state for submit */
@@ -345,11 +460,12 @@
         @@media (max-width: 768px) {
             .register-container { flex-direction: column; }
             .form-section, .visual-section { flex: auto; min-height: auto; }
-            .visual-section { min-height: 420px; }
+            .visual-section { min-height: 520px; padding: 1rem; }
+            .art-gallery { gap: 6px; padding: 12px; }
+            .art-item { border-radius: 12px; }
+            .visual-card { padding: 1rem; max-width: 90%; }
             .step-indicator::before { left: 10%; right: 10%; }
-            .visual-section::before { width: 30px; }
         }
-
     </style>
 </head>
 <body>
@@ -423,21 +539,30 @@
         </div>
     </div>
 
-    <!-- RIGHT SIDE: Spline 3D Interactive Scene -->
+    <!-- RIGHT SIDE: Vibrant Gallery Popup one by one (original colors, clear popup effect) -->
     <div class="visual-section">
-        <div class="spline-wrapper">
-            <!-- <iframe
-                src='https://my.spline.design/robots-luRuB2VGkSlawhc4AFJMk6ID/'
-                frameborder='0'
-                width='100%'
-                height='100%'
-                loading='lazy'
-                title='Artify 3D Scene'>
-            </iframe> -->
-            <iframe src='https://my.spline.design/nexbotrobotcharacterconcept-V6spkxf76eC0DVqSTI0BKqYl/' frameborder='0' width='100%' height='100%'></iframe>
+        <div class="glow-orb"></div>
+        <div class="glow-orb-2"></div>
+        <div class="art-gallery">
+            <div class="art-item"></div><div class="art-item"></div><div class="art-item"></div>
+            <div class="art-item"></div><div class="art-item"></div><div class="art-item"></div>
+            <div class="art-item"></div><div class="art-item"></div><div class="art-item"></div>
         </div>
-        <!-- Hides the Spline watermark at bottom-left -->
-        <div class="spline-watermark-cover"></div>
+        <div class="visual-content">
+            <div class="visual-card">
+                <div class="featured-badge"><i class="bi bi-stars"></i> FEATURED ARTIST COMMUNITY</div>
+                <h2>Art for the <span>digital future</span></h2>
+                <p>Join 50,000+ artists already shaping tomorrow's visual culture with cutting-edge tools and global recognition.</p>
+                <div class="artist-spotlight">
+                    <div class="artist-avatar"><i class="bi bi-palette-fill"></i></div>
+                    <div class="artist-info"><h4>Elena Rodriguez</h4><p>"Artify gave me the platform to showcase my digital art to the world. The community is incredibly supportive!"</p></div>
+                </div>
+                <div class="artist-spotlight">
+                    <div class="artist-avatar"><i class="bi bi-brush"></i></div>
+                    <div class="artist-info"><h4>Marcus Chen</h4><p>"From hobbyist to professional artist - Artify's tools helped me grow my craft and build my brand."</p></div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
